@@ -180,6 +180,7 @@ CPPFLAGS="-I$prefix/include $CPPFLAGS"
 LDFLAGS="-L$prefix/lib $LDFLAGS"
 
 if [ "$gromacs" = "yes" ]; then
+  [ -z "$GMXLDLIB" ] && die "Error: GMXLDLIB is not defined"
   LDFLAGS="-L$GMXLDLIB $LDFLAGS"
   CPPFLAGS="-I$GMXLDLIB/../include/gromacs $CPPFLAGS"
 fi
