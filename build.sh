@@ -13,6 +13,8 @@ do_build="yes"
 do_install="yes"
 do_update="no"
 
+relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
+rel=""
 url="https://PROG.votca.googlecode.com/hg/"
 checkout="hg clone"
 default="defaut"
@@ -84,6 +86,7 @@ Please visit: $(cecho BLUE www.votca.org)
 
 The normal sequence of a build is:
 - hg clone (if src is not there)
+  (use release tarball with --release)
 - hg pull + hg update (enable --do-update)
   (stop here with --no-configure)
 - bootstrap
@@ -103,6 +106,7 @@ $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
     $(cecho GREEN --ccache)            Enable ccache
+    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of use hg clone 
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update from hg
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
@@ -117,6 +121,7 @@ $(cecho GREEN -g), $(cecho GREEN --gromacs)           Set gromacs stuff base up 
 Examples:  ${0##*/} tools csg
            ${0##*/} -cug --prefix \$PWD/install tools csg
 	   ${0##*/} -u
+	   ${0##*/} --release 1.0_rc1 tools csg
 	
 eof
 }
@@ -163,6 +168,9 @@ while [ "${1#-}" != "$1" ]; do
    --conf-opts)
     extra_conf="$2"
     shift 2;;
+   --release)
+    rel="$2"
+    shift 2;;
    --ccache)
     [ -z "$(type ccache)" ] && die "${0##*/}: ccache not found"
     export CXX="ccache ${CXX:=g++}"
@@ -172,6 +180,7 @@ while [ "${1#-}" != "$1" ]; do
     shift;;
    --votca.org)
     url="http://hg.votca.org/PROG"
+    relurl="http://www.votca.org/downloads/votca-PROG-REL.tar.gz"
     shift;;
   *)
    die "Unknown option '$1'"
@@ -202,7 +211,26 @@ set -e
 for prog in "$@"; do
   [ -n "${all//* $prog *}" ] && die "Unknown progamm '$prog', I know$all"
 
-  if [ ! -d "$prog" ]; then
+  cecho GREEN "Working on $prog"
+  if [ -d "$prog" ] && [ -z "$rel" ]; then
+    cecho BLUE "Source dir is already there - skipping checkout"
+  elif [ -d "$prog" ] && [ -n "$rel" ]; then
+    cecho BLUE "Source dir is already there - skipping download (CTRL-C to stop)"
+    countdown 5
+  elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
+    tmpurl="${relurl//REL/$rel}"
+    tmpurl="${tmpurl//PROG/$prog}"
+    tarball="${tmpurl##*/}"
+    cecho GREEN "Download tarball $tarball from ${tmpurl}"
+    [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first"
+    wget "${tmpurl}"
+    tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
+    [ -z "${tardir//*\n*}" ] && die "Tarball $tarball contains zero or more then one directory, please check by hand"
+    [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
+    tar -xzf "${tarball}"
+    mv "${tardir}" "${prog}"
+    rm -f "${tarball}"
+  else
     cecho BLUE "Doing checkout for $prog from ${url/PROG/$prog} (CTRL-C to stop)"
     countdown 5
     ${checkout} ${url/PROG/$prog} $prog
@@ -210,8 +238,11 @@ for prog in "$@"; do
 
   cd $prog
   if [ "$do_update" == "yes" ]; then
-    cecho GREEN "updating hg repository"
-    if [ -d .hg ]; then
+    if [ -n "$rel" ]; then
+      cecho BLUE "Update of a release tarball doesn't make sense, skipping (CTRL-C to stop)"
+      countdown 5
+    elif [ -d .hg ]; then
+      cecho GREEN "updating hg repository"
       pullpath=$(hg path $default 2> /dev/null || true )
       if [ -z "${pullpath}" ]; then
 	pullpath=${url/PROG/$prog}
@@ -223,7 +254,7 @@ for prog in "$@"; do
       hg pull ${pullpath}
       hg update
     else
-      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping (CTRL-C to stop)"
+      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
       countdown 5
     fi
   fi
