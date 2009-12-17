@@ -13,7 +13,9 @@ do_build="yes"
 do_install="yes"
 do_update="no"
 
-hg_co="hg clone http://hg.votca.org/PROG PROG"
+url="https://PROG.votca.googlecode.com/hg/"
+checkout="hg clone"
+default="defaut"
 
 extra_conf=""
 
@@ -98,6 +100,8 @@ $usage
 OPTIONS:
 $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
     $(cecho GREEN --nocolor)           Disable color
+    $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
+                        (less reliable)
     $(cecho GREEN --ccache)            Enable ccache
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update from hg
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix
@@ -147,7 +151,7 @@ while [ "${1#-}" != "$1" ]; do
    --no-clean)
    do_clean="no"
     shift 1;;
-   --no-instal)
+   --no-install)
     do_install="no"
     shift 1;;
    --no-build)
@@ -164,8 +168,11 @@ while [ "${1#-}" != "$1" ]; do
     export CXX="ccache ${CXX:=g++}"
     shift;;
    --nocolor)
-   unset BLUE CYAN GREEN OFF RED
-   shift;;
+    unset BLUE CYAN GREEN OFF RED
+    shift;;
+   --votca.org)
+    url="http://hg.votca.org/PROG"
+    shift;;
   *)
    die "Unknown option '$1'"
    exit 1;;
@@ -196,16 +203,29 @@ for prog in "$@"; do
   [ -n "${all//* $prog *}" ] && die "Unknown progamm '$prog', I know$all"
 
   if [ ! -d "$prog" ]; then
-    cecho GREEN "Doing checkout for $prog (CTRL-C to stop)"
+    cecho BLUE "Doing checkout for $prog from ${url/PROG/$prog} (CTRL-C to stop)"
     countdown 5
-    ${hg_co//PROG/$prog}
+    ${checkout} ${url/PROG/$prog} $prog
   fi
 
   cd $prog
   if [ "$do_update" == "yes" ]; then
-    cecho GREEN "updating from hg repo"
-    hg pull
-    hg update
+    cecho GREEN "updating hg repository"
+    if [ -d .hg ]; then
+      pullpath=$(hg path $default 2> /dev/null || true )
+      if [ -z "${pullpath}" ]; then
+	pullpath=${url/PROG/$prog}
+	cecho BLUE "Could not fetch '$default' pull path, using $pullpath instead (CTRL-C to stop)"
+	countdown 5
+      else
+	cecho GREEN "from $pullpath"
+      fi
+      hg pull ${pullpath}
+      hg update
+    else
+      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping (CTRL-C to stop)"
+      countdown 5
+    fi
   fi
   cecho GREEN "configuring $prog"
   if [ "$do_configure" == "yes" ]; then
