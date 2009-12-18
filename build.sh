@@ -1,5 +1,22 @@
 #!/bin/bash
+# 
+# Copyright 2009 The VOTCA Development Team (http://www.votca.org)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#version 1.0 -- 18.12.09 initial version
 
+#defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
 #mind the spaces
@@ -16,6 +33,7 @@ do_update="no"
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
 url="https://PROG.votca.googlecode.com/hg/"
+selfurl="http://votca.googlecode.com/hg/build.sh"
 checkout="hg clone"
 default="defaut"
 
@@ -76,6 +94,27 @@ countdown() {
   echo
 }
 
+get_version() {
+  sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- .*$/\1/p' $1 | sed -n '$p'
+}
+
+self_update() {
+  new_version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch failed"
+  new_version="$(echo -e "${new_version}" | get_version)"
+  [ -z "${new_version}" ] && die "self_update: Could not fetch new version number"
+  cecho BLUE "Version on $url is: $new_version"
+  old_version="$(get_version $0)"
+  cecho BLUE "Local Version: $old_version"
+  newer=$(awk -v new="$new_version" -v old="$old_version" 'BEGIN{if (new>old){print "yes"}}')
+  if [ "$newer" = "yes" ]; then
+    cecho RED "I will try replace myself now (CTRL-C to stop)"
+    countdown 5
+    wget -O "${0}" "${selfurl}"
+  else
+    cecho GREEN "No updated needed"
+  fi
+}
+
 show_help () {
   cat << eof
 This is the votca build utils which builds votca modules
@@ -97,15 +136,17 @@ The normal sequence of a build is:
 - make install (disable with --no-install)
 
 The most recent version can be found at:
-$(cecho BLUE http://hg.votca.org/buildutil/raw-file/tip/build.sh)
+$(cecho BLUE $selfurl)
 
 $usage
-OPTIONS:
+OPTIONS (last overwrites previous):
 $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
+$(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
-$(cecho GREEN -d),  $(cecho GREEN --dev)              Use votca developer repository
+    $(cecho GREEN --selfupdate)        Do a self update
+$(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer repository
                         (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of use hg clone 
@@ -133,7 +174,7 @@ eof
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
     #short opt with arguments here: f
-    if [ "${1#-[f]}" != "${1}" ]; then
+    if [ "${1#-[r]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
     else
        set -- "${1:0:2}" "-${1:2}" "${@:2}"
@@ -143,6 +184,12 @@ while [ "${1#-}" != "$1" ]; do
    -h | --help)
     show_help
     exit 0;;
+   -v | --version)
+    echo "${0##*/}, version $(get_version $0)"
+    exit 0;;
+   --selfupdate)
+    self_update
+    exit $?;;
    -c | --clean-out)
     prefix_clean="yes"
     shift 1;;
@@ -183,9 +230,11 @@ while [ "${1#-}" != "$1" ]; do
    --votca.org)
     url="http://hg.votca.org/PROG"
     relurl="http://www.votca.org/downloads/votca-PROG-REL.tar.gz"
+    selfurl="http://hg.votca.org/buildutil/raw-file/tip/build.sh"
     shift;;
    -d | --dev)
     url="http://dev.votca.org/votca/PROG"
+    selfurl="http://dev.votca.org/votca/buildutil/raw-file/tip/build.sh"
     all=" tools csg moo kmc tof testsuite "
     standard=" tools csg moo kmc tof "
     shift 1;;
