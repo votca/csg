@@ -99,15 +99,15 @@ get_version() {
 }
 
 self_update() {
-  new_version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch failed"
+  new_version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch from $selfurl failed"
   new_version="$(echo -e "${new_version}" | get_version)"
   [ -z "${new_version}" ] && die "self_update: Could not fetch new version number"
-  cecho BLUE "Version on $url is: $new_version"
+  cecho BLUE "Version of $selfurl is: $new_version"
   old_version="$(get_version $0)"
   cecho BLUE "Local Version: $old_version"
   newer=$(awk -v new="$new_version" -v old="$old_version" 'BEGIN{if (new>old){print "yes"}}')
   if [ "$newer" = "yes" ]; then
-    cecho RED "I will try replace myself now (CTRL-C to stop)"
+    cecho RED "I will try replace myself now with $selfurl (CTRL-C to stop)"
     countdown 5
     wget -O "${0}" "${selfurl}"
   else
@@ -145,13 +145,13 @@ $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
-    $(cecho GREEN --selfupdate)        Do a self update
+    $(cecho GREEN --selfupdate)        Do a self update (EXPERIMENTAL)
 $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer repository
                         (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
-    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of use hg clone 
-$(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update from hg
-$(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix
+    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone 
+$(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources
+$(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
     $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options
     $(cecho GREEN --no-clean)          Don't run make clean
@@ -162,9 +162,10 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix
 $(cecho GREEN -g), $(cecho GREEN --gromacs)           Set gromacs stuff base up your \$GMXLDLIB
 
 Examples:  ${0##*/} tools csg
-           ${0##*/} -cug --prefix \$PWD/install tools csg
+           ${0##*/} -dcug --prefix \$PWD/install tools csg
 	   ${0##*/} -u
 	   ${0##*/} --release 1.0_rc1 tools csg
+	   ${0##*/} --dev --help
 	
 eof
 }
@@ -234,6 +235,7 @@ while [ "${1#-}" != "$1" ]; do
     shift;;
    -d | --dev)
     url="http://dev.votca.org/votca/PROG"
+    #wget would needs auth
     selfurl="http://dev.votca.org/votca/buildutil/raw-file/tip/build.sh"
     all=" tools csg moo kmc tof testsuite "
     standard=" tools csg moo kmc tof "
