@@ -105,6 +105,8 @@ $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
+$(cecho GREEN -d),  $(cecho GREEN --dev)              Use votca developer repository
+                        (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of use hg clone 
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update from hg
@@ -182,6 +184,11 @@ while [ "${1#-}" != "$1" ]; do
     url="http://hg.votca.org/PROG"
     relurl="http://www.votca.org/downloads/votca-PROG-REL.tar.gz"
     shift;;
+   -d | --dev)
+    url="http://dev.votca.org/votca/PROG"
+    all=" tools csg moo kmc tof testsuite "
+    standard=" tools csg moo kmc tof "
+    shift 1;;
   *)
    die "Unknown option '$1'"
    exit 1;;
