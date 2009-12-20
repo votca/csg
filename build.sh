@@ -35,7 +35,7 @@ rel=""
 url="https://PROG.votca.googlecode.com/hg/"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 checkout="hg clone"
-default="defaut"
+default="default"
 
 extra_conf=""
 
