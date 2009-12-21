@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#version 1.0 -- 18.12.09 initial version
+#version 1.0.0 -- 18.12.09 initial version
+#version 1.0.1 -- 21.12.09 added --pullpath option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -34,8 +35,7 @@ relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
 url="https://PROG.votca.googlecode.com/hg/"
 selfurl="http://votca.googlecode.com/hg/build.sh"
-checkout="hg clone"
-default="default"
+pathname="default"
 
 extra_conf=""
 
@@ -105,6 +105,8 @@ self_update() {
   cecho BLUE "Version of $selfurl is: $new_version"
   old_version="$(get_version $0)"
   cecho BLUE "Local Version: $old_version"
+  new_version="${new_version//[^0-9]}"
+  old_version="${old_version//[^0-9]}"
   newer=$(awk -v new="$new_version" -v old="$old_version" 'BEGIN{if (new>old){print "yes"}}')
   if [ "$newer" = "yes" ]; then
     cecho RED "I will try replace myself now with $selfurl (CTRL-C to stop)"
@@ -128,7 +130,7 @@ The normal sequence of a build is:
   (use release tarball with --release)
 - hg pull + hg update (enable --do-update)
   (stop here with --no-configure)
-- bootstrap
+- bootstrap (if needed)
 - configure
 - make clean (disable with --no-clean)
   (stop here with --no-build)    
@@ -150,7 +152,10 @@ $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer reposi
                         (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone 
-$(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources
+$(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
+                        or the votca server as fail back
+    $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
+                        Default: $pathname (Also see 'hg paths --help')
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
     $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options
@@ -200,6 +205,9 @@ while [ "${1#-}" != "$1" ]; do
    -u | --do-update)
     do_update="yes"
     shift 1;;
+   --pullpath)
+    pathname="$2"
+    shift 2;;
    --no-configure)
    do_configure="no"
     shift 1;;
@@ -291,7 +299,7 @@ for prog in "$@"; do
   else
     cecho BLUE "Doing checkout for $prog from ${url/PROG/$prog} (CTRL-C to stop)"
     countdown 5
-    ${checkout} ${url/PROG/$prog} $prog
+    hg clone ${url/PROG/$prog} $prog
   fi
 
   cd $prog
@@ -301,10 +309,10 @@ for prog in "$@"; do
       countdown 5
     elif [ -d .hg ]; then
       cecho GREEN "updating hg repository"
-      pullpath=$(hg path $default 2> /dev/null || true )
+      pullpath=$(hg path $pathname 2> /dev/null || true )
       if [ -z "${pullpath}" ]; then
 	pullpath=${url/PROG/$prog}
-	cecho BLUE "Could not fetch '$default' pull path, using $pullpath instead (CTRL-C to stop)"
+	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead (CTRL-C to stop)"
 	countdown 5
       else
 	cecho GREEN "from $pullpath"
