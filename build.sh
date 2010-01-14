@@ -16,6 +16,7 @@
 #
 #version 1.0.0 -- 18.12.09 initial version
 #version 1.0.1 -- 21.12.09 added --pullpath option
+#version 1.0.2 -- 14.01.10 improved clean
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -71,8 +72,8 @@ prefix_clean() {
   cd $prefix || die "Dir: '$prefix not found'"
   files="$(ls -d bin include lib share 2>/dev/null)"
   if [ -z "$files" ]; then 
-    echo "Found nothing to clean"
-    cd -
+    cecho BLUE "Found nothing to clean"
+    cd - > /dev/null
     return
   fi
   echo "I will $(cecho RED remove):"
@@ -81,7 +82,7 @@ prefix_clean() {
   countdown 10
   rm -rf $files
   cecho GREEN "Done, hope you are happy now"
-  cd -
+  cd - > /dev/null
 }
 
 countdown() {
