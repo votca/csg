@@ -17,6 +17,7 @@
 #version 1.0.0 -- 18.12.09 initial version
 #version 1.0.1 -- 21.12.09 added --pullpath option
 #version 1.0.2 -- 14.01.10 improved clean
+#version 1.0.3 -- 20.01.10 better error message in prefix_clean
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -69,7 +70,8 @@ cecho() {
 }
 
 prefix_clean() {
-  cd $prefix || die "Dir: '$prefix not found'"
+  cecho GREEN "Starting clean out of prefix"
+  cd $prefix || die "Prefixdir '$prefix' not found"
   files="$(ls -d bin include lib share 2>/dev/null)"
   if [ -z "$files" ]; then 
     cecho BLUE "Found nothing to clean"
