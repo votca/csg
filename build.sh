@@ -18,6 +18,7 @@
 #version 1.0.1 -- 21.12.09 added --pullpath option
 #version 1.0.2 -- 14.01.10 improved clean
 #version 1.0.3 -- 20.01.10 better error message in prefix_clean
+#version 1.0.4 -- 09.02.10 added --static option 
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -154,6 +155,7 @@ $(cecho GREEN -v), $(cecho GREEN --version)           Show version
 $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer repository
                         (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
+    $(cecho GREEN --static)            Build static executables
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone 
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                         or the votca server as fail back
@@ -227,8 +229,11 @@ while [ "${1#-}" != "$1" ]; do
     prefix="$2"
     shift 2;;
    --conf-opts)
-    extra_conf="$2"
+    extra_conf="${extra_conf}$2 "
     shift 2;;
+   --static)
+    extra_conf="${extra_conf}--enable-all-static "
+    shift ;;
    --release)
     rel="$2"
     shift 2;;
@@ -329,7 +334,8 @@ for prog in "$@"; do
   fi
   cecho GREEN "configuring $prog"
   if [ "$do_configure" == "yes" ]; then
-    [ -f bootstrap.sh ] && ./bootstrap.sh 
+    [ -f bootstrap.sh ] && ./bootstrap.sh
+    echo configure --prefix "$prefix" $extra_conf
     ./configure --prefix "$prefix" $extra_conf
   else
     cd ..
