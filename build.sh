@@ -103,6 +103,7 @@ get_version() {
 }
 
 self_update() {
+  [ -z "$(type -p wget)" ] && die "wget is missing"
   new_version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch from $selfurl failed"
   new_version="$(echo -e "${new_version}" | get_version)"
   [ -z "${new_version}" ] && die "self_update: Could not fetch new version number"
@@ -148,6 +149,7 @@ $usage
 OPTIONS (last overwrites previous):
 $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
 $(cecho GREEN -v), $(cecho GREEN --version)           Show version
+    $(cecho GREEN --debug)             Enable debug mode
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
@@ -182,6 +184,7 @@ eof
 
 # parse arguments
 
+shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
     #short opt with arguments here: f
@@ -192,6 +195,9 @@ while [ "${1#-}" != "$1" ]; do
     fi
  fi
  case $1 in
+   --debug)
+    set -x
+    shift ;;
    -h | --help)
     show_help
     exit 0;;
@@ -236,6 +242,8 @@ while [ "${1#-}" != "$1" ]; do
     shift ;;
    --release)
     rel="$2"
+    [ -z "${rel//[1-9].[0-9]?(_rc[1-9]?([0-9]))}" ] || \
+      die "--release option needs an argument of the form X.X{_rcXX}"
     shift 2;;
    --ccache)
     [ -z "$(type ccache)" ] && die "${0##*/}: ccache not found"
@@ -297,6 +305,7 @@ for prog in "$@"; do
     tarball="${tmpurl##*/}"
     cecho GREEN "Download tarball $tarball from ${tmpurl}"
     [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first"
+    [ -z "$(type -p wget)" ] && die "wget is missing"
     wget "${tmpurl}"
     tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
     [ -z "${tardir//*\n*}" ] && die "Tarball $tarball contains zero or more then one directory, please check by hand"
