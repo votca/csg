@@ -72,7 +72,8 @@ cecho() {
 
 prefix_clean() {
   cecho GREEN "Starting clean out of prefix"
-  cd $prefix || die "Prefixdir '$prefix' not found"
+  [ ! -d $prefix ] && cecho BLUE "prefix '$prefix' is not there - skipping" && return 0
+  cd $prefix || die "Could change to prefix '$prefix'"
   files="$(ls -d bin include lib share 2>/dev/null)"
   if [ -z "$files" ]; then 
     cecho BLUE "Found nothing to clean"
