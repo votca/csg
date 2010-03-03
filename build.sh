@@ -19,6 +19,7 @@
 #version 1.0.2 -- 14.01.10 improved clean
 #version 1.0.3 -- 20.01.10 better error message in prefix_clean
 #version 1.0.4 -- 09.02.10 added --static option 
+#version 1.0.5 -- 03.03.10 added pkg-config support
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -274,20 +275,20 @@ done
 [ -z "$1" ] && set -- $standard
 [ -z "$prefix" ] && die "Error: prefix is empty"
 
-
-CPPFLAGS="-I$prefix/include $CPPFLAGS"
-LDFLAGS="-L$prefix/lib $LDFLAGS"
-
+export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 if [ "$gromacs" = "yes" ]; then
   [ -z "$GMXLDLIB" ] && die "Error: GMXLDLIB is not defined"
-  LDFLAGS="-L$GMXLDLIB $LDFLAGS"
-  CPPFLAGS="-I$GMXLDLIB/../include/gromacs $CPPFLAGS"
+  if [ -f "$GMXLDLIB/pkgconfig/libgmx.pc" ]; then
+    export PKG_CONFIG_PATH="$GMXLDLIB/pkgconfig:${PKG_CONFIG_PATH}"
+  else
+    export GMX_LIBS="-L$GMXLDLIB -lgmx"
+    export GMX_CFLAGS="-I$GMXLDLIB/../include/gromacs"
+  fi
 fi
-export CPPFLAGS LDFLAGS
 
 echo "prefix is '$prefix'"
-echo "CPPFLAGS is '$CPPFLAGS'"
-echo "LDFLAGS is '$LDFLAGS'"
+[ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
+[ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
 [ "$prefix_clean" = "yes" ] && prefix_clean
 
 set -e
