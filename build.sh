@@ -343,9 +343,12 @@ for prog in "$@"; do
       countdown 5
     fi
   fi
-  cecho GREEN "configuring $prog"
   if [ "$do_configure" == "yes" ]; then
-    [ -f bootstrap.sh ] && ./bootstrap.sh
+    if [ -f bootstrap.sh ]; then 
+      cecho GREEN "bootstraping $prog"
+      ./bootstrap.sh
+    fi
+    cecho GREEN "configuring $prog"
     echo configure --prefix "$prefix" $extra_conf
     ./configure --prefix "$prefix" $extra_conf
   else
