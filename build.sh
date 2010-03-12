@@ -173,10 +173,9 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANG
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --prefix) $(cecho CYAN \<prefix\>)   use prefix
                         Default: $prefix
-$(cecho GREEN -g), $(cecho GREEN --gromacs)           Set gromacs stuff base up your \$GMXLDLIB
 
 Examples:  ${0##*/} tools csg
-           ${0##*/} -dcug --prefix \$PWD/install tools csg
+           ${0##*/} -dcu --prefix \$PWD/install tools csg
 	   ${0##*/} -u
 	   ${0##*/} --release 1.0_rc1 tools csg
 	   ${0##*/} --dev --help
@@ -213,7 +212,8 @@ while [ "${1#-}" != "$1" ]; do
     prefix_clean="yes"
     shift 1;;
    -g | --gromacs)
-    gromacs="yes"
+    cecho RED "-g/--gromacs is not needed anymore, remove it"
+    countdown 60
     shift 1;;
    -u | --do-update)
     do_update="yes"
@@ -276,15 +276,6 @@ done
 [ -z "$prefix" ] && die "Error: prefix is empty"
 
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
-if [ "$gromacs" = "yes" ]; then
-  [ -z "$GMXLDLIB" ] && die "Error: GMXLDLIB is not defined"
-  if [ -f "$GMXLDLIB/pkgconfig/libgmx.pc" ]; then
-    export PKG_CONFIG_PATH="$GMXLDLIB/pkgconfig:${PKG_CONFIG_PATH}"
-  else
-    export GMX_LIBS="-L$GMXLDLIB -lgmx"
-    export GMX_CFLAGS="-I$GMXLDLIB/../include/gromacs"
-  fi
-fi
 
 echo "prefix is '$prefix'"
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
