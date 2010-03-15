@@ -24,6 +24,7 @@
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
+libdir=""
 #mind the spaces
 all=" tools csg "
 standard=" tools csg "
@@ -171,8 +172,10 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANG
     $(cecho GREEN --no-clean)          Don't run make clean
     $(cecho GREEN --no-build)          Stop before build
     $(cecho GREEN --no-install)        Don't run make install
-    $(cecho GREEN --prefix) $(cecho CYAN \<prefix\>)   use prefix
+    $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
                         Default: $prefix
+    $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
+                        Default: PREFIX/lib, if VOTCALDLIB is empty
 
 Examples:  ${0##*/} tools csg
            ${0##*/} -dcu --prefix \$PWD/install tools csg
@@ -236,6 +239,9 @@ while [ "${1#-}" != "$1" ]; do
    --prefix)
     prefix="$2"
     shift 2;;
+   --votcalibdir)
+    libdir="$2"
+    shift 2;;
    --conf-opts)
     extra_conf="${extra_conf}$2 "
     shift 2;;
@@ -274,10 +280,14 @@ done
 
 [ -z "$1" ] && set -- $standard
 [ -z "$prefix" ] && die "Error: prefix is empty"
-
-export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
-
 echo "prefix is '$prefix'"
+
+if [ -z "$VOTCALDLIB" ]; then
+  [ -z "$libdir" ] && libdir="$prefix/lib"
+  export VOTCALDLIB="$libdir"
+fi
+echo "VOTCALDLIB is '$VOTCALDLIB'"
+
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
 [ "$prefix_clean" = "yes" ] && prefix_clean
