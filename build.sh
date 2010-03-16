@@ -20,6 +20,7 @@
 #version 1.0.3 -- 20.01.10 better error message in prefix_clean
 #version 1.0.4 -- 09.02.10 added --static option 
 #version 1.0.5 -- 03.03.10 added pkg-config support
+#version 1.0.6 -- 16.03.10 sets VOTCALDLIB
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
