@@ -289,6 +289,8 @@ if [ -z "$VOTCALDLIB" ]; then
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
 
+export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
+
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
 [ "$prefix_clean" = "yes" ] && prefix_clean
