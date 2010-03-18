@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # Copyright 2009 The VOTCA Development Team (http://www.votca.org)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #version 1.0.1 -- 21.12.09 added --pullpath option
 #version 1.0.2 -- 14.01.10 improved clean
 #version 1.0.3 -- 20.01.10 better error message in prefix_clean
-#version 1.0.4 -- 09.02.10 added --static option 
+#version 1.0.4 -- 09.02.10 added --static option
 #version 1.0.5 -- 03.03.10 added pkg-config support
 #version 1.0.6 -- 16.03.10 sets VOTCALDLIB
 
@@ -29,6 +29,7 @@ libdir=""
 #mind the spaces
 all=" tools csg "
 standard=" tools csg "
+j=1
 
 do_prefix_clean="no"
 do_configure="yes"
@@ -78,7 +79,7 @@ prefix_clean() {
   [ ! -d $prefix ] && cecho BLUE "prefix '$prefix' is not there - skipping" && return 0
   cd $prefix || die "Could change to prefix '$prefix'"
   files="$(ls -d bin include lib share 2>/dev/null)"
-  if [ -z "$files" ]; then 
+  if [ -z "$files" ]; then
     cecho BLUE "Found nothing to clean"
     cd - > /dev/null
     return
@@ -142,8 +143,8 @@ The normal sequence of a build is:
 - bootstrap (if needed)
 - configure
 - make clean (disable with --no-clean)
-  (stop here with --no-build)    
-- make 
+  (stop here with --no-build)
+- make
 - make install (disable with --no-install)
 
 The most recent version can be found at:
@@ -162,7 +163,7 @@ $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer reposi
                         (username/password needed)
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --static)            Build static executables
-    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone 
+    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                         or the votca server as fail back
     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
@@ -171,6 +172,8 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANG
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
     $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options
     $(cecho GREEN --no-clean)          Don't run make clean
+$(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make (0 for automatic)
+                        Default: $j
     $(cecho GREEN --no-build)          Stop before build
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
@@ -183,7 +186,7 @@ Examples:  ${0##*/} tools csg
 	   ${0##*/} -u
 	   ${0##*/} --release 1.0_rc1 tools csg
 	   ${0##*/} --dev --help
-	
+
 eof
 }
 
@@ -192,8 +195,8 @@ eof
 shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
-    #short opt with arguments here: f
-    if [ "${1#-[r]}" != "${1}" ]; then
+    #short opt with arguments here: j
+    if [ "${1#-[j]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
     else
        set -- "${1:0:2}" "-${1:2}" "${@:2}"
@@ -219,6 +222,11 @@ while [ "${1#-}" != "$1" ]; do
     cecho RED "-g/--gromacs is not needed anymore, remove it"
     countdown 60
     shift 1;;
+   -j | --jobs)
+    [ -z "$2" ] && die "Missing argument after --jobs"
+    [ -n "${2//[0-9]}" ] && die "Argument after --jobs should be a number"
+    j="$2"
+    shift 2;;
    -u | --do-update)
     do_update="yes"
     shift 1;;
@@ -289,6 +297,12 @@ if [ -z "$VOTCALDLIB" ]; then
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
 
+if [ $j -eq 0 ]; then
+  [ -f "/proc/cpuinfo" ] || die "/proc/cpuinfo not found no automatic jobs number possible"
+  j=$(( $(grep -c processor /proc/cpuinfo) + 1 ))
+  cecho BLUE "Setting number of jobs to $j"
+fi
+
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
@@ -348,7 +362,7 @@ for prog in "$@"; do
     fi
   fi
   if [ "$do_configure" == "yes" ]; then
-    if [ -f bootstrap.sh ]; then 
+    if [ -f bootstrap.sh ]; then
       cecho GREEN "bootstraping $prog"
       ./bootstrap.sh
     fi
@@ -358,20 +372,20 @@ for prog in "$@"; do
   else
     cd ..
     cecho GREEN "done with $prog"
-    continue 
+    continue
   fi
   if [ "$do_clean" == "yes" ]; then
     cecho GREEN "cleaning $prog"
     make clean
   fi
-  if [ "$do_build" == "no" ]; then 
-    cd .. 
+  if [ "$do_build" == "no" ]; then
+    cd ..
     cecho GREEN "done with $prog"
     continue
   fi
   cecho GREEN "buidling $prog"
-  make
-  if [ "$do_install" == "yes" ]; then 
+  make -j${j}
+  if [ "$do_install" == "yes" ]; then
     cecho GREEN "installing $prog"
     make install
   fi
