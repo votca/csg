@@ -29,7 +29,12 @@ libdir=""
 #mind the spaces
 all=" tools csg "
 standard=" tools csg "
-j=1
+if [ -f "/proc/cpuinfo" ]; then
+  j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
+  ((j++))
+else
+  j=1
+fi
 
 do_prefix_clean="no"
 do_configure="yes"
@@ -172,8 +177,8 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANG
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
     $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options
     $(cecho GREEN --no-clean)          Don't run make clean
-$(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make (0 for automatic)
-                        Default: $j
+$(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
+                        Default: $j (auto)
     $(cecho GREEN --no-build)          Stop before build
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
@@ -296,12 +301,6 @@ if [ -z "$VOTCALDLIB" ]; then
   export VOTCALDLIB="$libdir"
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
-
-if [ $j -eq 0 ]; then
-  [ -f "/proc/cpuinfo" ] || die "/proc/cpuinfo not found no automatic jobs number possible"
-  j=$(( $(grep -c processor /proc/cpuinfo) + 1 ))
-  cecho BLUE "Setting number of jobs to $j"
-fi
 
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
