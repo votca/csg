@@ -301,8 +301,9 @@ if [ -z "$VOTCALDLIB" ]; then
   export VOTCALDLIB="$libdir"
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
+export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
-export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
+cecho BLUE "Using $j jobs for make"
 
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
