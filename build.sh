@@ -296,9 +296,11 @@ done
 [ -z "$prefix" ] && die "Error: prefix is empty"
 echo "prefix is '$prefix'"
 
-if [ -z "$VOTCALDLIB" ]; then
-  [ -z "$libdir" ] && libdir="$prefix/lib"
+#libdir was explicitly given
+if [ -n "$libdir" ]; then
   export VOTCALDLIB="$libdir"
+elif [ -z "$VOTCALDLIB" ]; then
+  export VOTCALDLIB="$prefix/lib"
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
 export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
