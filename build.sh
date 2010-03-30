@@ -27,7 +27,7 @@ usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
 libdir=""
 #mind the spaces
-all=" tools csg "
+all=" tools csg moo "
 standard=" tools csg "
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -283,8 +283,8 @@ while [ "${1#-}" != "$1" ]; do
     url="http://dev.votca.org/votca/PROG"
     #wget would needs auth
     selfurl="http://dev.votca.org/votca/buildutil/raw-file/tip/build.sh"
-    all=" tools csg moo kmc tof testsuite "
-    standard=" tools csg moo kmc tof "
+    all=" tools csg moo kmc tof md2qm testsuite "
+    standard=" tools csg moo kmc md2qm "
     shift 1;;
   *)
    die "Unknown option '$1'"
