@@ -21,6 +21,7 @@
 #version 1.0.4 -- 09.02.10 added --static option
 #version 1.0.5 -- 03.03.10 added pkg-config support
 #version 1.0.6 -- 16.03.10 sets VOTCALDLIB
+#version 1.0.7 -- 23.03.10 added --jobs/--latest
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -48,6 +49,7 @@ rel=""
 url="https://PROG.votca.googlecode.com/hg/"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
+latest="1.0_rc5"
 
 extra_conf=""
 
@@ -169,6 +171,7 @@ $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer reposi
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --static)            Build static executables
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
+$(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                         or the votca server as fail back
     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
@@ -189,7 +192,7 @@ $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs
 Examples:  ${0##*/} tools csg
            ${0##*/} -dcu --prefix \$PWD/install tools csg
 	   ${0##*/} -u
-	   ${0##*/} --release 1.0_rc1 tools csg
+	   ${0##*/} --release ${latest} tools csg
 	   ${0##*/} --dev --help
 
 eof
@@ -267,6 +270,9 @@ while [ "${1#-}" != "$1" ]; do
     [ -z "${rel//[1-9].[0-9]?(_rc[1-9]?([0-9]))}" ] || \
       die "--release option needs an argument of the form X.X{_rcXX}"
     shift 2;;
+   -l | --latest)
+    rel="$latest"
+    shift;;
    --ccache)
     [ -z "$(type ccache)" ] && die "${0##*/}: ccache not found"
     export CXX="ccache ${CXX:=g++}"
@@ -296,13 +302,16 @@ done
 [ -z "$prefix" ] && die "Error: prefix is empty"
 echo "prefix is '$prefix'"
 
-if [ -z "$VOTCALDLIB" ]; then
-  [ -z "$libdir" ] && libdir="$prefix/lib"
+#libdir was explicitly given
+if [ -n "$libdir" ]; then
   export VOTCALDLIB="$libdir"
+elif [ -z "$VOTCALDLIB" ]; then
+  export VOTCALDLIB="$prefix/lib"
 fi
 echo "VOTCALDLIB is '$VOTCALDLIB'"
+export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
-export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
+cecho BLUE "Using $j jobs for make"
 
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
@@ -366,7 +375,7 @@ for prog in "$@"; do
       ./bootstrap.sh
     fi
     cecho GREEN "configuring $prog"
-    echo configure --prefix "$prefix" $extra_conf
+    cecho BLUE "configure --prefix '$prefix' $extra_conf"
     ./configure --prefix "$prefix" $extra_conf
   else
     cd ..
