@@ -28,7 +28,7 @@ usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
 libdir=""
 #mind the spaces
-all=" tools csg moo "
+all=" tools csg "
 standard=" tools csg "
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
