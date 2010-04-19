@@ -22,6 +22,7 @@
 #version 1.0.5 -- 03.03.10 added pkg-config support
 #version 1.0.6 -- 16.03.10 sets VOTCALDLIB
 #version 1.0.7 -- 23.03.10 added --jobs/--latest
+#version 1.1.0 -- 19.04.10 added --info
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -162,6 +163,7 @@ OPTIONS (last overwrites previous):
 $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
 $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --debug)             Enable debug mode
+    $(cecho GREEN --info) $(cecho CYAN FILE)         Generate a file with all build infomation
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
@@ -198,8 +200,13 @@ Examples:  ${0##*/} tools csg
 eof
 }
 
-# parse arguments
+cmdopts=""
+for i in "$@"; do
+  [ -z "${i//*[[:space:]]*}" ] && cmdopts="${cmdopts} '$i'" || cmdopts="${cmdopts} $i"
+done
+cmdopts="$(echo "$cmdopts" | sed 's/--info [^[:space:]]* //')"
 
+# parse arguments
 shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
@@ -214,6 +221,12 @@ while [ "${1#-}" != "$1" ]; do
    --debug)
     set -x
     shift ;;
+   --info)
+    [ -n "$2" ] || die "Missing argument after --info"
+    echo Infofile is $2
+    echo "Info of ${0} ${cmdopts}, version $(get_version $0)" > $2
+    ${0} ${cmdopts} | tee -a $2
+    exit $?;;
    -h | --help)
     show_help
     exit 0;;
