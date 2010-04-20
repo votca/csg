@@ -22,7 +22,7 @@
 #version 1.0.5 -- 03.03.10 added pkg-config support
 #version 1.0.6 -- 16.03.10 sets VOTCALDLIB
 #version 1.0.7 -- 23.03.10 added --jobs/--latest
-#version 1.1.0 -- 19.04.10 added --info
+#version 1.1.0 -- 19.04.10 added --log
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -58,8 +58,10 @@ gromacs="no"
 
 BLUE="[34;01m"
 CYAN="[36;01m"
+CYANN="[36m"
 GREEN="[32;01m"
 RED="[31;01m"
+PURP="[35;01m"
 OFF="[0m"
 
 die () {
@@ -68,7 +70,7 @@ die () {
 }
 
 cecho() {
-  local opts color=" BLUE CYAN GREEN RED "
+  local opts color=" BLUE CYAN CYANN GREEN RED PURP "
   if [ -z "${1##-*}" ]; then
     opts="$1"
     shift
@@ -105,7 +107,7 @@ countdown() {
   [ -z "$1" ] && "countdown: Missing argument"
   [ -n "${1//[0-9]}" ] && "countdown: argument should be a number"
   for ((i=$1;i>0;i--)); do
-    cecho -n CYAN "$i "
+    cecho -n CYANN "$i "
     sleep 1
   done
   echo
@@ -163,7 +165,7 @@ OPTIONS (last overwrites previous):
 $(cecho GREEN -h), $(cecho GREEN --help)              Show this help
 $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --debug)             Enable debug mode
-    $(cecho GREEN --info) $(cecho CYAN FILE)         Generate a file with all build infomation
+    $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with all build infomation
     $(cecho GREEN --nocolor)           Disable color
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
@@ -204,7 +206,7 @@ cmdopts=""
 for i in "$@"; do
   [ -z "${i//*[[:space:]]*}" ] && cmdopts="${cmdopts} '$i'" || cmdopts="${cmdopts} $i"
 done
-cmdopts="$(echo "$cmdopts" | sed 's/--info [^[:space:]]* //')"
+cmdopts="$(echo "$cmdopts" | sed 's/--log [^[:space:]]* //')"
 
 # parse arguments
 shopt -s extglob
@@ -221,10 +223,10 @@ while [ "${1#-}" != "$1" ]; do
    --debug)
     set -x
     shift ;;
-   --info)
-    [ -n "$2" ] || die "Missing argument after --info"
-    echo Infofile is $2
-    echo "Info of ${0} ${cmdopts}, version $(get_version $0)" > $2
+   --log)
+    [ -n "$2" ] || die "Missing argument after --log"
+    echo "Logfile is $(cecho PURP $2)"
+    echo "Log of '${0} ${cmdopts}'" > $2
     ${0} ${cmdopts} | tee -a $2
     exit $?;;
    -h | --help)
@@ -291,7 +293,7 @@ while [ "${1#-}" != "$1" ]; do
     export CXX="ccache ${CXX:=g++}"
     shift;;
    --nocolor)
-    unset BLUE CYAN GREEN OFF RED
+    unset BLUE CYAN CYANN GREEN OFF RED PURP
     shift;;
    --votca.org)
     url="http://hg.votca.org/PROG"
@@ -313,7 +315,6 @@ done
 
 [ -z "$1" ] && set -- $standard
 [ -z "$prefix" ] && die "Error: prefix is empty"
-echo "prefix is '$prefix'"
 
 #libdir was explicitly given
 if [ -n "$libdir" ]; then
@@ -321,13 +322,16 @@ if [ -n "$libdir" ]; then
 elif [ -z "$VOTCALDLIB" ]; then
   export VOTCALDLIB="$prefix/lib"
 fi
-echo "VOTCALDLIB is '$VOTCALDLIB'"
 export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
-cecho BLUE "Using $j jobs for make"
-
+#infos
+cecho GREEN "This is ${0##*/}, version $(get_version $0)"
+echo "prefix is '$prefix'"
+echo "VOTCALDLIB is '$VOTCALDLIB'"
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
+cecho BLUE "Using $j jobs for make"
+
 [ "$prefix_clean" = "yes" ] && prefix_clean
 
 set -e
