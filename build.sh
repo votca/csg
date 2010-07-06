@@ -23,6 +23,7 @@
 #version 1.0.6 -- 16.03.10 sets VOTCALDLIB
 #version 1.0.7 -- 23.03.10 added --jobs/--latest
 #version 1.1.0 -- 19.04.10 added --log
+#version 1.1.1 -- 06.07.10 ignore VOTCALDLIB from environment
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -191,7 +192,7 @@ $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs
     $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
                         Default: $prefix
     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
-                        Default: PREFIX/lib, if VOTCALDLIB is empty
+                        Default: PREFIX/lib
 
 Examples:  ${0##*/} tools csg
            ${0##*/} -dcu --prefix \$PWD/install tools csg
@@ -319,7 +320,7 @@ done
 #libdir was explicitly given
 if [ -n "$libdir" ]; then
   export VOTCALDLIB="$libdir"
-elif [ -z "$VOTCALDLIB" ]; then
+else
   export VOTCALDLIB="$prefix/lib"
 fi
 export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
