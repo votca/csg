@@ -24,6 +24,7 @@
 #version 1.0.7 -- 23.03.10 added --jobs/--latest
 #version 1.1.0 -- 19.04.10 added --log
 #version 1.1.1 -- 06.07.10 ignore VOTCALDLIB from environment
+#version 1.2.0 -- 12.07.10 added -U and new shortcuts (-p,-q,-C)
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -179,17 +180,18 @@ $(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer reposi
 $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                         or the votca server as fail back
+$(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-configure)
     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
                         Default: $pathname (Also see 'hg paths --help')
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
-    $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options
-    $(cecho GREEN --no-clean)          Don't run make clean
+$(cecho GREEN -C), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
+$(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
                         Default: $j (auto)
     $(cecho GREEN --no-build)          Stop before build
     $(cecho GREEN --no-install)        Don't run make install
-    $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
+$(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
                         Default: $prefix
     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
                         Default: PREFIX/lib
@@ -213,8 +215,8 @@ cmdopts="$(echo "$cmdopts" | sed 's/--log [^[:space:]]* //')"
 shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
-    #short opt with arguments here: j
-    if [ "${1#-[j]}" != "${1}" ]; then
+    #short opt with arguments here: j and p
+    if [ "${1#-[jp]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
     else
        set -- "${1:0:2}" "-${1:2}" "${@:2}"
@@ -254,14 +256,18 @@ while [ "${1#-}" != "$1" ]; do
    -u | --do-update)
     do_update="yes"
     shift 1;;
+   -U | --just-update)
+    do_update="yes"
+    do_configure="no"
+    shift 1;;
    --pullpath)
     pathname="$2"
     shift 2;;
    --no-configure)
-   do_configure="no"
+    do_configure="no"
     shift 1;;
-   --no-clean)
-   do_clean="no"
+   -q | --no-clean)
+    do_clean="no"
     shift 1;;
    --no-install)
     do_install="no"
@@ -269,13 +275,13 @@ while [ "${1#-}" != "$1" ]; do
    --no-build)
     do_build="no"
     shift 1;;
-   --prefix)
+   -p | --prefix)
     prefix="$2"
     shift 2;;
    --votcalibdir)
     libdir="$2"
     shift 2;;
-   --conf-opts)
+   -C | --conf-opts)
     extra_conf="${extra_conf}$2 "
     shift 2;;
    --static)
