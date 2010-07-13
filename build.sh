@@ -43,6 +43,7 @@ fi
 do_prefix_clean="no"
 do_configure="yes"
 do_clean="yes"
+do_clean_ignored="no"
 do_build="yes"
 do_install="yes"
 do_update="no"
@@ -172,8 +173,8 @@ $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
                         (less reliable)
     $(cecho GREEN --selfupdate)        Do a self update (EXPERIMENTAL)
-$(cecho GREEN -d), $(cecho GREEN --dev)               Use votca developer repository
-                        (username/password needed)
+$(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
+                        (account of votca.org needed)
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --static)            Build static executables
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
@@ -184,8 +185,9 @@ $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do
     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
                         Default: $pathname (Also see 'hg paths --help')
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
+$(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
-$(cecho GREEN -C), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
+$(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
                         Default: $j (auto)
@@ -244,6 +246,9 @@ while [ "${1#-}" != "$1" ]; do
    -c | --clean-out)
     prefix_clean="yes"
     shift 1;;
+   -C | --clean-ignored)
+    do_clean_ignored="yes"
+    shift 1;;
    -g | --gromacs)
     cecho RED "-g/--gromacs is not needed anymore, remove it"
     countdown 60
@@ -281,7 +286,7 @@ while [ "${1#-}" != "$1" ]; do
    --votcalibdir)
     libdir="$2"
     shift 2;;
-   -C | --conf-opts)
+   -O | --conf-opts)
     extra_conf="${extra_conf}$2 "
     shift 2;;
    --static)
@@ -390,6 +395,16 @@ for prog in "$@"; do
       hg update
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
+      countdown 5
+    fi
+  fi
+  if [ "$do_clean_ignored" = "yes" ]; then
+    if [ -d .hg ]; then
+      cecho BLUE "I will remove all ignored files from $prog, CTRL-C to stop"
+      countdown 5
+      hg status --print0 --no-status --ignored | xargs --null rm -f
+    else
+      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files (CTRL-C to stop)"
       countdown 5
     fi
   fi
