@@ -188,6 +188,7 @@ $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANG
 $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
 $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
+                        Do NOT put variables (XXX=YYY) here, but use environment variables
 $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
                         Default: $j (auto)
