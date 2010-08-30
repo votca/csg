@@ -204,6 +204,7 @@ Examples:  ${0##*/} tools csg
 	   ${0##*/} -u
 	   ${0##*/} --release ${latest} tools csg
 	   ${0##*/} --dev --help
+	   CC=g++ ${0##*/} --conf-opts '--enable-votca-boost --enable-votca-expat' tools
 
 eof
 }
