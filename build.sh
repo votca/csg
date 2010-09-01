@@ -219,8 +219,8 @@ cmdopts="$(echo "$cmdopts" | sed 's/--log [^[:space:]]* //')"
 shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
-    #short opt with arguments here: j and p
-    if [ "${1#-[jp]}" != "${1}" ]; then
+    #short opt with arguments here: j, p and O
+    if [ "${1#-[jpO]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
     else
        set -- "${1:0:2}" "-${1:2}" "${@:2}"
