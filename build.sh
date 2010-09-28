@@ -25,6 +25,7 @@
 #version 1.1.0 -- 19.04.10 added --log
 #version 1.1.1 -- 06.07.10 ignore VOTCALDLIB from environment
 #version 1.2.0 -- 12.07.10 added -U and new shortcuts (-p,-q,-C)
+#version 1.2.1 -- 28.09.10 added --no-bootstrap option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -42,6 +43,7 @@ fi
 
 do_prefix_clean="no"
 do_configure="yes"
+do_boostrap="yes"
 do_clean="yes"
 do_clean_ignored="no"
 do_build="yes"
@@ -53,7 +55,7 @@ rel=""
 url="https://PROG.votca.googlecode.com/hg/"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.0_rc5"
+latest="1.0_rc6"
 
 extra_conf=""
 
@@ -153,7 +155,7 @@ The normal sequence of a build is:
   (use release tarball with --release)
 - hg pull + hg update (enable --do-update)
   (stop here with --no-configure)
-- bootstrap (if needed)
+- bootstrap (if found and not --release or --no-bootstrap)
 - configure
 - make clean (disable with --no-clean)
   (stop here with --no-build)
@@ -178,6 +180,7 @@ $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
     $(cecho GREEN --ccache)            Enable ccache
     $(cecho GREEN --static)            Build static executables
     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
+                        (implies  $(cecho GREEN --no-bootstrap))
 $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
 $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                         or the votca server as fail back
@@ -187,6 +190,7 @@ $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do
 $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
 $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
+    $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
                         Do NOT put variables (XXX=YYY) here, but use environment variables
 $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
@@ -273,6 +277,9 @@ while [ "${1#-}" != "$1" ]; do
    --no-configure)
     do_configure="no"
     shift 1;;
+   --no-configure)
+    do_bootstrap="no"
+    shift 1;;
    -q | --no-clean)
     do_clean="no"
     shift 1;;
@@ -298,6 +305,7 @@ while [ "${1#-}" != "$1" ]; do
     rel="$2"
     [ -z "${rel//[1-9].[0-9]?(_rc[1-9]?([0-9]))}" ] || \
       die "--release option needs an argument of the form X.X{_rcXX}"
+    do_bootstrap="no"
     shift 2;;
    -l | --latest)
     rel="$latest"
@@ -350,7 +358,7 @@ cecho BLUE "Using $j jobs for make"
 
 set -e
 for prog in "$@"; do
-  [ -n "${all//* $prog *}" ] && die "Unknown progamm '$prog', I know$all"
+  [ -n "${all//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all"
 
   cecho GREEN "Working on $prog"
   if [ -d "$prog" ] && [ -z "$rel" ]; then
@@ -411,13 +419,17 @@ for prog in "$@"; do
     fi
   fi
   if [ "$do_configure" == "yes" ]; then
-    if [ -f bootstrap.sh ]; then
+    if [ "$do_bootstrap" = "yes" ] && [ -f bootstrap.sh ]; then
       cecho GREEN "bootstraping $prog"
       ./bootstrap.sh
     fi
     cecho GREEN "configuring $prog"
     cecho BLUE "configure --prefix '$prefix' $extra_conf"
-    ./configure --prefix "$prefix" $extra_conf
+    if [ -f configure ]; then
+      ./configure --prefix "$prefix" $extra_conf
+    else
+      die "No configure found, remove '--no-bootstrap' option"
+    fi
   else
     cd ..
     cecho GREEN "done with $prog"
