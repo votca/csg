@@ -25,7 +25,7 @@
 #version 1.1.0 -- 19.04.10 added --log
 #version 1.1.1 -- 06.07.10 ignore VOTCALDLIB from environment
 #version 1.2.0 -- 12.07.10 added -U and new shortcuts (-p,-q,-C)
-#version 1.2.1 -- 28.09.10 added --no-bootstrap option
+#version 1.2.1 -- 28.09.10 added --no-bootstrap and --dist option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -43,12 +43,13 @@ fi
 
 do_prefix_clean="no"
 do_configure="yes"
-do_boostrap="yes"
+do_bootstrap="yes"
 do_clean="yes"
 do_clean_ignored="no"
 do_build="yes"
 do_install="yes"
 do_update="no"
+do_dist="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -58,6 +59,7 @@ pathname="default"
 latest="1.0_rc6"
 
 extra_conf=""
+pack="tar.gz"
 
 gromacs="no"
 
@@ -198,6 +200,8 @@ $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs
                         Default: $j (auto)
     $(cecho GREEN --no-build)          Stop before build
     $(cecho GREEN --no-install)        Don't run make install
+    $(cecho GREEN --dist)              Create a dist tarball and move it here
+                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
 $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
                         Default: $prefix
     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
@@ -280,6 +284,10 @@ while [ "${1#-}" != "$1" ]; do
    --no-configure)
     do_bootstrap="no"
     shift 1;;
+   --dist)
+    do_dist="yes"
+    extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
+    shift 1;;
    -q | --no-clean)
     do_clean="no"
     shift 1;;
@@ -296,10 +304,10 @@ while [ "${1#-}" != "$1" ]; do
     libdir="$2"
     shift 2;;
    -O | --conf-opts)
-    extra_conf="${extra_conf}$2 "
+    extra_conf="${extra_conf} $2"
     shift 2;;
    --static)
-    extra_conf="${extra_conf}--enable-all-static "
+    extra_conf="${extra_conf} --enable-all-static"
     shift ;;
    --release)
     rel="$2"
@@ -424,8 +432,8 @@ for prog in "$@"; do
       ./bootstrap.sh
     fi
     cecho GREEN "configuring $prog"
-    cecho BLUE "configure --prefix '$prefix' $extra_conf"
     if [ -f configure ]; then
+       cecho BLUE "configure --prefix '$prefix' $extra_conf"
       ./configure --prefix "$prefix" $extra_conf
     else
       die "No configure found, remove '--no-bootstrap' option"
@@ -438,6 +446,10 @@ for prog in "$@"; do
   if [ "$do_clean" == "yes" ]; then
     cecho GREEN "cleaning $prog"
     make clean
+  fi
+  if [ "$do_dist" == "yes" ]; then
+    make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
+    mv *${pack} .. || die "No tarball found"
   fi
   if [ "$do_build" == "no" ]; then
     cd ..
