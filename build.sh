@@ -26,14 +26,18 @@
 #version 1.1.1 -- 06.07.10 ignore VOTCALDLIB from environment
 #version 1.2.0 -- 12.07.10 added -U and new shortcuts (-p,-q,-C)
 #version 1.2.1 -- 28.09.10 added --no-bootstrap and --dist option
+#version 1.3.0 -- 30.09.10 moved to googlecode
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
 libdir=""
 #mind the spaces
-all=" tools csg "
-standard=" tools csg "
+gc_progs=" tools csg tutorials csgapps "
+all_progs="$gc_all"
+standard_progs=" tools csg "
+nobuild_progs=" tutorials csgapps "
+
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
   ((j++))
@@ -53,10 +57,11 @@ do_dist="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
-url="https://PROG.votca.googlecode.com/hg/"
+gc_url="https://PROG.votca.googlecode.com/hg/"
+url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.0_rc6"
+latest="1.0"
 
 extra_conf=""
 pack="tar.gz"
@@ -174,8 +179,6 @@ $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --debug)             Enable debug mode
     $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with all build infomation
     $(cecho GREEN --nocolor)           Disable color
-    $(cecho GREEN --votca.org)         Use votca.org server instead of googlecode
-                        (less reliable)
     $(cecho GREEN --selfupdate)        Do a self update (EXPERIMENTAL)
 $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
                         (account of votca.org needed)
@@ -325,17 +328,10 @@ while [ "${1#-}" != "$1" ]; do
    --nocolor)
     unset BLUE CYAN CYANN GREEN OFF RED PURP
     shift;;
-   --votca.org)
-    url="http://hg.votca.org/PROG"
-    relurl="http://www.votca.org/downloads/votca-PROG-REL.tar.gz"
-    selfurl="http://hg.votca.org/buildutil/raw-file/tip/build.sh"
-    shift;;
    -d | --dev)
     url="http://dev.votca.org/votca/PROG"
-    #wget would needs auth
-    selfurl="http://dev.votca.org/votca/buildutil/raw-file/tip/build.sh"
-    all=" tools csg moo kmc tof md2qm testsuite "
-    standard=" tools csg moo kmc md2qm "
+    all_progs=" tools csg moo kmc tof md2qm testsuite csgapps "
+    standard_progs=" tools csg moo kmc md2qm "
     shift 1;;
   *)
    die "Unknown option '$1'"
@@ -343,7 +339,7 @@ while [ "${1#-}" != "$1" ]; do
  esac
 done
 
-[ -z "$1" ] && set -- $standard
+[ -z "$1" ] && set -- $standard_progs
 [ -z "$prefix" ] && die "Error: prefix is empty"
 
 #libdir was explicitly given
@@ -366,7 +362,8 @@ cecho BLUE "Using $j jobs for make"
 
 set -e
 for prog in "$@"; do
-  [ -n "${all//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all"
+  [ -n "${all_progs//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all_progs"
+  [ -z "${gc_progs//* $prog *}" ] && hgurl="$gc_url" || hgurl="$url"
 
   cecho GREEN "Working on $prog"
   if [ -d "$prog" ] && [ -z "$rel" ]; then
@@ -389,9 +386,9 @@ for prog in "$@"; do
     mv "${tardir}" "${prog}"
     rm -f "${tarball}"
   else
-    cecho BLUE "Doing checkout for $prog from ${url/PROG/$prog} (CTRL-C to stop)"
+    cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog} (CTRL-C to stop)"
     countdown 5
-    hg clone ${url/PROG/$prog} $prog
+    hg clone ${hgurl/PROG/$prog} $prog
   fi
 
   cd $prog
@@ -403,7 +400,7 @@ for prog in "$@"; do
       cecho GREEN "updating hg repository"
       pullpath=$(hg path $pathname 2> /dev/null || true )
       if [ -z "${pullpath}" ]; then
-	pullpath=${url/PROG/$prog}
+	pullpath=${hgurl/PROG/$prog}
 	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead (CTRL-C to stop)"
 	countdown 5
       else
@@ -415,6 +412,11 @@ for prog in "$@"; do
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
       countdown 5
     fi
+  fi
+  if [ -z "${nobuild_progs//* $prog *}" ]; then
+    cd ..
+    cecho GREEN "done with $prog"
+    continue
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [ -d .hg ]; then
