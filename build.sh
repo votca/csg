@@ -27,6 +27,7 @@
 #version 1.2.0 -- 12.07.10 added -U and new shortcuts (-p,-q,-C)
 #version 1.2.1 -- 28.09.10 added --no-bootstrap and --dist option
 #version 1.3.0 -- 30.09.10 moved to googlecode
+#version 1.3.1 -- 01.10.10 checkout stable branch by default
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -54,6 +55,7 @@ do_build="yes"
 do_install="yes"
 do_update="no"
 do_dist="no"
+dev="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -275,8 +277,7 @@ while [ "${1#-}" != "$1" ]; do
     do_update="yes"
     shift 1;;
    -U | --just-update)
-    do_update="yes"
-    do_configure="no"
+    do_update="only"
     shift 1;;
    --pullpath)
     pathname="$2"
@@ -329,6 +330,7 @@ while [ "${1#-}" != "$1" ]; do
     unset BLUE CYAN CYANN GREEN OFF RED PURP
     shift;;
    -d | --dev)
+    dev=yes
     url="http://dev.votca.org/votca/PROG"
     all_progs=" tools csg moo kmc tof md2qm testsuite csgapps "
     standard_progs=" tools csg moo kmc md2qm "
@@ -367,10 +369,14 @@ for prog in "$@"; do
 
   cecho GREEN "Working on $prog"
   if [ -d "$prog" ] && [ -z "$rel" ]; then
-    cecho BLUE "Source dir is already there - skipping checkout"
+    cecho BLUE "Source dir ($prog) is already there - skipping checkout"
   elif [ -d "$prog" ] && [ -n "$rel" ]; then
-    cecho BLUE "Source dir is already there - skipping download (CTRL-C to stop)"
+    cecho BLUE "Source dir ($prog) is already there - skipping download (CTRL-C to stop)"
     countdown 5
+  elif [ -n "$rel" ] && [ -z "${nobuild_progs//* $prog *}" ]; then
+    cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository (CTRL-C to stop)"
+    countdown 5
+    hg clone ${hgurl/PROG/$prog} $prog
   elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
     tmpurl="${relurl//REL/$rel}"
     tmpurl="${tmpurl//PROG/$prog}"
@@ -389,16 +395,22 @@ for prog in "$@"; do
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog} (CTRL-C to stop)"
     countdown 5
     hg clone ${hgurl/PROG/$prog} $prog
+    if [ "${dev}" = "no" ] && [ -z "${gc_progs//* $prog *}" ] && [ -n "${nobuild_progs//* $prog *}" ]; then
+      cd $prog
+      cecho BLUE "Switching to stable branch add --dev option to prevent that"
+      hg checkout stable
+      cd ..
+    fi
   fi
 
   cd $prog
-  if [ "$do_update" == "yes" ]; then
+  if [ "$do_update" == "yes" ] || [ "$do_update" == "only" ]; then
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping (CTRL-C to stop)"
       countdown 5
     elif [ -d .hg ]; then
       cecho GREEN "updating hg repository"
-      pullpath=$(hg path $pathname 2> /dev/null || true )
+      pullpath=$(hg path $pathname 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
 	pullpath=${hgurl/PROG/$prog}
 	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead (CTRL-C to stop)"
@@ -412,9 +424,14 @@ for prog in "$@"; do
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
       countdown 5
     fi
+    if [ "$do_update" == "only" ]; then
+      cd ..
+      continue
+    fi
   fi
   if [ -z "${nobuild_progs//* $prog *}" ]; then
     cd ..
+    cecho BLUE "Program $prog can not be build automatically"
     cecho GREEN "done with $prog"
     continue
   fi
