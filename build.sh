@@ -35,7 +35,7 @@ prefix="$HOME/votca"
 libdir=""
 #mind the spaces
 gc_progs=" tools csg tutorials csgapps "
-all_progs="$gc_all"
+all_progs="$gc_progs"
 standard_progs=" tools csg "
 nobuild_progs=" tutorials csgapps "
 
