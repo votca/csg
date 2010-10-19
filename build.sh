@@ -161,6 +161,7 @@ Please visit: $(cecho BLUE www.votca.org)
 
 The normal sequence of a build is:
 - hg clone (if src is not there)
+  and checkout stable branch unless --dev given
   (use release tarball with --release)
 - hg pull + hg update (enable --do-update)
   (stop here with --no-configure)
