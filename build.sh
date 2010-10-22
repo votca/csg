@@ -420,7 +420,10 @@ for prog in "$@"; do
 	cecho GREEN "from $pullpath"
       fi
       hg pull ${pullpath}
-      echo We are on branch $(cecho BLUE $(hg branch))
+      [ -z "$branch" ] && branch="$(hg branch)"
+      #prevent to build devel csg with stable tools and so on
+      [ "$branch" = "$(hg branch)" ] || die "You are mixing branches: '$branch' vs '$(hg branch)'"
+      echo "We are on branch $(cecho BLUE $(hg branch))"
       hg update
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
