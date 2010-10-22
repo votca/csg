@@ -420,6 +420,7 @@ for prog in "$@"; do
 	cecho GREEN "from $pullpath"
       fi
       hg pull ${pullpath}
+      echo We are on branch $(cecho BLUE $(hg branch))
       hg update
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
