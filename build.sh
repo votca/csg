@@ -28,6 +28,8 @@
 #version 1.2.1 -- 28.09.10 added --no-bootstrap and --dist option
 #version 1.3.0 -- 30.09.10 moved to googlecode
 #version 1.3.1 -- 01.10.10 checkout stable branch by default
+#version 1.3.2 -- 08.12.10 added --dist-pristine
+#version 1.3.3 -- 09.12.10 allow to overwrite hg by HG
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -66,7 +68,10 @@ pathname="default"
 latest="1.0"
 
 extra_conf=""
-pack="tar.gz"
+packext=".tar.gz"
+distext=""
+
+[ -z "$HG" ] && HG="hg"
 
 gromacs="no"
 
@@ -208,6 +213,8 @@ $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --dist)              Create a dist tarball and move it here
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
+    $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here 
+                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'"))
 $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
                         Default: $prefix
     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
@@ -293,6 +300,11 @@ while [ "${1#-}" != "$1" ]; do
     do_dist="yes"
     extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
     shift 1;;
+   --dist-pristine)
+    do_dist="yes"
+    extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
+    distext="_pristine"
+    shift 1;;
    -q | --no-clean)
     do_clean="no"
     shift 1;;
@@ -377,7 +389,7 @@ for prog in "$@"; do
   elif [ -n "$rel" ] && [ -z "${nobuild_progs//* $prog *}" ]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository (CTRL-C to stop)"
     countdown 5
-    hg clone ${hgurl/PROG/$prog} $prog
+    $HG clone ${hgurl/PROG/$prog} $prog
   elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
     tmpurl="${relurl//REL/$rel}"
     tmpurl="${tmpurl//PROG/$prog}"
@@ -395,11 +407,11 @@ for prog in "$@"; do
   else
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog} (CTRL-C to stop)"
     countdown 5
-    hg clone ${hgurl/PROG/$prog} $prog
+    $HG clone ${hgurl/PROG/$prog} $prog
     if [ "${dev}" = "no" ] && [ -z "${gc_progs//* $prog *}" ] && [ -n "${nobuild_progs//* $prog *}" ]; then
       cd $prog
       cecho BLUE "Switching to stable branch add --dev option to prevent that"
-      hg checkout stable
+      $HG checkout stable
       cd ..
     fi
   fi
@@ -411,7 +423,7 @@ for prog in "$@"; do
       countdown 5
     elif [ -d .hg ]; then
       cecho GREEN "updating hg repository"
-      pullpath=$(hg path $pathname 2> /dev/null || true)
+      pullpath=$($HG path $pathname 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
 	pullpath=${hgurl/PROG/$prog}
 	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead (CTRL-C to stop)"
@@ -419,12 +431,12 @@ for prog in "$@"; do
       else
 	cecho GREEN "from $pullpath"
       fi
-      hg pull ${pullpath}
-      [ -z "$branch" ] && branch="$(hg branch)"
+      $HG pull ${pullpath}
+      [ -z "$branch" ] && branch="$($HG branch)"
       #prevent to build devel csg with stable tools and so on
-      [ "$branch" = "$(hg branch)" ] || die "You are mixing branches: '$branch' vs '$(hg branch)'"
-      echo "We are on branch $(cecho BLUE $(hg branch))"
-      hg update
+      [ "$branch" = "$($HG branch)" ] || die "You are mixing branches: '$branch' vs '$($HG branch)'"
+      echo "We are on branch $(cecho BLUE $($HG branch))"
+      $HG update
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
       countdown 5
@@ -444,7 +456,7 @@ for prog in "$@"; do
     if [ -d .hg ]; then
       cecho BLUE "I will remove all ignored files from $prog, CTRL-C to stop"
       countdown 5
-      hg status --print0 --no-status --ignored | xargs --null rm -f
+      $HG status --print0 --no-status --ignored | xargs --null rm -f
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files (CTRL-C to stop)"
       countdown 5
@@ -471,9 +483,12 @@ for prog in "$@"; do
     cecho GREEN "cleaning $prog"
     make clean
   fi
-  if [ "$do_dist" == "yes" ]; then
+  if [ "$do_dist" = "yes" ]; then
     make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
-    mv *${pack} .. || die "No tarball found"
+    for i in  *${packext}; do
+      [ -f "$i" ] || die "Tarball $i not found"
+      mv "$i" ../"${i%$packext}${distext}${packext}"
+    done
   fi
   if [ "$do_build" == "no" ]; then
     cd ..
