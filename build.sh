@@ -30,6 +30,7 @@
 #version 1.3.1 -- 01.10.10 checkout stable branch by default
 #version 1.3.2 -- 08.12.10 added --dist-pristine
 #version 1.3.3 -- 09.12.10 allow to overwrite hg by HG
+#version 1.3.4 -- 10.12.10 added --devdoc option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -57,6 +58,7 @@ do_build="yes"
 do_install="yes"
 do_update="no"
 do_dist="no"
+do_devdoc="no"
 dev="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
@@ -101,6 +103,18 @@ cecho() {
   echo -n ${color}
   echo -ne "$@"
   echo $opts "${OFF}"
+}
+
+build_devdoc() {
+  cecho GREEN "Building devdoc"
+  [ -z "$(type -p doxygen)" ] && die "wget is missing"
+  [ -f tools/share/doc/Doxyfile ] || die "Could not get Doxyfile from tools repo"
+  sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
+      -e "/^INPUT /s/=.*$/= $progs/" \
+      -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
+      tools/share/doc/Doxyfile > Doxyfile
+  doxygen || die "Doxygen failed"
+  rm -f Doxyfile
 }
 
 prefix_clean() {
@@ -215,7 +229,8 @@ $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here 
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'"))
-$(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     use prefix
+    $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
+$(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                         Default: $prefix
     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
                         Default: PREFIX/lib
@@ -305,6 +320,9 @@ while [ "${1#-}" != "$1" ]; do
     extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
     distext="_pristine"
     shift 1;;
+   --devdoc)
+    do_devdoc="yes"
+    shift 1;;
    -q | --no-clean)
     do_clean="no"
     shift 1;;
@@ -376,6 +394,7 @@ cecho BLUE "Using $j jobs for make"
 [ "$prefix_clean" = "yes" ] && prefix_clean
 
 set -e
+progs="$@"
 for prog in "$@"; do
   [ -n "${all_progs//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all_progs"
   [ -z "${gc_progs//* $prog *}" ] && hgurl="$gc_url" || hgurl="$url"
@@ -506,3 +525,4 @@ for prog in "$@"; do
 done
 set +e
 
+[ "$do_devdoc" = "yes" ] && build_devdoc
