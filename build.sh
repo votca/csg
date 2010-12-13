@@ -31,6 +31,7 @@
 #version 1.3.2 -- 08.12.10 added --dist-pristine
 #version 1.3.3 -- 09.12.10 allow to overwrite hg by HG
 #version 1.3.4 -- 10.12.10 added --devdoc option
+#version 1.3.5 -- 13.12.10 added --no-branchcheck and --no-wait option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -60,6 +61,8 @@ do_update="no"
 do_dist="no"
 do_devdoc="no"
 dev="no"
+wait="yes"
+branch_check="yes"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -139,6 +142,7 @@ prefix_clean() {
 countdown() {
   [ -z "$1" ] && "countdown: Missing argument"
   [ -n "${1//[0-9]}" ] && "countdown: argument should be a number"
+  [ "$wait" = "no" ] && echo && return 
   for ((i=$1;i>0;i--)); do
     cecho -n CYANN "$i "
     sleep 1
@@ -224,6 +228,8 @@ $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
                         Default: $j (auto)
     $(cecho GREEN --no-build)          Stop before build
+$(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
+    $(cecho GREEN --no-branchcheck)    Do not check, for mixed hg branches
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --dist)              Create a dist tarball and move it here
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
@@ -287,10 +293,6 @@ while [ "${1#-}" != "$1" ]; do
    -C | --clean-ignored)
     do_clean_ignored="yes"
     shift 1;;
-   -g | --gromacs)
-    cecho RED "-g/--gromacs is not needed anymore, remove it"
-    countdown 60
-    shift 1;;
    -j | --jobs)
     [ -z "$2" ] && die "Missing argument after --jobs"
     [ -n "${2//[0-9]}" ] && die "Argument after --jobs should be a number"
@@ -331,6 +333,12 @@ while [ "${1#-}" != "$1" ]; do
     shift 1;;
    --no-build)
     do_build="no"
+    shift 1;;
+   -W | --no-wait)
+    wait="no"
+    shift 1;;
+   --no-branchcheck)
+    branch_check="no"
     shift 1;;
    -p | --prefix)
     prefix="$2"
@@ -451,9 +459,6 @@ for prog in "$@"; do
 	cecho GREEN "from $pullpath"
       fi
       $HG pull ${pullpath}
-      [ -z "$branch" ] && branch="$($HG branch)"
-      #prevent to build devel csg with stable tools and so on
-      [ "$branch" = "$($HG branch)" ] || die "You are mixing branches: '$branch' vs '$($HG branch)'"
       echo "We are on branch $(cecho BLUE $($HG branch))"
       $HG update
     else
@@ -465,11 +470,19 @@ for prog in "$@"; do
       continue
     fi
   fi
+  if [ -d .hg ]; then
+    [ -z "$branch" ] && branch="$($HG branch)"
+    #prevent to build devel csg with stable tools and so on
+    if [ "$branch" != "$($HG branch)" ]; then 
+      [ "$branch_check" = "yes" ] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with --no-branchcheck option)"
+      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"  
+    fi
+  fi
   if [ -z "${nobuild_progs//* $prog *}" ]; then
     cd ..
     cecho BLUE "Program $prog can not be build automatically"
     cecho GREEN "done with $prog"
-    continue
+    continu
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [ -d .hg ]; then
@@ -522,6 +535,7 @@ for prog in "$@"; do
   fi
   cd ..
   cecho GREEN "done with $prog"
+  last_prog="$prog"
 done
 set +e
 
