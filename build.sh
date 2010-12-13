@@ -142,7 +142,7 @@ prefix_clean() {
 countdown() {
   [ -z "$1" ] && "countdown: Missing argument"
   [ -n "${1//[0-9]}" ] && "countdown: argument should be a number"
-  [ "$wait" = "no" ] && echo && return 
+  [ "$wait" = "no" ] && return
   for ((i=$1;i>0;i--)); do
     cecho -n CYANN "$i "
     sleep 1
@@ -233,7 +233,7 @@ $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical p
     $(cecho GREEN --no-install)        Don't run make install
     $(cecho GREEN --dist)              Create a dist tarball and move it here
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
-    $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here 
+    $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'"))
     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
@@ -473,9 +473,9 @@ for prog in "$@"; do
   if [ -d .hg ]; then
     [ -z "$branch" ] && branch="$($HG branch)"
     #prevent to build devel csg with stable tools and so on
-    if [ "$branch" != "$($HG branch)" ]; then 
+    if [ "$branch" != "$($HG branch)" ]; then
       [ "$branch_check" = "yes" ] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with --no-branchcheck option)"
-      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"  
+      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'" 
     fi
   fi
   if [ -z "${nobuild_progs//* $prog *}" ]; then
