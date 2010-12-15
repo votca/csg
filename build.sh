@@ -32,16 +32,25 @@
 #version 1.3.3 -- 09.12.10 allow to overwrite hg by HG
 #version 1.3.4 -- 10.12.10 added --devdoc option
 #version 1.3.5 -- 13.12.10 added --no-branchcheck and --no-wait option
+#version 1.4.0 -- 15.12.10 added support for espressopp
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
 libdir=""
-#mind the spaces
+#mind the spaces at beginning and end
+
+#this gets overriden by --dev option
+#progs on googlecode
 gc_progs=" tools csg tutorials csgapps "
+#all possible programs
 all_progs="$gc_progs"
+#programs to build by default
 standard_progs=" tools csg "
+#program which cannot be build
 nobuild_progs=" tutorials csgapps "
+#program which do not have a release tarball or stable branch
+nodist_progs=" tutorials csgapps "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -371,8 +380,11 @@ while [ "${1#-}" != "$1" ]; do
    -d | --dev)
     dev=yes
     url="http://dev.votca.org/votca/PROG"
-    all_progs=" tools csg moo kmc tof md2qm testsuite csgapps "
-    standard_progs=" tools csg moo kmc md2qm "
+    all_progs=" tools csg moo kmc tof md2qm testsuite tutorials csgapps espressopp "
+    standard_progs=" tools csg espressopp "
+    nobuild_progs=" tutorials csgapps testsuite "
+    nodist_progs=" moo kmc tof md2qm testsuite csgapps espressopp tutorials "
+    esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
    die "Unknown option '$1'"
@@ -392,7 +404,7 @@ fi
 export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 
 #infos
-cecho GREEN "This is ${0##*/}, version $(get_version $0)"
+cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
 echo "prefix is '$prefix'"
 echo "VOTCALDLIB is '$VOTCALDLIB'"
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
@@ -406,6 +418,7 @@ progs="$@"
 for prog in "$@"; do
   [ -n "${all_progs//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all_progs"
   [ -z "${gc_progs//* $prog *}" ] && hgurl="$gc_url" || hgurl="$url"
+  [ "$prog" = "espressopp" ] && hgurl="$esp_url"
 
   cecho GREEN "Working on $prog"
   if [ -d "$prog" ] && [ -z "$rel" ]; then
@@ -413,7 +426,7 @@ for prog in "$@"; do
   elif [ -d "$prog" ] && [ -n "$rel" ]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download (CTRL-C to stop)"
     countdown 5
-  elif [ -n "$rel" ] && [ -z "${nobuild_progs//* $prog *}" ]; then
+  elif [ -n "$rel" ] && [ -z "${nodist_progs//* $prog *}" ]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository (CTRL-C to stop)"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
@@ -435,7 +448,7 @@ for prog in "$@"; do
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog} (CTRL-C to stop)"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
-    if [ "${dev}" = "no" ] && [ -z "${gc_progs//* $prog *}" ] && [ -n "${nobuild_progs//* $prog *}" ]; then
+    if [ "${dev}" = "no" ] && [ -n "${nodist_progs//* $prog *}" ]; then
       cd $prog
       cecho BLUE "Switching to stable branch add --dev option to prevent that"
       $HG checkout stable
@@ -482,7 +495,7 @@ for prog in "$@"; do
     cd ..
     cecho BLUE "Program $prog can not be build automatically"
     cecho GREEN "done with $prog"
-    continu
+    continue
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [ -d .hg ]; then
