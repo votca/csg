@@ -33,6 +33,7 @@
 #version 1.3.4 -- 10.12.10 added --devdoc option
 #version 1.3.5 -- 13.12.10 added --no-branchcheck and --no-wait option
 #version 1.4.0 -- 15.12.10 added support for espressopp
+#version 1.4.1 -- 17.12.10 default check for new version
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -163,18 +164,26 @@ get_version() {
   sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- .*$/\1/p' $1 | sed -n '$p'
 }
 
-self_update() {
-  [ -z "$(type -p wget)" ] && die "wget is missing"
-  new_version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch from $selfurl failed"
-  new_version="$(echo -e "${new_version}" | get_version)"
-  [ -z "${new_version}" ] && die "self_update: Could not fetch new version number"
-  cecho BLUE "Version of $selfurl is: $new_version"
+get_webversion() {
+  local version
+  [ -z "$(type -p wget)" ] && die "wget not found"
+  version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch from $selfurl failed"
+  version="$(echo -e "${version}" | get_version)"
+  [ -z "${version}" ] && die "get_webversion: Could not fetch new version number"
+  echo "${version}"
+}
+
+version_check() {
   old_version="$(get_version $0)"
-  cecho BLUE "Local Version: $old_version"
-  new_version="${new_version//[^0-9]}"
-  old_version="${old_version//[^0-9]}"
-  newer=$(awk -v new="$new_version" -v old="$old_version" 'BEGIN{if (new>old){print "yes"}}')
-  if [ "$newer" = "yes" ]; then
+  new_version="$(get_webversion)"
+  [ "$1" = "-q" ] || cecho BLUE "Version of $selfurl is: $new_version"
+  [ "$1" = "-q" ] || cecho BLUE "Local Version: $old_version"
+  expr "${old_version}" \< "${new_version}" > /dev/null
+  return $?
+}
+
+self_update() {
+  if version_check; then
     cecho RED "I will try replace myself now with $selfurl (CTRL-C to stop)"
     countdown 5
     wget -O "${0}" "${selfurl}"
@@ -214,7 +223,7 @@ $(cecho GREEN -v), $(cecho GREEN --version)           Show version
     $(cecho GREEN --debug)             Enable debug mode
     $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with all build infomation
     $(cecho GREEN --nocolor)           Disable color
-    $(cecho GREEN --selfupdate)        Do a self update (EXPERIMENTAL)
+    $(cecho GREEN --selfupdate)        Do a self update
 $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
                         (account of votca.org needed)
     $(cecho GREEN --ccache)            Enable ccache
@@ -391,6 +400,13 @@ while [ "${1#-}" != "$1" ]; do
    exit 1;;
  esac
 done
+
+if version_check -q; then
+  cecho RED "###############################################"
+  cecho RED "# Our version of VOTCA ${0##*/} is obsolete ! #"
+  cecho RED "# Please run ${0##*/} --selfupdate            #"
+  cecho RED "###############################################"
+fi
 
 [ -z "$1" ] && set -- $standard_progs
 [ -z "$prefix" ] && die "Error: prefix is empty"
