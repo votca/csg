@@ -560,7 +560,7 @@ for prog in "$@"; do
   make -j${j}
   if [ "$do_install" == "yes" ]; then
     cecho GREEN "installing $prog"
-    make install
+    make -j${j} install
   fi
   cd ..
   cecho GREEN "done with $prog"
