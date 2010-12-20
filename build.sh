@@ -34,6 +34,7 @@
 #version 1.3.5 -- 13.12.10 added --no-branchcheck and --no-wait option
 #version 1.4.0 -- 15.12.10 added support for espressopp
 #version 1.4.1 -- 17.12.10 default check for new version
+#version 1.4.2 -- 20.12.10 some fixes in self_update check
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -120,7 +121,7 @@ cecho() {
 
 build_devdoc() {
   cecho GREEN "Building devdoc"
-  [ -z "$(type -p doxygen)" ] && die "wget is missing"
+  [ -z "$(type -p doxygen)" ] && die "doxygen not found"
   [ -f tools/share/doc/Doxyfile ] || die "Could not get Doxyfile from tools repo"
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
       -e "/^INPUT /s/=.*$/= $progs/" \
@@ -166,16 +167,20 @@ get_version() {
 
 get_webversion() {
   local version
-  [ -z "$(type -p wget)" ] && die "wget not found"
-  version="$(wget -qO- "${selfurl}")" || die "self_update: wget fetch from $selfurl failed"
-  version="$(echo -e "${version}" | get_version)"
-  [ -z "${version}" ] && die "get_webversion: Could not fetch new version number"
+  if [ "$1" = "-q" ]; then
+    version="$(wget -qO- "${selfurl}" | get_version)"
+  else
+    [ -z "$(type -p wget)" ] && die "wget not found"
+    version="$(wget -qO- "${selfurl}" )" || die "self_update: wget fetch from $selfurl failed"
+    version="$(echo -e "${version}" | get_version)"
+    [ -z "${version}" ] && die "get_webversion: Could not fetch new version number"
+  fi
   echo "${version}"
 }
 
 version_check() {
   old_version="$(get_version $0)"
-  new_version="$(get_webversion)"
+  [ "$1" = "-q" ] && new_version="$(get_webversion -q)" || new_version="$(get_webversion)"
   [ "$1" = "-q" ] || cecho BLUE "Version of $selfurl is: $new_version"
   [ "$1" = "-q" ] || cecho BLUE "Local Version: $old_version"
   expr "${old_version}" \< "${new_version}" > /dev/null
@@ -183,6 +188,7 @@ version_check() {
 }
 
 self_update() {
+  [ -z "$(type -p wget)" ] && die "wget not found"
   if version_check; then
     cecho RED "I will try replace myself now with $selfurl (CTRL-C to stop)"
     countdown 5
@@ -302,6 +308,9 @@ while [ "${1#-}" != "$1" ]; do
    -v | --version)
     echo "${0##*/}, version $(get_version $0)"
     exit 0;;
+   --hg)
+    sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- [0-9][0-9]\.[0-9][0-9]\.[0-9][0-9] \(.*\)$/\2/p' $0 | sed -n '$p'
+    exit 0;;
    --selfupdate)
     self_update
     exit $?;;
@@ -402,10 +411,12 @@ while [ "${1#-}" != "$1" ]; do
 done
 
 if version_check -q; then
-  cecho RED "###############################################"
-  cecho RED "# Our version of VOTCA ${0##*/} is obsolete ! #"
-  cecho RED "# Please run ${0##*/} --selfupdate            #"
-  cecho RED "###############################################"
+  x=${0##*/}; x=${x//?/#}
+  cecho RED "########################################$x"
+  cecho RED "# Your version of VOTCA ${0##*/} is obsolete ! #"
+  cecho RED "# Please run '${0##*/} --selfupdate'           #"
+  cecho RED "########################################$x"
+  unset x
 fi
 
 [ -z "$1" ] && set -- $standard_progs
