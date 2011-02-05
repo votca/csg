@@ -535,12 +535,24 @@ for prog in "$@"; do
     fi
   fi
   if [ "$do_configure" == "yes" ]; then
-    if [ "$do_bootstrap" = "yes" ] && [ -f bootstrap.sh ]; then
-      cecho GREEN "bootstraping $prog"
-      ./bootstrap.sh
+    if [ "$do_bootstrap" = "yes" ]; then
+      if [ -f CMakeLists.txt ]; then
+        cecho BLUE "cmake build system found, skipping bootstrap for $prog"
+      elif [ -f bootstrap.sh ]; then
+        cecho GREEN "bootstraping $prog"
+        ./bootstrap.sh
+      elif [ -f autogen.sh ]; then
+        cecho GREEN "bootstraping $prog"
+        ./autogen.sh
+      else
+        cecho BLUE "No bootstrap.sh found, skipping bootstrap for $prog"
+      fi
     fi
     cecho GREEN "configuring $prog"
-    if [ -f configure ]; then
+    if [ -f CMakeLists.txt ]; then
+      cecho BLUE "cmake . -DCMAKE_INSTALL_PREFIX="$prefix" $extra_conf"
+      cmake . -DCMAKE_INSTALL_PREFIX="$prefix" $extra_conf
+    elif [ -f configure ]; then
        cecho BLUE "configure --prefix '$prefix' $extra_conf"
       ./configure --prefix "$prefix" $extra_conf
     else
@@ -556,6 +568,7 @@ for prog in "$@"; do
     make clean
   fi
   if [ "$do_dist" = "yes" ]; then
+    [ -f CMakeLists.txt ] && die "cmake and --dist don't work together at this point"
     make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
     for i in  *${packext}; do
       [ -f "$i" ] || die "Tarball $i not found"
