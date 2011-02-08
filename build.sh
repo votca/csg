@@ -84,6 +84,7 @@ pathname="default"
 latest="1.0"
 
 extra_conf=""
+cmake_opts=
 packext=".tar.gz"
 distext=""
 
@@ -248,6 +249,8 @@ $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from r
     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
                         Do NOT put variables (XXX=YYY) here, but use environment variables
+    $(cecho GREEN --camke-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
+                        Do NOT put variables (XXX=YYY) here, but use environment variables
 $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
                         Default: $j (auto)
@@ -258,7 +261,7 @@ $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical p
     $(cecho GREEN --dist)              Create a dist tarball and move it here
                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
-                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'"))
+                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                         Default: $prefix
@@ -343,10 +346,12 @@ while [ "${1#-}" != "$1" ]; do
    --dist)
     do_dist="yes"
     extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -EXTERNAL_EXPAT=OFF"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
     extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -EXTERNAL_EXPAT=ON"
     distext="_pristine"
     shift 1;;
    --devdoc)
@@ -375,6 +380,9 @@ while [ "${1#-}" != "$1" ]; do
     shift 2;;
    -O | --conf-opts)
     extra_conf="${extra_conf} $2"
+    shift 2;;
+  --cmake-opts)
+    cmake_opts="${cmake_opts} $2"
     shift 2;;
    --static)
     extra_conf="${extra_conf} --enable-all-static"
@@ -550,8 +558,8 @@ for prog in "$@"; do
     fi
     cecho GREEN "configuring $prog"
     if [ -f CMakeLists.txt ]; then
-      cecho BLUE "cmake . -DCMAKE_INSTALL_PREFIX="$prefix" $extra_conf"
-      cmake . -DCMAKE_INSTALL_PREFIX="$prefix" $extra_conf
+      cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
+      cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
     elif [ -f configure ]; then
        cecho BLUE "configure --prefix '$prefix' $extra_conf"
       ./configure --prefix "$prefix" $extra_conf
@@ -568,12 +576,30 @@ for prog in "$@"; do
     make clean
   fi
   if [ "$do_dist" = "yes" ]; then
-    [ -f CMakeLists.txt ] && die "cmake and --dist don't work together at this point"
-    make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
-    for i in  *${packext}; do
-      [ -f "$i" ] || die "Tarball $i not found"
-      mv "$i" ../"${i%$packext}${distext}${packext}"
-    done
+    [ "${dev}" = "no" ] && die "Creating a dist tarball with --dev option make no sense"
+    if [ -f CMakeLists.txt ]; then
+      [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
+      [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
+      tmp=$(mktemp -d ./source-XXX) || die "mktemp -d ./source-XXX failed"
+      hg archive -t files $tmp || die "hg archive failed"
+      cd $tmp
+      cmake .
+      make -j${j} package_source
+      for i in  *${packext}; do
+        [ -f "$i" ] || die "Tarball $i not found"
+        mv "$i" ../../"${i%$packext}${distext}${packext}"
+      done
+      cd ..
+      rm -rf $tmp
+    else
+      [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will end up in the tarball, commit them first"
+      [ -n "$(hg status --unknown)" ] && die "There are unknown files, they might end up in the tarball, rm/commit the files first"
+      make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
+      for i in  *${packext}; do
+        [ -f "$i" ] || die "Tarball $i not found"
+        mv "$i" ../"${i%$packext}${distext}${packext}"
+      done
+    fi
   fi
   if [ "$do_build" == "no" ]; then
     cd ..
