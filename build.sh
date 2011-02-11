@@ -581,7 +581,6 @@ for prog in "$@"; do
     make clean
   fi
   if [ "$do_dist" = "yes" ]; then
-    [ "${dev}" = "no" ] && die "Creating a dist tarball with --dev option make no sense"
     if [ -f CMakeLists.txt ]; then
       [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
       [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
