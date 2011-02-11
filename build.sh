@@ -35,6 +35,7 @@
 #version 1.4.0 -- 15.12.10 added support for espressopp
 #version 1.4.1 -- 17.12.10 default check for new version
 #version 1.4.2 -- 20.12.10 some fixes in self_update check
+#version 1.5.0 -- 11.02.11 added --longhelp and cmake support
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -201,79 +202,81 @@ self_update() {
 
 show_help () {
   cat << eof
-This is the votca build utils which builds votca modules
-Give multiple programs to build them. Nothing means:$standard
-One can build:$all
+    This is the votca build utils which builds votca modules
+    Give multiple programs to build them. Nothing means:$standard_progs
+    One can build:$all_progs
 
-Please visit: $(cecho BLUE www.votca.org)
+    Please visit: $(cecho BLUE www.votca.org)
 
-The normal sequence of a build is:
-- hg clone (if src is not there)
-  and checkout stable branch unless --dev given
-  (use release tarball with --release)
-- hg pull + hg update (enable --do-update)
-  (stop here with --no-configure)
-- bootstrap (if found and not --release or --no-bootstrap)
-- configure
-- make clean (disable with --no-clean)
-  (stop here with --no-build)
-- make
-- make install (disable with --no-install)
+    The normal sequence of a build is:
+    - hg clone (if src is not there)
+      and checkout stable branch unless --dev given
+      (use release tarball with --release)
+    - hg pull + hg update (enable --do-update)
+      (stop here with --no-configure)
+    - bootstrap (if found and not --release or --no-bootstrap)
+    - configure
+    - make clean (disable with --no-clean)
+      (stop here with --no-build)
+    - make
+    - make install (disable with --no-install)
 
-The most recent version can be found at:
-$(cecho BLUE $selfurl)
+ADV The most recent version can be found at:
+ADV $(cecho BLUE $selfurl)
+ADV
+    $usage
 
-$usage
-OPTIONS (last overwrites previous):
-$(cecho GREEN -h), $(cecho GREEN --help)              Show this help
-$(cecho GREEN -v), $(cecho GREEN --version)           Show version
-    $(cecho GREEN --debug)             Enable debug mode
-    $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with all build infomation
-    $(cecho GREEN --nocolor)           Disable color
-    $(cecho GREEN --selfupdate)        Do a self update
-$(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
-                        (account of votca.org needed)
-    $(cecho GREEN --ccache)            Enable ccache
-    $(cecho GREEN --static)            Build static executables
-    $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
-                        (implies  $(cecho GREEN --no-bootstrap))
-$(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
-$(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
-                        or the votca server as fail back
-$(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-configure)
-    $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
-                        Default: $pathname (Also see 'hg paths --help')
-$(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
-$(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
-    $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
-    $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
-$(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
-                        Do NOT put variables (XXX=YYY) here, but use environment variables
-    $(cecho GREEN --camke-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
-                        Do NOT put variables (XXX=YYY) here, but use environment variables
-$(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
-$(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
-                        Default: $j (auto)
-    $(cecho GREEN --no-build)          Stop before build
-$(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
-    $(cecho GREEN --no-branchcheck)    Do not check, for mixed hg branches
-    $(cecho GREEN --no-install)        Don't run make install
-    $(cecho GREEN --dist)              Create a dist tarball and move it here
-                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'"))
-    $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
-                        (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
-    $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
-$(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
-                        Default: $prefix
-    $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
-                        Default: PREFIX/lib
+    OPTIONS (last overwrites previous):
+    $(cecho GREEN -h), $(cecho GREEN --help)              Show a short help
+        $(cecho GREEN --longhelp)          Show a detailed help
+ADV $(cecho GREEN -v), $(cecho GREEN --version)           Show version
+ADV     $(cecho GREEN --debug)             Enable debug mode
+ADV     $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with all build infomation
+ADV     $(cecho GREEN --nocolor)           Disable color
+ADV     $(cecho GREEN --selfupdate)        Do a self update
+ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
+ADV                         (account of votca.org needed)
+ADV     $(cecho GREEN --ccache)            Enable ccache
+ADV     $(cecho GREEN --static)            Build static executables
+ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
+ADV                         (implies  $(cecho GREEN --no-bootstrap))
+    $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
+    $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
+                            or the votca server as fail back
+ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-configure)
+ADV     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
+ADV                         Default: $pathname (Also see 'hg paths --help')
+ADV $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
+ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
+ADV     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
+ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
+ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
+ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
+ADV     $(cecho GREEN --camke-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
+ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
+ADV $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
+ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
+ADV                         Default: $j (auto)
+ADV     $(cecho GREEN --no-build)          Stop before build
+ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
+ADV     $(cecho GREEN --no-branchcheck)    Do not check, for mixed hg branches
+ADV     $(cecho GREEN --no-install)        Don't run make install
+ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
+ADV                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
+ADV                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
+    $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
+                            Default: $prefix
+ADV     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
+ADV                         Default: PREFIX/lib
 
-Examples:  ${0##*/} tools csg
-           ${0##*/} -dcu --prefix \$PWD/install tools csg
-	   ${0##*/} -u
-	   ${0##*/} --release ${latest} tools csg
-	   ${0##*/} --dev --help
-	   CC=g++ ${0##*/} --conf-opts '--enable-votca-boost --enable-votca-expat' tools
+    Examples:  ${0##*/} tools csg
+               ${0##*/} -dcu --prefix \$PWD/install tools csg
+               ${0##*/} -u
+               ${0##*/} --release ${latest} tools csg
+               ${0##*/} --dev --longhelp
+               CC=g++ ${0##*/} --conf-opts '--enable-votca-boost --enable-votca-expat' tools
 
 eof
 }
@@ -306,8 +309,11 @@ while [ "${1#-}" != "$1" ]; do
     ${0} ${cmdopts} | tee -a $2
     exit $?;;
    -h | --help)
-    show_help
+    show_help | sed -e '/^ADV /d' -e 's/^    //'
     exit 0;;
+  --longhelp)
+   show_help | sed -e 's/^ADV/   /' -e 's/^    //'
+   exit 0;;
    -v | --version)
     echo "${0##*/}, version $(get_version $0)"
     exit 0;;
@@ -407,7 +413,6 @@ while [ "${1#-}" != "$1" ]; do
     dev=yes
     url="http://dev.votca.org/votca/PROG"
     all_progs=" tools csg moo kmc tof md2qm testsuite tutorials csgapps espressopp "
-    standard_progs=" tools csg espressopp "
     nobuild_progs=" tutorials csgapps testsuite "
     nodist_progs=" moo kmc tof md2qm testsuite csgapps espressopp tutorials "
     esp_url="https://hg.berlios.de/repos/espressopp"
@@ -523,7 +528,7 @@ for prog in "$@"; do
     #prevent to build devel csg with stable tools and so on
     if [ "$branch" != "$($HG branch)" ]; then
       [ "$branch_check" = "yes" ] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with --no-branchcheck option)"
-      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'" 
+      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
     fi
   fi
   if [ -z "${nobuild_progs//* $prog *}" ]; then
