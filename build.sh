@@ -622,4 +622,4 @@ for prog in "$@"; do
 done
 set +e
 
-[ "$do_devdoc" = "yes" ] && build_devdoc
+[ "$do_devdoc" = "no" ] || build_devdoc
