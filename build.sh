@@ -36,11 +36,11 @@
 #version 1.4.1 -- 17.12.10 default check for new version
 #version 1.4.2 -- 20.12.10 some fixes in self_update check
 #version 1.5.0 -- 11.02.11 added --longhelp and cmake support
+#version 1.5.1 -- 13.02.11 removed --votcalibdir and added rpath options
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
-libdir=""
 #mind the spaces at beginning and end
 
 #this gets overriden by --dev option
@@ -75,6 +75,7 @@ do_devdoc="no"
 dev="no"
 wait="yes"
 branch_check="yes"
+rpath="yes"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -249,6 +250,7 @@ ADV                         Default: $pathname (Also see 'hg paths --help')
 ADV $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
 ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
 ADV     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
+ADV     $(cecho GREEN --no-rpath)          Remove rpath from libs (like fedora does)
 ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
@@ -261,15 +263,14 @@ ADV     $(cecho GREEN --no-build)          Stop before build
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
 ADV     $(cecho GREEN --no-branchcheck)    Do not check, for mixed hg branches
 ADV     $(cecho GREEN --no-install)        Don't run make install
-ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
-ADV                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'") or cmake equivalent)
-ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
-ADV                         (implies $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here (implies $(cecho GREEN --warn-to-errors) and
+ADV                         $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here (implies $(cecho GREEN --warn-to-errors) and
+ADV                         $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding -Werror to CXXFLAGS)
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                             Default: $prefix
-ADV     $(cecho GREEN --votcalibdir) $(cecho CYAN DIR)   export DIR as VOTCALDLIB
-ADV                         Default: PREFIX/lib
 
     Examples:  ${0##*/} tools csg
                ${0##*/} -dcu --prefix \$PWD/install tools csg
@@ -346,19 +347,27 @@ while [ "${1#-}" != "$1" ]; do
    --no-configure)
     do_configure="no"
     shift 1;;
+   --no-rpath)
+    rpath="no"
+    shift 1;;
    --no-configure)
     do_bootstrap="no"
+    shift 1;;
+   --warn-to-errors)
+    export CXXFLAGS="-Werror ${CXXFLAGS}"
     shift 1;;
    --dist)
     do_dist="yes"
     extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -EXTERNAL_EXPAT=OFF"
+    export CXXFLAGS="-Werror ${CXXFLAGS}"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
     extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -EXTERNAL_EXPAT=ON"
     distext="_pristine"
+    export CXXFLAGS="-Werror ${CXXFLAGS}"
     shift 1;;
    --devdoc)
     do_devdoc="yes"
@@ -380,9 +389,6 @@ while [ "${1#-}" != "$1" ]; do
     shift 1;;
    -p | --prefix)
     prefix="$2"
-    shift 2;;
-   --votcalibdir)
-    libdir="$2"
     shift 2;;
    -O | --conf-opts)
     extra_conf="${extra_conf} $2"
@@ -435,19 +441,17 @@ fi
 [ -z "$1" ] && set -- $standard_progs
 [ -z "$prefix" ] && die "Error: prefix is empty"
 
-#libdir was explicitly given
-if [ -n "$libdir" ]; then
-  export VOTCALDLIB="$libdir"
-else
-  export VOTCALDLIB="$prefix/lib"
-fi
-export PKG_CONFIG_PATH="$VOTCALDLIB/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
+#set pkg-config dir to make csg find tools
+export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
+#add libdir to LD_LIBRARY_PATH in case build system support no rpath
+export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
 echo "prefix is '$prefix'"
 echo "VOTCALDLIB is '$VOTCALDLIB'"
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
+[ -n "$CXXFLAGS" ] && echo "CXXFLAGS is '$CXXFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
 cecho BLUE "Using $j jobs for make"
 
@@ -568,6 +572,11 @@ for prog in "$@"; do
     elif [ -f configure ]; then
        cecho BLUE "configure --prefix '$prefix' $extra_conf"
       ./configure --prefix "$prefix" $extra_conf
+      if [ "$rpath" = "no" ]; then
+         #fedora's hack to get rid of rpath
+         sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+         sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+      fi
     else
       die "No configure found, remove '--no-bootstrap' option"
     fi
