@@ -146,7 +146,6 @@ prefix_clean() {
   fi
   echo "I will $(cecho RED remove):"
   echo $files
-  cecho RED "CTRL-C to stop it"
   countdown 10
   rm -rf $files
   cecho GREEN "Done, hope you are happy now"
@@ -157,6 +156,7 @@ countdown() {
   [ -z "$1" ] && "countdown: Missing argument"
   [ -n "${1//[0-9]}" ] && "countdown: argument should be a number"
   [ "$wait" = "no" ] && return
+  cecho -n RED "(CTRL-C to stop) "
   for ((i=$1;i>0;i--)); do
     cecho -n CYANN "$i "
     sleep 1
@@ -193,7 +193,7 @@ version_check() {
 self_update() {
   [ -z "$(type -p wget)" ] && die "wget not found"
   if version_check; then
-    cecho RED "I will try replace myself now with $selfurl (CTRL-C to stop)"
+    cecho RED "I will try replace myself now with $selfurl"
     countdown 5
     wget -O "${0}" "${selfurl}"
   else
@@ -467,10 +467,10 @@ for prog in "$@"; do
   if [ -d "$prog" ] && [ -z "$rel" ]; then
     cecho BLUE "Source dir ($prog) is already there - skipping checkout"
   elif [ -d "$prog" ] && [ -n "$rel" ]; then
-    cecho BLUE "Source dir ($prog) is already there - skipping download (CTRL-C to stop)"
+    cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
   elif [ -n "$rel" ] && [ -z "${nodist_progs//* $prog *}" ]; then
-    cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository (CTRL-C to stop)"
+    cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
   elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
@@ -488,7 +488,7 @@ for prog in "$@"; do
     mv "${tardir}" "${prog}"
     rm -f "${tarball}"
   else
-    cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog} (CTRL-C to stop)"
+    cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog}"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
     if [ "${dev}" = "no" ] && [ -n "${nodist_progs//* $prog *}" ]; then
@@ -502,14 +502,14 @@ for prog in "$@"; do
   cd $prog
   if [ "$do_update" == "yes" ] || [ "$do_update" == "only" ]; then
     if [ -n "$rel" ]; then
-      cecho BLUE "Update of a release tarball doesn't make sense, skipping (CTRL-C to stop)"
+      cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
     elif [ -d .hg ]; then
       cecho GREEN "updating hg repository"
       pullpath=$($HG path $pathname 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
 	pullpath=${hgurl/PROG/$prog}
-	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead (CTRL-C to stop)"
+	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead"
 	countdown 5
       else
 	cecho GREEN "from $pullpath"
@@ -518,7 +518,7 @@ for prog in "$@"; do
       echo "We are on branch $(cecho BLUE $($HG branch))"
       $HG update
     else
-      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update (CTRL-C to stop)"
+      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update"
       countdown 5
     fi
     if [ "$do_update" == "only" ]; then
@@ -542,11 +542,11 @@ for prog in "$@"; do
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [ -d .hg ]; then
-      cecho BLUE "I will remove all ignored files from $prog, CTRL-C to stop"
+      cecho BLUE "I will remove all ignored files from $prog"
       countdown 5
       $HG status --print0 --no-status --ignored | xargs --null rm -f
     else
-      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files (CTRL-C to stop)"
+      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files"
       countdown 5
     fi
   fi
