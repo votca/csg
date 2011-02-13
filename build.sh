@@ -449,7 +449,6 @@ export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
 echo "prefix is '$prefix'"
-echo "VOTCALDLIB is '$VOTCALDLIB'"
 [ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
 [ -n "$CXXFLAGS" ] && echo "CXXFLAGS is '$CXXFLAGS'"
 [ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
