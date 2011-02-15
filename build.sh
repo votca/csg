@@ -76,6 +76,7 @@ dev="no"
 wait="yes"
 branch_check="yes"
 rpath="yes"
+rm_libtool="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -251,6 +252,7 @@ ADV $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (
 ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
 ADV     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
 ADV     $(cecho GREEN --no-rpath)          Remove rpath from libs (like fedora does)
+ADV     $(cecho GREEN --rm-libtool)        Remove libtool files before bootstrap
 ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
@@ -350,24 +352,27 @@ while [ "${1#-}" != "$1" ]; do
    --no-rpath)
     rpath="no"
     shift 1;;
+   --rm-libtool)
+    rm_libtool="yes"
+    shift 1;;
    --no-configure)
     do_bootstrap="no"
     shift 1;;
    --warn-to-errors)
-    export CXXFLAGS="-Werror ${CXXFLAGS}"
+    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --dist)
     do_dist="yes"
     extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -EXTERNAL_EXPAT=OFF"
-    export CXXFLAGS="-Werror ${CXXFLAGS}"
+    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
     extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -EXTERNAL_EXPAT=ON"
     distext="_pristine"
-    export CXXFLAGS="-Werror ${CXXFLAGS}"
+    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --devdoc)
     do_devdoc="yes"
@@ -555,6 +560,12 @@ for prog in "$@"; do
       if [ -f CMakeLists.txt ]; then
         cecho BLUE "cmake build system found, skipping bootstrap for $prog"
       elif [ -f bootstrap.sh ]; then
+	if [ "$rm_libtool" = "yes" ]; then
+          cecho GREEN "Removing libtool files"
+	  cd config
+	  rm -v ltmain.sh  lt~obsolete.m4  ltoptions.m4  ltsugar.m4  ltversion.m4 ltmain.sh
+	  cd ..
+	fi
         cecho GREEN "bootstraping $prog"
         ./bootstrap.sh
       elif [ -f autogen.sh ]; then
