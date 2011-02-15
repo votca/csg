@@ -563,7 +563,7 @@ for prog in "$@"; do
 	if [ "$rm_libtool" = "yes" ]; then
           cecho GREEN "Removing libtool files"
 	  cd config
-	  rm -v ltmain.sh  lt~obsolete.m4  ltoptions.m4  ltsugar.m4  ltversion.m4 ltmain.sh
+	  rm -f -v ltmain.sh  lt~obsolete.m4  ltoptions.m4  ltsugar.m4  ltversion.m4 ltmain.sh
 	  cd ..
 	fi
         cecho GREEN "bootstraping $prog"
