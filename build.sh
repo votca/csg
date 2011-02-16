@@ -37,6 +37,7 @@
 #version 1.4.2 -- 20.12.10 some fixes in self_update check
 #version 1.5.0 -- 11.02.11 added --longhelp and cmake support
 #version 1.5.1 -- 13.02.11 removed --votcalibdir and added rpath options
+#version 1.5.2 -- 16.02.11 added libtool options
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -76,7 +77,7 @@ dev="no"
 wait="yes"
 branch_check="yes"
 rpath="yes"
-rm_libtool="no"
+libtoolize="yes"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -253,6 +254,7 @@ ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file fr
 ADV     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
 ADV     $(cecho GREEN --no-rpath)          Remove rpath from libs (like fedora does)
 ADV     $(cecho GREEN --rm-libtool)        Remove libtool files before bootstrap
+ADV     $(cecho GREEN --no-libtoolize)     Do not run libtoolize in bootstrap
 ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
@@ -353,7 +355,10 @@ while [ "${1#-}" != "$1" ]; do
     rpath="no"
     shift 1;;
    --rm-libtool)
-    rm_libtool="yes"
+   libtoolize="rm"
+    shift 1;;
+   --no-libtoolize)
+    libtoolize="no"
     shift 1;;
    --no-configure)
     do_bootstrap="no"
@@ -560,14 +565,20 @@ for prog in "$@"; do
       if [ -f CMakeLists.txt ]; then
         cecho BLUE "cmake build system found, skipping bootstrap for $prog"
       elif [ -f bootstrap.sh ]; then
-	if [ "$rm_libtool" = "yes" ]; then
+	if [ "$libtoolize" = "rm" ]; then
           cecho GREEN "Removing libtool files"
 	  cd config
 	  rm -f -v ltmain.sh  lt~obsolete.m4  ltoptions.m4  ltsugar.m4  ltversion.m4 ltmain.sh
 	  cd ..
+          cecho GREEN "bootstraping $prog"
+          ./bootstrap.sh
+	elif [ "$libtoolize" = "no" ]; then
+          cecho GREEN "bootstraping $prog"
+	  LIBTOOLIZE=true ./bootstrap.sh
+	else
+          cecho GREEN "bootstraping $prog"
+	  LIBTOOLIZE=true ./bootstrap.sh
 	fi
-        cecho GREEN "bootstraping $prog"
-        ./bootstrap.sh
       elif [ -f autogen.sh ]; then
         cecho GREEN "bootstraping $prog"
         ./autogen.sh
