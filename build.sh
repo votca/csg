@@ -38,6 +38,7 @@
 #version 1.5.0 -- 11.02.11 added --longhelp and cmake support
 #version 1.5.1 -- 13.02.11 removed --votcalibdir and added rpath options
 #version 1.5.2 -- 16.02.11 added libtool options
+#version 1.5.3 -- 17.02.11 bumped latest to 1.1_rc3
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -85,7 +86,7 @@ gc_url="https://PROG.votca.googlecode.com/hg/"
 url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.0"
+latest="1.1_rc3"
 
 extra_conf=""
 cmake_opts=
