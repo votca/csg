@@ -40,6 +40,7 @@
 #version 1.5.2 -- 16.02.11 added libtool options
 #version 1.5.3 -- 17.02.11 bumped latest to 1.1_rc3
 #version 1.5.4 -- 17.02.11 moved away from dev.votca.org
+#version 1.5.5 -- 18.02.11 bumped latest to 1.1
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -87,7 +88,7 @@ gc_url="https://PROG.votca.googlecode.com/hg/"
 url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.1_rc3"
+latest="1.1"
 
 extra_conf=""
 cmake_opts=
