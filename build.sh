@@ -39,6 +39,7 @@
 #version 1.5.1 -- 13.02.11 removed --votcalibdir and added rpath options
 #version 1.5.2 -- 16.02.11 added libtool options
 #version 1.5.3 -- 17.02.11 bumped latest to 1.1_rc3
+#version 1.5.4 -- 17.02.11 moved away from dev.votca.org
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -47,15 +48,15 @@ prefix="$HOME/votca"
 
 #this gets overriden by --dev option
 #progs on googlecode
-gc_progs=" tools csg tutorials csgapps "
+gc_progs=" tools csg tutorials csgapps testsuite manual "
 #all possible programs
 all_progs="$gc_progs"
 #programs to build by default
 standard_progs=" tools csg "
 #program which cannot be build
-nobuild_progs=" tutorials csgapps "
+nobuild_progs=" tutorials csgapps testsuite "
 #program which do not have a release tarball or stable branch
-nodist_progs=" tutorials csgapps "
+nodist_progs=" tutorials csgapps testsuite manual "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -428,10 +429,10 @@ while [ "${1#-}" != "$1" ]; do
     shift;;
    -d | --dev)
     dev=yes
-    url="http://dev.votca.org/votca/PROG"
-    all_progs=" tools csg moo kmc tof md2qm testsuite tutorials csgapps espressopp "
+    url="https://194.95.63.77/votca_PROG"
+    all_progs=" tools csg moo kmcold md2qm testsuite tutorials csgapps espressopp manual "
     nobuild_progs=" tutorials csgapps testsuite "
-    nodist_progs=" moo kmc tof md2qm testsuite csgapps espressopp tutorials "
+    nodist_progs=" moo kmcold md2qm testsuite csgapps espressopp tutorials manual "
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
@@ -456,6 +457,9 @@ fi
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 #add libdir to LD_LIBRARY_PATH in case build system support no rpath
 export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+#for the manual
+export CSGSHARE="$prefix/share/votca"
+export PATH="$prefix/bin${PATH:+:}${PATH}"
 
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
@@ -583,6 +587,8 @@ for prog in "$@"; do
       elif [ -f autogen.sh ]; then
         cecho GREEN "bootstraping $prog"
         ./autogen.sh
+      elif [ -f manual.tex ]; then
+	:
       else
         cecho BLUE "No bootstrap.sh found, skipping bootstrap for $prog"
       fi
@@ -599,8 +605,10 @@ for prog in "$@"; do
          sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
          sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
       fi
+    elif [ -f manual.tex ]; then
+      :
     else
-      die "No configure found, remove '--no-bootstrap' option"
+      die "No configure found, remove '--no-bootstrap' option if you gave it"
     fi
   else
     cd ..
@@ -612,7 +620,9 @@ for prog in "$@"; do
     make clean
   fi
   if [ "$do_dist" = "yes" ]; then
-    if [ -f CMakeLists.txt ]; then
+    if [ -f manual.tex ]; then
+      die "We cannot build a dist for the manual"
+    elif [ -f CMakeLists.txt ]; then
       [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
       [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
       tmp=$(mktemp -d ./source-XXX) || die "mktemp -d ./source-XXX failed"
@@ -644,8 +654,12 @@ for prog in "$@"; do
   cecho GREEN "buidling $prog"
   make -j${j}
   if [ "$do_install" == "yes" ]; then
-    cecho GREEN "installing $prog"
-    make -j${j} install
+    if [ -f manual.tex ]; then
+      :
+    else
+      cecho GREEN "installing $prog"
+      make -j${j} install
+    fi
   fi
   cd ..
   cecho GREEN "done with $prog"
