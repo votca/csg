@@ -362,7 +362,7 @@ while [ "${1#-}" != "$1" ]; do
    --no-libtoolize)
     libtoolize="no"
     shift 1;;
-   --no-configure)
+   --no-bootstrap)
     do_bootstrap="no"
     shift 1;;
    --warn-to-errors)
