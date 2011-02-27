@@ -243,7 +243,6 @@ ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
 ADV                         (account of votca.org needed)
 ADV     $(cecho GREEN --ccache)            Enable ccache
-ADV     $(cecho GREEN --static)            Build static executables
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
 ADV                         (implies  $(cecho GREEN --no-bootstrap))
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
@@ -261,7 +260,7 @@ ADV     $(cecho GREEN --no-libtoolize)     Do not run libtoolize in bootstrap
 ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
-ADV     $(cecho GREEN --camke-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
+ADV     $(cecho GREEN --cmake-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
 ADV $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
@@ -409,9 +408,6 @@ while [ "${1#-}" != "$1" ]; do
   --cmake-opts)
     cmake_opts="${cmake_opts} $2"
     shift 2;;
-   --static)
-    extra_conf="${extra_conf} --enable-all-static"
-    shift ;;
    --release)
     rel="$2"
     [ -z "${rel//[1-9].[0-9]?(_rc[1-9]?([0-9]))}" ] || \
