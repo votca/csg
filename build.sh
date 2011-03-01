@@ -410,7 +410,7 @@ while [ "${1#-}" != "$1" ]; do
     shift 2;;
    --release)
     rel="$2"
-    [ -z "${rel//[1-9].[0-9]?(_rc[1-9]?([0-9]))}" ] || \
+    [ -z "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))}" ] || \
       die "--release option needs an argument of the form X.X{_rcXX}"
     do_bootstrap="no"
     shift 2;;
