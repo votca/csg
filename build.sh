@@ -243,7 +243,6 @@ ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
 ADV                         (account of votca.org needed)
-ADV     $(cecho GREEN --ccache)            Enable ccache
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
 ADV                         (implies  $(cecho GREEN --no-bootstrap))
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
@@ -261,7 +260,7 @@ ADV     $(cecho GREEN --no-libtoolize)     Do not run libtoolize in bootstrap
 ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
 ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
-ADV     $(cecho GREEN --cmake-opts) $(cecho CYAN OPTS)   Extra cmake options (maybe multiple times)
+ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
 ADV $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
@@ -372,13 +371,13 @@ while [ "${1#-}" != "$1" ]; do
    --dist)
     do_dist="yes"
     extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -EXTERNAL_EXPAT=OFF"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF"
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
     extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -EXTERNAL_EXPAT=ON"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON"
     distext="_pristine"
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
@@ -406,9 +405,9 @@ while [ "${1#-}" != "$1" ]; do
    -O | --conf-opts)
     extra_conf="${extra_conf} $2"
     shift 2;;
-  --cmake-opts)
-    cmake_opts="${cmake_opts} $2"
-    shift 2;;
+  -D*)
+    cmake_opts="${cmake_opts} $1"
+    shift 1;;
    --release)
     rel="$2"
     [ -z "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))}" ] || \
@@ -417,10 +416,6 @@ while [ "${1#-}" != "$1" ]; do
     shift 2;;
    -l | --latest)
     rel="$latest"
-    shift;;
-   --ccache)
-    [ -z "$(type ccache)" ] && die "${0##*/}: ccache not found"
-    export CXX="ccache ${CXX:=g++}"
     shift;;
    --nocolor)
     unset BLUE CYAN CYANN GREEN OFF RED PURP
@@ -623,17 +618,7 @@ for prog in "$@"; do
     elif [ -f CMakeLists.txt ]; then
       [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
       [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
-      tmp=$(mktemp -d ./source-XXX) || die "mktemp -d ./source-XXX failed"
-      hg archive -t files $tmp || die "hg archive failed"
-      cd $tmp
-      cmake .
-      make -j${j} package_source
-      for i in  *${packext}; do
-        [ -f "$i" ] || die "Tarball $i not found"
-        mv "$i" ../../"${i%$packext}${distext}${packext}"
-      done
-      cd ..
-      rm -rf $tmp
+      #the actual dist we do later
     else
       [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will end up in the tarball, commit them first"
       [ -n "$(hg status --unknown)" ] && die "There are unknown files, they might end up in the tarball, rm/commit the files first"
@@ -658,6 +643,16 @@ for prog in "$@"; do
       cecho GREEN "installing $prog"
       make -j${j} install
     fi
+  fi
+  if [ "$do_dist" = "yes" ] && [ -f CMakeLists.txt ]; then
+    #if we are here we know make and make installed worked
+    [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
+    [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
+    unset ver
+    ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' CMakeLists.txt)" || die "sed grep of PROJECT_VERSION failed"
+    [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
+    [ "$distext" = "_pristine" ] && exclude="--exclude src/libboost" || exlcude=""
+    hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
   fi
   cd ..
   cecho GREEN "done with $prog"
