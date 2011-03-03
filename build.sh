@@ -405,9 +405,9 @@ while [ "${1#-}" != "$1" ]; do
    -O | --conf-opts)
     extra_conf="${extra_conf} $2"
     shift 2;;
-  -D*)
-    cmake_opts="${cmake_opts} $1"
-    shift 1;;
+  -D)
+    cmake_opts="${cmake_opts} -D${2#-}"
+    shift 2;;
    --release)
     rel="$2"
     [ -z "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))}" ] || \
