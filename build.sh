@@ -558,6 +558,9 @@ for prog in "$@"; do
       countdown 5
     fi
   fi
+  if [ "$do_clean" == "yes" ] && [ -f CMakeLists.txt ]; then
+    rm -f CMakeCache.txt
+  fi
   if [ "$do_configure" == "yes" ]; then
     if [ "$do_bootstrap" = "yes" ]; then
       if [ -f CMakeLists.txt ]; then
