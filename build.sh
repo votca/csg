@@ -242,7 +242,6 @@ ADV     $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with al
 ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
-ADV                         (account of votca.org needed)
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
 ADV                         (implies  $(cecho GREEN --no-bootstrap))
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
@@ -451,7 +450,6 @@ export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_P
 #add libdir to LD_LIBRARY_PATH in case build system support no rpath
 export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 #for the manual
-export CSGSHARE="$prefix/share/votca"
 export PATH="$prefix/bin${PATH:+:}${PATH}"
 
 #infos
