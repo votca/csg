@@ -646,13 +646,15 @@ for prog in "$@"; do
     fi
   fi
   if [ "$do_dist" = "yes" ] && [ -f CMakeLists.txt ]; then
+    cecho GREEN "packing $prog"
     #if we are here we know make and make installed worked
     [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
     [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
     unset ver
     ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' CMakeLists.txt)" || die "sed grep of PROJECT_VERSION failed"
     [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
-    [ "$distext" = "_pristine" ] && exclude="--exclude src/libboost" || exlcude=""
+    exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
+    [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
     hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
   fi
   cd ..
