@@ -539,7 +539,9 @@ for prog in "$@"; do
       cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
     fi
   fi
-  if [ ! -f manual.tex ] && [ ! -f "CMakeLists.txt" ]; then
+  if [ -f manual.tex ] || [ -f CMakeLists.txt ] || [ -f configure.ac ]; then
+    :
+  else
     cd ..
     cecho BLUE "Program $prog can not be build automatically"
     cecho GREEN "done with $prog"
