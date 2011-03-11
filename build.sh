@@ -55,10 +55,8 @@ gc_progs=" tools csg tutorials csgapps testsuite manual "
 all_progs="$gc_progs"
 #programs to build by default
 standard_progs=" tools csg "
-#program which cannot be build
-nobuild_progs=" tutorials csgapps testsuite "
-#program which do not have a release tarball or stable branch
-nodist_progs=" tutorials csgapps testsuite manual "
+#program which do not have a release tarball
+norel_progs=" testsuite csgapps testsuite manual "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -92,13 +90,11 @@ pathname="default"
 latest="1.1.1"
 
 extra_conf=""
-cmake_opts=
+cmake_opts=""
 packext=".tar.gz"
 distext=""
 
 [ -z "$HG" ] && HG="hg"
-
-gromacs="no"
 
 BLUE="[34;01m"
 CYAN="[36;01m"
@@ -423,8 +419,7 @@ while [ "${1#-}" != "$1" ]; do
     dev=yes
     url="https://194.95.63.77/votca_PROG"
     all_progs=" tools csg moo kmcold md2qm testsuite tutorials csgapps espressopp manual "
-    nobuild_progs=" tutorials csgapps testsuite "
-    nodist_progs=" moo kmcold md2qm testsuite csgapps espressopp tutorials manual "
+    norel_progs=" moo kmcold md2qm testsuite csgapps espressopp manual "
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
@@ -475,7 +470,7 @@ for prog in "$@"; do
   elif [ -d "$prog" ] && [ -n "$rel" ]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
-  elif [ -n "$rel" ] && [ -z "${nodist_progs//* $prog *}" ]; then
+  elif [ -n "$rel" ] && [ -z "${norel_progs//* $prog *}" ]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
@@ -497,10 +492,14 @@ for prog in "$@"; do
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog}"
     countdown 5
     $HG clone ${hgurl/PROG/$prog} $prog
-    if [ "${dev}" = "no" ] && [ -n "${nodist_progs//* $prog *}" ]; then
+    if [ "${dev}" = "no" ]; then
       cd $prog
-      cecho BLUE "Switching to stable branch add --dev option to prevent that"
-      $HG checkout stable
+      if [ -n "$(hg branches | sed -n '/^stable[[:space:]]/p' )" ]; then
+        cecho BLUE "Switching to stable branch add --dev option to prevent that"
+        $HG checkout stable
+      else
+	cecho BLUE "No stable branch found, skipping switching!"
+      fi
       cd ..
     fi
   fi
@@ -540,7 +539,7 @@ for prog in "$@"; do
       cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
     fi
   fi
-  if [ -z "${nobuild_progs//* $prog *}" ]; then
+  if [ ! -f manual.tex ] && [ ! -f "CMakeLists.txt" ]; then
     cd ..
     cecho BLUE "Program $prog can not be build automatically"
     cecho GREEN "done with $prog"
