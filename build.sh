@@ -42,6 +42,7 @@
 #version 1.5.4 -- 17.02.11 moved away from dev.votca.org
 #version 1.5.5 -- 18.02.11 bumped latest to 1.1
 #version 1.5.6 -- 01.03.11 bumped latest to 1.1.1
+#version 1.5.7 -- 15.03.11 switched back to dev.votca.org
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -417,7 +418,7 @@ while [ "${1#-}" != "$1" ]; do
     shift;;
    -d | --dev)
     dev=yes
-    url="https://194.95.63.77/votca_PROG"
+    url="https://dev.votca.org/votca_PROG"
     all_progs=" tools csg moo kmcold md2qm testsuite tutorials csgapps espressopp manual "
     norel_progs=" moo kmcold md2qm testsuite csgapps espressopp manual "
     esp_url="https://hg.berlios.de/repos/espressopp"
