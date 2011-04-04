@@ -43,6 +43,7 @@
 #version 1.5.5 -- 18.02.11 bumped latest to 1.1
 #version 1.5.6 -- 01.03.11 bumped latest to 1.1.1
 #version 1.5.7 -- 15.03.11 switched back to dev.votca.org
+#version 1.5.8 -- 04.04.11 bumped latest to 1.1.2
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -88,7 +89,7 @@ gc_url="https://PROG.votca.googlecode.com/hg/"
 url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.1.1"
+latest="1.1.2"
 
 extra_conf=""
 cmake_opts=""
