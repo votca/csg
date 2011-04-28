@@ -130,13 +130,13 @@ build_devdoc() {
   local ver
   cecho GREEN "Building devdoc"
   [ -z "$(type -p doxygen)" ] && die "doxygen not found"
-  [ -f tools/share/doc/Doxyfile ] || die "Could not get Doxyfile from tools repo"
+  [ -f tools/share/doc/Doxyfile.in ] || die "Could not get Doxyfile.in from tools repo"
   ver=$(get_votca_version tools/CMakeLists.txt) || die
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
       -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
       -e "/^INPUT /s/=.*$/= $progs/" \
       -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
-      tools/share/doc/Doxyfile > Doxyfile
+      tools/share/doc/Doxyfile.in > Doxyfile
   doxygen || die "Doxygen failed"
   rm -f Doxyfile
 }
