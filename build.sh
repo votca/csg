@@ -127,10 +127,13 @@ cecho() {
 }
 
 build_devdoc() {
+  local ver
   cecho GREEN "Building devdoc"
   [ -z "$(type -p doxygen)" ] && die "doxygen not found"
   [ -f tools/share/doc/Doxyfile ] || die "Could not get Doxyfile from tools repo"
+  ver=$(get_votca_version tools/CMakeLists.txt) || die
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
+      -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
       -e "/^INPUT /s/=.*$/= $progs/" \
       -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
       tools/share/doc/Doxyfile > Doxyfile
@@ -183,6 +186,15 @@ get_webversion() {
     [ -z "${version}" ] && die "get_webversion: Could not fetch new version number"
   fi
   echo "${version}"
+}
+
+get_votca_version() {
+  local ver
+  [ -z "$1" ] && die "get_votca_version: Missing argument"
+  [ -f "$1" ] || die "get_votca_version: Could not find '$1'"
+  ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' $1)" || die "Could not grep PROJECT_VERSION from '$1'"
+  [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
+  echo "$ver"
 }
 
 version_check() {
@@ -653,9 +665,7 @@ for prog in "$@"; do
     #if we are here we know make and make installed worked
     [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
     [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
-    unset ver
-    ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' CMakeLists.txt)" || die "sed grep of PROJECT_VERSION failed"
-    [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
+    ver="$(get_votca_version CMakeLists.txt)" || die
     exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
     [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
     hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
