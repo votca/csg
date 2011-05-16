@@ -432,8 +432,8 @@ while [ "${1#-}" != "$1" ]; do
    -d | --dev)
     dev=yes
     url="https://dev.votca.org/votca_PROG"
-    all_progs=" tools csg moo kmcold md2qm testsuite tutorials csgapps espressopp manual "
-    norel_progs=" moo kmcold md2qm testsuite csgapps espressopp manual "
+    all_progs=" tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual "
+    norel_progs=" moo kmc kmcold md2qm testsuite csgapps espressopp manual "
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
