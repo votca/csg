@@ -325,7 +325,7 @@ while [ "${1#-}" != "$1" ]; do
     ${0} ${cmdopts} | tee -a $2
     exit $?;;
    -h | --help)
-    show_help | sed -e '/^ADV /d' -e 's/^    //'
+    show_help | sed -e '/^ADV/d' -e 's/^    //'
     exit 0;;
   --longhelp)
    show_help | sed -e 's/^ADV/   /' -e 's/^    //'
