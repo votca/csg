@@ -457,7 +457,7 @@ fi
 #set pkg-config dir to make csg find tools
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 #add libdir to LD_LIBRARY_PATH in case build system support no rpath
-[ "$rpath" = "no" ] && export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 #for the manual
 export PATH="$prefix/bin${PATH:+:}${PATH}"
 
