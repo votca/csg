@@ -45,6 +45,7 @@
 #version 1.5.7 -- 15.03.11 switched back to dev.votca.org
 #version 1.5.8 -- 04.04.11 bumped latest to 1.1.2
 #version 1.5.9 -- 16.06.11 bumped latest to 1.2
+#version 1.6.0 -- 17.06.11 removed autotools support
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -59,7 +60,7 @@ all_progs="$gc_progs"
 #programs to build by default
 standard_progs=" tools csg "
 #program which do not have a release tarball
-norel_progs=" testsuite csgapps testsuite manual "
+norel_progs=" csgapps testsuite manual "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -69,9 +70,8 @@ else
 fi
 
 do_prefix_clean="no"
-do_configure="yes"
-do_bootstrap="yes"
-do_clean="yes"
+do_cmake="yes"
+do_clean="no"
 do_clean_ignored="no"
 do_build="yes"
 do_install="yes"
@@ -81,8 +81,7 @@ do_devdoc="no"
 dev="no"
 wait="yes"
 branch_check="yes"
-rpath="yes"
-libtoolize="yes"
+dist_check="yes"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -92,7 +91,6 @@ selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
 latest="1.2"
 
-extra_conf=""
 cmake_opts=""
 packext=".tar.gz"
 distext=""
@@ -191,8 +189,8 @@ get_webversion() {
 
 get_votca_version() {
   local ver
-  [ -z "$1" ] && die "get_votca_version: Missing argument"
-  [ -f "$1" ] || die "get_votca_version: Could not find '$1'"
+  [[ -z $1 ]] && die "get_votca_version: Missing argument"
+  [[ -f $1 ]] || die "get_votca_version: Could not find '$1'"
   ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' $1)" || die "Could not grep PROJECT_VERSION from '$1'"
   [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
   echo "$ver"
@@ -229,14 +227,11 @@ show_help () {
     The normal sequence of a build is:
     - hg clone (if src is not there)
       and checkout stable branch unless --dev given
-      (use release tarball with --release)
-    - hg pull + hg update (enable --do-update)
-      (stop here with --no-configure)
-    - bootstrap (if found and not --release or --no-bootstrap)
-    - configure
-    - make clean (disable with --no-clean)
-      (stop here with --no-build)
-    - make
+      (or downloads tarballs if --release given)
+    - hg pull + hg update (if --do-update given)
+    - run cmake (unless --no-cmake)
+    - make clean (if --clean given)
+    - make (unless --no-build given)
     - make install (disable with --no-install)
 
 ADV The most recent version can be found at:
@@ -254,35 +249,27 @@ ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
-ADV                         (implies  $(cecho GREEN --no-bootstrap))
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
     $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                             or the votca server as fail back
-ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-configure)
+ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-cmake)
 ADV     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
 ADV                         Default: $pathname (Also see 'hg paths --help')
 ADV $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
 ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
-ADV     $(cecho GREEN --no-configure)      Stop after update (before bootstrap)
-ADV     $(cecho GREEN --no-rpath)          Remove rpath from libs (like fedora does)
-ADV     $(cecho GREEN --rm-libtool)        Remove libtool files before bootstrap
-ADV     $(cecho GREEN --no-libtoolize)     Do not run libtoolize in bootstrap
-ADV     $(cecho GREEN --no-bootstrap)      Do not run bootstrap.sh
-ADV $(cecho GREEN -O), $(cecho GREEN --conf-opts) $(cecho CYAN OPTS)    Extra configure options (maybe multiple times)
-ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
+ADV     $(cecho GREEN --no-cmake)          Stop before cmake 
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
-ADV                         Do NOT put variables (XXX=YYY) here, but use environment variables
-ADV $(cecho GREEN -q), $(cecho GREEN --no-clean)          Don't run make clean
+ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
+ADV $(cecho GREEN -q), $(cecho GREEN --clean)             Run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
 ADV                         Default: $j (auto)
 ADV     $(cecho GREEN --no-build)          Stop before build
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
-ADV     $(cecho GREEN --no-branchcheck)    Do not check, for mixed hg branches
 ADV     $(cecho GREEN --no-install)        Don't run make install
-ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here (implies $(cecho GREEN --warn-to-errors) and
-ADV                         $(cecho GREEN --conf-opts) $(cecho CYAN "'--enable-votca-boost --enable-votca-expat'") or cmake equivalent)
-ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here (implies $(cecho GREEN --warn-to-errors) and
-ADV                         $(cecho GREEN --conf-opts) $(cecho CYAN "'--disable-votca-boost --disable-votca-expat'") or cmake equivalent)
+ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
+ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF))
+ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
+ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=ON))
 ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding -Werror to CXXFLAGS)
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
@@ -293,7 +280,7 @@ ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all
                ${0##*/} -u
                ${0##*/} --release ${latest} tools csg
                ${0##*/} --dev --longhelp
-               CC=g++ ${0##*/} --conf-opts '--enable-votca-boost --enable-votca-expat' tools
+               CC=g++ ${0##*/} -DWITH_GMX_DEVEL=ON csg
 
 eof
 }
@@ -309,7 +296,7 @@ shopt -s extglob
 while [ "${1#-}" != "$1" ]; do
  if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
     #short opt with arguments here: j, p and O
-    if [ "${1#-[jpO]}" != "${1}" ]; then
+    if [ "${1#-[jpD]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
     else
        set -- "${1:0:2}" "-${1:2}" "${@:2}"
@@ -360,33 +347,19 @@ while [ "${1#-}" != "$1" ]; do
    --pullpath)
     pathname="$2"
     shift 2;;
-   --no-configure)
-    do_configure="no"
-    shift 1;;
-   --no-rpath)
-    rpath="no"
-    shift 1;;
-   --rm-libtool)
-   libtoolize="rm"
-    shift 1;;
-   --no-libtoolize)
-    libtoolize="no"
-    shift 1;;
-   --no-bootstrap)
-    do_bootstrap="no"
+   --no-cmake)
+    do_cmake="no"
     shift 1;;
    --warn-to-errors)
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --dist)
     do_dist="yes"
-    extra_conf="${extra_conf} --enable-votca-boost --enable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF"
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
-    extra_conf="${extra_conf} --disable-votca-boost --disable-votca-expat"
     cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON"
     distext="_pristine"
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
@@ -394,8 +367,8 @@ while [ "${1#-}" != "$1" ]; do
    --devdoc)
     do_devdoc="yes"
     shift 1;;
-   -q | --no-clean)
-    do_clean="no"
+   -q | --clean)
+    do_clean="yes"
     shift 1;;
    --no-install)
     do_install="no"
@@ -409,20 +382,19 @@ while [ "${1#-}" != "$1" ]; do
    --no-branchcheck)
     branch_check="no"
     shift 1;;
+   --no-distcheck)
+    dist_check="no"
+    shift 1;;
    -p | --prefix)
     prefix="$2"
     shift 2;;
-   -O | --conf-opts)
-    extra_conf="${extra_conf} $2"
-    shift 2;;
   -D)
-    cmake_opts="${cmake_opts} -D${2#-}"
+    cmake_opts="${cmake_opts} -D${2}"
     shift 2;;
    --release)
     rel="$2"
     [ -z "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))}" ] || \
       die "--release option needs an argument of the form X.X{_rcXX}"
-    do_bootstrap="no"
     shift 2;;
    -l | --latest)
     rel="$latest"
@@ -457,7 +429,7 @@ fi
 
 #set pkg-config dir to make csg find tools
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
-#add libdir to LD_LIBRARY_PATH in case build system support no rpath
+#add libdir to LD_LIBRARY_PATH to allow runing csg_* for the manual
 export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 #for the manual
 export PATH="$prefix/bin${PATH:+:}${PATH}"
@@ -554,14 +526,6 @@ for prog in "$@"; do
       cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
     fi
   fi
-  if [ -f manual.tex ] || [ -f CMakeLists.txt ] || [ -f configure.ac ]; then
-    :
-  else
-    cd ..
-    cecho BLUE "Program $prog can not be build automatically"
-    cecho GREEN "done with $prog"
-    continue
-  fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [ -d .hg ]; then
       cecho BLUE "I will remove all ignored files from $prog"
@@ -572,104 +536,54 @@ for prog in "$@"; do
       countdown 5
     fi
   fi
-  if [ "$do_clean" == "yes" ] && [ -f CMakeLists.txt ]; then
-    rm -f CMakeCache.txt
-  fi
-  if [ "$do_configure" == "yes" ]; then
-    if [ "$do_bootstrap" = "yes" ]; then
-      if [ -f CMakeLists.txt ]; then
-        cecho BLUE "cmake build system found, skipping bootstrap for $prog"
-      elif [ -f bootstrap.sh ]; then
-	if [ "$libtoolize" = "rm" ]; then
-          cecho GREEN "Removing libtool files"
-	  cd config
-	  rm -f -v ltmain.sh  lt~obsolete.m4  ltoptions.m4  ltsugar.m4  ltversion.m4 ltmain.sh
-	  cd ..
-          cecho GREEN "bootstraping $prog"
-          ./bootstrap.sh
-	elif [ "$libtoolize" = "no" ]; then
-          cecho GREEN "bootstraping $prog"
-	  LIBTOOLIZE=true ./bootstrap.sh
-	else
-          cecho GREEN "bootstraping $prog"
-	  LIBTOOLIZE=true ./bootstrap.sh
-	fi
-      elif [ -f autogen.sh ]; then
-        cecho GREEN "bootstraping $prog"
-        ./autogen.sh
-      elif [ -f manual.tex ]; then
-	:
-      else
-        cecho BLUE "No bootstrap.sh found, skipping bootstrap for $prog"
-      fi
-    fi
-    cecho GREEN "configuring $prog"
-    if [ -f CMakeLists.txt ]; then
-      cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
-      cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
-    elif [ -f configure ]; then
-       cecho BLUE "configure --prefix '$prefix' $extra_conf"
-      ./configure --prefix "$prefix" $extra_conf
-      if [ "$rpath" = "no" ]; then
-         #fedora's hack to get rid of rpath
-         sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-         sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-      fi
-    elif [ -f manual.tex ]; then
-      :
-    else
-      die "No configure found, remove '--no-bootstrap' option if you gave it"
-    fi
-  else
-    cd ..
-    cecho GREEN "done with $prog"
-    continue
+  if [ "$do_dist" = "yes" ]; then
+    [[ -d .hg ]] || die "I can only make a tarball out of a mercurial repository"
+    [[ $dist_check = "yes" && -n "$($HG status --modified)" ]] && die "There are uncommitted changes, they will not end up in the tarball, commit them first (disable this check with --no-distcheck option)"
+    [[ $dist_check = "yes" && -n "$($HG status --unknown)" ]] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first (disable this check with --no-distcheck option)"
   fi
   if [ "$do_clean" == "yes" ]; then
+    rm -f CMakeCache.txt
+  fi
+  if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
+    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
+    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
+  fi
+  if [[ $do_clean == "yes" && -f Makefile ]]; then
     cecho GREEN "cleaning $prog"
     make clean
   fi
-  if [ "$do_dist" = "yes" ]; then
-    if [ -f manual.tex ]; then
-      die "We cannot build a dist for the manual"
-    elif [ -f CMakeLists.txt ]; then
-      [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
-      [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
-      #the actual dist we do later
-    else
-      [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will end up in the tarball, commit them first"
-      [ -n "$(hg status --unknown)" ] && die "There are unknown files, they might end up in the tarball, rm/commit the files first"
-      make distcheck DISTCHECK_CONFIGURE_FLAGS="${extra_conf}"
-      for i in  *${packext}; do
-        [ -f "$i" ] || die "Tarball $i not found"
-        mv "$i" ../"${i%$packext}${distext}${packext}"
-      done
-    fi
+  if [[ $do_build == "yes" && -f Makefile ]]; then 
+    cecho GREEN "buidling $prog"
+    make -j${j}
   fi
-  if [ "$do_build" == "no" ]; then
-    cd ..
-    cecho GREEN "done with $prog"
-    continue
-  fi
-  cecho GREEN "buidling $prog"
-  make -j${j}
-  if [ "$do_install" == "yes" ]; then
+  if [[ "$do_install" == "yes" && -f Makefile ]]; then
     if [ -f manual.tex ]; then
-      :
+      cecho BLUE "manual can not be installed"
     else
       cecho GREEN "installing $prog"
       make -j${j} install
     fi
   fi
-  if [ "$do_dist" = "yes" ] && [ -f CMakeLists.txt ]; then
+  if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
-    #if we are here we know make and make installed worked
-    [ -n "$(hg status --modified)" ] && die "There are uncommitted changes, they will not end up in the tarball, commit them first"
-    [ -n "$(hg status --unknown)" ] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first"
-    ver="$(get_votca_version CMakeLists.txt)" || die
-    exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
-    [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
-    hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
+    #if we are here we know  that make and make installed worked
+    if [ -f manual.tex ]; then
+      ver="$(sed -n 's/VER=[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' Makefile)" || die "Could not get version of the manual"
+      [ -z "${ver}" ] && die "Version of the manual was empty"
+      [ -f "manual.pdf" ] || die "Could not find manual.pdf"
+      cp manual.pdf ../votca-manual-${ver}${distext}.pdf || die "cp of manual failed"
+    elif [ -f VERSION ]; then
+      ver="$(<VERSION)"
+      [ -z "${ver}" ] && die "Version inside VERSION was empty"
+      hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
+    elif [ -f CMakeLists.txt ]; then
+      ver="$(get_votca_version CMakeLists.txt)" || die
+      exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
+      [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
+      hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
+    else
+      die "I don't know how to make a dist for $prog"
+    fi
   fi
   cd ..
   cecho GREEN "done with $prog"
