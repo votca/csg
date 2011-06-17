@@ -64,6 +64,7 @@ norel_progs=" csgapps testsuite manual "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
+  [[ -z ${p%%*_pristine} ]] && r="$rel_pristine" || r="$rel"
   ((j++))
 else
   j=1
@@ -82,6 +83,8 @@ dev="no"
 wait="yes"
 branch_check="yes"
 dist_check="yes"
+rel_check="yes"
+self_download="no"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -385,6 +388,12 @@ while [ "${1#-}" != "$1" ]; do
    --no-distcheck)
     dist_check="no"
     shift 1;;
+   --no-relcheck)
+    rel_check="no"
+    shift 1;;
+   --selfdownload)
+    self_download="yes"
+    shift 1;;
    -p | --prefix)
     prefix="$2"
     shift 2;;
@@ -393,8 +402,8 @@ while [ "${1#-}" != "$1" ]; do
     shift 2;;
    --release)
     rel="$2"
-    [ -z "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))}" ] || \
-      die "--release option needs an argument of the form X.X{_rcXX}"
+    [[ $rel_check = "yes" && -n "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))?(_pristine)}" ]] && \
+      die "--release option needs an argument of the form X.X{_rcXX} (disable this check with --no-relcheck option)"
     shift 2;;
    -l | --latest)
     rel="$latest"
@@ -466,11 +475,14 @@ for prog in "$@"; do
     tmpurl="${tmpurl//PROG/$prog}"
     tarball="${tmpurl##*/}"
     cecho GREEN "Download tarball $tarball from ${tmpurl}"
-    [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first"
-    [ -z "$(type -p wget)" ] && die "wget is missing"
-    wget "${tmpurl}"
+    if [ "$self_download" = "no" ]; then
+      [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first"
+      [ -z "$(type -p wget)" ] && die "wget is missing"
+      wget "${tmpurl}"
+    fi
+    [ -f "${tarball}" ] || die "wget has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
     tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
-    [ -z "${tardir//*\n*}" ] && die "Tarball $tarball contains zero or more then one directory, please check by hand"
+    [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
     [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
     tar -xzf "${tarball}"
     mv "${tardir}" "${prog}"
