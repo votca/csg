@@ -46,6 +46,7 @@
 #version 1.5.8 -- 04.04.11 bumped latest to 1.1.2
 #version 1.5.9 -- 16.06.11 bumped latest to 1.2
 #version 1.6.0 -- 17.06.11 removed autotools support
+#version 1.6.1 -- 17.06.11 added --cmake options
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -85,6 +86,7 @@ branch_check="yes"
 dist_check="yes"
 rel_check="yes"
 self_download="no"
+cmake="cmake"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -275,6 +277,8 @@ ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (witho
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=ON))
 ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding -Werror to CXXFLAGS)
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
+ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead as cmake
+ADV                         Default: $cmake
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                             Default: $prefix
 
@@ -353,6 +357,9 @@ while [ "${1#-}" != "$1" ]; do
    --no-cmake)
     do_cmake="no"
     shift 1;;
+   --cmake)
+    cmake="$2"
+    shift 2;;
    --warn-to-errors)
     export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
@@ -558,6 +565,7 @@ for prog in "$@"; do
   fi
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
+    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
     cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
