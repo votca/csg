@@ -65,7 +65,6 @@ norel_progs=" csgapps testsuite manual "
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
-  [[ -z ${p%%*_pristine} ]] && r="$rel_pristine" || r="$rel"
   ((j++))
 else
   j=1
@@ -592,17 +591,14 @@ for prog in "$@"; do
       [ -z "${ver}" ] && die "Version of the manual was empty"
       [ -f "manual.pdf" ] || die "Could not find manual.pdf"
       cp manual.pdf ../votca-manual-${ver}${distext}.pdf || die "cp of manual failed"
-    elif [ -f VERSION ]; then
-      ver="$(<VERSION)"
-      [ -z "${ver}" ] && die "Version inside VERSION was empty"
-      hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
     else
-      die "I don't know how to make a dist for $prog"
+      [ -z "${REL}" ] && die "No CMakeLists.txt found and REL was not defined"
+      hg archive ${exclude} -t tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "hg archive failed"
     fi
   fi
   cd ..
