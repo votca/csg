@@ -360,18 +360,18 @@ while [ "${1#-}" != "$1" ]; do
     cmake="$2"
     shift 2;;
    --warn-to-errors)
-    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
+    cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
     shift 1;;
    --dist)
     do_dist="yes"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF"
-    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
+    do_clean="yes"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -DCMAKE_CXX_FLAGS='-Werror'"
     shift 1;;
    --dist-pristine)
     do_dist="yes"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON"
+    do_clean="yes"
+    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -DCMAKE_CXX_FLAGS='-Werror'"
     distext="_pristine"
-    export CXXFLAGS="-O2 -Werror ${CXXFLAGS}"
     shift 1;;
    --devdoc)
     do_devdoc="yes"
