@@ -475,6 +475,7 @@ for prog in "$@"; do
   elif [ -n "$rel" ] && [ -z "${norel_progs//* $prog *}" ]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
+    [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone ${hgurl/PROG/$prog} $prog
   elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
     tmpurl="${relurl//REL/$rel}"
@@ -496,6 +497,7 @@ for prog in "$@"; do
   else
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog}"
     countdown 5
+    [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone ${hgurl/PROG/$prog} $prog
     if [ "${dev}" = "no" ]; then
       cd $prog
