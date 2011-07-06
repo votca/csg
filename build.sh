@@ -589,6 +589,7 @@ for prog in "$@"; do
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
+    [[ -n $distext && $prog != "tools" ]] && die "pristine distribution can only be done for votca tools"
     #if we are here we know  that make and make installed worked
     if [ -f manual.tex ]; then
       ver="$(sed -n 's/VER=[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' Makefile)" || die "Could not get version of the manual"
@@ -599,10 +600,10 @@ for prog in "$@"; do
       ver="$(get_votca_version CMakeLists.txt)" || die
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
-      hg archive ${exclude} -t tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "hg archive failed"
+      $HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "$HG archive failed"
     else
-      [ -z "${REL}" ] && die "No CMakeLists.txt found and REL was not defined"
-      hg archive ${exclude} -t tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "hg archive failed"
+      [ -z "${REL}" ] && die "No CMakeLists.txt found and environment variable REL was not defined"
+      $HG archive --prefix "votca-${prog}-${REL}" --type tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "$HG archive failed"
     fi
   fi
   cd ..
