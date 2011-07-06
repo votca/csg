@@ -565,8 +565,10 @@ for prog in "$@"; do
     rm -f CMakeCache.txt
   fi
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
+    [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory does not look like a source main directory (no project line in CMakeLists.txt found)"
     cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
     [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
+    # we always run normal cmake in case user forgot to generate
     cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
