@@ -446,6 +446,8 @@ fi
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
 #add libdir to LD_LIBRARY_PATH to allow runing csg_* for the manual
 export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+#hack for some old version of Mac OS
+export DYLD_LIBRARY_PATH="$prefix/lib${DYLD_LIBRARY_PATH:+:}${DYLD_LIBRARY_PATH}"
 #for the manual
 export PATH="$prefix/bin${PATH:+:}${PATH}"
 
