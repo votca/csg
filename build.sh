@@ -46,7 +46,8 @@
 #version 1.5.8 -- 04.04.11 bumped latest to 1.1.2
 #version 1.5.9 -- 16.06.11 bumped latest to 1.2
 #version 1.6.0 -- 17.06.11 removed autotools support
-#version 1.6.1 -- 17.06.11 added --cmake options
+#version 1.6.1 -- 17.06.11 added --cmake option
+#version 1.6.2 -- 28.07.11 added --with-rpath option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -264,6 +265,8 @@ ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file fr
 ADV     $(cecho GREEN --no-cmake)          Stop before cmake 
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
+ADV $(cecho GREEN -R), $(cecho GREEN --with-rpath)        Make the binaries remember the libs from compile time
+ADV                         Same as $(cecho GREEN -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON)
 ADV $(cecho GREEN -q), $(cecho GREEN --clean)             Run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
 ADV                         Default: $j (auto)
@@ -361,6 +364,9 @@ while [ "${1#-}" != "$1" ]; do
     shift 2;;
    --warn-to-errors)
     cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
+    shift 1;;
+   -R | --with-rpath)
+    cmake_opts="${cmake_opts} -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
     shift 1;;
    --dist)
     do_dist="yes"
