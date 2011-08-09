@@ -48,6 +48,7 @@
 #version 1.6.0 -- 17.06.11 removed autotools support
 #version 1.6.1 -- 17.06.11 added --cmake option
 #version 1.6.2 -- 28.07.11 added --with-rpath option
+#version 1.7.0 -- 09.08.11 added --no-rpath option and allow to build gromacs
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -58,7 +59,7 @@ prefix="$HOME/votca"
 #progs on googlecode
 gc_progs=" tools csg tutorials csgapps testsuite manual "
 #all possible programs
-all_progs="$gc_progs"
+all_progs="${gc_progs}gromacs "
 #programs to build by default
 standard_progs=" tools csg "
 #program which do not have a release tarball
@@ -95,7 +96,9 @@ url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
 latest="1.2"
+gromacs_ver="4.5.4"
 
+rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=""
 packext=".tar.gz"
 distext=""
@@ -173,6 +176,26 @@ countdown() {
     sleep 1
   done
   echo
+}
+
+download_and_upack_tarball() {
+  local url tarball
+  [ -z "$1" ] && die "download_and_upack_tarball: Missing argument"
+  url="$1"
+  tarball="${url##*/}"
+  cecho GREEN "Download tarball $tarball from ${url}"
+  if [ "$self_download" = "no" ]; then
+    [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first or add --selfdownload option"
+    [ -z "$(type -p wget)" ] && die "wget is missing"
+    wget "${url}"
+  fi
+  [ -f "${tarball}" ] || die "wget has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
+  tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
+  [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
+  [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
+  tar -xzf "${tarball}"
+  mv "${tardir}" "${prog}"
+  rm -f "${tarball}"
 }
 
 get_version() {
@@ -265,8 +288,7 @@ ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file fr
 ADV     $(cecho GREEN --no-cmake)          Stop before cmake 
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
-ADV $(cecho GREEN -R), $(cecho GREEN --with-rpath)        Make the binaries remember the libs from compile time
-ADV                         Same as $(cecho GREEN -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON)
+ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default) 
 ADV $(cecho GREEN -q), $(cecho GREEN --clean)             Run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
 ADV                         Default: $j (auto)
@@ -365,8 +387,8 @@ while [ "${1#-}" != "$1" ]; do
    --warn-to-errors)
     cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
     shift 1;;
-   -R | --with-rpath)
-    cmake_opts="${cmake_opts} -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
+   -R | --no-rpath)
+    rpath_opt=""
     shift 1;;
    --dist)
     do_dist="yes"
@@ -426,7 +448,7 @@ while [ "${1#-}" != "$1" ]; do
    -d | --dev)
     dev=yes
     url="https://dev.votca.org/votca_PROG"
-    all_progs=" tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual "
+    all_progs=" tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual gromacs "
     norel_progs=" moo kmc kmcold md2qm testsuite csgapps espressopp manual "
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
@@ -475,7 +497,14 @@ for prog in "$@"; do
   [ "$prog" = "espressopp" ] && hgurl="$esp_url"
 
   cecho GREEN "Working on $prog"
-  if [ -d "$prog" ] && [ -z "$rel" ]; then
+  if [ "$prog" = "gromacs" ]; then
+    if [ -d "$prog" ]; then
+      cecho BLUE "Source dir ($prog) is already there - skipping download"
+      countdown 5
+    else
+      download_and_upack_tarball "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
+    fi
+  elif [ -d "$prog" ] && [ -z "$rel" ]; then
     cecho BLUE "Source dir ($prog) is already there - skipping checkout"
   elif [ -d "$prog" ] && [ -n "$rel" ]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
@@ -488,20 +517,7 @@ for prog in "$@"; do
   elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
     tmpurl="${relurl//REL/$rel}"
     tmpurl="${tmpurl//PROG/$prog}"
-    tarball="${tmpurl##*/}"
-    cecho GREEN "Download tarball $tarball from ${tmpurl}"
-    if [ "$self_download" = "no" ]; then
-      [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first"
-      [ -z "$(type -p wget)" ] && die "wget is missing"
-      wget "${tmpurl}"
-    fi
-    [ -f "${tarball}" ] || die "wget has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
-    tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
-    [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
-    [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
-    tar -xzf "${tarball}"
-    mv "${tardir}" "${prog}"
-    rm -f "${tarball}"
+    download_and_upack_tarball "$tmpurl"
   else
     cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog}"
     countdown 5
@@ -574,10 +590,10 @@ for prog in "$@"; do
   fi
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
-    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts ."
-    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
+    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt ."
+    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
     # we always run normal cmake in case user forgot to generate
-    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts .
+    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
     cecho GREEN "cleaning $prog"
