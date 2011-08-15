@@ -49,6 +49,7 @@
 #version 1.6.1 -- 17.06.11 added --cmake option
 #version 1.6.2 -- 28.07.11 added --with-rpath option
 #version 1.7.0 -- 09.08.11 added --no-rpath option and allow to build gromacs
+#version 1.7.1 -- 15.08.11 added more branch checks
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -324,8 +325,8 @@ cmdopts="$(echo "$cmdopts" | sed 's/--log [^[:space:]]* //')"
 
 # parse arguments
 shopt -s extglob
-while [ "${1#-}" != "$1" ]; do
- if [ "${1#--}" = "$1" ] && [ -n "${1:2}" ]; then
+while [[ ${1#-} != $1 ]]; do
+ if [[ ${1#--} = $1 && -n ${1:2} ]]; then
     #short opt with arguments here: j, p and O
     if [ "${1#-[jpD]}" != "${1}" ]; then
        set -- "${1:0:2}" "${1:2}" "${@:2}"
@@ -504,17 +505,17 @@ for prog in "$@"; do
     else
       download_and_upack_tarball "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
     fi
-  elif [ -d "$prog" ] && [ -z "$rel" ]; then
+  elif [[ -d $prog && -z $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping checkout"
-  elif [ -d "$prog" ] && [ -n "$rel" ]; then
+  elif [[ -d $prog && -n $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
-  elif [ -n "$rel" ] && [ -z "${norel_progs//* $prog *}" ]; then
+  elif [[ -n $rel && -z ${norel_progs//* $prog *} ]]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone ${hgurl/PROG/$prog} $prog
-  elif [ ! -d "$prog" ] && [ -n "$rel" ]; then
+  elif [[ ! -d $prog && -n $rel ]]; then
     tmpurl="${relurl//REL/$rel}"
     tmpurl="${tmpurl//PROG/$prog}"
     download_and_upack_tarball "$tmpurl"
@@ -524,19 +525,17 @@ for prog in "$@"; do
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone ${hgurl/PROG/$prog} $prog
     if [ "${dev}" = "no" ]; then
-      cd $prog
-      if [ -n "$(hg branches | sed -n '/^stable[[:space:]]/p' )" ]; then
+      if [[ -n $($HG branches R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
-        $HG checkout stable
+        $HG checkout R $prog stable
       else
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
-      cd ..
     fi
   fi
 
   cd $prog
-  if [ "$do_update" == "yes" ] || [ "$do_update" == "only" ]; then
+  if [[ $do_update == "yes" || $do_update == "only" ]]; then
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
@@ -551,27 +550,31 @@ for prog in "$@"; do
 	cecho GREEN "from $pullpath"
       fi
       $HG pull ${pullpath}
-      echo "We are on branch $(cecho BLUE $($HG branch))"
+      cecho GREEN "We are on branch $(cecho BLUE $($HG branch))"
       $HG update
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update"
       countdown 5
     fi
-    if [ "$do_update" == "only" ]; then
-      cd ..
-      continue
-    fi
   fi
-  if [ -d .hg ]; then
-    [ -z "$branch" ] && branch="$($HG branch)"
-    #prevent to build devel csg with stable tools and so on
-    if [ "$branch" != "$($HG branch)" ]; then
-      [ "$branch_check" = "yes" ] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with --no-branchcheck option)"
-      cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
+  if [[ -d .hg ]]; then 
+    [[ -z $branch ]] && branch="$($HG branch)"
+    if [[ $branch_check = "yes" ]]; then
+      [[ $dev = "no" && -n $($HG branches | sed -n '/^stable[[:space:]]/p' ) && $($HG branch) != "stable" ]] && \
+        die "We build the stable version of $prog, but we are on branch $($HG branch) and not 'stable'. Please checkout the stable branch with 'hg update stable' or add --dev option (disable this check with the --no-branchcheck option)"
+      [[ $dev = "yes" && $($HG branch) = "stable" ]] && \
+	die "We build the devel version of $prog, but we are on the stable branch. Please checkout a devel branch like default with 'hg update default' (disable this check with the --no-branchcheck option)"
+      #prevent to build devel csg with stable tools and so on
+      [[ $branch != $($HG branch) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'hg update BRANCHNAME'."
     fi
+    [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
+  fi
+  if [[ $do_update == "only" ]]; then
+    cd ..
+    continue
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
-    if [ -d .hg ]; then
+    if [[ -d .hg ]]; then
       cecho BLUE "I will remove all ignored files from $prog"
       countdown 5
       $HG status --print0 --no-status --ignored | xargs --null rm -f
