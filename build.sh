@@ -50,6 +50,7 @@
 #version 1.6.2 -- 28.07.11 added --with-rpath option
 #version 1.7.0 -- 09.08.11 added --no-rpath option and allow to build gromacs
 #version 1.7.1 -- 15.08.11 added more branch checks
+#version 1.7.2 -- 18.08.11 fixed a bug in clone code
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -525,9 +526,9 @@ for prog in "$@"; do
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone ${hgurl/PROG/$prog} $prog
     if [ "${dev}" = "no" ]; then
-      if [[ -n $($HG branches R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
+      if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
-        $HG checkout R $prog stable
+        $HG update -R $prog stable
       else
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
@@ -561,9 +562,9 @@ for prog in "$@"; do
     [[ -z $branch ]] && branch="$($HG branch)"
     if [[ $branch_check = "yes" ]]; then
       [[ $dev = "no" && -n $($HG branches | sed -n '/^stable[[:space:]]/p' ) && $($HG branch) != "stable" ]] && \
-        die "We build the stable version of $prog, but we are on branch $($HG branch) and not 'stable'. Please checkout the stable branch with 'hg update stable' or add --dev option (disable this check with the --no-branchcheck option)"
+        die "We build the stable version of $prog, but we are on branch $($HG branch) and not 'stable'. Please checkout the stable branch with 'hg update -R $prog stable' or add --dev option (disable this check with the --no-branchcheck option)"
       [[ $dev = "yes" && $($HG branch) = "stable" ]] && \
-	die "We build the devel version of $prog, but we are on the stable branch. Please checkout a devel branch like default with 'hg update default' (disable this check with the --no-branchcheck option)"
+	die "We build the devel version of $prog, but we are on the stable branch. Please checkout a devel branch like default with 'hg update -R $prog default' (disable this check with the --no-branchcheck option)"
       #prevent to build devel csg with stable tools and so on
       [[ $branch != $($HG branch) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'hg update BRANCHNAME'."
     fi
