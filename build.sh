@@ -303,13 +303,13 @@ ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (witho
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=ON))
 ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding -Werror to CXXFLAGS)
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
-ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead as cmake
+ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                             Default: $prefix
 
     Examples:  ${0##*/} tools csg
-               ${0##*/} -dcu --prefix \$PWD/install tools csg
+               ${0##*/} -dcu --prefix=\$PWD/install tools csg
                ${0##*/} -u
                ${0##*/} --release ${latest} tools csg
                ${0##*/} --dev --longhelp
@@ -322,17 +322,18 @@ cmdopts=""
 for i in "$@"; do
   [ -z "${i//*[[:space:]]*}" ] && cmdopts="${cmdopts} '$i'" || cmdopts="${cmdopts} $i"
 done
-cmdopts="$(echo "$cmdopts" | sed 's/--log [^[:space:]]* //')"
+cmdopts="$(echo "$cmdopts" | sed 's/--log[ =][^[:space:]]* //')"
 
 # parse arguments
 shopt -s extglob
-while [[ ${1#-} != $1 ]]; do
- if [[ ${1#--} = $1 && -n ${1:2} ]]; then
-    #short opt with arguments here: j, p and O
-    if [ "${1#-[jpD]}" != "${1}" ]; then
-       set -- "${1:0:2}" "${1:2}" "${@:2}"
-    else
-       set -- "${1:0:2}" "-${1:2}" "${@:2}"
+while [[ ${1} = -* ]]; do
+  if [[ ${1} = --*=* ]]; then # case --xx=yy
+    set -- "${1%%=*}" "${1#*=}" "${@:2}" # --xx=yy to --xx yy
+  elif [[ ${1} != --* && -n ${1:2} ]]; then # split -xy to
+    if [[ ${1} = -[jpD]* ]]; then #short opts with arguments
+       set -- "${1:0:2}" "${1:2}" "${@:2}" # -xy to -x y
+    else #short opts without arguments
+       set -- "${1:0:2}" "-${1:2}" "${@:2}" # -xy to -x -y
     fi
  fi
  case $1 in
@@ -385,6 +386,7 @@ while [[ ${1#-} != $1 ]]; do
     shift 1;;
    --cmake)
     cmake="$2"
+    [[ -z $(type -p $cmake) ]] && die "Custom cmake '$cmake' not found"
     shift 2;;
    --warn-to-errors)
     cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
@@ -469,8 +471,8 @@ if version_check -q; then
   unset x
 fi
 
-[ -z "$1" ] && set -- $standard_progs
-[ -z "$prefix" ] && die "Error: prefix is empty"
+[[ -z $1 ]] && set -- $standard_progs
+[[ -z $prefix ]] && die "Error: prefix is empty"
 
 #set pkg-config dir to make csg find tools
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
@@ -483,13 +485,13 @@ export PATH="$prefix/bin${PATH:+:}${PATH}"
 
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
-echo "prefix is '$prefix'"
-[ -n "$CPPFLAGS" ] && echo "CPPFLAGS is '$CPPFLAGS'"
-[ -n "$CXXFLAGS" ] && echo "CXXFLAGS is '$CXXFLAGS'"
-[ -n "$LDFLAGS" ] && echo "LDFLAGS is '$LDFLAGS'"
+echo "Install prefix is '$prefix'"
+[[ -n $CPPFLAGS ]] && echo "CPPFLAGS is '$CPPFLAGS'"
+[[ -n $CXXFLAGS ]] && echo "CXXFLAGS is '$CXXFLAGS'"
+[[ -n $LDFLAGS ]] && echo "LDFLAGS is '$LDFLAGS'"
 cecho BLUE "Using $j jobs for make"
 
-[ "$prefix_clean" = "yes" ] && prefix_clean
+[[ $prefix_clean = "yes" ]] && prefix_clean
 
 set -e
 progs="$@"
@@ -594,6 +596,7 @@ for prog in "$@"; do
   fi
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
+   [ [ -z $(type -p cmake) ]] && die "cmake not found"
     cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt ."
     [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
     # we always run normal cmake in case user forgot to generate
