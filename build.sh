@@ -55,17 +55,16 @@
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
-#mind the spaces at beginning and end
 
 #this gets overriden by --dev option
-#progs on googlecode
-gc_progs=" tools csg tutorials csgapps testsuite manual "
+#progs on https://code.google.com/p/votca
+gc_progs="tools csg tutorials csgapps testsuite manual"
 #all possible programs
-all_progs="${gc_progs}gromacs "
+all_progs="${gc_progs} gromacs"
 #programs to build by default
-standard_progs=" tools csg "
+standard_progs="tools csg"
 #program which do not have a release tarball
-norel_progs=" csgapps testsuite manual "
+norel_progs="csgapps testsuite manual"
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -254,8 +253,8 @@ self_update() {
 show_help () {
   cat << eof
     This is the votca build utils which builds votca modules
-    Give multiple programs to build them. Nothing means:$standard_progs
-    One can build:$all_progs
+    Give multiple programs to build them. Nothing means: $standard_progs
+    One can build: $all_progs
 
     Please visit: $(cecho BLUE www.votca.org)
 
@@ -457,8 +456,8 @@ while [[ ${1} = -* ]]; do
    -d | --dev)
     dev=yes
     url="https://dev.votca.org/votca_PROG"
-    all_progs=" tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual gromacs "
-    norel_progs=" moo kmc kmcold md2qm testsuite csgapps espressopp manual "
+    all_progs="tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual gromacs"
+    norel_progs="moo kmc kmcold md2qm testsuite csgapps espressopp manual"
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
