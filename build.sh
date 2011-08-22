@@ -105,7 +105,7 @@ cmake_opts=""
 packext=".tar.gz"
 distext=""
 
-[ -z "$HG" ] && HG="hg"
+[[ -z $HG ]] && HG="hg"
 
 BLUE="[34;01m"
 CYAN="[36;01m"
@@ -120,14 +120,19 @@ die () {
   exit 1
 }
 
+is_in() {
+  [[ -z $1 || -z $2 ]] && die "is_in: Missing argument"
+  [[ " ${@:2} " = *" $1 "* ]]
+}
+
 cecho() {
-  local opts color=" BLUE CYAN CYANN GREEN RED PURP "
-  if [ -z "${1##-*}" ]; then
+  local opts color colors="BLUE CYAN CYANN GREEN RED PURP"
+  if [[ $1 = -?* ]]; then
     opts="$1"
     shift
   fi
-  [ -z "$2" ] && die "cecho: Missing argumet"
-  [ -n "${color//* $1 *}" ] && die "cecho: Unknown color ($color allowed)"
+  [[ -z $2 ]] && die "cecho: Missing argumet"
+  is_in "$1" "$colors" || die "cecho: Unknown color ($color allowed)"
   color=${!1}
   shift
   echo -n ${color}
@@ -329,7 +334,7 @@ shopt -s extglob
 while [[ ${1} = -* ]]; do
   if [[ ${1} = --*=* ]]; then # case --xx=yy
     set -- "${1%%=*}" "${1#*=}" "${@:2}" # --xx=yy to --xx yy
-  elif [[ ${1} != --* && -n ${1:2} ]]; then # split -xy to
+  elif [[ ${1} = -[^-]?* ]]; then # case -xy split
     if [[ ${1} = -[jpD]* ]]; then #short opts with arguments
        set -- "${1:0:2}" "${1:2}" "${@:2}" # -xy to -x y
     else #short opts without arguments
@@ -368,8 +373,8 @@ while [[ ${1} = -* ]]; do
     do_clean_ignored="yes"
     shift 1;;
    -j | --jobs)
-    [ -z "$2" ] && die "Missing argument after --jobs"
-    [ -n "${2//[0-9]}" ] && die "Argument after --jobs should be a number"
+    [[ -z $2 ]] && die "Missing argument after --jobs"
+    [[ -n ${2//[0-9]} ]] && die "Argument after --jobs should be a number"
     j="$2"
     shift 2;;
    -u | --do-update)
@@ -496,13 +501,13 @@ cecho BLUE "Using $j jobs for make"
 set -e
 progs="$@"
 for prog in "$@"; do
-  [ -n "${all_progs//* $prog *}" ] && die "Unknown progamm '$prog', I know: $all_progs"
-  [ -z "${gc_progs//* $prog *}" ] && hgurl="$gc_url" || hgurl="$url"
-  [ "$prog" = "espressopp" ] && hgurl="$esp_url"
+  is_in "${prog}" "${all_progs}" || die "Unknown progamm '$prog', I know: $all_progs"
+  is_in "${prog}" "${gc_progs}" && hgurl="$gc_url" || hgurl="$url"
+  [[ $prog = "espressopp" ]] && hgurl="$esp_url"
 
   cecho GREEN "Working on $prog"
-  if [ "$prog" = "gromacs" ]; then
-    if [ -d "$prog" ]; then
+  if [[ $prog = "gromacs" ]]; then
+    if [[ -d $prog ]]; then
       cecho BLUE "Source dir ($prog) is already there - skipping download"
       countdown 5
     else
@@ -513,7 +518,7 @@ for prog in "$@"; do
   elif [[ -d $prog && -n $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
-  elif [[ -n $rel && -z ${norel_progs//* $prog *} ]]; then
+  elif [[ -n $rel ]] &&  is_in "${prog}" "${norel_progs}"; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
@@ -596,7 +601,7 @@ for prog in "$@"; do
   fi
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
-   [ [ -z $(type -p cmake) ]] && die "cmake not found"
+    [[ -z $(type -p cmake) ]] && die "cmake not found"
     cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt ."
     [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
     # we always run normal cmake in case user forgot to generate
