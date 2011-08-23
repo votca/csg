@@ -444,8 +444,8 @@ while [[ ${1} = -* ]]; do
     shift 2;;
    --release)
     rel="$2"
-    [[ $rel_check = "yes" && -n "${rel//[1-9].[0-9]?(.[0-9])?(_rc[1-9]?([0-9]))?(_pristine)}" ]] && \
-      die "--release option needs an argument of the form X.X{_rcXX} (disable this check with --no-relcheck option)"
+    [[ $rel_check = "yes" && ${rel} = [1-9].[0-9]?(.[1-9]|_rc[1-9])?(_pristine) ]] || \
+      die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
     shift 2;;
    -l | --latest)
     rel="$latest"
