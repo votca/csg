@@ -477,6 +477,7 @@ fi
 
 [[ -z $1 ]] && set -- $standard_progs
 [[ -z $prefix ]] && die "Error: prefix is empty"
+[[ $prefix = /* ]] || die "prefix has to be a global path"
 
 #set pkg-config dir to make csg find tools
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
