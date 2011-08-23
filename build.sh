@@ -64,7 +64,7 @@ all_progs="${gc_progs} gromacs"
 #programs to build by default
 standard_progs="tools csg"
 #program which do not have a release tarball
-norel_progs="csgapps testsuite manual"
+norel_progs="testsuite manual"
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -457,7 +457,7 @@ while [[ ${1} = -* ]]; do
     dev=yes
     url="https://dev.votca.org/votca_PROG"
     all_progs="tools csg moo kmc kmcold md2qm testsuite tutorials csgapps espressopp manual gromacs"
-    norel_progs="moo kmc kmcold md2qm testsuite csgapps espressopp manual"
+    norel_progs="moo kmc kmcold md2qm testsuite espressopp manual"
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
@@ -616,12 +616,8 @@ for prog in "$@"; do
     make -j${j}
   fi
   if [[ "$do_install" == "yes" && -f Makefile ]]; then
-    if [ -f manual.tex ]; then
-      cecho BLUE "manual can not be installed"
-    else
-      cecho GREEN "installing $prog"
-      make -j${j} install
-    fi
+    cecho GREEN "installing $prog"
+    make -j${j} install
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
