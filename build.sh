@@ -51,6 +51,7 @@
 #version 1.7.0 -- 09.08.11 added --no-rpath option and allow to build gromacs
 #version 1.7.1 -- 15.08.11 added more branch checks
 #version 1.7.2 -- 18.08.11 fixed a bug in clone code
+#version 1.7.3 -- 25.08.11 bumped latest to 1.2.1
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -96,7 +97,7 @@ gc_url="https://PROG.votca.googlecode.com/hg/"
 url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.2"
+latest="1.2.1"
 gromacs_ver="4.5.4"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
