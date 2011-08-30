@@ -480,15 +480,6 @@ fi
 [[ -z $prefix ]] && die "Error: prefix is empty"
 [[ $prefix = /* ]] || die "prefix has to be a global path"
 
-#set pkg-config dir to make csg find tools
-export PKG_CONFIG_PATH="$prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:}${PKG_CONFIG_PATH}"
-#add libdir to LD_LIBRARY_PATH to allow runing csg_* for the manual
-export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
-#hack for some old version of Mac OS
-export DYLD_LIBRARY_PATH="$prefix/lib${DYLD_LIBRARY_PATH:+:}${DYLD_LIBRARY_PATH}"
-#for the manual
-export PATH="$prefix/bin${PATH:+:}${PATH}"
-
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
 echo "Install prefix is '$prefix'"
@@ -505,6 +496,14 @@ for prog in "$@"; do
   is_in "${prog}" "${all_progs}" || die "Unknown progamm '$prog', I know: $all_progs"
   is_in "${prog}" "${gc_progs}" && hgurl="$gc_url" || hgurl="$url"
   [[ $prog = "espressopp" ]] && hgurl="$esp_url"
+
+  #sets pkg-config dir to make csg find tools
+  #adds libdir to (DY)LD_LIBRARY_PATH to allow runing csg_* for the manual
+  #set path to find csg_* for the manual
+  if [[ -f "$prefix/bin/VOTCARC.bash" ]]; then
+    cecho BLUE "sourcing '$prefix/bin/VOTCARC.bash'"
+    source "$prefix/bin/VOTCARC.bash" || die "sourcing of '$prefix/bin/VOTCARC.bash' failed"
+  fi
 
   cecho GREEN "Working on $prog"
   if [[ $prog = "gromacs" ]]; then
