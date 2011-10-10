@@ -52,6 +52,7 @@
 #version 1.7.1 -- 15.08.11 added more branch checks
 #version 1.7.2 -- 18.08.11 fixed a bug in clone code
 #version 1.7.3 -- 25.08.11 bumped latest to 1.2.1
+#version 1.7.4 -- 10.10.11 ctp renames
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -98,7 +99,7 @@ url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
 latest="1.2.1"
-gromacs_ver="4.5.4"
+gromacs_ver="4.5.5"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=""
@@ -457,8 +458,8 @@ while [[ ${1} = -* ]]; do
    -d | --dev)
     dev=yes
     url="https://dev.votca.org/votca_PROG"
-    all_progs="tools csg moo kmc kmcold ctp testsuite tutorials csgapps espressopp manual gromacs"
-    norel_progs="moo kmc kmcold ctp testsuite espressopp manual"
+    all_progs="${all_progs} moo kmc kmcold ctp ctp_manual espressopp"
+    norel_progs="${norel_progs} moo kmc kmcold ctp ctp_manual espressopp"
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
@@ -633,6 +634,13 @@ for prog in "$@"; do
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       $HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "$HG archive failed"
+      #enable this code whenever ChangeLog is gone from csg
+      #$HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type files "../votca-${prog}-${ver}${distext}.tar" || die "$HG archive failed"
+      #if [ $prog = csg ]; then
+      #  lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-csg | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+      #fi
+      #tar -cf ../votca-${prog}-${ver}${distext}.tar votca-${prog}-${ver}/*
+      #gzip -9 ../votca-${prog}-${ver}${distext}.tar
     else
       [ -z "${REL}" ] && die "No CMakeLists.txt found and environment variable REL was not defined"
       $HG archive --prefix "votca-${prog}-${REL}" --type tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "$HG archive failed"
