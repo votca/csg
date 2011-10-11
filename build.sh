@@ -53,6 +53,7 @@
 #version 1.7.2 -- 18.08.11 fixed a bug in clone code
 #version 1.7.3 -- 25.08.11 bumped latest to 1.2.1
 #version 1.7.4 -- 10.10.11 ctp renames
+#version 1.7.5 -- 11.10.11 added --gui
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -91,6 +92,10 @@ dist_check="yes"
 rel_check="yes"
 self_download="no"
 cmake="cmake"
+for i in cmake-gui ccmake cmake; do
+  [[ -n $(type -p $i) ]] && break
+done
+cmake_gui="$i"
 
 relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
@@ -311,6 +316,7 @@ ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding 
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
+        $(cecho GREEN --gui)               Use cmake with gui (same as $(cecho GREEN --cmake) $(cecho CYAN $cmake_gui))
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                             Default: $prefix
 
@@ -389,14 +395,17 @@ while [[ ${1} = -* ]]; do
     shift 2;;
    --no-cmake)
     do_cmake="no"
-    shift 1;;
+    shift ;;
+   --gui)
+     cmake="$cmake_gui"
+     shift ;;
    --cmake)
     cmake="$2"
     [[ -z $(type -p $cmake) ]] && die "Custom cmake '$cmake' not found"
     shift 2;;
    --warn-to-errors)
     cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
-    shift 1;;
+    shift ;;
    -R | --no-rpath)
     rpath_opt=""
     shift 1;;
