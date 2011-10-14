@@ -54,6 +54,7 @@
 #version 1.7.3 -- 25.08.11 bumped latest to 1.2.1
 #version 1.7.4 -- 10.10.11 ctp renames
 #version 1.7.5 -- 11.10.11 added --gui
+#version 1.7.6 -- 14.10.11 do clean by default again
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -78,7 +79,7 @@ fi
 
 do_prefix_clean="no"
 do_cmake="yes"
-do_clean="no"
+do_clean="yes"
 do_clean_ignored="no"
 do_build="yes"
 do_install="yes"
@@ -271,7 +272,7 @@ show_help () {
       (or downloads tarballs if --release given)
     - hg pull + hg update (if --do-update given)
     - run cmake (unless --no-cmake)
-    - make clean (if --clean given)
+    - make clean (unless --no-clean given)
     - make (unless --no-build given)
     - make install (disable with --no-install)
 
@@ -293,19 +294,19 @@ ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball ins
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
     $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                             or the votca server as fail back
-ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Same as $(cecho GREEN --do-update) + $(cecho GREEN --no-cmake)
+ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Just update the source and do nothing else
 ADV     $(cecho GREEN --pullpath) $(cecho CYAN NAME)     Changes the name of the path to pull from
 ADV                         Default: $pathname (Also see 'hg paths --help')
 ADV $(cecho GREEN -c), $(cecho GREEN --clean-out)         Clean out the prefix (DANGEROUS)
 ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file from repository (SUPER DANGEROUS)
-ADV     $(cecho GREEN --no-cmake)          Stop before cmake 
+ADV     $(cecho GREEN --no-cmake)          Do not run cmake
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
-ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default) 
-ADV $(cecho GREEN -q), $(cecho GREEN --clean)             Run make clean
+ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default)
+ADV     $(cecho GREEN --no-clean)          Don't run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
 ADV                         Default: $j (auto)
-ADV     $(cecho GREEN --no-build)          Stop before build
+ADV     $(cecho GREEN --no-build)          Don't build the source
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
 ADV     $(cecho GREEN --no-install)        Don't run make install
 ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
@@ -423,8 +424,8 @@ while [[ ${1} = -* ]]; do
    --devdoc)
     do_devdoc="yes"
     shift 1;;
-   -q | --clean)
-    do_clean="yes"
+   --no-clean)
+    do_clean="no"
     shift 1;;
    --no-install)
     do_install="no"
@@ -488,7 +489,8 @@ fi
 
 [[ -z $1 ]] && set -- $standard_progs
 [[ -z $prefix ]] && die "Error: prefix is empty"
-[[ $prefix = /* ]] || die "prefix has to be a global path"
+[[ $prefix = *WHERE/TO/INSTALL/VOTCA* ]] && die "Deine Mutti!!!\nGo and read the instruction again."
+[[ $prefix = /* ]] || die "prefix has to be a global path (should start with a '/')"
 
 #infos
 cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
@@ -575,7 +577,7 @@ for prog in "$@"; do
       countdown 5
     fi
   fi
-  if [[ -d .hg ]]; then 
+  if [[ -d .hg ]]; then
     [[ -z $branch ]] && branch="$($HG branch)"
     if [[ $branch_check = "yes" ]]; then
       [[ $dev = "no" && -n $($HG branches | sed -n '/^stable[[:space:]]/p' ) && $($HG branch) != "stable" ]] && \
@@ -621,7 +623,7 @@ for prog in "$@"; do
     cecho GREEN "cleaning $prog"
     make clean
   fi
-  if [[ $do_build == "yes" && -f Makefile ]]; then 
+  if [[ $do_build == "yes" && -f Makefile ]]; then
     cecho GREEN "buidling $prog"
     make -j${j}
   fi
@@ -645,8 +647,10 @@ for prog in "$@"; do
       $HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "$HG archive failed"
       #enable this code whenever ChangeLog is gone from csg
       #$HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type files "../votca-${prog}-${ver}${distext}.tar" || die "$HG archive failed"
-      #if [ $prog = csg ]; then
+      #if [[ $prog = csg ]]; then
       #  lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-csg | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+      #elif [[ $prog = ctp ]]; then
+      #  lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-ctp | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
       #fi
       #tar -cf ../votca-${prog}-${ver}${distext}.tar votca-${prog}-${ver}/*
       #gzip -9 ../votca-${prog}-${ver}${distext}.tar
