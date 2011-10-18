@@ -644,16 +644,20 @@ for prog in "$@"; do
       ver="$(get_votca_version CMakeLists.txt)" || die
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
-      $HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type tgz "../votca-${prog}-${ver}${distext}.tar.gz" || die "$HG archive failed"
-      #enable this code whenever ChangeLog is gone from csg
-      #$HG archive ${exclude} --prefix "votca-${prog}-${ver}" --type files "../votca-${prog}-${ver}${distext}.tar" || die "$HG archive failed"
-      #if [[ $prog = csg ]]; then
-      #  lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-csg | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
-      #elif [[ $prog = ctp ]]; then
-      #  lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-ctp | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
-      #fi
-      #tar -cf ../votca-${prog}-${ver}${distext}.tar votca-${prog}-${ver}/*
-      #gzip -9 ../votca-${prog}-${ver}${distext}.tar
+      $HG archive ${exclude} --type files "votca-${prog}-${ver}${distext}" || die "$HG archive failed"
+      if [[ $ver != *1.2* ]]; then #remove this line whenever 1.3 is stable
+        if [[ $prog = csg ]]; then
+          lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-csg | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+      die "CJ $ver"
+        elif [[ $prog = ctp ]]; then
+          lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-ctp | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+        fi
+      fi
+      #overwrite is the default behaviour of hg archive, emulate it!
+      rm -f ../votca-${prog}-${ver}${distext}.tar ../votca-${prog}-${ver}${distext}.tar.gz
+      tar -cf ../votca-${prog}-${ver}${distext}.tar votca-${prog}-${ver}/*
+      rm -r votca-${prog}-${ver}
+      gzip -9 ../votca-${prog}-${ver}${distext}.tar
     else
       [ -z "${REL}" ] && die "No CMakeLists.txt found and environment variable REL was not defined"
       $HG archive --prefix "votca-${prog}-${REL}" --type tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "$HG archive failed"
