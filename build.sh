@@ -645,13 +645,13 @@ for prog in "$@"; do
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       $HG archive ${exclude} --type files "votca-${prog}-${ver}${distext}" || die "$HG archive failed"
-      if [[ $ver != *1.2* ]]; then #remove this line whenever 1.3 is stable
-        if [[ $prog = csg ]]; then
-          lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-csg | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
-      die "CJ $ver"
-        elif [[ $prog = ctp ]]; then
-          lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-ctp | sed -ne '/^Version/,/^Comments/p' |sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
-        fi
+      #remove the 1.2 bit whenever 1.3 is stable
+      if [[ $ver != *1.2* ]] && [[ $prog = csg || $prog = ctp ]]; then
+        [[ -z $(type -p lynx) ]] && die "lynx not found"
+        lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-${prog} | \
+          sed -ne '/^Version/,/^Comments/p' | \
+          sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+        [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
       fi
       #overwrite is the default behaviour of hg archive, emulate it!
       rm -f ../votca-${prog}-${ver}${distext}.tar ../votca-${prog}-${ver}${distext}.tar.gz
