@@ -467,9 +467,10 @@ while [[ ${1} = -* ]]; do
     shift;;
    -d | --dev)
     dev=yes
-    url="https://dev.votca.org/votca_PROG"
-    all_progs="${all_progs} moo kmc kmcold ctp ctp_manual espressopp"
-    norel_progs="${norel_progs} moo kmc kmcold ctp ctp_manual espressopp"
+    url="https://PROG.votca-ctp.googlecode.com/hg"
+    #url="https://dev.votca.org/votca_PROG"
+    all_progs="${all_progs} moo kmc ctp ctp_manual espressopp"
+    norel_progs="${norel_progs} moo kmc ctp ctp_manual espressopp"
     esp_url="https://hg.berlios.de/repos/espressopp"
     shift 1;;
   *)
