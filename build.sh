@@ -55,6 +55,7 @@
 #version 1.7.4 -- 10.10.11 ctp renames
 #version 1.7.5 -- 11.10.11 added --gui
 #version 1.7.6 -- 14.10.11 do clean by default again
+#version 1.7.7 -- 02.11.11 reworked url treatment
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -62,13 +63,11 @@ prefix="$HOME/votca"
 
 #this gets overriden by --dev option
 #progs on https://code.google.com/p/votca
-gc_progs="tools csg tutorials csgapps testsuite manual"
+votca_progs="tools csg csg-tutorials csgapps csg-testsuite csg-manual"
 #all possible programs
-all_progs="${gc_progs} gromacs"
+all_progs="${votca_progs} gromacs"
 #programs to build by default
 standard_progs="tools csg"
-#program which do not have a release tarball
-norel_progs="testsuite manual"
 
 if [ -f "/proc/cpuinfo" ]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
@@ -98,10 +97,7 @@ for i in cmake-gui ccmake cmake; do
 done
 cmake_gui="$i"
 
-relurl="http://votca.googlecode.com/files/votca-PROG-REL.tar.gz"
 rel=""
-gc_url="https://PROG.votca.googlecode.com/hg/"
-url="$gc_url"
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
 latest="1.2.1"
@@ -193,7 +189,7 @@ countdown() {
 }
 
 download_and_upack_tarball() {
-  local url tarball
+  local url tarball tardir
   [ -z "$1" ] && die "download_and_upack_tarball: Missing argument"
   url="$1"
   tarball="${url##*/}"
@@ -208,7 +204,7 @@ download_and_upack_tarball() {
   [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
   [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
   tar -xzf "${tarball}"
-  mv "${tardir}" "${prog}"
+  [[ $tardir = $prog ]] || mv "${tardir}" "${prog}"
   rm -f "${tarball}"
 }
 
@@ -236,6 +232,33 @@ get_votca_version() {
   ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' $1)" || die "Could not grep PROJECT_VERSION from '$1'"
   [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
   echo "$ver"
+}
+
+get_url() {
+  local url
+  [[ -z $1 || -z $2  ]] && die "get_url: Missing argument"
+  if [[ $1 = source ]]; then
+    case $2 in
+      tools|csg*)
+        echo "https://$2.votca.googlecode.com/hg/";;
+      moo|kmc|ctp*)
+        echo "https://$2.votca-ctp.googlecode.com/hg/";;
+      espressopp)
+	echo "https://hg.berlios.de/repos/espressopp";;
+      gromacs)
+	echo "git://git.gromacs.org/gromacs";;
+    esac
+  elif [[ $1 = release ]]; then
+    case $2 in
+      *manual|*testsuite)
+	true;;
+      tools|csg*)
+	[[ -z $rel ]] && die "get_url: rel variable not found"
+	echo "http://votca.googlecode.com/files/votca-$2-$rel.tar.gz";;
+    esac
+  else
+    die "get_url: unknown type $1"
+  fi
 }
 
 version_check() {
@@ -467,11 +490,7 @@ while [[ ${1} = -* ]]; do
     shift;;
    -d | --dev)
     dev=yes
-    url="https://PROG.votca-ctp.googlecode.com/hg"
-    #url="https://dev.votca.org/votca_PROG"
-    all_progs="${all_progs} moo kmc ctp ctp_manual espressopp"
-    norel_progs="${norel_progs} moo kmc ctp ctp_manual espressopp"
-    esp_url="https://hg.berlios.de/repos/espressopp"
+    all_progs="${all_progs} moo kmc ctp ctp-manual espressopp"
     shift 1;;
   *)
    die "Unknown option '$1'"
@@ -507,8 +526,7 @@ set -e
 progs="$@"
 for prog in "$@"; do
   is_in "${prog}" "${all_progs}" || die "Unknown progamm '$prog', I know: $all_progs"
-  is_in "${prog}" "${gc_progs}" && hgurl="$gc_url" || hgurl="$url"
-  [[ $prog = "espressopp" ]] && hgurl="$esp_url"
+  [[ -z $(get_url source $prog) ]] && die "Progamm '$prog' has no source url"
 
   #sets pkg-config dir to make csg find tools
   #adds libdir to (DY)LD_LIBRARY_PATH to allow runing csg_* for the manual
@@ -531,20 +549,18 @@ for prog in "$@"; do
   elif [[ -d $prog && -n $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
-  elif [[ -n $rel ]] &&  is_in "${prog}" "${norel_progs}"; then
+  elif [[ -n $rel && -z $(get_url release $prog) ]]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
-    $HG clone ${hgurl/PROG/$prog} $prog
-  elif [[ ! -d $prog && -n $rel ]]; then
-    tmpurl="${relurl//REL/$rel}"
-    tmpurl="${tmpurl//PROG/$prog}"
-    download_and_upack_tarball "$tmpurl"
+    $HG clone $(get_url source $prog) $prog
+  elif [[ -n $rel && -n $(get_url release $prog) ]]; then
+    download_and_upack_tarball "$(get_url release $prog)"
   else
-    cecho BLUE "Doing checkout for $prog from ${hgurl/PROG/$prog}"
+    cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
-    $HG clone ${hgurl/PROG/$prog} $prog
+    $HG clone $(get_url source $prog) $prog
     if [ "${dev}" = "no" ]; then
       if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
@@ -564,7 +580,7 @@ for prog in "$@"; do
       cecho GREEN "updating hg repository"
       pullpath=$($HG path $pathname 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
-	pullpath=${hgurl/PROG/$prog}
+	pullpath=$(get_url source $prog)
 	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead"
 	countdown 5
       else
@@ -640,7 +656,7 @@ for prog in "$@"; do
       ver="$(sed -n 's/VER=[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' Makefile)" || die "Could not get version of the manual"
       [ -z "${ver}" ] && die "Version of the manual was empty"
       [ -f "manual.pdf" ] || die "Could not find manual.pdf"
-      cp manual.pdf ../votca-manual-${ver}${distext}.pdf || die "cp of manual failed"
+      cp manual.pdf ../votca-${prog}-${ver}${distext}.pdf || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
