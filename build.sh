@@ -56,6 +56,7 @@
 #version 1.7.5 -- 11.10.11 added --gui
 #version 1.7.6 -- 14.10.11 do clean by default again
 #version 1.7.7 -- 02.11.11 reworked url treatment
+#version 1.7.8 -- 09.11.11 added --minimal
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -119,7 +120,7 @@ PURP="[35;01m"
 OFF="[0m"
 
 die () {
-  cecho RED "$*" >&2
+  [[ -n $1 ]] && cecho RED "$*" >&2
   exit 1
 }
 
@@ -304,7 +305,7 @@ ADV $(cecho BLUE $selfurl)
 ADV
     $usage
 
-    OPTIONS (last overwrites previous):
+    OPTIONS (last overwrites previous one):
     $(cecho GREEN -h), $(cecho GREEN --help)              Show a short help
         $(cecho GREEN --longhelp)          Show a detailed help
 ADV $(cecho GREEN -v), $(cecho GREEN --version)           Show version
@@ -325,6 +326,9 @@ ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file fr
 ADV     $(cecho GREEN --no-cmake)          Do not run cmake
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
+ADV     $(cecho GREEN --minimal)           Build with minimum deps (same as $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_SQLITE3=OFF)
+ADV                         $(cecho GREEN -D)$(cecho CYAN WITH_FFTW=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GSL=OFF) $(cecho GREEN -D)$(cecho CYAN BUILD_MANPAGES=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GMX=OFF))
+ADV                         Functionality, which is really needed can explicitly be enabled again with $(cecho GREEN -D)$(cecho CYAN XXX=)$(cecho BLUE ON)
 ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default)
 ADV     $(cecho GREEN --no-clean)          Don't run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
@@ -477,6 +481,9 @@ while [[ ${1} = -* ]]; do
   -D)
     cmake_opts="${cmake_opts} -D${2}"
     shift 2;;
+  --minimal)
+    cmake_opts="${cmake_opts} --no-warn-unused-cli -DEXTERNAL_BOOST=OFF -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF"
+    shift;;
    --release)
     rel="$2"
     [[ $rel_check = "yes" && ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])?(_pristine) ]] && \
@@ -504,6 +511,7 @@ if version_check -q; then
   cecho RED "# Your version of VOTCA ${0##*/} is obsolete ! #"
   cecho RED "# Please run '${0##*/} --selfupdate'           #"
   cecho RED "########################################$x"
+  die
   unset x
 fi
 
