@@ -70,12 +70,14 @@ all_progs="${votca_progs} gromacs"
 #programs to build by default
 standard_progs="tools csg"
 
-if [ -f "/proc/cpuinfo" ]; then
+if [[ -f /proc/cpuinfo ]]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
-  ((j++))
+elif [[ -x /usr/bin/sysctl ]]
+  j="$(/usr/bin/sysctl -n hw.ncpu 2>/dev/null)" || j=0
 else
-  j=1
+  j=0
 fi
+((j++))
 
 do_prefix_clean="no"
 do_cmake="yes"
@@ -147,8 +149,8 @@ cecho() {
 build_devdoc() {
   local ver
   cecho GREEN "Building devdoc"
-  [ -z "$(type -p doxygen)" ] && die "doxygen not found"
-  [ -f tools/share/doc/Doxyfile.in ] || die "Could not get Doxyfile.in from tools repo"
+  [[ -z $(type -p doxygen) ]] && die "doxygen not found"
+  [[ -f tools/share/doc/Doxyfile.in ]] || die "Could not get Doxyfile.in from tools repo"
   ver=$(get_votca_version tools/CMakeLists.txt) || die
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
       -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
@@ -161,10 +163,10 @@ build_devdoc() {
 
 prefix_clean() {
   cecho GREEN "Starting clean out of prefix"
-  [ ! -d $prefix ] && cecho BLUE "prefix '$prefix' is not there - skipping" && return 0
+  [[ ! -d $prefix ]] && cecho BLUE "prefix '$prefix' is not there - skipping" && return 0
   cd $prefix || die "Could change to prefix '$prefix'"
   files="$(ls -d bin include lib lib64 share 2>/dev/null)"
-  if [ -z "$files" ]; then
+  if [[ -z $files ]]; then
     cecho BLUE "Found nothing to clean"
     cd - > /dev/null
     return
