@@ -72,7 +72,7 @@ standard_progs="tools csg"
 
 if [[ -f /proc/cpuinfo ]]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
-elif [[ -x /usr/bin/sysctl ]]
+elif [[ -x /usr/bin/sysctl ]]; then
   j="$(/usr/bin/sysctl -n hw.ncpu 2>/dev/null)" || j=0
 else
   j=0
@@ -180,9 +180,9 @@ prefix_clean() {
 }
 
 countdown() {
-  [ -z "$1" ] && "countdown: Missing argument"
-  [ -n "${1//[0-9]}" ] && "countdown: argument should be a number"
-  [ "$wait" = "no" ] && return
+  [[ -z $1 ]] && "countdown: Missing argument"
+  [[ -n ${1//[0-9]} ]] && "countdown: argument should be a number"
+  [[ $wait = "no" ]] && return
   cecho -n RED "(CTRL-C to stop) "
   for ((i=$1;i>0;i--)); do
     cecho -n CYANN "$i "
@@ -193,7 +193,7 @@ countdown() {
 
 download_and_upack_tarball() {
   local url tarball tardir
-  [ -z "$1" ] && die "download_and_upack_tarball: Missing argument"
+  [[ -z $1 ]] && die "download_and_upack_tarball: Missing argument"
   url="$1"
   tarball="${url##*/}"
   cecho GREEN "Download tarball $tarball from ${url}"
