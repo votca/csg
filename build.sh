@@ -72,8 +72,8 @@ standard_progs="tools csg"
 
 if [[ -f /proc/cpuinfo ]]; then
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
-elif [[ -x /usr/bin/sysctl ]]; then
-  j="$(/usr/bin/sysctl -n hw.ncpu 2>/dev/null)" || j=0
+elif [[ -x /usr/sbin/sysctl ]]; then
+  j="$(/usr/sbin/sysctl -n hw.ncpu 2>/dev/null)" || j=0
 else
   j=0
 fi
@@ -217,13 +217,13 @@ get_version() {
 
 get_webversion() {
   local version
-  if [ "$1" = "-q" ]; then
+  if [[ $1 = "-q" ]]; then
     version="$(wget -qO- "${selfurl}" | get_version)"
   else
-    [ -z "$(type -p wget)" ] && die "wget not found"
+    [[ -z $(type -p wget) ]] && die "wget not found"
     version="$(wget -qO- "${selfurl}" )" || die "self_update: wget fetch from $selfurl failed"
     version="$(echo -e "${version}" | get_version)"
-    [ -z "${version}" ] && die "get_webversion: Could not fetch new version number"
+    [[ -z ${version} ]] && die "get_webversion: Could not fetch new version number"
   fi
   echo "${version}"
 }
@@ -233,7 +233,7 @@ get_votca_version() {
   [[ -z $1 ]] && die "get_votca_version: Missing argument"
   [[ -f $1 ]] || die "get_votca_version: Could not find '$1'"
   ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' $1)" || die "Could not grep PROJECT_VERSION from '$1'"
-  [ -z "${ver}" ] && die "PROJECT_VERSION is empty"
+  [[ -z ${ver} ]] && die "PROJECT_VERSION is empty"
   echo "$ver"
 }
 
@@ -274,7 +274,7 @@ version_check() {
 }
 
 self_update() {
-  [ -z "$(type -p wget)" ] && die "wget not found"
+  [[ -z $(type -p wget) ]] && die "wget not found"
   if version_check; then
     cecho RED "I will try replace myself now with $selfurl"
     countdown 5
