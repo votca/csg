@@ -671,7 +671,7 @@ for prog in "$@"; do
       ver="$(get_votca_version CMakeLists.txt)" || die
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
-      $HG archive ${exclude} --type files "votca-${prog}-${ver}${distext}" || die "$HG archive failed"
+      $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
       #remove the 1.2 bit whenever 1.3 is stable
       if [[ $ver != *1.2* ]] && [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
