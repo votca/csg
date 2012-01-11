@@ -57,6 +57,7 @@
 #version 1.7.6 -- 14.10.11 do clean by default again
 #version 1.7.7 -- 02.11.11 reworked url treatment
 #version 1.7.8 -- 09.11.11 added --minimal
+#version 1.7.9 -- 10.01.12 bumped latest to 1.2.2
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -103,7 +104,7 @@ cmake_gui="$i"
 rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.2.1"
+latest="1.2.2"
 gromacs_ver="4.5.5"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
