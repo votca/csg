@@ -110,6 +110,7 @@ cmake_gui="$i"
 
 rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
+clurl="http://www.votca.org/development/changelog-csg"
 pathname="default"
 gromacs_ver="4.5.5"
 
@@ -221,11 +222,11 @@ download_and_upack_tarball() {
 get_latest() {
   local rel
   [[ -z $(type -p lynx) ]] && die "lynx not found"
-  rel=$(lynx -dump http://www.votca.org/development/changelog-csg | \
+  rel=$(lynx -dump $clurl | \
     sed -n 's/^Version \([^("]*\) ["(].*$/\1/p' | \
     sed -n '1p')
-  [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])? ]] && \
-      die "lynx could not get the version, specify it by hand using --release option"
+  [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9]) ]] && \
+    die "lynx could not get the version (found $rel), specify it by hand using --release option"
   echo "$rel"
 }
 
@@ -683,7 +684,7 @@ for prog in "$@"; do
       $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
       if [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
-        lynx -dump http:///www.votca.org/development/changelog-${prog} | \
+        lynx -dump ${clurl%-*}-${prog} | \
           sed -ne '/^Version/,/^Comments/p' | \
           sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
