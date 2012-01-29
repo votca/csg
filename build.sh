@@ -95,6 +95,7 @@ do_devdoc="no"
 dev="no"
 wait="yes"
 
+changelogcheck="yes"
 branchcheck="yes"
 distcheck="yes"
 relcheck="yes"
@@ -473,7 +474,7 @@ while [[ ${1} = -* ]]; do
    -W | --no-wait)
     wait="no"
     shift 1;;
-  --no-@(branch|dist|prog|rel)check)
+  --no-@(branch|changelog|dist|prog|rel)check)
     eval ${1#--no-}="no"
     shift 1;;
    --selfdownload)
@@ -675,8 +676,8 @@ for prog in "$@"; do
       cp manual.pdf ../votca-${prog}-${ver}${distext}.pdf || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
-      #lat="$(get_latest)" || die
-      #[[ $ver = $lat ]] || die "Go an update changelog on votca.org first"
+      lat="$(get_latest)" || die
+      [[ $changelogcheck = "yes" && $ver != $lat ]] && die "Go and update changelog on votca.org first"
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
