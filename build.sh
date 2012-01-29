@@ -58,6 +58,7 @@
 #version 1.7.7 -- 02.11.11 reworked url treatment
 #version 1.7.8 -- 09.11.11 added --minimal
 #version 1.7.9 -- 10.01.12 bumped latest to 1.2.2
+#version 1.8.0 -- 29.01.12 add support for non-votca progs
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -81,19 +82,24 @@ fi
 ((j++))
 
 do_prefix_clean="no"
+do_clean_ignored="no"
+
+do_build="yes"
 do_cmake="yes"
 do_clean="yes"
-do_clean_ignored="no"
-do_build="yes"
 do_install="yes"
+
 do_update="no"
 do_dist="no"
 do_devdoc="no"
 dev="no"
 wait="yes"
-branch_check="yes"
-dist_check="yes"
-rel_check="yes"
+
+branchcheck="yes"
+distcheck="yes"
+relcheck="yes"
+progcheck="yes"
+
 self_download="no"
 cmake="cmake"
 for i in cmake-gui ccmake cmake; do
@@ -104,7 +110,6 @@ cmake_gui="$i"
 rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
 pathname="default"
-latest="1.2.2"
 gromacs_ver="4.5.5"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
@@ -210,6 +215,17 @@ download_and_upack_tarball() {
   tar -xzf "${tarball}"
   [[ $tardir = $prog ]] || mv "${tardir}" "${prog}"
   rm -f "${tarball}"
+}
+
+get_latest() {
+  local rel
+  [[ -z $(type -p lynx) ]] && die "lynx not found"
+  rel=$(lynx -dump http://www.votca.org/development/changelog-csg | \
+    sed -n 's/^Version \([^("]*\) ["(].*$/\1/p' | \
+    sed -n '1p')
+  [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])? ]] && \
+      die "lynx could not get the version, specify it by hand using --release option"
+  echo "$rel"
 }
 
 get_version() {
@@ -318,7 +334,7 @@ ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
-    $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball ($latest)
+    $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball
     $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                             or the votca server as fail back
 ADV $(cecho GREEN -U), $(cecho GREEN --just-update)       Just update the source and do nothing else
@@ -424,9 +440,6 @@ while [[ ${1} = -* ]]; do
    --pullpath)
     pathname="$2"
     shift 2;;
-   --no-cmake)
-    do_cmake="no"
-    shift ;;
    --gui)
      cmake="$cmake_gui"
      shift ;;
@@ -454,26 +467,14 @@ while [[ ${1} = -* ]]; do
    --devdoc)
     do_devdoc="yes"
     shift 1;;
-   --no-clean)
-    do_clean="no"
-    shift 1;;
-   --no-install)
-    do_install="no"
-    shift 1;;
-   --no-build)
-    do_build="no"
+  --no-@(build|clean|cmake|install))
+    eval do_${1#--no-}="no"
     shift 1;;
    -W | --no-wait)
     wait="no"
     shift 1;;
-   --no-branchcheck)
-    branch_check="no"
-    shift 1;;
-   --no-distcheck)
-    dist_check="no"
-    shift 1;;
-   --no-relcheck)
-    rel_check="no"
+  --no-@(branch|dist|prog|rel)check)
+    eval ${1#--no-}="no"
     shift 1;;
    --selfdownload)
     self_download="yes"
@@ -489,11 +490,11 @@ while [[ ${1} = -* ]]; do
     shift;;
    --release)
     rel="$2"
-    [[ $rel_check = "yes" && ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])?(_pristine) ]] && \
+    [[ $relcheck = "yes" && ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])?(_pristine) ]] && \
       die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
     shift 2;;
    -l | --latest)
-    rel="$latest"
+    rel="$(get_latest)" || die
     shift;;
    --nocolor)
     unset BLUE CYAN CYANN GREEN OFF RED PURP
@@ -536,8 +537,8 @@ cecho BLUE "Using $j jobs for make"
 set -e
 progs="$@"
 for prog in "$@"; do
-  is_in "${prog}" "${all_progs}" || die "Unknown progamm '$prog', I know: $all_progs"
-  [[ -z $(get_url source $prog) ]] && die "Progamm '$prog' has no source url"
+  [[ ${progcheck} = "yes" ]] && ! is_in "${prog}" "${all_progs}" && \
+    die "Unknown progamm '$prog', I know: $all_progs (disable this check with --no-progcheck option)"
 
   #sets pkg-config dir to make csg find tools
   #adds libdir to (DY)LD_LIBRARY_PATH to allow runing csg_* for the manual
@@ -562,15 +563,17 @@ for prog in "$@"; do
     countdown 5
   elif [[ -n $rel && -z $(get_url release $prog) ]]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
+    [[ -z $(get_url source $prog) ]] && die "but I don't know its source url - get it yourself and put it in dir $prog" 
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone $(get_url source $prog) $prog
   elif [[ -n $rel && -n $(get_url release $prog) ]]; then
     download_and_upack_tarball "$(get_url release $prog)"
   else
+    [[ -z $(get_url source $prog) ]] && die "I don't know the source url of $prog - get it yourself and put it in dir $prog"
     cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
-    [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
+    [[ -z "$(type -p $HG)" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone $(get_url source $prog) $prog
     if [ "${dev}" = "no" ]; then
       if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
@@ -591,6 +594,8 @@ for prog in "$@"; do
       cecho GREEN "updating hg repository"
       pullpath=$($HG path $pathname 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
+        [[ -z $(get_url source $prog) ]] && \
+	  die "I don't know the source url of $prog - do the update of $prog yourself"
 	pullpath=$(get_url source $prog)
 	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead"
 	countdown 5
@@ -607,7 +612,7 @@ for prog in "$@"; do
   fi
   if [[ -d .hg ]]; then
     [[ -z $branch ]] && branch="$($HG branch)"
-    if [[ $branch_check = "yes" ]]; then
+    if [[ $branchcheck = "yes" ]]; then
       [[ $dev = "no" && -n $($HG branches | sed -n '/^stable[[:space:]]/p' ) && $($HG branch) != "stable" ]] && \
         die "We build the stable version of $prog, but we are on branch $($HG branch) and not 'stable'. Please checkout the stable branch with 'hg update -R $prog stable' or add --dev option (disable this check with the --no-branchcheck option)"
       [[ $dev = "yes" && $($HG branch) = "stable" ]] && \
@@ -633,8 +638,8 @@ for prog in "$@"; do
   fi
   if [ "$do_dist" = "yes" ]; then
     [[ -d .hg ]] || die "I can only make a tarball out of a mercurial repository"
-    [[ $dist_check = "yes" && -n "$($HG status --modified)" ]] && die "There are uncommitted changes, they will not end up in the tarball, commit them first (disable this check with --no-distcheck option)"
-    [[ $dist_check = "yes" && -n "$($HG status --unknown)" ]] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first (disable this check with --no-distcheck option)"
+    [[ $distcheck = "yes" && -n "$($HG status --modified)" ]] && die "There are uncommitted changes, they will not end up in the tarball, commit them first (disable this check with --no-distcheck option)"
+    [[ $distcheck = "yes" && -n "$($HG status --unknown)" ]] && die "There are unknown files, they will not end up in the tarball, rm/commit the files first (disable this check with --no-distcheck option)"
   fi
   if [ "$do_clean" == "yes" ]; then
     rm -f CMakeCache.txt
@@ -670,13 +675,14 @@ for prog in "$@"; do
       cp manual.pdf ../votca-${prog}-${ver}${distext}.pdf || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
+      #lat="$(get_latest)" || die
+      #[[ $ver = $lat ]] || die "Go an update changelog on votca.org first"
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
-      #remove the 1.2 bit whenever 1.3 is stable
-      if [[ $ver != *1.2* ]] && [[ $prog = csg || $prog = ctp ]]; then
+      if [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
-        lynx -dump https://sites.google.com/a/votca.org/main/development/changelog-${prog} | \
+        lynx -dump http:///www.votca.org/development/changelog-${prog} | \
           sed -ne '/^Version/,/^Comments/p' | \
           sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
