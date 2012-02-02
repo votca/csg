@@ -61,7 +61,6 @@
 #version 1.8.0 -- 29.01.12 add support for non-votca progs
 #version 1.8.1 -- 02.02.12 make it work in bash 4.0 again
 
-shopt -s extglob
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
@@ -219,17 +218,6 @@ download_and_upack_tarball() {
   tar -xzf "${tarball}"
   [[ $tardir = $prog ]] || mv "${tardir}" "${prog}"
   rm -f "${tarball}"
-}
-
-get_latest() {
-  local rel
-  [[ -z $(type -p lynx) ]] && die "lynx not found"
-  rel=$(lynx -dump $clurl | \
-    sed -n 's/^Version \([^("]*\) ["(].*$/\1/p' | \
-    sed -n '1p')
-  [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9]) ]] && \
-    die "lynx could not get the version (found $rel), specify it by hand using --release option"
-  echo "$rel"
 }
 
 get_version() {
@@ -498,7 +486,14 @@ while [[ ${1} = -* ]]; do
       die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
     shift 2;;
    -l | --latest)
-    rel="$(get_latest)" || die
+    # don't use lynx here, some distribution don't have it by default
+    [[ -z $(type -p wget) ]] && die "wget not found, specify it by hand using --release option"
+    rel=$(wget -O - -q "${clurl}" | \
+      sed 's/Version [^ ]* /&\n/g' | \
+      sed -n 's/.*Version \([^ ]*\) .*/\1/p' | \
+      sed -n '1p')
+    [[ -z $rel || ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9]) ]] && \
+      die "lynx could not get the version (found $rel), specify it by hand using --release option"
     shift;;
    --nocolor)
     unset BLUE CYAN CYANN GREEN OFF RED PURP
@@ -679,8 +674,6 @@ for prog in "$@"; do
       cp manual.pdf ../votca-${prog}-${ver}${distext}.pdf || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
-      lat="$(get_latest)" || die
-      [[ $changelogcheck = "yes" && $ver != $lat ]] && die "Go and update changelog on votca.org first"
       exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
       [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
       $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
@@ -690,6 +683,8 @@ for prog in "$@"; do
           sed -ne '/^Version/,/^Comments/p' | \
           sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
+	[[ $changelogcheck = "yes" && -z "$(grep 'Version ${ver} ' votca-${prog}-${ver}/ChangeLog)" ]] && \
+          die "Go and update changelog on votca.org before make a release"
       fi
       #overwrite is the default behaviour of hg archive, emulate it!
       rm -f ../votca-${prog}-${ver}${distext}.tar ../votca-${prog}-${ver}${distext}.tar.gz
