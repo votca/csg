@@ -59,7 +59,9 @@
 #version 1.7.8 -- 09.11.11 added --minimal
 #version 1.7.9 -- 10.01.12 bumped latest to 1.2.2
 #version 1.8.0 -- 29.01.12 add support for non-votca progs
+#version 1.8.1 -- 02.02.12 make it work in bash 4.0 again
 
+shopt -s extglob
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
 prefix="$HOME/votca"
