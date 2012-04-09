@@ -74,10 +74,12 @@ all_progs="${votca_progs} gromacs"
 #programs to build by default
 standard_progs="tools csg"
 
-if [[ -f /proc/cpuinfo ]]; then
+if [[ -f /proc/cpuinfo ]]; then #linux
   j="$(grep -c processor /proc/cpuinfo 2>/dev/null)" || j=0
-elif [[ -x /usr/sbin/sysctl ]]; then
+elif [[ -x /usr/sbin/sysctl ]]; then #mac os
   j="$(/usr/sbin/sysctl -n hw.ncpu 2>/dev/null)" || j=0
+elif [[ -x /usr/sbin/lsdev ]]; then #AIX
+  j=$(/usr/sbin/lsdev 2>/dev/null | sed -n '/Processor/p' | sed -n '$=')
 else
   j=0
 fi
