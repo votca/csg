@@ -426,6 +426,9 @@ while [[ ${1} = -* ]]; do
     [[ -n ${2//[0-9]} ]] && die "Argument after --jobs should be a number"
     j="$2"
     shift 2;;
+   --no-build)
+    do_build="no"
+    shift 1;;
    -u | --do-update)
     do_update="yes"
     shift 1;;
