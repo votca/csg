@@ -61,6 +61,7 @@
 #version 1.8.0 -- 29.01.12 add support for non-votca progs
 #version 1.8.1 -- 02.02.12 make it work in bash 4.0 again
 #version 1.8.2 -- 15.02.12 update to new googlecdoe url to avoid insec. certs
+#version 1.8.3 -- 04.07.12 remove -DEXTERNAL_BOOST=OFF from --minimal
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -340,7 +341,7 @@ ADV $(cecho GREEN -C), $(cecho GREEN --clean-ignored)     Remove ignored file fr
 ADV     $(cecho GREEN --no-cmake)          Do not run cmake
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
-ADV     $(cecho GREEN --minimal)           Build with minimum deps (same as $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_SQLITE3=OFF)
+ADV     $(cecho GREEN --minimal)           Build with minimum deps
 ADV                         $(cecho GREEN -D)$(cecho CYAN WITH_FFTW=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GSL=OFF) $(cecho GREEN -D)$(cecho CYAN BUILD_MANPAGES=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GMX=OFF))
 ADV                         Functionality, which is really needed can explicitly be enabled again with $(cecho GREEN -D)$(cecho CYAN XXX=)$(cecho BLUE ON)
 ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default)
@@ -484,7 +485,7 @@ while [[ ${1} = -* ]]; do
     cmake_opts="${cmake_opts} -D${2}"
     shift 2;;
   --minimal)
-    cmake_opts="${cmake_opts} --no-warn-unused-cli -DEXTERNAL_BOOST=OFF -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF"
+    cmake_opts="${cmake_opts} --no-warn-unused-cli -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF"
     shift;;
    --release)
     rel="$2"
