@@ -691,7 +691,7 @@ for prog in "$@"; do
           sed -ne '/^Version/,/Comments/p' | \
           sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
-	[[ $changelogcheck = "yes" && -z "$(grep 'Version ${ver} ' votca-${prog}-${ver}/ChangeLog)" ]] && \
+	[[ $changelogcheck = "yes" && -z $(grep "Version ${ver} " votca-${prog}-${ver}/ChangeLog) ]] && \
           die "Go and update changelog on votca.org before make a release"
       fi
       #overwrite is the default behaviour of hg archive, emulate it!
