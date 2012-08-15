@@ -687,7 +687,8 @@ for prog in "$@"; do
       if [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
         lynx -dump ${clurl%-*}-${prog} | \
-          sed -ne '/^Version/,/^Comments/p' | \
+          sed -e 's/^[[:space:]]*//' | \
+          sed -ne '/^Version/,/Comments/p' | \
           sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
 	[[ $changelogcheck = "yes" && -z "$(grep 'Version ${ver} ' votca-${prog}-${ver}/ChangeLog)" ]] && \
