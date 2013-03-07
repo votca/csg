@@ -62,6 +62,7 @@
 #version 1.8.1 -- 02.02.12 make it work in bash 4.0 again
 #version 1.8.2 -- 15.02.12 update to new googlecdoe url to avoid insec. certs
 #version 1.8.3 -- 04.07.12 remove -DEXTERNAL_BOOST=OFF from --minimal
+#version 1.8.4 -- 07.03.13 bumped gromacs version to 4.6.1
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -117,7 +118,7 @@ rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
 clurl="http://www.votca.org/development/changelog-csg"
 pathname="default"
-gromacs_ver="4.5.5"
+gromacs_ver="4.6.1"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=""
