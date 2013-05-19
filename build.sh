@@ -63,6 +63,7 @@
 #version 1.8.2 -- 15.02.12 update to new googlecdoe url to avoid insec. certs
 #version 1.8.3 -- 04.07.12 remove -DEXTERNAL_BOOST=OFF from --minimal
 #version 1.8.4 -- 07.03.13 bumped gromacs version to 4.6.1
+#version 1.8.5 -- 19.05.13 added ctp-tutorials
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -508,7 +509,7 @@ while [[ ${1} = -* ]]; do
     shift;;
    -d | --dev)
     dev=yes
-    all_progs="${all_progs} moo kmc ctp ctp-manual espressopp"
+    all_progs="${all_progs} moo kmc ctp ctp-manual ctp-tutorials espressopp"
     shift 1;;
   *)
    die "Unknown option '$1'"
