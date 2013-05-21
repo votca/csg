@@ -126,7 +126,8 @@ cmake_opts=""
 packext=".tar.gz"
 distext=""
 
-[[ -z $HG ]] && HG="hg"
+HG="${HG:=hg}"
+GIT="${GIT:=git}"
 
 BLUE="[34;01m"
 CYAN="[36;01m"
@@ -271,8 +272,11 @@ get_url() {
       *manual|*testsuite)
 	true;;
       tools|csg*)
-	[[ -z $rel ]] && die "get_url: rel variable not found"
+	[[ -z $rel ]] && die "${FUNCNAME}: rel variable not set"
 	echo "http://votca.googlecode.com/files/votca-$2-$rel.tar.gz";;
+      gromacs)
+	[[ -z $gromacs_ver ]] && die "${FUNCNAME}: gromacs_ver variable not set"
+	echo "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
     esac
   else
     die "get_url: unknown type $1"
@@ -557,21 +561,15 @@ for prog in "$@"; do
   fi
 
   cecho GREEN "Working on $prog"
-  if [[ $prog = "gromacs" ]]; then
-    if [[ -d $prog ]]; then
-      cecho BLUE "Source dir ($prog) is already there - skipping download"
-      countdown 5
-    else
-      download_and_upack_tarball "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
-    fi
-  elif [[ -d $prog && -z $rel ]]; then
+  if [[ -d $prog && -z $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping checkout"
   elif [[ -d $prog && -n $rel ]]; then
     cecho BLUE "Source dir ($prog) is already there - skipping download"
     countdown 5
   elif [[ -n $rel && -z $(get_url release $prog) ]]; then
     cecho BLUE "Program $prog has no release tarball I will get it from the its mercurial repository"
-    [[ -z $(get_url source $prog) ]] && die "but I don't know its source url - get it yourself and put it in dir $prog" 
+    [[ $prog = "gromacs" ]] && die "Automatic checkout is not supported for gromacs, yet" #should never happen...
+    [[ -z $(get_url source $prog) ]] && die "but I don't know its source url - get it yourself and put it in dir $prog"
     countdown 5
     [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone $(get_url source $prog) $prog
@@ -579,11 +577,12 @@ for prog in "$@"; do
     download_and_upack_tarball "$(get_url release $prog)"
   else
     [[ -z $(get_url source $prog) ]] && die "I don't know the source url of $prog - get it yourself and put it in dir $prog"
+    [[ $prog = "gromacs" ]] && die "Automatic checkout is not supported for gromacs, yet"
     cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
     [[ -z "$(type -p $HG)" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
     $HG clone $(get_url source $prog) $prog
-    if [ "${dev}" = "no" ]; then
+    if [[ -d .hg && ${dev} = "no" ]]; then
       if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
         $HG update -R $prog stable
@@ -598,21 +597,27 @@ for prog in "$@"; do
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
-    elif [ -d .hg ]; then
-      cecho GREEN "updating hg repository"
-      pullpath=$($HG path $pathname 2> /dev/null || true)
+    elif [[ -d .hg || -d .git ]]; then
+      cecho GREEN "updating $([[ -d .hg ]] && echo hg || echo git) repository"
+      [[ $pathname = default ]] && origin="origin" || origin="$pathname" #TODO improve
+      [[ -d .hg ]] && pullpath=$($HG path $pathname 2> /dev/null || true) || pullpath=$($GIT config --get remote.${origin}.url 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
         [[ -z $(get_url source $prog) ]] && \
 	  die "I don't know the source url of $prog - do the update of $prog yourself"
 	pullpath=$(get_url source $prog)
-	cecho BLUE "Could not fetch pull path '$pathname', using $pullpath instead"
+	cecho BLUE "Could not fetch pull path '$([[ -d .hg ]] && echo $pathname || echo $origin)', using $pullpath instead"
 	countdown 5
       else
 	cecho GREEN "from $pullpath"
       fi
-      $HG pull ${pullpath}
-      cecho GREEN "We are on branch $(cecho BLUE $($HG branch))"
-      $HG update
+      if [[ -d .hg ]]; then
+        $HG pull ${pullpath}
+        cecho GREEN "We are on branch $(cecho BLUE $($HG branch))"
+        $HG update
+      else
+        cecho GREEN "We are on branch $(cecho BLUE $($GIT rev-parse --abbrev-ref HEAD))"
+        $GIT pull --ff-only $origin
+      fi
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update"
       countdown 5
@@ -629,16 +634,23 @@ for prog in "$@"; do
       [[ $branch != $($HG branch) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'hg update BRANCHNAME'."
     fi
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
+  elif [[ -d .git && $branchcheck = "yes" ]]; then
+    [[ $($GIT rev-parse --abbrev-ref HEAD) != release-4* ]] && \
+      die "We only support support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'git checkout release-4-6' (disable this check with the --no-branchcheck option)"
   fi
   if [[ $do_update == "only" ]]; then
     cd ..
     continue
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
-    if [[ -d .hg ]]; then
+    if [[ -d .hg || -d .git ]]; then
       cecho BLUE "I will remove all ignored files from $prog"
       countdown 5
-      $HG status --print0 --no-status --ignored | xargs --null rm -f
+      if [[ -d .hg ]]; then
+        $HG status --print0 --no-status --ignored | xargs --null rm -f
+      else
+	$GIT clean -fdX
+      fi
     else
       cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files"
       countdown 5
