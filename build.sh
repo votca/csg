@@ -312,10 +312,10 @@ show_help () {
     Please visit: $(cecho BLUE www.votca.org)
 
     The normal sequence of a build is:
-    - hg clone (if src is not there)
+    - hg/git clone (if src is not there)
       and checkout stable branch unless --dev given
       (or downloads tarballs if --release given)
-    - hg pull + hg update (if --do-update given)
+    - hg pull + hg update / git pull --ff-only (if --do-update given)
     - run cmake (unless --no-cmake)
     - make clean (unless --no-clean given)
     - make (unless --no-build given)
@@ -335,7 +335,7 @@ ADV     $(cecho GREEN --log) $(cecho CYAN FILE)          Generate a file with al
 ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
-ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg clone
+ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg/git clone
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball
     $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                             or the votca server as fail back
@@ -577,11 +577,15 @@ for prog in "$@"; do
     download_and_upack_tarball "$(get_url release $prog)"
   else
     [[ -z $(get_url source $prog) ]] && die "I don't know the source url of $prog - get it yourself and put it in dir $prog"
-    [[ $prog = "gromacs" ]] && die "Automatic checkout is not supported for gromacs, yet"
     cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
-    [[ -z "$(type -p $HG)" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
-    $HG clone $(get_url source $prog) $prog
+    if [[ $(get_url source $prog) != git* ]]; then
+      [[ -z "$(type -p $HG)" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
+      $HG clone $(get_url source $prog) $prog
+    else
+      [[ -z "$(type -p $GIT)" ]] && die "Could not find $GIT, please install git (http://http://git-scm.com/)"
+      $GIT clone $(get_url source $prog) $prog
+    fi
     if [[ -d .hg && ${dev} = "no" ]]; then
       if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
@@ -589,6 +593,9 @@ for prog in "$@"; do
       else
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
+    elif [[ -d .git ]]; then
+      #TODO add support for other branches
+      $GIT --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
     fi
   fi
 
@@ -614,12 +621,12 @@ for prog in "$@"; do
         $HG pull ${pullpath}
         cecho GREEN "We are on branch $(cecho BLUE $($HG branch))"
         $HG update
-      else
+      elif [[ -d .git ]]; then
         cecho GREEN "We are on branch $(cecho BLUE $($GIT rev-parse --abbrev-ref HEAD))"
         $GIT pull --ff-only $origin
       fi
     else
-      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping update"
+      cecho BLUE "$prog dir doesn't seem to be a hg/git repository, skipping update"
       countdown 5
     fi
   fi
@@ -652,7 +659,7 @@ for prog in "$@"; do
 	$GIT clean -fdX
       fi
     else
-      cecho BLUE "$prog dir doesn't seem to be a hg repository, skipping remove of ignored files"
+      cecho BLUE "$prog dir doesn't seem to be a hg/git repository, skipping remove of ignored files"
       countdown 5
     fi
   fi
