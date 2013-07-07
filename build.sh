@@ -64,6 +64,7 @@
 #version 1.8.3 -- 04.07.12 remove -DEXTERNAL_BOOST=OFF from --minimal
 #version 1.8.4 -- 07.03.13 bumped gromacs version to 4.6.1
 #version 1.8.5 -- 19.05.13 added ctp-tutorials
+#version 1.8.6 -- 07.07.13 allow spaces in -D option (fixes issue 133)
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -122,7 +123,7 @@ pathname="default"
 gromacs_ver="4.6.1"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
-cmake_opts=""
+cmake_opts=()
 packext=".tar.gz"
 distext=""
 
@@ -379,12 +380,8 @@ ADV                         Default: $cmake
 eof
 }
 
-cmdopts=""
-for i in "$@"; do
-  [ -z "${i//*[[:space:]]*}" ] && cmdopts="${cmdopts} '$i'" || cmdopts="${cmdopts} $i"
-done
-cmdopts="$(echo "$cmdopts" | sed 's/--log[ =][^[:space:]]* //')"
-
+#save before parsing for --log
+cmdopts=( "$@" )
 # parse arguments
 shopt -s extglob
 while [[ ${1} = -* ]]; do
@@ -403,10 +400,14 @@ while [[ ${1} = -* ]]; do
     shift ;;
    --log)
     [ -n "$2" ] || die "Missing argument after --log"
-    echo "Logfile is $(cecho PURP $2)"
-    echo "Log of '${0} ${cmdopts}'" > $2
-    ${0} ${cmdopts} | tee -a $2
-    exit $?;;
+    if [[ -z ${VOTCA_LOG} ]]; then 
+      echo "Logfile is $(cecho PURP $2)"
+      export VOTCA_LOG="$2"
+      echo "Log of '${0} ${cmdopts[@]// /\\ }'" > $2
+      ${0} "${cmdopts[@]}" | tee -a $2
+      exit $?
+    fi
+    shift 2;;
    -h | --help)
     show_help | sed -e '/^ADV/d' -e 's/^    //'
     exit 0;;
@@ -453,7 +454,7 @@ while [[ ${1} = -* ]]; do
     [[ -z $(type -p $cmake) ]] && die "Custom cmake '$cmake' not found"
     shift 2;;
    --warn-to-errors)
-    cmake_opts="${cmake_opts} -DCMAKE_CXX_FLAGS='-Werror'"
+    cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
     shift ;;
    -R | --no-rpath)
     rpath_opt=""
@@ -461,12 +462,12 @@ while [[ ${1} = -* ]]; do
    --dist)
     do_dist="yes"
     do_clean="yes"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=OFF -DCMAKE_CXX_FLAGS='-Werror'"
+    cmake_opts+=( -DEXTERNAL_BOOST=OFF -DCMAKE_CXX_FLAGS='-Werror' )
     shift 1;;
    --dist-pristine)
     do_dist="yes"
     do_clean="yes"
-    cmake_opts="${cmake_opts} -DEXTERNAL_BOOST=ON -DCMAKE_CXX_FLAGS='-Werror'"
+    cmake_opts+=( -DEXTERNAL_BOOST=ON -DCMAKE_CXX_FLAGS='-Werror' )
     distext="_pristine"
     shift 1;;
    --devdoc)
@@ -488,10 +489,10 @@ while [[ ${1} = -* ]]; do
     prefix="$2"
     shift 2;;
   -D)
-    cmake_opts="${cmake_opts} -D${2}"
+    cmake_opts+=( -D"${2}" )
     shift 2;;
   --minimal)
-    cmake_opts="${cmake_opts} --no-warn-unused-cli -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF"
+    cmake_opts+=( --no-warn-unused-cli -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF )
     shift;;
    --release)
     rel="$2"
@@ -674,10 +675,10 @@ for prog in "$@"; do
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
     [[ -z $(type -p cmake) ]] && die "cmake not found"
-    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt ."
-    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
+    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" ${cmake_opts[@]// /\\ } $rpath_opt ."
+    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" $rpath_opt .
     # we always run normal cmake in case user forgot to generate
-    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" $cmake_opts $rpath_opt .
+    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" $rpath_opt .
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
     cecho GREEN "cleaning $prog"
