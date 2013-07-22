@@ -631,6 +631,10 @@ for prog in "$@"; do
       countdown 5
     fi
   fi
+  if [[ $do_update == "only" ]]; then
+    cd ..
+    continue
+  fi
   if [[ -d .hg ]]; then
     [[ -z $branch ]] && branch="$($HG branch)"
     if [[ $branchcheck = "yes" ]]; then
@@ -644,11 +648,7 @@ for prog in "$@"; do
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
   elif [[ -d .git && $branchcheck = "yes" ]]; then
     [[ $($GIT rev-parse --abbrev-ref HEAD) != release-4* ]] && \
-      die "We only support support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'git checkout release-4-6' (disable this check with the --no-branchcheck option)"
-  fi
-  if [[ $do_update == "only" ]]; then
-    cd ..
-    continue
+      die "We only support support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'cd gromacs; git checkout release-4-6' (disable this check with the --no-branchcheck option)"
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [[ -d .hg || -d .git ]]; then
