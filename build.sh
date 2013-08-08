@@ -172,10 +172,12 @@ build_devdoc() {
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
       -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
       -e "/^INPUT /s/=.*$/= $progs/" \
+      -e "/^HTML_FOOTER /s/=.*$/= footer.html/" \
       -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
       tools/share/doc/Doxyfile.in > Doxyfile
+  : > footer.html
   doxygen || die "Doxygen failed"
-  rm -f Doxyfile
+  rm -f Doxyfile footer.html
 }
 
 prefix_clean() {
