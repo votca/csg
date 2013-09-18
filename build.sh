@@ -129,6 +129,7 @@ distext=""
 
 HG="${HG:=hg}"
 GIT="${GIT:=git}"
+WGET="${WGET:=wget}"
 
 BLUE="[34;01m"
 CYAN="[36;01m"
@@ -218,10 +219,10 @@ download_and_upack_tarball() {
   cecho GREEN "Download tarball $tarball from ${url}"
   if [ "$self_download" = "no" ]; then
     [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first or add --selfdownload option"
-    [ -z "$(type -p wget)" ] && die "wget is missing"
-    wget "${url}"
+    [ -z "$(type -p ${WGET})" ] && die "${WGET} is missing"
+    ${WGET} "${url}"
   fi
-  [ -f "${tarball}" ] || die "wget has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
+  [ -f "${tarball}" ] || die "${WGET} has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
   tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
   [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
   [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
@@ -237,10 +238,10 @@ get_version() {
 get_webversion() {
   local version
   if [[ $1 = "-q" ]]; then
-    version="$(wget -qO- "${selfurl}" | get_version)"
+    version="$(${WGET} -qO- "${selfurl}" | get_version)"
   else
-    [[ -z $(type -p wget) ]] && die "wget not found"
-    version="$(wget -qO- "${selfurl}" )" || die "self_update: wget fetch from $selfurl failed"
+    [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found"
+    version="$(${WGET} -qO- "${selfurl}" )" || die "self_update: ${WGET} fetch from $selfurl failed"
     version="$(echo -e "${version}" | get_version)"
     [[ -z ${version} ]] && die "get_webversion: Could not fetch new version number"
   fi
@@ -296,11 +297,11 @@ version_check() {
 }
 
 self_update() {
-  [[ -z $(type -p wget) ]] && die "wget not found"
+  [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found"
   if version_check; then
     cecho RED "I will try replace myself now with $selfurl"
     countdown 5
-    wget -O "${0}" "${selfurl}"
+    ${WGET} -O "${0}" "${selfurl}"
   else
     cecho GREEN "No updated needed"
   fi
@@ -503,8 +504,8 @@ while [[ ${1} = -* ]]; do
     shift 2;;
    -l | --latest)
     # don't use lynx here, some distribution don't have it by default
-    [[ -z $(type -p wget) ]] && die "wget not found, specify it by hand using --release option"
-    rel=$(wget -O - -q "${clurl}" | \
+    [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found, specify it by hand using --release option"
+    rel=$(${WGET} -O - -q "${clurl}" | \
       sed 's/Version [^ ]* /&\n/g' | \
       sed -n 's/.*Version \([^ ]*\) .*/\1/p' | \
       sed -n '1p')
