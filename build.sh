@@ -65,6 +65,7 @@
 #version 1.8.4 -- 07.03.13 bumped gromacs version to 4.6.1
 #version 1.8.5 -- 19.05.13 added ctp-tutorials
 #version 1.8.6 -- 07.07.13 allow spaces in -D option (fixes issue 133)
+#version 1.8.7 -- 08.10.13 fix git checkout of gromacs
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -590,14 +591,14 @@ for prog in "$@"; do
       [[ -z "$(type -p $GIT)" ]] && die "Could not find $GIT, please install git (http://http://git-scm.com/)"
       $GIT clone $(get_url source $prog) $prog
     fi
-    if [[ -d .hg && ${dev} = "no" ]]; then
+    if [[ -d ${prog}/.hg && ${dev} = "no" ]]; then
       if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
         $HG update -R $prog stable
       else
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
-    elif [[ -d .git ]]; then
+    elif [[ -d ${prog}/.git ]]; then
       #TODO add support for other branches
       $GIT --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
     fi
@@ -651,7 +652,7 @@ for prog in "$@"; do
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
   elif [[ -d .git && $branchcheck = "yes" ]]; then
     [[ $($GIT rev-parse --abbrev-ref HEAD) != release-4* ]] && \
-      die "We only support support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'cd gromacs; git checkout release-4-6' (disable this check with the --no-branchcheck option)"
+      die "We only support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'cd gromacs; git checkout release-4-6' (disable this check with the --no-branchcheck option)"
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [[ -d .hg || -d .git ]]; then
