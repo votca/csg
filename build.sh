@@ -66,6 +66,7 @@
 #version 1.8.5 -- 19.05.13 added ctp-tutorials
 #version 1.8.6 -- 07.07.13 allow spaces in -D option (fixes issue 133)
 #version 1.8.7 -- 08.10.13 fix git checkout of gromacs
+#version 1.8.8 -- 19.10.13 allow mixing of options and programs
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -109,6 +110,7 @@ branchcheck="yes"
 distcheck="yes"
 relcheck="yes"
 progcheck="yes"
+progs=()
 
 self_download="no"
 cmake="cmake"
@@ -173,10 +175,10 @@ build_devdoc() {
   ver=$(get_votca_version tools/CMakeLists.txt) || die
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
       -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
-      -e "/^INPUT /s/=.*$/= $progs/" \
+      -e "/^INPUT /s/=.*$/= ${progs[*]}/" \
       -e "/^HTML_FOOTER /s/=.*$/= footer.html/" \
       -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
-      tools/share/doc/Doxyfile.in > Doxyfile
+      tools/share/doc/Doxyfile.in > Doxyfile || die "Making of Doxyfile failed"
   : > footer.html
   doxygen || die "Doxygen failed"
   rm -f Doxyfile footer.html
@@ -388,7 +390,7 @@ eof
 cmdopts=( "$@" )
 # parse arguments
 shopt -s extglob
-while [[ ${1} = -* ]]; do
+while [[ $# -gt 0 ]]; do
   if [[ ${1} = --*=* ]]; then # case --xx=yy
     set -- "${1%%=*}" "${1#*=}" "${@:2}" # --xx=yy to --xx yy
   elif [[ ${1} = -[^-]?* ]]; then # case -xy split
@@ -520,9 +522,12 @@ while [[ ${1} = -* ]]; do
     dev=yes
     all_progs="${all_progs} moo kmc ctp ctp-manual ctp-tutorials espressopp"
     shift 1;;
-  *)
+  -*)
    die "Unknown option '$1'"
    exit 1;;
+  *)
+   [[ -n $1 ]] && progs+=( "$1" )
+   shift 1;;
  esac
 done
 
@@ -536,7 +541,7 @@ if version_check -q; then
   unset x
 fi
 
-[[ -z $1 ]] && set -- $standard_progs
+[[ ${#progs[@]} -eq 0 ]] && progs=( $standard_progs )
 [[ -z $prefix ]] && die "Error: prefix is empty"
 [[ $prefix = *WHERE/TO/INSTALL/VOTCA* ]] && die "Deine Mutti!!!\nGo and read the instruction again."
 [[ $prefix = /* ]] || die "prefix has to be a global path (should start with a '/')"
@@ -552,8 +557,7 @@ cecho BLUE "Using $j jobs for make"
 [[ $prefix_clean = "yes" ]] && prefix_clean
 
 set -e
-progs="$@"
-for prog in "$@"; do
+for prog in "${progs[@]}"; do
   [[ ${progcheck} = "yes" ]] && ! is_in "${prog}" "${all_progs}" && \
     die "Unknown progamm '$prog', I know: $all_progs (disable this check with --no-progcheck option)"
 
@@ -734,6 +738,6 @@ for prog in "$@"; do
   cecho GREEN "done with $prog"
   last_prog="$prog"
 done
-set +e
+set +x
 
-[ "$do_devdoc" = "no" ] || build_devdoc
+[[ $do_devdoc = "no" ]] || build_devdoc
