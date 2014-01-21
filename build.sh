@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2009 The VOTCA Development Team (http://www.votca.org)
+# Copyright 2009-2014 The VOTCA Development Team (http://www.votca.org)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,7 +127,6 @@ gromacs_ver="4.6.1"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=()
-packext=".tar.gz"
 distext=""
 
 HG="${HG:=hg}"
@@ -148,23 +147,16 @@ die () {
 }
 
 is_in() {
-  [[ -z $1 || -z $2 ]] && die "is_in: Missing argument"
+  [[ -z $1 || -z $2 ]] && die "${FUNCNAME}: Missing argument"
   [[ " ${@:2} " = *" $1 "* ]]
 }
 
 cecho() {
-  local opts color colors="BLUE CYAN CYANN GREEN RED PURP"
-  if [[ $1 = -?* ]]; then
-    opts="$1"
-    shift
-  fi
-  [[ -z $2 ]] && die "cecho: Missing argumet"
-  is_in "$1" "$colors" || die "cecho: Unknown color ($color allowed)"
-  color=${!1}
-  shift
-  echo -n ${color}
-  echo -ne "$@"
-  echo $opts "${OFF}"
+  local colors="BLUE CYAN CYANN GREEN RED PURP"
+  [[ -z $1 || -z $2 ]] && die "${FUNCNAME}: Missing argument"
+  is_in "$1" "$colors" || die "${FUNCNAME}: Unknown color '$1' ($colors allowed)"
+  echo -n "${!1}"
+  echo "${@:2}${OFF}"
 }
 
 build_devdoc() {
@@ -174,9 +166,9 @@ build_devdoc() {
   [[ -f tools/share/doc/Doxyfile.in ]] || die "Could not get Doxyfile.in from tools repo"
   ver=$(get_votca_version tools/CMakeLists.txt) || die
   sed -e '/^PROJECT_NAME /s/=.*$/= Votca/' \
-      -e "/^PROJECT_NUMBER /s/=.*$/= $ver/" \
-      -e "/^INPUT /s/=.*$/= ${progs[*]}/" \
-      -e "/^HTML_FOOTER /s/=.*$/= footer.html/" \
+      -e '/^PROJECT_NUMBER /s/=.*$/= '"$ver/" \
+      -e '/^INPUT /s/=.*$/= '"${progs[*]}/" \
+      -e '/^HTML_FOOTER /s/=.*$/= footer.html/' \
       -e '/^HTML_OUTPUT /s/=.*$/= devdoc/' \
       tools/share/doc/Doxyfile.in > Doxyfile || die "Making of Doxyfile failed"
   : > footer.html
@@ -185,30 +177,28 @@ build_devdoc() {
 }
 
 prefix_clean() {
+  local i files=()
   cecho GREEN "Starting clean out of prefix"
-  [[ ! -d $prefix ]] && cecho BLUE "prefix '$prefix' is not there - skipping" && return 0
-  cd $prefix || die "Could change to prefix '$prefix'"
-  files="$(ls -d bin include lib lib64 share 2>/dev/null)"
-  if [[ -z $files ]]; then
+  for i in ${prefix}/{bin,include,lib{,32,64},share}; do
+    [[ -d $i ]] && files+=( "$i" )
+  done
+  if [[ ${#files[@]} -eq 0 ]]; then
     cecho BLUE "Found nothing to clean"
-    cd - > /dev/null
     return
   fi
-  echo "I will $(cecho RED remove):"
-  echo $files
+  echo "I will $(cecho RED remove): ${files[@]#${prefix}/}"
   countdown 10
-  rm -rf $files
+  rm -rf "${files[@]}"
   cecho GREEN "Done, hope you are happy now"
-  cd - > /dev/null
 }
 
 countdown() {
   [[ -z $1 ]] && "countdown: Missing argument"
   [[ -n ${1//[0-9]} ]] && "countdown: argument should be a number"
   [[ $wait = "no" ]] && return
-  cecho -n RED "(CTRL-C to stop) "
+  cecho RED -n "(CTRL-C to stop) "
   for ((i=$1;i>0;i--)); do
-    cecho -n CYANN "$i "
+    cecho CYANN -n "$i "
     sleep 1
   done
   echo
@@ -216,53 +206,53 @@ countdown() {
 
 download_and_upack_tarball() {
   local url tarball tardir
-  [[ -z $1 ]] && die "download_and_upack_tarball: Missing argument"
+  [[ -z $1 ]] && die "${FUNCNAME}: Missing argument"
   url="$1"
   tarball="${url##*/}"
   cecho GREEN "Download tarball $tarball from ${url}"
   if [ "$self_download" = "no" ]; then
     [ -f "$tarball" ] && die "Tarball $tarball is already there, remove it first or add --selfdownload option"
-    [ -z "$(type -p ${WGET})" ] && die "${WGET} is missing"
-    ${WGET} "${url}"
+    [ -z "$(type -p "${WGET}")" ] && die "${WGET} is missing"
+    "${WGET}" "${url}"
   fi
   [ -f "${tarball}" ] || die "${WGET} has failed to fetch the tarball (add --selfdownload option and copy ${tarball} here by hand)"
-  tardir="$(tar -tzf ${tarball} | sed -e's#/.*$##' | sort -u)"
+  tardir="$(tar -tzf "${tarball}" | sed -e's#/.*$##' | sort -u)"
   [ -z "${tardir//*\\n*}" ] && die "Tarball $tarball contains zero or more then one directory ($tardir), please check by hand"
   [ -e "${tardir}" ] && die "Tarball unpack directory ${tardir} is already there, remove it first"
   tar -xzf "${tarball}"
-  [[ $tardir = $prog ]] || mv "${tardir}" "${prog}"
+  [[ $tardir = "$prog" ]] || mv "${tardir}" "${prog}"
   rm -f "${tarball}"
 }
 
 get_version() {
-  sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- .*$/\1/p' $1 | sed -n '$p'
+  sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- .*$/\1/p' "${1:--}" | sed -n '$p'
 }
 
 get_webversion() {
   local version
   if [[ $1 = "-q" ]]; then
-    version="$(${WGET} -qO- "${selfurl}" | get_version)"
+    version="$("${WGET}" -qO- "${selfurl}" | get_version)"
   else
-    [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found"
-    version="$(${WGET} -qO- "${selfurl}" )" || die "self_update: ${WGET} fetch from $selfurl failed"
+    [[ -z $(type -p "${WGET}") ]] && die "${WGET} not found"
+    version="$("${WGET}" -qO- "${selfurl}" )" || die "${FUNCNAME}: ${WGET} fetch from $selfurl failed"
     version="$(echo -e "${version}" | get_version)"
-    [[ -z ${version} ]] && die "get_webversion: Could not fetch new version number"
+    [[ -z ${version} ]] && die "${FUNCNAME}: Could not fetch new version number"
   fi
   echo "${version}"
 }
 
 get_votca_version() {
   local ver
-  [[ -z $1 ]] && die "get_votca_version: Missing argument"
-  [[ -f $1 ]] || die "get_votca_version: Could not find '$1'"
-  ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' $1)" || die "Could not grep PROJECT_VERSION from '$1'"
+  [[ -z $1 ]] && die "${FUNCNAME}: Missing argument"
+  [[ -f $1 ]] || die "${FUNCNAME}: Could not find '$1'"
+  ver="$(sed -n 's@^.*(PROJECT_VERSION "\([^"]*\)").*$@\1@p' "$1")" || die "Could not grep PROJECT_VERSION from '$1'"
   [[ -z ${ver} ]] && die "PROJECT_VERSION is empty"
   echo "$ver"
 }
 
 get_url() {
   local url
-  [[ -z $1 || -z $2  ]] && die "get_url: Missing argument"
+  [[ -z $1 || -z $2  ]] && die "${FUNCNAME}: Missing argument"
   if [[ $1 = source ]]; then
     case $2 in
       tools|csg*)
@@ -286,25 +276,25 @@ get_url() {
 	echo "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
     esac
   else
-    die "get_url: unknown type $1"
+    die "${FUNCNAME}: unknown type $1"
   fi
 }
 
 version_check() {
-  old_version="$(get_version $0)"
+  old_version="$(get_version "$0")"
   [ "$1" = "-q" ] && new_version="$(get_webversion -q)" || new_version="$(get_webversion)"
   [ "$1" = "-q" ] || cecho BLUE "Version of $selfurl is: $new_version"
   [ "$1" = "-q" ] || cecho BLUE "Local Version: $old_version"
-  expr "${old_version}" \< "${new_version}" > /dev/null
+  [[ "${old_version}" < "${new_version}" ]]
   return $?
 }
 
 self_update() {
-  [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found"
+  [[ -z $(type -p "${WGET}") ]] && die "${WGET} not found"
   if version_check; then
     cecho RED "I will try replace myself now with $selfurl"
     countdown 5
-    ${WGET} -O "${0}" "${selfurl}"
+    "${WGET}" -O "${0}" "${selfurl}"
   else
     cecho GREEN "No updated needed"
   fi
@@ -407,10 +397,10 @@ while [[ $# -gt 0 ]]; do
    --log)
     [ -n "$2" ] || die "Missing argument after --log"
     if [[ -z ${VOTCA_LOG} ]]; then 
-      echo "Logfile is $(cecho PURP $2)"
+      echo "Logfile is $(cecho PURP "$2")"
       export VOTCA_LOG="$2"
-      echo "Log of '${0} ${cmdopts[@]// /\\ }'" > $2
-      ${0} "${cmdopts[@]}" | tee -a $2
+      echo "Log of '${0} ${cmdopts[@]// /\\ }'" > "$2"
+      "${0}" "${cmdopts[@]}" | tee -a "$2"
       exit $?
     fi
     shift 2;;
@@ -421,16 +411,16 @@ while [[ $# -gt 0 ]]; do
    show_help | sed -e 's/^ADV/   /' -e 's/^    //'
    exit 0;;
    -v | --version)
-    echo "${0##*/}, version $(get_version $0)"
+    echo "${0##*/}, version $(get_version "$0")"
     exit 0;;
    --hg)
-    sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- [0-9][0-9]\.[0-9][0-9]\.[0-9][0-9] \(.*\)$/\2/p' $0 | sed -n '$p'
+    sed -ne 's/^#version[[:space:]]*\([^[:space:]]*\)[[:space:]]*-- [0-9][0-9]\.[0-9][0-9]\.[0-9][0-9] \(.*\)$/\2/p' "$0" | sed -n '$p'
     exit 0;;
    --selfupdate)
     self_update
     exit $?;;
    -c | --clean-out)
-    prefix_clean="yes"
+    do_prefix_clean="yes"
     shift 1;;
    -C | --clean-ignored)
     do_clean_ignored="yes"
@@ -457,7 +447,7 @@ while [[ $# -gt 0 ]]; do
      shift ;;
    --cmake)
     cmake="$2"
-    [[ -z $(type -p $cmake) ]] && die "Custom cmake '$cmake' not found"
+    [[ -z $(type -p "$cmake") ]] && die "Custom cmake '$cmake' not found"
     shift 2;;
    --warn-to-errors)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
@@ -480,13 +470,13 @@ while [[ $# -gt 0 ]]; do
     do_devdoc="yes"
     shift 1;;
   --no-@(build|clean|cmake|install))
-    eval do_${1#--no-}="no"
+    eval do_"${1#--no-}"="no"
     shift 1;;
    -W | --no-wait)
     wait="no"
     shift 1;;
   --no-@(branch|changelog|dist|prog|rel)check)
-    eval ${1#--no-}="no"
+    eval "${1#--no-}"="no"
     shift 1;;
    --selfdownload)
     self_download="yes"
@@ -507,8 +497,8 @@ while [[ $# -gt 0 ]]; do
     shift 2;;
    -l | --latest)
     # don't use lynx here, some distribution don't have it by default
-    [[ -z $(type -p ${WGET}) ]] && die "${WGET} not found, specify it by hand using --release option"
-    rel=$(${WGET} -O - -q "${clurl}" | \
+    [[ -z $(type -p "${WGET}") ]] && die "${WGET} not found, specify it by hand using --release option"
+    rel=$("${WGET}" -O - -q "${clurl}" | \
       sed 's/Version [^ ]* /&\n/g' | \
       sed -n 's/.*Version \([^ ]*\) .*/\1/p' | \
       sed -n '1p')
@@ -547,14 +537,14 @@ fi
 [[ $prefix = /* ]] || die "prefix has to be a global path (should start with a '/')"
 
 #infos
-cecho GREEN "This is VOTCA ${0##*/}, version $(get_version $0)"
+cecho GREEN "This is VOTCA ${0##*/}, version $(get_version "$0")"
 echo "Install prefix is '$prefix'"
 [[ -n $CPPFLAGS ]] && echo "CPPFLAGS is '$CPPFLAGS'"
 [[ -n $CXXFLAGS ]] && echo "CXXFLAGS is '$CXXFLAGS'"
 [[ -n $LDFLAGS ]] && echo "LDFLAGS is '$LDFLAGS'"
 cecho BLUE "Using $j jobs for make"
 
-[[ $prefix_clean = "yes" ]] && prefix_clean
+[[ $do_prefix_clean = "yes" ]] && prefix_clean
 
 set -e
 for prog in "${progs[@]}"; do
@@ -580,35 +570,35 @@ for prog in "${progs[@]}"; do
     [[ $prog = "gromacs" ]] && die "Automatic checkout is not supported for gromacs, yet" #should never happen...
     [[ -z $(get_url source $prog) ]] && die "but I don't know its source url - get it yourself and put it in dir $prog"
     countdown 5
-    [ -z "$(type -p $HG)" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
-    $HG clone $(get_url source $prog) $prog
-  elif [[ -n $rel && -n $(get_url release $prog) ]]; then
-    download_and_upack_tarball "$(get_url release $prog)"
+    [ -z "$(type -p "$HG")" ] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
+    "$HG" clone "$(get_url source "$prog")" "$prog"
+  elif [[ -n $rel && -n $(get_url release "$prog") ]]; then
+    download_and_upack_tarball "$(get_url release "$prog")"
   else
     [[ -z $(get_url source $prog) ]] && die "I don't know the source url of $prog - get it yourself and put it in dir $prog"
     cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
     if [[ $(get_url source $prog) != git* ]]; then
-      [[ -z "$(type -p $HG)" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
-      $HG clone $(get_url source $prog) $prog
+      [[ -z "$(type -p "$HG")" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
+      "$HG" clone "$(get_url source $prog)" "$prog"
     else
-      [[ -z "$(type -p $GIT)" ]] && die "Could not find $GIT, please install git (http://http://git-scm.com/)"
-      $GIT clone $(get_url source $prog) $prog
+      [[ -z "$(type -p "$GIT")" ]] && die "Could not find $GIT, please install git (http://http://git-scm.com/)"
+      "$GIT" clone "$(get_url source $prog)" "$prog"
     fi
     if [[ -d ${prog}/.hg && ${dev} = "no" ]]; then
-      if [[ -n $($HG branches -R $prog | sed -n '/^stable[[:space:]]/p' ) ]]; then
+      if [[ -n $("$HG" branches -R "$prog" | sed -n '/^stable[[:space:]]/p' ) ]]; then
         cecho BLUE "Switching to stable branch add --dev option to prevent that"
-        $HG update -R $prog stable
+        "$HG" update -R "$prog" stable
       else
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
     elif [[ -d ${prog}/.git ]]; then
       #TODO add support for other branches
-      $GIT --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
+      "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
     fi
   fi
 
-  cd $prog
+  pushd "$prog" > /dev/null || die "Could not change into $prog"
   if [[ $do_update == "yes" || $do_update == "only" ]]; then
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
@@ -616,23 +606,23 @@ for prog in "${progs[@]}"; do
     elif [[ -d .hg || -d .git ]]; then
       cecho GREEN "updating $([[ -d .hg ]] && echo hg || echo git) repository"
       [[ $pathname = default ]] && origin="origin" || origin="$pathname" #TODO improve
-      [[ -d .hg ]] && pullpath=$($HG path $pathname 2> /dev/null || true) || pullpath=$($GIT config --get remote.${origin}.url 2> /dev/null || true)
+      [[ -d .hg ]] && pullpath=$("$HG" path "$pathname" 2> /dev/null || true) || pullpath=$("$GIT" config --get remote."${origin}".url 2> /dev/null || true)
       if [ -z "${pullpath}" ]; then
         [[ -z $(get_url source $prog) ]] && \
 	  die "I don't know the source url of $prog - do the update of $prog yourself"
 	pullpath=$(get_url source $prog)
-	cecho BLUE "Could not fetch pull path '$([[ -d .hg ]] && echo $pathname || echo $origin)', using $pullpath instead"
+	cecho BLUE "Could not fetch pull path '$([[ -d .hg ]] && echo "$pathname" || echo "$origin")', using $pullpath instead"
 	countdown 5
       else
 	cecho GREEN "from $pullpath"
       fi
       if [[ -d .hg ]]; then
-        $HG pull ${pullpath}
-        cecho GREEN "We are on branch $(cecho BLUE $($HG branch))"
-        $HG update
+        "$HG" pull "${pullpath}"
+        cecho GREEN "We are on branch $(cecho BLUE "$("$HG" branch)")"
+        "$HG" update
       elif [[ -d .git ]]; then
-        cecho GREEN "We are on branch $(cecho BLUE $($GIT rev-parse --abbrev-ref HEAD))"
-        $GIT pull --ff-only $origin
+        cecho GREEN "We are on branch $(cecho BLUE "$("$GIT" rev-parse --abbrev-ref HEAD)")"
+        "$GIT" pull --ff-only "$origin"
       fi
     else
       cecho BLUE "$prog dir doesn't seem to be a hg/git repository, skipping update"
@@ -640,7 +630,7 @@ for prog in "${progs[@]}"; do
     fi
   fi
   if [[ $do_update == "only" ]]; then
-    cd ..
+    popd > /dev/null || die "Could not change back"
     continue
   fi
   if [[ -d .hg ]]; then
@@ -651,11 +641,11 @@ for prog in "${progs[@]}"; do
       [[ $dev = "yes" && $($HG branch) = "stable" ]] && \
 	die "We build the devel version of $prog, but we are on the stable branch. Please checkout a devel branch like default with 'hg update -R $prog default' (disable this check with the --no-branchcheck option)"
       #prevent to build devel csg with stable tools and so on
-      [[ $branch != $($HG branch) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'hg update BRANCHNAME'."
+      [[ $branch != $("$HG" branch) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$($HG branch) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'hg update BRANCHNAME'."
     fi
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
   elif [[ -d .git && $branchcheck = "yes" ]]; then
-    [[ $($GIT rev-parse --abbrev-ref HEAD) != release-4* ]] && \
+    [[ $("$GIT" rev-parse --abbrev-ref HEAD) != release-4* ]] && \
       die "We only support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'cd gromacs; git checkout release-4-6' (disable this check with the --no-branchcheck option)"
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
@@ -663,9 +653,9 @@ for prog in "${progs[@]}"; do
       cecho BLUE "I will remove all ignored files from $prog"
       countdown 5
       if [[ -d .hg ]]; then
-        $HG status --print0 --no-status --ignored | xargs --null rm -f
+        "$HG" status --print0 --no-status --ignored | xargs --null rm -f
       else
-	$GIT clean -fdX
+	"$GIT" clean -fdX
       fi
     else
       cecho BLUE "$prog dir doesn't seem to be a hg/git repository, skipping remove of ignored files"
@@ -683,10 +673,10 @@ for prog in "${progs[@]}"; do
   if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
     [[ -z $(type -p cmake) ]] && die "cmake not found"
-    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX="$prefix" ${cmake_opts[@]// /\\ } $rpath_opt ."
-    [[ $cmake != "cmake" ]] && $cmake  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" $rpath_opt .
+    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX='$prefix' ${cmake_opts[@]// /\\ } $rpath_opt ."
+    [[ $cmake != "cmake" ]] && "$cmake"  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" .
     # we always run normal cmake in case user forgot to generate
-    cmake  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" $rpath_opt .
+    cmake -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" .
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
     cecho GREEN "cleaning $prog"
@@ -694,47 +684,47 @@ for prog in "${progs[@]}"; do
   fi
   if [[ $do_build == "yes" && -f Makefile ]]; then
     cecho GREEN "buidling $prog"
-    make -j${j}
+    make -j"${j}"
   fi
   if [[ "$do_install" == "yes" && -f Makefile ]]; then
     cecho GREEN "installing $prog"
-    make -j${j} install
+    make -j"${j}" install
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
     [[ -n $distext && $prog != "tools" ]] && die "pristine distribution can only be done for votca tools"
-    #if we are here we know  that make and make installed worked
+    #if we are here we know that make and make installed worked
     if [ -f manual.tex ]; then
       ver="$(sed -n 's/VER=[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' Makefile)" || die "Could not get version of the manual"
       [ -z "${ver}" ] && die "Version of the manual was empty"
       [ -f "manual.pdf" ] || die "Could not find manual.pdf"
-      cp manual.pdf ../votca-${prog}-${ver}${distext}.pdf || die "cp of manual failed"
+      cp manual.pdf ../"votca-${prog}-${ver}${distext}.pdf" || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
-      exclude="--exclude netbeans/ --exclude src/csg_boltzmann/nbproject/"
-      [ "$distext" = "_pristine" ] && exclude="${exclude} --exclude src/libboost/"
-      $HG archive ${exclude} --type files "votca-${prog}-${ver}" || die "$HG archive failed"
+      exclude=( "--exclude netbeans/" "--exclude src/csg_boltzmann/nbproject/" )
+      [ "$distext" = "_pristine" ] && exclude+=( "--exclude src/libboost/" )
+      "$HG" archive "${exclude[@]}" --type files "votca-${prog}-${ver}" || die "$HG archive failed"
       if [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
-        lynx -dump ${clurl%-*}-${prog} | \
+        lynx -dump "${clurl%-*}-${prog}" | \
           sed -e 's/^[[:space:]]*//' | \
           sed -ne '/^Version/,/Comments/p' | \
-          sed -e '/^Comments/d' > votca-${prog}-${ver}/ChangeLog
+          sed -e '/^Comments/d' > "votca-${prog}-${ver}"/ChangeLog
         [[ -s votca-${prog}-${ver}/ChangeLog ]] || die "Building of ChangeLog failed"
-	[[ $changelogcheck = "yes" && -z $(grep "Version ${ver} " votca-${prog}-${ver}/ChangeLog) ]] && \
+	[[ $changelogcheck = "yes" && -z $(grep "Version ${ver} " "votca-${prog}-${ver}"/ChangeLog) ]] && \
           die "Go and update changelog on votca.org before make a release"
       fi
       #overwrite is the default behaviour of hg archive, emulate it!
-      rm -f ../votca-${prog}-${ver}${distext}.tar ../votca-${prog}-${ver}${distext}.tar.gz
-      tar -cf ../votca-${prog}-${ver}${distext}.tar votca-${prog}-${ver}/*
-      rm -r votca-${prog}-${ver}
-      gzip -9 ../votca-${prog}-${ver}${distext}.tar
+      rm -f ../"votca-${prog}-${ver}${distext}.tar" ../"votca-${prog}-${ver}${distext}.tar.gz"
+      tar -cf ../"votca-${prog}-${ver}${distext}.tar" "votca-${prog}-${ver}"/*
+      rm -r "votca-${prog}-${ver}"
+      gzip -9 ../"votca-${prog}-${ver}${distext}.tar"
     else
       [ -z "${REL}" ] && die "No CMakeLists.txt found and environment variable REL was not defined"
-      $HG archive --prefix "votca-${prog}-${REL}" --type tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "$HG archive failed"
+      "$HG" archive --prefix "votca-${prog}-${REL}" --type tgz "../votca-${prog}-${REL}${distext}.tar.gz" || die "$HG archive failed"
     fi
   fi
-  cd ..
+  popd > /dev/null || die "Could not change back"
   cecho GREEN "done with $prog"
   last_prog="$prog"
 done
