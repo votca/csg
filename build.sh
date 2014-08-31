@@ -67,6 +67,7 @@
 #version 1.8.6 -- 07.07.13 allow spaces in -D option (fixes issue 133)
 #version 1.8.7 -- 08.10.13 fix git checkout of gromacs
 #version 1.8.8 -- 19.10.13 allow mixing of options and programs
+#version 1.8.9 -- 31.08.14 added --verbose option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -127,6 +128,7 @@ gromacs_ver="4.6.1"
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=()
+MAKE_OPTS=
 distext=""
 
 HG="${HG:=hg}"
@@ -351,6 +353,7 @@ ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the 
 ADV     $(cecho GREEN --no-clean)          Don't run make clean
 ADV $(cecho GREEN -j), $(cecho GREEN --jobs) $(cecho CYAN N)            Allow N jobs at once for make
 ADV                         Default: $j (auto)
+ADV     $(cecho GREEN --verbose)           Run make in verbose mode
 ADV     $(cecho GREEN --no-build)          Don't build the source
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
 ADV     $(cecho GREEN --no-install)        Don't run make install
@@ -396,7 +399,7 @@ while [[ $# -gt 0 ]]; do
     shift ;;
    --log)
     [ -n "$2" ] || die "Missing argument after --log"
-    if [[ -z ${VOTCA_LOG} ]]; then 
+    if [[ -z ${VOTCA_LOG} ]]; then
       echo "Logfile is $(cecho PURP "$2")"
       export VOTCA_LOG="$2"
       echo "Log of '${0} ${cmdopts[@]// /\\ }'" > "$2"
@@ -430,6 +433,9 @@ while [[ $# -gt 0 ]]; do
     [[ -n ${2//[0-9]} ]] && die "Argument after --jobs should be a number"
     j="$2"
     shift 2;;
+   --verbose)
+     MAKE_OPTS+=" VERBOSE=1"
+     shift 1;;
    --no-build)
     do_build="no"
     shift 1;;
@@ -680,15 +686,15 @@ for prog in "${progs[@]}"; do
   fi
   if [[ $do_clean == "yes" && -f Makefile ]]; then
     cecho GREEN "cleaning $prog"
-    make clean
+    make ${MAKE_OPTS} clean
   fi
   if [[ $do_build == "yes" && -f Makefile ]]; then
     cecho GREEN "buidling $prog"
-    make -j"${j}"
+    make -j"${j}" ${MAKE_OPTS}
   fi
   if [[ "$do_install" == "yes" && -f Makefile ]]; then
     cecho GREEN "installing $prog"
-    make -j"${j}" install
+    make -j"${j}" ${MAKE_OPTS} install
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
