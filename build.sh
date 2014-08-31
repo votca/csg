@@ -272,7 +272,9 @@ get_url() {
 	true;;
       tools|csg*)
 	[[ -z $rel ]] && die "${FUNCNAME}: rel variable not set"
-	echo "http://votca.googlecode.com/files/votca-$2-$rel.tar.gz";;
+	#Google code disable tarballs
+	#echo "http://votca.googlecode.com/files/votca-$2-$rel.tar.gz";;
+	echo "http://downloads.votca.googlecode.com/hg/votca-$2-$rel.tar.gz";;
       gromacs)
 	[[ -z $gromacs_ver ]] && die "${FUNCNAME}: gromacs_ver variable not set"
 	echo "ftp://ftp.gromacs.org/pub/gromacs/gromacs-${gromacs_ver}.tar.gz"
