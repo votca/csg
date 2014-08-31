@@ -701,8 +701,8 @@ for prog in "${progs[@]}"; do
       cp manual.pdf ../"votca-${prog}-${ver}${distext}.pdf" || die "cp of manual failed"
     elif [ -f CMakeLists.txt ]; then
       ver="$(get_votca_version CMakeLists.txt)" || die
-      exclude=( "--exclude netbeans/" "--exclude src/csg_boltzmann/nbproject/" )
-      [ "$distext" = "_pristine" ] && exclude+=( "--exclude src/libboost/" )
+      exclude=( --exclude netbeans/ --exclude src/csg_boltzmann/nbproject/ )
+      [ "$distext" = "_pristine" ] && exclude+=( --exclude src/libboost/ )
       "$HG" archive "${exclude[@]}" --type files "votca-${prog}-${ver}" || die "$HG archive failed"
       if [[ $prog = csg || $prog = ctp ]]; then
         [[ -z $(type -p lynx) ]] && die "lynx not found"
