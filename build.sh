@@ -68,6 +68,7 @@
 #version 1.8.7 -- 08.10.13 fix git checkout of gromacs
 #version 1.8.8 -- 19.10.13 allow mixing of options and programs
 #version 1.8.9 -- 31.08.14 added --verbose option
+#version 1.9.0 -- 02.09.14 added --builddir and --ninja
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -119,6 +120,7 @@ for i in cmake-gui ccmake cmake; do
   [[ -n $(type -p $i) ]] && break
 done
 cmake_gui="$i"
+cmake_builddir="."
 
 rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
@@ -284,6 +286,17 @@ get_url() {
   fi
 }
 
+make_or_ninja() {
+  [[ -f Makefile && -f build.ninja ]] && die "$prog is configured to use Ninja and make, which won't work, add --clean-ignored to the command line once"
+  if [[ -f Makefile ]]; then
+    make "$@"
+  elif [[ -f build.ninja ]]; then
+    ninja "$@"
+  else
+    cecho BLUE "Neither Makefile nor build.ninja found, skipping"
+  fi
+}
+
 version_check() {
   old_version="$(get_version "$0")"
   [ "$1" = "-q" ] && new_version="$(get_webversion -q)" || new_version="$(get_webversion)"
@@ -367,6 +380,10 @@ ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding 
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
+ADV     $(cecho GREEN --ninja)             Use ninja instead of make (same as $(cecho GREEN -D)$(cecho CYAN CMAKE_GENERATOR=Ninja)
+ADV                         Default: $cmake
+ADV     $(cecho GREEN --builddir) $(cecho CYAN DIR)      Do an out-of-source build in $(cecho CYAN DIR)
+ADV                         Default: $cmake_builddir
         $(cecho GREEN --gui)               Use cmake with gui (same as $(cecho GREEN --cmake) $(cecho CYAN $cmake_gui))
     $(cecho GREEN -p), $(cecho GREEN --prefix) $(cecho CYAN PREFIX)     Use install prefix $(cecho CYAN PREFIX)
                             Default: $prefix
@@ -457,6 +474,12 @@ while [[ $# -gt 0 ]]; do
     cmake="$2"
     [[ -z $(type -p "$cmake") ]] && die "Custom cmake '$cmake' not found"
     shift 2;;
+   --builddir)
+     cmake_builddir="$2"
+     shift 2;;
+   --ninja)
+     cmake_opts+=( -DCMAKE_GENERATOR=Ninja )
+     shift 1;;
    --warn-to-errors)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
     shift ;;
@@ -665,6 +688,7 @@ for prog in "${progs[@]}"; do
       else
 	"$GIT" clean -fdX
       fi
+      find . -type d -empty -delete &> /dev/null #remove all empty dirs
     else
       cecho BLUE "$prog dir doesn't seem to be a hg/git repository, skipping remove of ignored files"
       countdown 5
@@ -678,25 +702,38 @@ for prog in "${progs[@]}"; do
   if [ "$do_clean" == "yes" ]; then
     rm -f CMakeCache.txt
   fi
-  if [[ $do_cmake == "yes" && -f CMakeLists.txt ]]; then
+  cmake_srcdir="$PWD"
+  if [[ -f CMakeLists.txt ]]; then
     [[ -z $(sed -n '/^project(.*)/p' CMakeLists.txt) ]] && die "The current directory ($PWD) does not look like a source main directory (no project line in CMakeLists.txt found)"
+    [[ -d "$cmake_builddir" ]] || mkdir -p "$cmake_builddir" || die "Could not make dir '$cmake_builddir'"
+    if [[ $(pwd -P) != $(cd $cmake_builddir; pwd -P) ]]; then #if out-of-source build
+      [[ -d CMakeFiles ]] && die "$prog is already configured in-source, but we are trying to build out-of-source, add --clean-ignored to the command line once"
+    else
+      cmake_srcdir="."
+    fi
+    pushd "$cmake_builddir" > /dev/null || die "Could not change into '$cmake_builddir'"
+  fi
+  if [[ $do_cmake == "yes" && -f ${cmake_srcdir}/CMakeLists.txt ]]; then
     [[ -z $(type -p cmake) ]] && die "cmake not found"
-    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX='$prefix' ${cmake_opts[@]// /\\ } $rpath_opt ."
-    [[ $cmake != "cmake" ]] && "$cmake"  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" .
+    cecho BLUE "cmake -DCMAKE_INSTALL_PREFIX='$prefix' ${cmake_opts[@]// /\\ } $rpath_opt ${cmake_srcdir}"
+    [[ $cmake != "cmake" ]] && "$cmake"  -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" "${cmake_srcdir}"
     # we always run normal cmake in case user forgot to generate
-    cmake -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" .
+    cmake -DCMAKE_INSTALL_PREFIX="$prefix" "${cmake_opts[@]}" "$rpath_opt" "${cmake_srcdir}"
   fi
-  if [[ $do_clean == "yes" && -f Makefile ]]; then
+  if [[ $do_clean == "yes" ]]; then
     cecho GREEN "cleaning $prog"
-    make ${MAKE_OPTS} clean
+    make_or_ninja ${MAKE_OPTS} clean
   fi
-  if [[ $do_build == "yes" && -f Makefile ]]; then
+  if [[ $do_build == "yes" ]]; then
     cecho GREEN "buidling $prog"
-    make -j"${j}" ${MAKE_OPTS}
+    make_or_ninja -j"${j}" ${MAKE_OPTS}
   fi
-  if [[ "$do_install" == "yes" && -f Makefile ]]; then
+  if [[ "$do_install" == "yes" ]]; then
     cecho GREEN "installing $prog"
-    make -j"${j}" ${MAKE_OPTS} install
+    make_or_ninja -j"${j}" ${MAKE_OPTS} install
+  fi
+  if [[ -f $cmake_srcdir/CMakeLists.txt ]]; then
+    popd > /dev/null || die "Could not change back"
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
