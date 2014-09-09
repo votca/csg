@@ -380,7 +380,7 @@ ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding 
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
-ADV     $(cecho GREEN --ninja)             Use ninja instead of make (same as $(cecho GREEN -D)$(cecho CYAN CMAKE_GENERATOR=Ninja)
+ADV     $(cecho GREEN --ninja)             Use ninja instead of make
 ADV                         Default: $cmake
 ADV     $(cecho GREEN --builddir) $(cecho CYAN DIR)      Do an out-of-source build in $(cecho CYAN DIR)
 ADV                         Default: $cmake_builddir
@@ -478,7 +478,7 @@ while [[ $# -gt 0 ]]; do
      cmake_builddir="$2"
      shift 2;;
    --ninja)
-     cmake_opts+=( -DCMAKE_GENERATOR=Ninja )
+     cmake_opts+=( -G Ninja )
      shift 1;;
    --warn-to-errors)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
