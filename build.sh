@@ -69,6 +69,7 @@
 #version 1.8.8 -- 19.10.13 allow mixing of options and programs
 #version 1.8.9 -- 31.08.14 added --verbose option
 #version 1.9.0 -- 02.09.14 added --builddir and --ninja
+#version 1.9.1 -- 09.09.14 added --runtest option
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -105,7 +106,8 @@ do_update="no"
 do_dist="no"
 do_devdoc="no"
 dev="no"
-wait="yes"
+wait=
+tests=()
 
 changelogcheck="yes"
 branchcheck="yes"
@@ -372,6 +374,7 @@ ADV     $(cecho GREEN --verbose)           Run make in verbose mode
 ADV     $(cecho GREEN --no-build)          Don't build the source
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
 ADV     $(cecho GREEN --no-install)        Don't run make install
+ADV     $(cecho GREEN --runtest) $(cecho CYAN DIR)       Run one step $(cecho CYAN DIR) as a test, when csg-tutorials is build (EXPERIMENTAL)
 ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF))
 ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
@@ -486,6 +489,9 @@ while [[ $# -gt 0 ]]; do
    -R | --no-rpath)
     rpath_opt=""
     shift 1;;
+   --runtest)
+    tests+=( "$2" )
+    shift 2;;
    --dist)
     do_dist="yes"
     do_clean="yes"
@@ -734,6 +740,15 @@ for prog in "${progs[@]}"; do
   fi
   if [[ -f $cmake_srcdir/CMakeLists.txt ]]; then
     popd > /dev/null || die "Could not change back"
+  fi
+  if [[ $prog = csg-tutorials ]]; then
+    for t in "${tests[@]}"; do
+      pushd $t  > /dev/null ||  die "Could not change into '$t'"
+      [[ -f settings.xml ]] || die "Could not find settings.xml in '$t'"
+      [[ $do_clean != yes ]] || csg_inverse ${wait:+--nowait} --options settings.xml clean || die "'csg_inverse --options cg.xml clean' failed in '$t'"
+      csg_inverse --options settings.xml --do-iterations 1 || die "'csg_inverse --options cg.xml --do-iterations 2' failed in '$t'"
+      popd > /dev/null
+    done
   fi
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
