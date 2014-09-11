@@ -375,6 +375,7 @@ ADV     $(cecho GREEN --no-build)          Don't build the source
 ADV $(cecho GREEN -W), $(cecho GREEN --no-wait)           Do not wait, at critical points (DANGEROUS)
 ADV     $(cecho GREEN --no-install)        Don't run make install
 ADV     $(cecho GREEN --runtest) $(cecho CYAN DIR)       Run one step $(cecho CYAN DIR) as a test, when csg-tutorials is build (EXPERIMENTAL)
+ADV                         Use CSG_MDRUN_STEPS environment variable to control the number of steps to run.
 ADV     $(cecho GREEN --dist)              Create a dist tarball and move it here
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF))
 ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
@@ -747,7 +748,11 @@ for prog in "${progs[@]}"; do
       [[ -f settings.xml ]] || die "Could not find settings.xml in '$t'"
       cecho GREEN "running one iteration of $t in ${prog}"
       [[ $do_clean != yes ]] || csg_inverse ${wait:+--nowait} --options settings.xml clean || die "'csg_inverse --options cg.xml clean' failed in '$t'"
-      CSG_RUNTEST=yes csg_inverse --options settings.xml --do-iterations 1 || die "'csg_inverse --options cg.xml --do-iterations 2' failed in '$t'"
+      if ! CSG_RUNTEST=yes csg_inverse --options settings.xml --do-iterations 1; then
+        sleep 1
+        [[ -f inverse.log ]] && tail -50 inverse.log
+	die "'csg_inverse --options cg.xml --do-iterations 2' failed in '$t'"
+      fi
       popd > /dev/null
     done
   fi
