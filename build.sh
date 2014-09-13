@@ -750,7 +750,7 @@ for prog in "${progs[@]}"; do
       [[ $do_clean != yes ]] || csg_inverse ${wait:+--nowait} --options settings.xml clean || die "'csg_inverse --options cg.xml clean' failed in '$t'"
       if ! CSG_RUNTEST=yes csg_inverse --options settings.xml --do-iterations 1; then
         sleep 1
-        [[ -f inverse.log ]] && tail -50 inverse.log
+        [[ -f inverse.log ]] && tail -200 inverse.log
 	die "'csg_inverse --options cg.xml --do-iterations 2' failed in '$t'"
       fi
       popd > /dev/null
