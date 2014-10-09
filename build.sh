@@ -162,7 +162,7 @@ cecho() {
   [[ -z $1 || -z $2 ]] && die "${FUNCNAME}: Missing argument"
   is_in "$1" "$colors" || die "${FUNCNAME}: Unknown color '$1' ($colors allowed)"
   echo -n "${!1}"
-  echo "${@:2}${OFF}"
+  echo "${@:2}""${OFF}"
 }
 
 build_devdoc() {
