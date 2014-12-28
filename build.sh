@@ -70,6 +70,7 @@
 #version 1.8.9 -- 31.08.14 added --verbose option
 #version 1.9.0 -- 02.09.14 added --builddir and --ninja
 #version 1.9.1 -- 09.09.14 added --runtest option
+#version 1.9.2 -- 28.12.14 added --gmx-release option and gmx 5.0 support
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -128,7 +129,7 @@ rel=""
 selfurl="http://votca.googlecode.com/hg/build.sh"
 clurl="http://www.votca.org/development/changelog-csg"
 pathname="default"
-gromacs_ver="4.6.1"
+gromacs_ver="4.6.7" #bump after 1.3 release
 
 rpath_opt="-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
 cmake_opts=()
@@ -352,6 +353,8 @@ ADV     $(cecho GREEN --nocolor)           Disable color
 ADV     $(cecho GREEN --selfupdate)        Do a self update
 ADV $(cecho GREEN -d), $(cecho GREEN --dev)               Switch to developer mode
 ADV     $(cecho GREEN --release) $(cecho CYAN REL)       Get Release tarball instead of using hg/git clone
+ADV     $(cecho GREEN --gmx-release) $(cecho CYAN REL)   Use custom gromacs release
+ADV                         Default: $gromacs_ver
     $(cecho GREEN -l), $(cecho GREEN --latest)            Get the latest tarball
     $(cecho GREEN -u), $(cecho GREEN --do-update)         Do a update of the sources from pullpath $pathname
                             or the votca server as fail back
@@ -533,6 +536,11 @@ while [[ $# -gt 0 ]]; do
     [[ $relcheck = "yes" && ${rel} != [1-9].[0-9]?(.[1-9]|_rc[1-9])?(_pristine) ]] && \
       die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
     shift 2;;
+   --gmx-release)
+    gromacs_ver="$2"
+    [[ $relcheck = "yes" && ${2} != [1-9].[0-9]?(.[1-9]|-rc[1-9]) ]] && \
+      die "--release option needs an argument which is a release (disable this check with --no-relcheck option)"
+    shift 2;;
    -l | --latest)
     # don't use lynx here, some distribution don't have it by default
     [[ -z $(type -p "${WGET}") ]] && die "${WGET} not found, specify it by hand using --release option"
@@ -584,6 +592,11 @@ cecho BLUE "Using $j jobs for make"
 
 [[ $do_prefix_clean = "yes" ]] && prefix_clean
 
+if [[ $dev = no && $gromacs_ver = 5.0* ]]; then 
+  cecho BLUE "Auto-adding WITH_GMX_DEVEL=ON to cmake option as gromacs 5.0 is being used" 
+  cmake_opts+=( -DWITH_GMX_DEVEL=ON ) #remove after 1.3 is released
+fi
+
 set -e
 for prog in "${progs[@]}"; do
   [[ ${progcheck} = "yes" ]] && ! is_in "${prog}" "${all_progs}" && \
@@ -632,7 +645,13 @@ for prog in "${progs[@]}"; do
       fi
     elif [[ -d ${prog}/.git ]]; then
       #TODO add support for other branches
-      "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
+      if [[ $gromacs_ver = 5.0* ]]; then
+        "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-5-0 --track origin/release-5-0
+      elif [[ $gromacs_ver = 4.6* ]]; then
+        "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
+      else
+	die "Only gromacs 4.6 and 5.0 are supported, yet"
+      fi
     fi
   fi
 
@@ -683,8 +702,8 @@ for prog in "${progs[@]}"; do
     fi
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
   elif [[ -d .git && $branchcheck = "yes" ]]; then
-    [[ $("$GIT" rev-parse --abbrev-ref HEAD) != release-4* ]] && \
-      die "We only support release branches 4 and higher in gromacs! Please checkout one of these, preferable the 4.6 release with: 'cd gromacs; git checkout release-4-6' (disable this check with the --no-branchcheck option)"
+    [[ $("$GIT" rev-parse --abbrev-ref HEAD) != release-@(4-6|5-0) ]] && \
+      die "We only support release branches 4.6 and higher in gromacs! Please checkout one of these, preferably the 5.0 release with: 'cd gromacs; git checkout release-5-0' (disable this check with the --no-branchcheck option)"
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [[ -d .hg || -d .git ]]; then
@@ -751,7 +770,7 @@ for prog in "${progs[@]}"; do
       if ! CSG_RUNTEST=yes csg_inverse --options settings.xml --do-iterations 1; then
         sleep 1
         [[ -f inverse.log ]] && tail -200 inverse.log
-	die "'csg_inverse --options cg.xml --do-iterations 2' failed in '$t'"
+	die "'csg_inverse --options settings.xml --do-iterations 1' failed in '$t'"
       fi
       popd > /dev/null
     done
