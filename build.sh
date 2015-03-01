@@ -71,6 +71,7 @@
 #version 1.9.0 -- 02.09.14 added --builddir and --ninja
 #version 1.9.1 -- 09.09.14 added --runtest option
 #version 1.9.2 -- 28.12.14 added --gmx-release option and gmx 5.0 support
+#version 1.9.3 -- 01.03.15 dopped support for espressopp
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -266,8 +267,6 @@ get_url() {
         echo "https://code.google.com/p/votca.$2";;
       moo|kmc|ctp*)
         echo "https://code.google.com/p/votca-ctp.$2";;
-      espressopp)
-	echo "https://hg.berlios.de/repos/espressopp";;
       gromacs)
 	echo "git://git.gromacs.org/gromacs";;
     esac
@@ -556,7 +555,7 @@ while [[ $# -gt 0 ]]; do
     shift;;
    -d | --dev)
     dev=yes
-    all_progs="${all_progs} moo kmc ctp ctp-manual ctp-tutorials espressopp"
+    all_progs="${all_progs} moo kmc ctp ctp-manual ctp-tutorials"
     shift 1;;
   -*)
    die "Unknown option '$1'"
