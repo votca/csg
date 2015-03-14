@@ -72,6 +72,7 @@
 #version 1.9.1 -- 09.09.14 added --runtest option
 #version 1.9.2 -- 28.12.14 added --gmx-release option and gmx 5.0 support
 #version 1.9.3 -- 01.03.15 dopped support for espressopp
+#version 1.9.4 -- 13.03.15 moved selfurl to github
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -127,7 +128,7 @@ cmake_gui="$i"
 cmake_builddir="."
 
 rel=""
-selfurl="http://votca.googlecode.com/hg/build.sh"
+selfurl="https://raw.githubusercontent.com/votca/buildutil/master/build.sh"
 clurl="http://www.votca.org/development/changelog-csg"
 pathname="default"
 gromacs_ver="4.6.7" #bump after 1.3 release
