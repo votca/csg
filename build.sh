@@ -73,6 +73,7 @@
 #version 1.9.2 -- 28.12.14 added --gmx-release option and gmx 5.0 support
 #version 1.9.3 -- 01.03.15 dopped support for espressopp
 #version 1.9.4 -- 13.03.15 moved selfurl to github
+#version 1.9.5 -- 20.03.15 added --use-git to support cloning from github
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -126,6 +127,7 @@ for i in cmake-gui ccmake cmake; do
 done
 cmake_gui="$i"
 cmake_builddir="."
+use_git=no
 
 rel=""
 selfurl="https://raw.githubusercontent.com/votca/buildutil/master/build.sh"
@@ -265,7 +267,9 @@ get_url() {
   if [[ $1 = source ]]; then
     case $2 in
       tools|csg*)
-        echo "https://code.google.com/p/votca.$2";;
+	[[ ${use_git} =  yes ]] && \
+          echo "git://github.com/votca/$2" || \
+          echo "https://code.google.com/p/votca.$2";;
       moo|kmc|ctp*)
         echo "https://code.google.com/p/votca-ctp.$2";;
       gromacs)
@@ -389,6 +393,8 @@ ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) i
 ADV                         Default: $cmake
 ADV     $(cecho GREEN --ninja)             Use ninja instead of make
 ADV                         Default: $cmake
+ADV     $(cecho GREEN --use-git)           Use git instead of hg
+ADV                         Default: $use_git
 ADV     $(cecho GREEN --builddir) $(cecho CYAN DIR)      Do an out-of-source build in $(cecho CYAN DIR)
 ADV                         Default: $cmake_builddir
         $(cecho GREEN --gui)               Use cmake with gui (same as $(cecho GREEN --cmake) $(cecho CYAN $cmake_gui))
@@ -486,6 +492,9 @@ while [[ $# -gt 0 ]]; do
      shift 2;;
    --ninja)
      cmake_opts+=( -G Ninja )
+     shift 1;;
+   --use-git)
+     use_git="yes"
      shift 1;;
    --warn-to-errors)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
@@ -629,7 +638,7 @@ for prog in "${progs[@]}"; do
     [[ -z $(get_url source $prog) ]] && die "I don't know the source url of $prog - get it yourself and put it in dir $prog"
     cecho BLUE "Doing checkout for $prog from $(get_url source $prog)"
     countdown 5
-    if [[ $(get_url source $prog) != git* ]]; then
+    if [[ $(get_url source $prog) != *git* ]]; then
       [[ -z "$(type -p "$HG")" ]] && die "Could not find $HG, please install mercurial (http://mercurial.selenic.com/)"
       "$HG" clone "$(get_url source $prog)" "$prog"
     else
@@ -644,19 +653,32 @@ for prog in "${progs[@]}"; do
 	cecho BLUE "No stable branch found, skipping switching!"
       fi
     elif [[ -d ${prog}/.git ]]; then
+      pushd "$prog" > /dev/null || die "Could not change into $prog"
       #TODO add support for other branches
-      if [[ $gromacs_ver = 5.0* ]]; then
-        "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-5-0 --track origin/release-5-0
-      elif [[ $gromacs_ver = 4.6* ]]; then
-        "$GIT" --work-tree=$prog --git-dir=$prog/.git checkout -b release-4-6 --track origin/release-4-6
+      if [[ $prog = gromacs ]]; then 
+        if [[ $gromacs_ver = 5.0* ]]; then
+          "$GIT" checkout release-5-0
+        elif [[ $gromacs_ver = 4.6* ]]; then
+          "$GIT" checkout release-4-6
+        else
+          die "Only gromacs 4.6 and 5.0 are supported, yet"
+        fi
       else
-	die "Only gromacs 4.6 and 5.0 are supported, yet"
+        if [[ -n $("$GIT" branch --list stable) || -n $("$GIT" branch -r --list origin/stable) ]]; then
+          cecho BLUE "Switching to stable branch add --dev option to prevent that"
+          "$GIT" checkout stable
+        else
+          cecho BLUE "No stable branch found, skipping switching!"
+        fi
       fi
+      popd > /dev/null || die "Could not change back"
     fi
   fi
 
   pushd "$prog" > /dev/null || die "Could not change into $prog"
   if [[ $do_update == "yes" || $do_update == "only" ]]; then
+    [[ $(get_url source $prog) = *git* && -d .hg ]] && \
+      die "You cannot use git to update an hg repository, please drop the --use-git option or re-clone $prog by removing it first ('rm -r $prog')"
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
@@ -702,8 +724,18 @@ for prog in "${progs[@]}"; do
     fi
     [[ $branch = $($HG branch) ]] || cecho PURP "You are mixing branches: '$branch' vs '$($HG branch)'"
   elif [[ -d .git && $branchcheck = "yes" ]]; then
-    [[ $("$GIT" rev-parse --abbrev-ref HEAD) != release-@(4-6|5-0) ]] && \
-      die "We only support release branches 4.6 and higher in gromacs! Please checkout one of these, preferably the 5.0 release with: 'cd gromacs; git checkout release-5-0' (disable this check with the --no-branchcheck option)"
+    if [[ $prog = gromacs ]]; then
+      [[ $("$GIT" rev-parse --abbrev-ref HEAD) != release-@(4-6|5-0) ]] && \
+        die "We only support release branches 4.6 and higher in gromacs! Please checkout one of these, preferably the 5.0 release with: 'cd gromacs; git checkout release-5-0' (disable this check with the --no-branchcheck option)"
+    else
+      [[ -z $branch ]] && branch="$("$GIT" rev-parse --abbrev-ref HEAD)"
+      [[ $dev = "no" ]] && [[ -n $($GIT branch --list stable) || -n $("$GIT" branch -r --list origin/stable) ]] && [[ $($GIT rev-parse --abbrev-ref HEAD) != "stable" ]] && \
+        die "We build the stable version of $prog, but we are on branch $($GIT rev-parse --abbrev-ref HEAD) and not 'stable'. Please checkout the stable branch with 'git checkout stable' or add --dev option (disable this check with the --no-branchcheck option)"
+      [[ $dev = "yes" && $("$GIT" rev-parse --abbrev-ref HEAD) = "stable" ]] && \
+	die "We build the devel version of $prog, but we are on the stable branch. Please checkout a devel branch like default with 'git checkout master' (disable this check with the --no-branchcheck option)"
+      #prevent to build devel csg with stable tools and so on
+      [[ $branch != $("$GIT" rev-parse --abbrev-ref HEAD) ]] && die "You are mixing branches: '$branch' (in $last_prog) vs '$("$GIT" rev-parse --abbrev-ref HEAD) (in $prog)' (disable this check with the --no-branchcheck option)\n You can change the branch with 'git checkout BRANCHNAME'."
+    fi
   fi
   if [ "$do_clean_ignored" = "yes" ]; then
     if [[ -d .hg || -d .git ]]; then
