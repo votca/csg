@@ -271,7 +271,9 @@ get_url() {
           echo "git://github.com/votca/$2" || \
           echo "https://code.google.com/p/votca.$2";;
       moo|kmc|ctp*)
-        echo "https://code.google.com/p/votca-ctp.$2";;
+	[[ ${use_git} =  yes ]] && \
+          echo "git://github.com/votca/$2" || \
+          echo "https://code.google.com/p/votca-ctp.$2";;
       gromacs)
 	echo "git://git.gromacs.org/gromacs";;
     esac
@@ -663,7 +665,7 @@ for prog in "${progs[@]}"; do
         else
           die "Only gromacs 4.6 and 5.0 are supported, yet"
         fi
-      else
+      elif [[ ${dev} = "no" ]]; then
         if [[ -n $("$GIT" branch --list stable) || -n $("$GIT" branch -r --list origin/stable) ]]; then
           cecho BLUE "Switching to stable branch add --dev option to prevent that"
           "$GIT" checkout stable
