@@ -373,7 +373,7 @@ ADV     $(cecho GREEN --no-cmake)          Do not run cmake
 ADV $(cecho GREEN -D)$(cecho CYAN '*')                     Extra cmake options (maybe multiple times)
 ADV                         Do NOT put variables (XXX=YYY) here, just use environment variables
 ADV     $(cecho GREEN --minimal)           Build with minimum deps
-ADV                         $(cecho GREEN -D)$(cecho CYAN WITH_FFTW=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GSL=OFF) $(cecho GREEN -D)$(cecho CYAN BUILD_MANPAGES=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GMX=OFF))
+ADV                         $(cecho GREEN -D)$(cecho CYAN WITH_FFTW=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GSL=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_MKL=OFF) $(cecho GREEN -D)$(cecho CYAN BUILD_MANPAGES=OFF) $(cecho GREEN -D)$(cecho CYAN WITH_GMX=OFF))
 ADV                         Functionality, which is really needed can explicitly be enabled again with $(cecho GREEN -D)$(cecho CYAN XXX=)$(cecho BLUE ON)
 ADV $(cecho GREEN -R), $(cecho GREEN --no-rpath)          Remove rpath from the binaries (cmake default)
 ADV     $(cecho GREEN --no-clean)          Don't run make clean
@@ -540,7 +540,7 @@ while [[ $# -gt 0 ]]; do
     cmake_opts+=( -D"${2}" )
     shift 2;;
   --minimal)
-    cmake_opts+=( --no-warn-unused-cli -DWITH_FFTW=OFF -DWITH_GSL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF )
+    cmake_opts+=( --no-warn-unused-cli -DWITH_FFTW=OFF -DWITH_GSL=OFF -DWITH_MKL=OFF -DBUILD_MANPAGES=OFF -DWITH_GMX=OFF -DWITH_SQLITE3=OFF )
     shift;;
    --release)
     rel="$2"
