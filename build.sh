@@ -74,6 +74,7 @@
 #version 1.9.3 -- 01.03.15 dopped support for espressopp
 #version 1.9.4 -- 13.03.15 moved selfurl to github
 #version 1.9.5 -- 20.03.15 added --use-git to support cloning from github
+#version 1.9.6 -- 27.06.15 added --use-hg
 
 #defaults
 usage="Usage: ${0##*/} [options] [progs]"
@@ -394,9 +395,11 @@ ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all
 ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
 ADV     $(cecho GREEN --ninja)             Use ninja instead of make
-ADV                         Default: $cmake
+ADV                         Default: cmake's default (make)
 ADV     $(cecho GREEN --use-git)           Use git instead of hg
 ADV                         Default: $use_git
+ADV     $(cecho GREEN --use-hg)            Use hg instead of git
+ADV                         Default: $([[ $use_git = yes ]] && echo no || echo yes)
 ADV     $(cecho GREEN --builddir) $(cecho CYAN DIR)      Do an out-of-source build in $(cecho CYAN DIR)
 ADV                         Default: $cmake_builddir
         $(cecho GREEN --gui)               Use cmake with gui (same as $(cecho GREEN --cmake) $(cecho CYAN $cmake_gui))
@@ -497,6 +500,9 @@ while [[ $# -gt 0 ]]; do
      shift 1;;
    --use-git)
      use_git="yes"
+     shift 1;;
+   --use-hg)
+     use_git="no"
      shift 1;;
    --warn-to-errors)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Werror' )
@@ -603,6 +609,7 @@ cecho BLUE "Using $j jobs for make"
 
 [[ $do_prefix_clean = "yes" ]] && prefix_clean
 
+#drop after 1.3 release
 if [[ $dev = no && $gromacs_ver = 5.0* ]]; then 
   cecho BLUE "Auto-adding WITH_GMX_DEVEL=ON to cmake option as gromacs 5.0 is being used" 
   cmake_opts+=( -DWITH_GMX_DEVEL=ON ) #remove after 1.3 is released
@@ -680,7 +687,9 @@ for prog in "${progs[@]}"; do
   pushd "$prog" > /dev/null || die "Could not change into $prog"
   if [[ $do_update == "yes" || $do_update == "only" ]]; then
     [[ $(get_url source $prog) = *git* && -d .hg ]] && \
-      die "You cannot use git to update an hg repository, please drop the --use-git option or re-clone $prog by removing it first ('rm -r $prog')"
+      die "You cannot use git to update an hg repository, please drop the --use-git option, add the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
+    [[ $(get_url source $prog) != *git* && -d .git ]] && \
+	    die "You cannot use hg to update an git repository, please add the --use-git, drop the --use-hg option or re-clone $prog by removing it first ('rm -r $prog')"
     if [ -n "$rel" ]; then
       cecho BLUE "Update of a release tarball doesn't make sense, skipping"
       countdown 5
@@ -812,7 +821,7 @@ for prog in "${progs[@]}"; do
   if [ "$do_dist" = "yes" ]; then
     cecho GREEN "packing $prog"
     [[ -n $distext && $prog != "tools" ]] && die "pristine distribution can only be done for votca tools"
-    #if we are here we know that make and make installed worked
+    #if we are here we know that make and make install worked
     if [ -f manual.tex ]; then
       ver="$(sed -n 's/VER=[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' Makefile)" || die "Could not get version of the manual"
       [ -z "${ver}" ] && die "Version of the manual was empty"
