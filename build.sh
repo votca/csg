@@ -506,7 +506,8 @@ while [[ $# -gt 0 ]]; do
      use_git="no"
      shift 1;;
    --warn-to-errors)
-    cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall -Werror' )
+    cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall' )
+    #cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall -Werror' )
     shift ;;
    -R | --no-rpath)
     rpath_opt=""
