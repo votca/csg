@@ -391,7 +391,8 @@ ADV     $(cecho GREEN --dist)              Create a dist tarball and move it her
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=OFF))
 ADV     $(cecho GREEN --dist-pristine)     Create a pristine dist tarball (without bundled libs) and move it here
 ADV                         (implies $(cecho GREEN --warn-to-errors) and $(cecho GREEN -D)$(cecho CYAN EXTERNAL_BOOST=ON))
-ADV     $(cecho GREEN --warn-to-errors)    Turn all warning into errors (adding '-Wall -Werror' to CXXFLAGS)
+ADV     $(cecho GREEN --warn-to-errors)    Turn all warnings into errors (same as  $(cecho GREEN -D)$(cecho CYAN CMAKE_CXX_FLAGS=\'-Wall -Werror\'))
+ADV     $(cecho GREEN --Wall)              Show more warnings (same as $(cecho GREEN -D)$(cecho CYAN CMAKE_CXX_FLAGS=-Wall))
 ADV     $(cecho GREEN --devdoc)            Build a combined html doxygen for all programs (useful with $(cecho GREEN -U))
 ADV     $(cecho GREEN --cmake) $(cecho CYAN CMD)         Use $(cecho CYAN CMD) instead of cmake
 ADV                         Default: $cmake
@@ -505,9 +506,11 @@ while [[ $# -gt 0 ]]; do
    --use-hg)
      use_git="no"
      shift 1;;
-   --warn-to-errors)
+   --Wall)
     cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall' )
-    #cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall -Werror' )
+    shift ;;
+   --warn-to-errors)
+    cmake_opts+=( -DCMAKE_CXX_FLAGS='-Wall -Werror' )
     shift ;;
    -R | --no-rpath)
     rpath_opt=""
