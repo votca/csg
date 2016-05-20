@@ -31,7 +31,9 @@ name="$(csg_get_interaction_property name)"
 mol="$(csg_get_interaction_property inverse.optimizer.density.molname)"
 axis="$(csg_get_interaction_property inverse.optimizer.density.axis)"
 step="$(csg_get_interaction_property inverse.optimizer.density.step)"
-opts=( "--molname" "$mol" "--axis" "$axis" "--step" "$step" )
+# added scale
+scale="$(csg_get_interaction_property inverse.optimizer.density.scale)"
+opts=( "--molname" "$mol" "--axis" "$axis" "--step" "$step" "--scale" "$scale")
 do_external density ${sim_prog} "${name}.density.new" "${opts[@]}"
 
 [[ -f ${name}.density.new ]] || die "${0##*/}: Could not calculate ${name}.density.new"
