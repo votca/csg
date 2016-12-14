@@ -32,9 +32,19 @@ for_all non-bonded 'cp_from_main_dir --rename $(csg_get_interaction_property nam
 # copy target distribution files from main dir and rename them to .dist.new
 #for_all non-bonded 'cp_from_main_dir --rename $(csg_get_interaction_property inverse.target) $(csg_get_interaction_property name).dist.new'
 
+
+
 sim_prog="$(csg_get_property cg.inverse.program)"
 
 # run csg_reupdate to generate intital potential tables
 msg --color green "Generating potential tables from the initial parameters"
 critical csg_reupdate --gentable true --param-in-ext param.new --options $CSGXMLFILE
 critical do_external post_update re
+
+# get permittivity value from last step and make it current parameters
+if [[ $(csg_get_property cg.inverse.permittivity) = true ]]; then
+  cp_from_main_dir --rename permittivity.initial permittivity.updated
+fi
+
+
+

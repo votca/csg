@@ -1,18 +1,7 @@
-/* 
- * Copyright 2009-2016 The VOTCA Development Team (http://www.votca.org)
+/*
+ * Author: sikandar
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Created on November 8, 2011, 11:52 PM
  */
 
 #ifndef POTENTIALFUNCTIONLJ126_H
@@ -34,9 +23,11 @@ public:
 	const double max_=10.0);
     ~PotentialFunctionLJ126(){};
     // calculate function value for given r
+    double CalculateV (const double r) const;
     double CalculateF (const double r) const;
     // calculate first derivative w.r.t. ith parameter
     double CalculateDF(const int i, const double r) const;
+    double CalculateDV(const int i, const double r) const;
     // calculate second derivative w.r.t. ith parameter
     double CalculateD2F(const int i, const int j, const double r) const;
 

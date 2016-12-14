@@ -61,4 +61,4 @@ p_now=$(echo "$output" | sed -n 's/^Pressure[^-0-9]*\(\(-\?[0-9][^[:space:]]*[0-
 [[ $p_now = nan && $(csg_get_property cg.inverse.gromacs.g_energy.pressure.allow_nan) = no ]] && \
   die "${0##*/}: Pressure was nan, check your simulation (this usually means system has blow up -> use pre simulation)"
 
-echo "Pressure=${p_now}" > "$1"
+echo "${p_now}" > "$1"

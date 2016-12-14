@@ -1,18 +1,9 @@
-/* 
- * Copyright 2009-2016 The VOTCA Development Team (http://www.votca.org)
+/*
+ * File:   main.cpp
+ * Author: mashaya1 moradza2
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Created on October 13, 2011, 10:52 PM
+ * Modified on September 15, 2016, 7:14 PM
  */
 
 #include <cstdlib>
@@ -91,10 +82,13 @@ void CsgREupdate::BeginEvaluate(Topology *top, Topology *top_atom){
     int id = _potentials.size();
 
     PotentialInfo *i = new PotentialInfo(id,false,_nlamda,_param_in_ext,*iter,_gentable);
-
+    _volume = top->BoxVolume();
     Table *aardf = new Table();
+    Table *cgrdf = new Table();
     aardf->Load(name + ".dist.tgt");
+    cgrdf->Load(name + ".dist.new");
     _aardfs.push_back(aardf);
+    _cgrdfs.push_back(cgrdf);
 
     // generate the bead lists
     BeadList beads1, beads2;
@@ -119,7 +113,7 @@ void CsgREupdate::BeginEvaluate(Topology *top, Topology *top_atom){
       *rdfnorm = (beads1.size() * beads2.size()) / top->BoxVolume();
 
     _aardfnorms.push_back(rdfnorm);
-
+    _cgrdfnorms.push_back(rdfnorm);
     // let user know the properties of CG potential he/she selected
     cout << "We have " << i->potentialName << " CG potential" << endl;
     cout << "\t \t Between beads " << i->type1 << "-" << i->type2 << endl;
@@ -129,23 +123,27 @@ void CsgREupdate::BeginEvaluate(Topology *top, Topology *top_atom){
     cout << "Potential range:" << endl;
     cout << "\t \t rmin    = " << i->rmin << " [nm]" << endl;
     cout << "\t \t rcutoff = " << i->rcut << " [nm]" << endl;
-
+    
     // update parameter counter
     _nlamda += i->ucg->getOptParamSize();
 
     _potentials.push_back(i);
 
   }
+   //Check if Permittivity is goingt to be optimized and increase number of parameters by one 
+  _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+  if (_PERMITTIVITY && !_gentable){
+      _nlamda =_nlamda +1;
+ }
 
   cout << "Total number of parameters to optimize: " << _nlamda << endl;
 
-  _lamda.resize(_nlamda,false);
-
+  _lamda.resize(_nlamda,true);
+  cout<<"is it working"<<endl;
   // need to store initial guess of parameters in _lamda
   PotentialContainer::iterator potiter;
   for (potiter = _potentials.begin();
        potiter != _potentials.end(); ++potiter){
-
     int pos_start = (*potiter)->vec_pos;
     int pos_max  = pos_start + (*potiter)->ucg->getOptParamSize();
 
@@ -157,27 +155,44 @@ void CsgREupdate::BeginEvaluate(Topology *top, Topology *top_atom){
     } // end row loop
 
   }// end potiter loop
+  //Determine intial value and position of permittivity
+  if (_PERMITTIVITY){
+     std::ifstream ofs("permittivity.current", std::ofstream::in);
+     double num;
+     ofs >> num;
+     cout<<"The initial value of permittiivity is :"<<num<<endl;
+     num = 1/num;
+     _lamda(_nlamda-1)=num;//push_back(ofs>>num); 
+     ofs.close();
 
-  _DS.resize(_nlamda,false);
+     
+   }  
+   
+  _DS.resize(_nlamda,true);
   _DS.clear();
-  _HS.resize(_nlamda,false);
+  _HS.resize(_nlamda,true);
   _HS.clear();
-  _dUFrame.resize(_nlamda,false);
+  _dUFrame.resize(_nlamda,true);
   _dUFrame.clear();
   _nframes = 0.0; // no frames processed yet!
-
+  // cout<<" is it working"<<endl;
   // set Temperature
   _beta = (1.0/_options.get("cg.inverse.kBT").as<double>());
 
   // relaxation parameter for update
   _relax = _options.get("cg.inverse.scale").as<double>();
-
   // whether to take steepest descent in case of non-symmetric positive H
   //_dosteep = _options.get("cg.inverse.re.do_steep").as<bool>();
 
   _UavgAA = 0.0;
   _UavgCG = 0.0;
-
+  _UavgQ  = 0.0;
+  _dUavgQ = 0.0;
+  
+  _DVirial.resize(_nlamda,true);
+  _DVirial.clear();
+  
+  
 }
 
 void CsgREupdate::Run(){
@@ -211,6 +226,12 @@ void CsgREupdate::Run(){
       _potentials.push_back(i);
 
     }
+     // check permittiviy and update number of parameters
+     _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+     if (_PERMITTIVITY){
+        _nlamda +=1;
+     }
+
 
     WriteOutFiles();
 
@@ -225,15 +246,22 @@ void CsgREupdate::EndEvaluate(){
 
   //formulate _HS dlamda = - _DS
 
+  cout<<"**************** starting EndEvaluate *************"<<endl;
+  CoulombicCal();
   REFormulateLinEq();
 
+
   cout << "Updating parameters" << endl;
+  cout << "DS for Electrostic is "<<_DS(_nlamda-1)<<"    HS is  :: "<<_HS(_nlamda-1,_nlamda-1)<<endl;
   REUpdateLamda();
 
   cout << "AA Ensemble Avg Energy :: " << _UavgAA << endl;
   cout << "CG Ensemble Avg Energy :: " << _UavgCG << endl;
-
-  WriteOutFiles();
+/*  cout << "CG Ensemble Avg Short-range Electrostatic :: "<< _UavgQ <<endl;
+  double pout;
+  pout = _pressure * 16.603;
+  cout << "Pressure based on CG RDF is equal to :: " << pout <<endl;
+*/WriteOutFiles();
 
   cout <<"Finished RE update!\n";
 
@@ -263,6 +291,35 @@ void CsgREupdate::WriteOutFiles()
           (*potiter)->ucg->SaveParam(file_name);
         }
     }
+    // check permittiviy and update number of parameters
+    _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+    if(_PERMITTIVITY && !_gentable){
+       double num;
+       num = 1./_lamda(_nlamda-1);
+       cout<< "Writing permittivity value out"<<file_name<<"the value of permittivity is "<<num<<endl;
+       std::ofstream ofs;
+       ofs.open("permittivity.updated",std::ofstream::out);
+       ofs << num;
+       ofs.close();
+
+    
+    }
+    /*
+    _PRESSURE = _options.get("cg.inverse.pressure").as<bool>();
+    if (_PRESSURE ){
+      std::ofstream ofs;
+      double D, K, Vi;
+      D = _options.get("cg.inverse.DOF").as<int>();
+      K = D/(2*_beta);
+      Vi = _Vavg / _volume;
+      double pwrite;
+      pwrite = _pressure * 16.6054;
+      ofs.open("pressure.new", std::ofstream::out);
+      ofs<<pwrite<<"\t pressure [bar]"<<endl;
+      ofs<<K<<"kinetic energy [kj]"<<endl;
+      ofs<<Vi<<"Virial per volume"<<endl;
+      ofs.close();
+      }*/
 }
 
 // formulate _HS x = -_DS
@@ -275,24 +332,24 @@ void CsgREupdate::REFormulateLinEq() {
   _DS /= ( (double)_nframes );
   _HS /= ( (double)_nframes );
   _UavgCG /= ( (double)_nframes );
-
+   
   /* adding 4th term in eq. 52 of ref J. Chem. Phys. 134, 094112, 2011
    * to _HS
    */
+  cout<<"REFormulation is on progress"<<"DS"<<_DS(_nlamda-1)<<"HS  :"<<_HS(_nlamda-1,_nlamda-1)<<endl;
   for( int row = 0; row < _nlamda; row++) {
 
-    for( int col = row; col < _nlamda; col++){
-
+   //for( int col = row; col < _nlamda; col++){
+   for( int col = row; col < _nlamda; col++){
       _HS(row,col) += (-1.0 * _DS(row) * _DS(col));
       // since at this step _DS(i) = -beta*<dU/dlamda_i>cg
-
     }// end loop over col
-
   } // end loop over row
 
     /* adding 1st term (i.e. aa ensemble avg) of eq. 51 to _DS
      * and of eq. 52 to _DH
      */
+ 
   PotentialContainer::iterator potiter;
   for (potiter = _potentials.begin();
        potiter != _potentials.end(); ++potiter){
@@ -302,9 +359,22 @@ void CsgREupdate::REFormulateLinEq() {
       AAavgBonded(potinfo);
     else
       AAavgNonbonded(potinfo);
-
   }
+  
+  _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+  if(_PERMITTIVITY)
+      AAavgElectrostatic( );
 
+  _PRESSURE = _options.get("cg.inverse.pressure").as<bool>();
+  if (_PRESSURE){
+        cout<< "entering pressure optimization"<<endl;
+  	PotentialContainer::iterator potiter;
+        for (potiter = _potentials.begin();
+          potiter != _potentials.end(); ++potiter){
+          PotentialInfo *potinfo = *potiter;          
+	      VirialCalSR(potinfo);
+	} 
+  } // end of loop for pressure optimization
 }
 
 // update lamda = lamda + relax*dlamda
@@ -314,14 +384,19 @@ void CsgREupdate::REUpdateLamda() {
   ub::vector<double> dlamda(_nlamda);
   dlamda.clear();
   ub::vector<double> minusDS(_nlamda);
-
+  cout<<"size of parameter file is "<< _nlamda<<endl;
+  //cout<<"HS" << _HS(_nlamda-1,_nlamda-1)<<endl;
   // since linalg_cholesky_solve takes full matrix
   // copy symmetric _HS to full matrix HS_
   ub::matrix<double> HS_(_nlamda,_nlamda);
+  ub::matrix<double> HS2_(_nlamda, _nlamda);
   for(int row = 0; row < _nlamda; row++)
-    for(int col = 0; col<_nlamda; col++)
+    //for(int col=0; col <_nlamda; col ++)
+    for(int col = 0; col<_nlamda; col++){
+     // cout<<col<<"\t"<<row<<"\t"<<_HS(row,col)<<endl;
       HS_(row,col) = _HS(row,col);
-
+      HS2_(row, col) = _HS(row,col);
+      }
   minusDS = -_DS;
 
   try {
@@ -360,9 +435,44 @@ void CsgREupdate::REUpdateLamda() {
       }
 
   }
+  _PRESSURE = _options.get("cg.inverse.pressure").as<bool>();
+  if(_PRESSURE){
+    // dlamda = dlamadaU + dlamdaC;
+    ub::vector<double> dHSB (_nlamda);
+    dHSB.clear();
+    ub::vector<double> B(_nlamda);
+    B= _DVirial / _volume;  // B = dP/dlamada = (1/P_t)*(1/V)*(dVirial/dlamad);
+    _pt = _options.get("cg.inverse.pt").as<double>();
+    _pt = _pt / 16.6054 ;
+    B = B/_pt; // B calculation done refer to CERN HandBook on Lagrang Multiplier
+    // for (int i = 0; i <_nlamda; i++)
+    //     cout << i<<"jacobian is equal to" << B(i) <<endl;
+   std::ifstream ifile ("CGMDPressure.new", std::ios::in);
+   double CGMDPressure;
+   ifile >> CGMDPressure;
+   CGMDPressure = CGMDPressure / 16.6054;
+   cout << "CGMDPressure =\t"<<CGMDPressure<<endl;
+   cout << "Target Pressure \t"<<_pt<<endl;
+   B = B*((CGMDPressure-_pt)/_pt);
+   votca::tools::linalg_cholesky_solve(dHSB, HS2_, B);
+   ifile.close(); 
+    double M = 0;
+    double UC = 0;
+    for ( int i =0; i <_nlamda; i++){
+       M  += B(i)*dHSB(i);
+       UC += B(i)*dlamda(i);
+    }
+    ub::vector<double> dlamdaC (_nlamda);
+    dlamdaC.clear();
+  
+    for (int i =0; i < _nlamda; i++){
+       dlamdaC(i) = - dHSB(i) * (   0.5*((CGMDPressure-_pt)/_pt)*(( CGMDPressure-_pt)/_pt)  +  UC) / M;
+    }
+    dlamda = dlamda + dlamdaC;
 
+  }
   _lamda = _lamda + _relax * dlamda ;
-
+  cout<<"Error is for sure in this loop"<<endl;
   // now update parameters of individual cg potentials
   PotentialContainer::iterator potiter;
   for (potiter = _potentials.begin();
@@ -377,10 +487,15 @@ void CsgREupdate::REUpdateLamda() {
       (*potiter)->ucg->setOptParam(lamda_i,_lamda(row));
 
     } // end row loop
+  cout<<"Error can be from this loop"<<endl;
 
   }// end potiter loop
+  cout<<"Error is not in this loop"<<endl;
 
 }
+
+
+
 
 // do non bonded potential AA ensemble avg energy computations
 void CsgREupdate::AAavgNonbonded(PotentialInfo* potinfo) {
@@ -436,7 +551,7 @@ void CsgREupdate::AAavgNonbonded(PotentialInfo* potinfo) {
     } // end loop over hist
 
     _DS(row) += ( _beta * dU_i );
-
+    //for( int col = row; col < pos_max; col++){
     for( int col = row; col < pos_max; col++){
 
       lamda_j = col - pos_start;
@@ -466,6 +581,15 @@ void CsgREupdate::AAavgNonbonded(PotentialInfo* potinfo) {
 
 }
 
+// do Electrostatic potential AA ensemble avg energy computations
+
+void CsgREupdate::AAavgElectrostatic() {
+        double UAACol;
+        UAACol = _options.get("cg.inverse.UAACol").as<double>();
+        _DS(_nlamda-1) += ( _beta * UAACol ); 
+	  // d2U/dA  is zero as d U_elec / dA = function(r) => d2U/dA =0
+}
+
 // do bonded potential AA ensemble avg energy computations
 void CsgREupdate::AAavgBonded(PotentialInfo* potinfo) {
 }
@@ -485,12 +609,15 @@ CsgApplication::Worker * CsgREupdate::ForkWorker(){
     PotentialInfo *i = new PotentialInfo(worker->_potentials.size(),false,worker->_nlamda,_param_in_ext, *iter);
     // update parameter counter
     worker->_nlamda += i->ucg->getOptParamSize();
-
     worker->_potentials.push_back(i);
 
   }
-
-  worker->_lamda.resize(worker->_nlamda,false);
+  //Check for permittivity and if true then increase number of parameters
+  _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+  if(_PERMITTIVITY)
+	worker->_nlamda +=1;
+  cout<<"I have   "<< _nlamda << "parameters inside my worker"<<endl;
+  worker->_lamda.resize(worker->_nlamda,true);
 
   // need to store initial guess of parameters in _lamda
   PotentialContainer::iterator potiter;
@@ -509,11 +636,11 @@ CsgApplication::Worker * CsgREupdate::ForkWorker(){
 
   }// end potiter loop
 
-  worker->_DS.resize(worker->_nlamda,false);
+  worker->_DS.resize(worker->_nlamda,true);
   worker->_DS.clear();
-  worker->_HS.resize(worker->_nlamda,false);
+  worker->_HS.resize(worker->_nlamda,true);
   worker->_HS.clear();
-  worker->_dUFrame.resize(worker->_nlamda,false);
+  worker->_dUFrame.resize(worker->_nlamda,true);
   worker->_dUFrame.clear();
   worker->_nframes = 0.0; // no frames processed yet!
   // set Temperature
@@ -549,42 +676,61 @@ void CsgREupdateWorker::EvalConfiguration(Topology *conf, Topology *conf_atom){
    * hence store current frame dU/dlamda in _dUFrame!
    */
 
-  _dUFrame.clear();
+   _dUFrame.clear();
+   _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+   if (_PERMITTIVITY){
+       int n_frames, cnt;
+       cnt = 0;
+       double num2;
+       std::ifstream col("Coul_pot.new", std::ofstream::in);
+       col >> n_frames;
+       col >> num2;
+       while (cnt != _nframes){
+          cnt++; // put checking stuff here 
+	  col >> num2;
+       }	
+      // cout<<_nframes<<"\t"<<num2<<"\t"<<cnt<<"\t"<<_lamda(_nlamda-1)<<endl;
+       col.close();
+       
+       std::ifstream ofs("permittivity.current", std::ofstream::in);
+       double num;
+       ofs >> num;
+       //cout<<"The initial value of permittiivity is :"<<num<<endl;
+       ofs.close();
 
-  PotentialContainer::iterator potiter;
-  for (potiter = _potentials.begin();
+       _dUFrame(_nlamda-1) = num2*num;
+       //cout<<_lamda(_nlamda-1)<<"t"<<(_nlamda-1)<<endl;
+   }
+   PotentialContainer::iterator potiter;
+   for (potiter = _potentials.begin();
        potiter != _potentials.end(); ++potiter){
 
     PotentialInfo *potinfo = *potiter;
-
     if( potinfo->bonded )
       EvalBonded(conf, potinfo);
     else
       EvalNonbonded(conf,potinfo);
 
-  }
-
+   }
+  
   // update _DS and _HS
   for (int row = 0; row < _nlamda; row++) {
-
     _DS(row) += (-1.0 * _beta * _dUFrame(row));
-
     for (int col = row; col < _nlamda; col++)
+    //for (int col = row; col < row+1; col++)
       _HS(row, col) += ( _beta * _beta * _dUFrame(row) * _dUFrame(col));
-
   }
 
   _nframes++;
 
 }
-
 //do nonbonded potential related update stuff for the current frame in evalconfig
 void CsgREupdateWorker::EvalNonbonded(Topology* conf, PotentialInfo* potinfo) {
 
   BeadList beads1, beads2;
   beads1.Generate(*conf, potinfo->type1);
   beads2.Generate(*conf, potinfo->type2);
-
+  
   if(beads1.size() == 0)
     throw std::runtime_error("Topology does not have beads of type \""
                              + potinfo->type1 + "\"\n"
@@ -627,20 +773,22 @@ void CsgREupdateWorker::EvalNonbonded(Topology* conf, PotentialInfo* potinfo) {
   int lamda_i, lamda_j;
   double dU_i, d2U_ij;
   double U;
-
+  
+  // Electrostatic Vriable
   // compute total energy
   U = 0.0;
-  for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter)
+  for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter){
     U += potinfo->ucg->CalculateF((*pair_iter)->dist());
-
+  }
+  
   _UavgCG += U;
 
   // computing dU/dlamda and d2U/dlamda_i dlamda_j
   for (int row = pos_start; row < pos_max; row++) {
 
-    lamda_i = row - pos_start;
+	  lamda_i = row - pos_start;
 
-    dU_i = 0.0;
+	  dU_i = 0.0;
     for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter)
       dU_i += potinfo->ucg->CalculateDF(lamda_i, (*pair_iter)->dist());
 
@@ -654,7 +802,7 @@ void CsgREupdateWorker::EvalNonbonded(Topology* conf, PotentialInfo* potinfo) {
       for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter)
         d2U_ij += potinfo->ucg->CalculateD2F(lamda_i, lamda_j, (*pair_iter)->dist());
 
-      _HS(row, col) += (-1.0 * _beta * d2U_ij);
+
 
     } // end loop col
 
@@ -662,6 +810,30 @@ void CsgREupdateWorker::EvalNonbonded(Topology* conf, PotentialInfo* potinfo) {
 
   delete nb;
 
+}
+
+void CsgREupdate::CoulombicCal(){
+    std::ifstream ofs2("UCol.new", std::ofstream::in);
+    double UCol;
+    ofs2 >> UCol;
+    cout<<"U_Col read from CGMD:"<<UCol<<endl;
+    ofs2.close();
+ /*   
+    std::ifstream ofs3("U2Col.new", std::ofstream::in);
+    double U2Col;
+    ofs3 >> U2Col;
+    cout<<"U2_Col read from CGMD:"<<U2Col<<endl;
+    ofs3.close();
+    
+    _DS(_nlamda-1) = (-1.0 * _nframes * UCol * _beta ) / _lamda(_nlamda-1) ;
+          
+
+    _HS(_nlamda-1,_nlamda-1) = (_nframes * U2Col *  _beta * _beta  ) /(_lamda(_nlamda-1)*_lamda(_nlamda-1)); */
+    _PRESSURE = _options.get("cg.inverse.pressure").as<bool>();
+    if (_PRESSURE){
+  	_DVirial(_nlamda-1) = UCol / (3.0 *_lamda(_nlamda-1));
+        cout<<"Dvirial Coulombic : "<< _DVirial(_nlamda-1)<<endl;
+   } 
 }
 
 //do bonded potential related update stuff for the current frame in evalconfig
@@ -677,20 +849,24 @@ PotentialInfo::PotentialInfo(int index, bool bonded_, int vec_pos_,
   bonded   = bonded_;
   vec_pos  = vec_pos_;
   _options = options;
-
   potentialName = _options->get("name").value();
   type1 = _options->get("type1").value();
   type2 = _options->get("type2").value();
   potentialFunction = _options->get("re.function").value();
-
   rmin = _options->get("min").as<double>();
   rcut = _options->get("max").as<double>();
+  
 
+  //store charge of each pair in q1 and q2
+  
+  
   // assign the user selected function form for this potential
   if( potentialFunction == "lj126")
     ucg = new PotentialFunctionLJ126(potentialName,rmin, rcut);
   else if (potentialFunction == "ljg")
     ucg = new PotentialFunctionLJG(potentialName,rmin, rcut);
+//  else if (potentialFunction =="ljgexp")
+  //  ucg = new PotentialFunctionLJGEXP(potentialName, rmin, rcut);
   else if (potentialFunction == "cbspl")
     {
       // get number of B-splines coefficients which are to be optimized
@@ -740,3 +916,67 @@ PotentialInfo::PotentialInfo(int index, bool bonded_, int vec_pos_,
   string oldparam_file_name = potentialName + "." + param_in_ext_;
   ucg->setParam(oldparam_file_name);
 }
+
+// calcualte virial based on the RDF of AA or CG system
+void CsgREupdate::VirialCalSR(PotentialInfo* potinfo) {
+
+  int pos_start = potinfo->vec_pos;
+  int pos_max   = pos_start + potinfo->ucg->getOptParamSize();
+  int lamda_i;
+  double dV_i;
+//  double V;
+  int indx = potinfo->potentialIndex;
+  _PERMITTIVITY = _options.get("cg.inverse.permittivity").as<bool>();
+  // compute avg AA energy
+//  V = 0.0;
+  
+  // assuming rdf bins are of same size
+  double step = _cgrdfs[indx]->x(2) - _cgrdfs[indx]->x(1);
+
+/*  for(unsigned int bin = 0; bin < _cgrdfs[indx]->size(); bin++) {
+
+    double r_hist = _cgrdfs[indx]->x(bin);
+    double r1 = r_hist - 0.5 * step;
+    double r2 = r1 + step;
+    double n_hist = _cgrdfs[indx]->y(bin) * (*_cgrdfnorms[indx]) *
+      (4. / 3. * M_PI * (r2 * r2 * r2 - r1 * r1 * r1));
+
+    if( n_hist > 0.0 )
+      V +=  (1.0 / 3.0) * n_hist *  potinfo->ucg->CalculateV(r_hist);
+	
+  }
+  _Vavg += V;
+*/
+  // computing dV/dlamda
+  for( int row = pos_start; row < pos_max; row++){
+
+    // ith parameter of this potential
+    lamda_i = row - pos_start;
+
+    // compute dU/dlamda and add to _DS
+    dV_i = 0.0;
+
+    for(unsigned int bin = 0; bin < _cgrdfs[indx]->size(); bin++) {
+
+      double r_hist = _cgrdfs[indx]->x(bin);
+      double r1 = r_hist - 0.5 * step;
+      double r2 = r1 + step;
+      double n_hist = _cgrdfs[indx]->y(bin) * (*_cgrdfnorms[indx]) *
+        (4. / 3. * M_PI * (r2 * r2 * r2 - r1 * r1 * r1));
+
+      if( n_hist > 0.0 )
+        dV_i += (1.0/3.0) * n_hist * potinfo->ucg->CalculateDV(lamda_i,r_hist);
+
+    } // end loop over hist
+    _DVirial(row) +=dV_i;
+   }
+    
+}
+
+
+
+
+
+
+
+
