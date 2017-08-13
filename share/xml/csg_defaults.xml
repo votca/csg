@@ -244,6 +244,9 @@
       <traj>traj.xtc
         <DESC> Gromacs trajectory file to use</DESC>
       </traj>
+      <trjcat>gmx trjcat
+        <DESC> Gromacs trajectory concatenation uitility</DESC>
+      </trjcat>
     </gromacs>
     <hoomd-blue>
       <command>hoomd

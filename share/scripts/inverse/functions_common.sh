@@ -642,22 +642,22 @@ add_to_csgshare() { #added an directory to the csg internal search directories
   for dirlist in "$@"; do
     old_IFS="$IFS"
     IFS=":"
-    for dir in $dirlist; do
+    for dir in ${dirlist}; do
       #dir maybe contains $PWD or something
       eval dir="$dir"
-      [[ -d $dir ]] || die "${FUNCNAME[0]}: Could not find scriptdir $dir"
-      dir="$(globalize_dir "$dir")"
+      [[ -d ${dir} ]] || die "${FUNCNAME[0]}: Could not find scriptdir ${dir}"
+      dir="$(globalize_dir "${dir}")"
       if [[ $end = "yes" ]]; then
-        export CSGSHARE="${CSGSHARE}${CSGSHARE:+:}$dir"
-        export PERL5LIB="${PERL5LIB}${PERL5LIB:+:}$dir"
-        export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}$dir"
+        export CSGSHARE="${CSGSHARE}${CSGSHARE:+:}${dir}"
+        export PERL5LIB="${PERL5LIB}${PERL5LIB:+:}${dir}"
+        export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}${dir}"
       else
-        export CSGSHARE="$dir${CSGSHARE:+:}$CSGSHARE"
-        export PERL5LIB="$dir${PERL5LIB:+:}$PERL5LIB"
-        export PYTHONPATH="$dir${PYTHONPATH:+:}$PYTHONPATH"
+        export CSGSHARE="${dir}${CSGSHARE:+:}${CSGSHARE}"
+        export PERL5LIB="${dir}${PERL5LIB:+:}${PERL5LIB}"
+        export PYTHONPATH="${dir}${PYTHONPATH:+:}${PYTHONPATH}"
       fi
     done
-    IFS="$old_IFS"
+    IFS="${old_IFS}"
   done
   check_path_variable CSGSHARE PERL5LIB PYTHONPATH
 }
