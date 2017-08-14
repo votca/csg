@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+# Copyright 2009-2017 The VOTCA Development Team (http://www.votca.org)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 if [[ $1 = "--help" ]]; then
 cat <<EOF
 ${0##*/}, version %version%
-This script runs a gromacs simulation or pre-simulation
+This script runs a gromacs simulation or pre-simulation with '-multidir' option (see gromacs and VOTCA manuals)
 
 Usage: ${0##*/} [--pre]
 
@@ -44,50 +44,36 @@ mdirs=$(echo ${mdrun_opts} | grep -o "sim" | wc -l)
 
 echo -e "\nCreating/checking simulation data for ${mdirs} separate simulations (run in parallel)"
 
-#confout="confout.gro"
 confout="$(csg_get_property cg.inverse.gromacs.conf_out)"
 
-#conf="conf.gro"
 conf="$(csg_get_property cg.inverse.gromacs.conf)"
-if [[ -f ${conf}.${it} ]]; then
-    critical cp -f "${conf}.${it}" "$conf"
-fi
-[[ -f $conf ]] || die "${0##*/}: gromacs initial configuration file '$conf' not found (make sure it is in cg.inverse.filelist)"
 
-#mdp="grompp.mdp"
 mdp="$(csg_get_property cg.inverse.gromacs.mdp)"
 if [[ -f ${mdp}.${it} ]]; then
     critical cp -f "${mdp}.${it}" "$mdp"
 fi
 [[ -f $mdp ]] || die "${0##*/}: gromacs mdp file '$mdp' not found (make sure it is in cg.inverse.filelist)"
 
-#index="index.ndx"
 index="$(csg_get_property cg.inverse.gromacs.index)"
 if [[ -f ${index}.${it} ]]; then
     critical cp -f "${index}.${it}" "$index"
 fi
 [[ -f $index ]] || die "${0##*/}: grompp index file '$index' not found (make sure it is in cg.inverse.filelist)"
 
-#topol_in="topol.top"
 topol_in="$(csg_get_property cg.inverse.gromacs.topol_in)"
 if [[ -f ${topol_in}.${it} ]]; then
     critical cp -f "${topol_in}.${it}" "$topol_in"
 fi
 [[ -f $topol_in ]] || die "${0##*/}: grompp text topol file '$topol_in' not found (make sure it is in cg.inverse.filelist)"
 
-#traj="traj.xtc"
 traj="$(csg_get_property cg.inverse.gromacs.traj)"
 
-#checkpoint="state.cpt"
 checkpoint="$(csg_get_property cg.inverse.gromacs.mdrun.checkpoint)"
 
-#tpr="topol.tpr"
 tpr="$(csg_get_property cg.inverse.gromacs.topol)"
 
-#mdrun_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.mdrun.opts)"
 grompp_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.grompp.opts)"
 
-#grompp="gmx grompp"
 grompp="$(csg_get_property cg.inverse.gromacs.grompp.bin)"
 [[ -n "$(type -p ${grompp})" ]] && echo "using grompp binary '${grompp}'" || die "${0##*/}: grompp binary '${grompp}' not found (override by cg.inverse.gromacs.grompp.bin)"
 
@@ -142,6 +128,11 @@ else
 
 	    mark_done "Filecopy"
 	fi
+	
+	if [[ -f ${conf}.${it} ]]; then
+    	   critical cp -f "${conf}.${it}" "$conf"
+	fi
+	[[ -f ${conf} ]] || die "${0##*/}: gromacs initial configuration file '${conf}' not found (make sure it is in cg.inverse.filelist)"
 
 	if [[ $1 != "--pre" ]]; then
         #in a presimulation usually do care about traj and temperature
@@ -163,7 +154,7 @@ else
 #	if [[ $(critical ${grompp} -h 2>&1) = *"VERSION 5.0"* && $(get_simulation_setting cutoff-scheme XXX) = XXX ]]; then
 
 	if [[ $(critical ${grompp} -h 2>&1) = *"VERSION 5"* && $(get_simulation_setting cutoff-scheme XXX) = XXX ]]; then
-	   echo "cutoff-scheme = group" >> $mdp
+	   echo "cutoff-scheme = Group" >> $mdp
 	   msg --color blue --to-stderr "Automatically added 'cutoff-scheme = Group' to $mdp, tabulated interactions only work with Group cutoff-scheme!"
 	fi
 
@@ -171,20 +162,13 @@ else
 
 #see if we can run grompp again as checksum of tpr does not appear in the checkpoint
 
-#not using grompp_log, as it seems undefiend by default, so errors (if any) are missing from log/err files
-
 	critical ${grompp} -n "${index}" -f "${mdp}" -p "$topol_in" -o "$tpr" -c "${conf}" ${grompp_opts} 2>&1 
-#| grompp_log "${grompp} -n "${index}" -f "${mdp}" -p "$topol_in" -o "$tpr" -c "${conf}" ${grompp_opts}"
 
 	[[ -f $tpr ]] || die "${0##*/}: gromacs tpr file '$tpr' not found after runing grompp"
 
 	cd ../
 
-#done preparation of simulation task - for ((it=0;it<mdirs;it++)); do ...
     done
-
-    #should be done above
-    #mdrun_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.mdrun.opts)"
 
     mdrun="$(csg_get_property cg.inverse.gromacs.mdrun.command)"
     #no check for mdrun, because mdrun_mpi could maybe exist only on compute nodes
@@ -206,10 +190,7 @@ else
 
     else
 
-#not using gromacs_log, as it seems undefiend by default, so errors (if any) are missing from log/err files
-
 	critical $mdrun -s "${tpr}" -c "${confout}" -o "${traj%.*}".trr -x "${traj%.*}".xtc ${mdrun_opts} 2>&1 
-#| gromacs_log "$mdrun -s "${tpr}" -c "${confout}" -o "${traj%.*}".trr -x "${traj%.*}".xtc ${mdrun_opts}"
 
         simok="YES"
         for ((it=0;it<mdirs;it++)); do
@@ -245,7 +226,6 @@ fi
 
 is_done "Simtasks" || die "${0##*/}: Multi-task simulation appears unfinished (try to restart)."
 
-#trjcat="gmx trjcat"
 trjcat="$(csg_get_property cg.inverse.gromacs.trjcat)"
 [[ -n "$(type -p ${trjcat})" ]] && echo "using trjcat binary '${trjcat}'" || die "${0##*/}: trjcat binary '${trjcat}' not found (override by cg.inverse.gromacs.trjcat)"
 
