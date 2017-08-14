@@ -45,7 +45,7 @@ if [[ ${mdrun_opts} == *multidir* ]]; then
   [[ ${mdirs} -le ${tasks} ]] || die "${0##*/}: mdrun '-multidir' option provided presumes the number of separate simulations greater than the number of tasks/threads (check cg.inverse.gromacs.mdrun.opts)"
 
   do_external run multidir
-  exit
+  exit 0
 
 fi
 
@@ -153,9 +153,9 @@ else
   echo "${0##*/}: No walltime defined, so no time limitation given to $mdrun"
 fi
 
-#gmx-5.1 has new handling of bonded tables - is it true only for ver.5.1 or above too???
-#if [[ ${mdrun_opts} != *tableb* ]]; then
-if [[ $(critical ${grompp} -h 2>&1) = *"VERSION 5.1"* && ${mdrun_opts} != *tableb* ]]; then
+#gmx-5.1 has new handling of bonded tables
+    mdrun_opts
+if [[ ${mdrun_opts} != *tableb* ]]; then
   tables=
   for i in table_[abd][0-9]*.xvg; do
     [[ -f $i ]] && tables+=" $i"
