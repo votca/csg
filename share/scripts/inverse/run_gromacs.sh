@@ -154,7 +154,7 @@ else
 fi
 
 #gmx-5.1 has new handling of bonded tables
-    mdrun_opts
+
 if [[ ${mdrun_opts} != *tableb* ]]; then
   tables=
   for i in table_[abd][0-9]*.xvg; do
