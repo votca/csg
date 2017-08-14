@@ -31,73 +31,43 @@ fi
 tasks=$(get_number_tasks)
 
 mdrun_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.mdrun.opts)"
-
 mdirs=$(echo ${mdrun_opts} | grep -o "sim" | wc -l)
 
 #checks for impossible (due to same checks in run_gromacs.sh)
 
 [[ -n ${mdirs} ]] || die "${0##*/}: mdrun '-multidir' option does not contain directory names including pattern 'sim' (check cg.inverse.gromacs.mdrun.opts)"
-
 [[ ${mdirs} -gt 1 ]] || die "${0##*/}: mdrun '-multidir' option is set but the number of directories including pattern 'sim' <= 1 (check cg.inverse.gromacs.mdrun.opts)"
-
 [[ ${mdirs} -le ${tasks} ]] || die "${0##*/}: mdrun '-multidir' option provided presumes the number of separate simulations greater than the number of tasks/threads (check cg.inverse.gromacs.mdrun.opts)"
 
 echo -e "\nCreating/checking simulation data for ${mdirs} separate simulations (run in parallel)"
 
 confout="$(csg_get_property cg.inverse.gromacs.conf_out)"
-
 conf="$(csg_get_property cg.inverse.gromacs.conf)"
-
 mdp="$(csg_get_property cg.inverse.gromacs.mdp)"
-if [[ -f ${mdp}.${it} ]]; then
-    critical cp -f "${mdp}.${it}" "$mdp"
-fi
-[[ -f $mdp ]] || die "${0##*/}: gromacs mdp file '$mdp' not found (make sure it is in cg.inverse.filelist)"
-
 index="$(csg_get_property cg.inverse.gromacs.index)"
-if [[ -f ${index}.${it} ]]; then
-    critical cp -f "${index}.${it}" "$index"
-fi
-[[ -f $index ]] || die "${0##*/}: grompp index file '$index' not found (make sure it is in cg.inverse.filelist)"
-
 topol_in="$(csg_get_property cg.inverse.gromacs.topol_in)"
-if [[ -f ${topol_in}.${it} ]]; then
-    critical cp -f "${topol_in}.${it}" "$topol_in"
-fi
-[[ -f $topol_in ]] || die "${0##*/}: grompp text topol file '$topol_in' not found (make sure it is in cg.inverse.filelist)"
-
 traj="$(csg_get_property cg.inverse.gromacs.traj)"
-
 checkpoint="$(csg_get_property cg.inverse.gromacs.mdrun.checkpoint)"
-
 tpr="$(csg_get_property cg.inverse.gromacs.topol)"
 
 grompp_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.grompp.opts)"
-
 grompp="$(csg_get_property cg.inverse.gromacs.grompp.bin)"
 [[ -n "$(type -p ${grompp})" ]] && echo "using grompp binary '${grompp}'" || die "${0##*/}: grompp binary '${grompp}' not found (override by cg.inverse.gromacs.grompp.bin)"
 
 if is_done "Simtasks"; then
-
     echo -e "\nAll Simulation tasks done - skipping\n"
-
 else
-
     for ((it=0;it<mdirs;it++)); do
 	this_dir="sim_${it}"
 
 	if [[ -d $this_dir ]]; then
-
 	    cd $this_dir || die "${0##*/}: cd $this_dir failed"
-
 	    if is_done "Simulation"; then 
 		echo -e "\nSimulation task ${it} done - skipping\n"
 		cd ../
 		continue; 
 	    fi
-
 	    cd ../
-
 	else
 	    echo -e "\nSimulation task $it created at $(date)\n"
 	    mkdir -p $this_dir || die "${0##*/}: mkdir -p $this_dir failed (unfinished simulation exists?)"
@@ -134,6 +104,21 @@ else
 	fi
 	[[ -f ${conf} ]] || die "${0##*/}: gromacs initial configuration file '${conf}' not found (make sure it is in cg.inverse.filelist)"
 
+	if [[ -f ${mdp}.${it} ]]; then
+    	   critical cp -f "${mdp}.${it}" "$mdp"
+	fi
+	[[ -f $mdp ]] || die "${0##*/}: gromacs mdp file '$mdp' not found (make sure it is in cg.inverse.filelist)"
+
+	if [[ -f ${index}.${it} ]]; then
+    	   critical cp -f "${index}.${it}" "$index"
+	fi
+	[[ -f $index ]] || die "${0##*/}: grompp index file '$index' not found (make sure it is in cg.inverse.filelist)"
+
+	if [[ -f ${topol_in}.${it} ]]; then
+    	   critical cp -f "${topol_in}.${it}" "$topol_in"
+	fi
+	[[ -f $topol_in ]] || die "${0##*/}: grompp text topol file '$topol_in' not found (make sure it is in cg.inverse.filelist)"
+
 	if [[ $1 != "--pre" ]]; then
         #in a presimulation usually do care about traj and temperature
 	   check_temp || die "${0##*/}: check of tempertures failed"
@@ -161,13 +146,10 @@ else
 	critical cp ../tab*xvg ./
 
 #see if we can run grompp again as checksum of tpr does not appear in the checkpoint
-
 	critical ${grompp} -n "${index}" -f "${mdp}" -p "$topol_in" -o "$tpr" -c "${conf}" ${grompp_opts} 2>&1 
-
 	[[ -f $tpr ]] || die "${0##*/}: gromacs tpr file '$tpr' not found after runing grompp"
 
 	cd ../
-
     done
 
     mdrun="$(csg_get_property cg.inverse.gromacs.mdrun.command)"
