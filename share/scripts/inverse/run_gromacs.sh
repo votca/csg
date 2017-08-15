@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright 2009-2016 The VOTCA Development Team (http://www.votca.org)
+# Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,16 +98,35 @@ if [[ $(csg_get_property cg.inverse.gromacs.pre_simulation) = "yes" && $1 != "--
   msg "Doing main simulation"
 fi
 
-#support for older mdp file, cutoff-scheme = Verlet is default for >=gmx-5 now, but does not work with tabulated interactions
+#support for older mdp file, cutoff-scheme = Verlet is default for Gromacs 5.0, but does not work with tabulated interactions
 #XXX is returned if cutoff-scheme is not in mdp file
-if [[ $(get_simulation_setting cutoff-scheme XXX) = XXX ]]; then
+if [[ $(critical ${grompp[@]} -h 2>&1) = *"VERSION 5."[01]* && $(get_simulation_setting cutoff-scheme XXX) = XXX ]]; then
   echo "cutoff-scheme = Group" >> $mdp
   msg --color blue --to-stderr "Automatically added 'cutoff-scheme = Group' to $mdp, tabulated interactions only work with Group cutoff-scheme!"
 fi
+# Change of mdp file of gromacs in order to optimize Electrostatic interaction in CGMD simulation
+if [[ $(csg_get_property cg.inverse.permittivity) = true ]]; then
+  permittivity=$(awk '{print $1}' permittivity.current | tail -n 1)
+  echo "deleting current value of epsilon_re from $mdp and replcing it with true value"
+  sed -i '/epsilon_r/d' $mdp
+  echo "epsilon_r       =  $permittivity" >> $mdp;
+  msg --color blue --to-stderr "Automatically added permittivity (epsilon_r = $permittivity) to $mdp  !"
+fi
+
+
+
+
 
 if [[ ${CSG_MDRUN_STEPS} ]]; then
-  msg --color blue --to-stderr "Appending -nsteps ${CSG_MDRUN_STEPS} to mdrun options"
-  mdrun_opts+=" -nsteps $CSG_MDRUN_STEPS"
+  #mdrun <4.6 does not have -nsteps options, remove this block whenever we drop support for <4.6
+  if [[ $(critical ${grompp[@]} -h 2>&1) = *"VERSION 4."[05]* ]]; then
+    nsteps=$(get_simulation_setting nsteps)
+    critical sed -i "/^nsteps/s/=.*/=${CSG_MDRUN_STEPS}/" $mdp
+    msg --color blue --to-stderr "Replace nsteps (=$nsteps) in '$mdp' to be ${CSG_MDRUN_STEPS}"
+  else
+    msg --color blue --to-stderr "Appending -nsteps ${CSG_MDRUN_STEPS} to mdrun options"
+    mdrun_opts+=" -nsteps $CSG_MDRUN_STEPS"
+  fi
 fi
 
 if [[ ${CSG_MDRUN_OPTS} ]]; then
@@ -131,18 +150,6 @@ if [[ -n $CSGENDING ]]; then
   mdrun_opts="-cpi $checkpoint -maxh $wall_h ${mdrun_opts}"
 else
   echo "${0##*/}: No walltime defined, so no time limitation given to $mdrun"
-fi
-
-#>gmx-5.1 has new handling of bonded tables
-if [[ ${mdrun_opts} != *tableb* ]]; then
-  tables=
-  for i in table_[abd][0-9]*.xvg; do
-    [[ -f $i ]] && tables+=" $i"
-  done
-  if [[ -n ${tables} ]]; then
-	  msg --color blue --to-stderr "Automatically added '-tableb${tables} to mdrun options (add -tableb option to cg.inverse.gromacs.mdrun.opts yourself if this is wrong)"
-    mdrun_opts+=" -tableb${tables}"
-  fi
 fi
 
 critical $mdrun -s "${tpr}" -c "${confout}" -o "${traj%.*}".trr -x "${traj%.*}".xtc ${mdrun_opts} ${CSG_RUNTEST:+-v} 2>&1 | gromacs_log "$mdrun -s "${tpr}" -c "${confout}" -o "${traj%.*}".trr -x "${traj%.*}".xtc ${mdrun_opts}"

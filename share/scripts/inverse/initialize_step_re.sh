@@ -29,6 +29,10 @@ sim_prog="$(csg_get_property cg.inverse.program)"
 
 # get new parameters from last step and make it current parameters
 for_all non-bonded 'cp_from_last_step --rename $(csg_get_interaction_property name).param.new $(csg_get_interaction_property name).param.cur'
+# get permittivity value from last step and make it current parameters
+if [[ $(csg_get_property cg.inverse.permittivity) = true ]]; then
+  cp_from_last_step --rename permittivity.updated permittivity.current
+fi
 
 # get new potential tables from last step and make it current potential tables
 for_all non-bonded 'cp_from_last_step --rename $(csg_get_interaction_property name).pot.new $(csg_get_interaction_property name).pot.cur'

@@ -1,18 +1,8 @@
-/* 
- * Copyright 2009-2016 The VOTCA Development Team (http://www.votca.org)
+/*
+ * File:   csg_reupdate.h
+ * Author: mashaya1
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Created on October 13, 2011, 11:09 PM
  */
 
 #ifndef CSG_REUPDATE_H
@@ -45,11 +35,9 @@ struct PotentialInfo {
   PotentialFunction *ucg;
   int vec_pos;
   pair<int, int> beadTypes;
-  
   string potentialName;
   string potentialFunction;
   string type1, type2;
-  
   double rmin,rcut;
   
   Property *_options;
@@ -107,13 +95,17 @@ protected:
   double _beta;
   double _relax;
   int _nframes;
+  bool PERMITTIVITY;
+  double _permittivity;
   
   bool _gentable;
   bool _dosteep;
   
   vector<Table *> _aardfs;
   vector<double *> _aardfnorms;
-
+  
+  vector<Table *> _cgrdfs;
+  vector<double *> _cgrdfnorms;
   // file extension for the inputs/outputs
   string _param_in_ext, _param_out_ext;
   string _pot_out_ext;
@@ -125,14 +117,27 @@ protected:
   
   // Compute Avg U, dU, and d2U values in reference AA ensemble
   void AAavgBonded(PotentialInfo *potinfo);
+  //void AAavgElectrostatic();
+  
   void AAavgNonbonded(PotentialInfo *potinfo);
   
   // Formulates _HS dlamda = - _DS system of Lin Eq.
   void REFormulateLinEq();
-
-  // Solve _HS dlamda = - _DS and update _lamda
+  // Get Coulombic Interaction from GROMACS gmx energy 
+  void AAavgElectrostatic();
+// Solve _HS dlamda = - _DS and update _lamda
   void REUpdateLamda();
-  
+// Calculate virial part of pressure
+  ub::vector<double> _DVirial;
+  double _pressure;
+  double _pt;
+  double _volume;
+  double _PRESSURE;
+  double _UavgQ ;
+  double _dUavgQ;
+  bool _PERMITTIVITY;
+  void VirialCalSR(PotentialInfo *potinfo);
+  void CoulombicCal();
 };
 
 
@@ -154,15 +159,14 @@ public:
   ub::symmetric_matrix<double, ub::upper> _HS;
   ub::vector<double> _DS;
   ub::vector<double> _dUFrame;
-
   double _UavgCG;
+  double _UavgCGQ;
   double _beta;
   int _nframes;
-
+  bool _PERMITTIVITY;
   void EvalConfiguration(Topology *conf, Topology *conf_atom);
   void EvalBonded(Topology *conf, PotentialInfo *potinfo);
   void EvalNonbonded(Topology *conf, PotentialInfo *potinfo);
-  
 };
 
 #endif	/* CSG_REUPDATE_H */

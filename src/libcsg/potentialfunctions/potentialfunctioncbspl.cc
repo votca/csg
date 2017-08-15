@@ -1,19 +1,3 @@
-/* 
- * Copyright 2009-2016 The VOTCA Development Team (http://www.votca.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
 
 #include <votca/csg/potentialfunctions/potentialfunctioncbspl.h>
 
@@ -214,7 +198,10 @@ double PotentialFunctionCBSPL::CalculateF (const double r) const {
     return 0.0;
 
 }
+double PotentialFunctionCBSPL::CalculateV (const double r) const {
 
+   return 0.0;
+}
 // calculate first derivative w.r.t. ith parameter
 double PotentialFunctionCBSPL::CalculateDF(const int i, const double r) const{
 
@@ -250,7 +237,35 @@ double PotentialFunctionCBSPL::CalculateDF(const int i, const double r) const{
     return 0.0;
 
 }
+double PotentialFunctionCBSPL::CalculateDV(const int i, const double r) const{
+ if ( r <= _cut_off ) {
 
+     unsigned int i_opt = i + _nexcl;
+     unsigned int indx;
+     double rk;
+     indx = min( int( ( r )/_dr ), _nbreak-2 );
+     rk = indx*_dr;
+     
+     if ( i_opt >= indx && i_opt <= indx+3 ){
+     
+     ub::vector<double> R;
+     R.resize(4,false); R.clear();
+
+     double t = ( r - rk)/_dr;
+
+     R(0) = 0.0; R(1) = - 1.0*r/_dr; R(2) = - 2.0*(r - rk)*r/(_dr*_dr); R(3) = -3.0*(r-rk)*(r-rk)*r/(_dr*_dr*_dr);
+
+     ub::vector<double> RM = ub::prod(R,_M);
+     
+     return RM(i_opt-indx);
+     
+     }else
+     
+     return 0.0;
+     
+     } else 
+ return 0.0;
+}
 // calculate second derivative w.r.t. ith parameter
 double PotentialFunctionCBSPL::CalculateD2F(const int i, const int j,
                                             const double r) const {
