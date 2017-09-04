@@ -96,6 +96,10 @@ postadd overwrite postadd_overwrite.sh
 postadd plot postadd_plot.sh
 postadd average postadd_average.sh
 
+# smoothing for updated potential to allow forgetting noise from previous iterations (rdfs)
+# the script is the same as postupd_smooth.sh
+postadd smooth postadd_smooth.sh
+
 #convergence checks
 convergence_check default convergence_check_default.sh
 
@@ -194,6 +198,7 @@ tables jackknife tables_jackknife.pl
 # interface to gromacs
 initstep gromacs initialize_step_genericsim.sh
 run gromacs run_gromacs.sh
+run multidir run_gromacs_multidir.sh
 clean gromacs clean_generic.sh
 presimulation gromacs run_gromacs.sh --pre
 pressure gromacs calc_pressure_gromacs.sh

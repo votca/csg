@@ -28,6 +28,27 @@ EOF
    exit 0
 fi
 
+tasks=$(get_number_tasks)
+
+mdrun_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.mdrun.opts)"
+
+if [[ ${mdrun_opts} == *multidir* ]]; then
+
+  mdirs=$(echo ${mdrun_opts} | grep -o "sim" | wc -l)
+
+#check mdrun '-multidir' option for consistency
+
+  [[ -n ${mdirs} ]] || die "${0##*/}: mdrun '-multidir' option does not contain directory names including pattern 'sim' (check cg.inverse.gromacs.mdrun.opts)"
+
+  [[ ${mdirs} -gt 1 ]] || die "${0##*/}: mdrun '-multidir' option is set but the number of directories including pattern 'sim' <= 1 (check cg.inverse.gromacs.mdrun.opts)"
+
+  [[ ${mdirs} -le ${tasks} ]] || die "${0##*/}: mdrun '-multidir' option provided presumes the number of separate simulations greater than the number of tasks/threads (check cg.inverse.gromacs.mdrun.opts)"
+
+  do_external run multidir
+  exit 0
+
+fi
+
 tpr="$(csg_get_property cg.inverse.gromacs.topol)"
 
 mdp="$(csg_get_property cg.inverse.gromacs.mdp)"
@@ -37,7 +58,6 @@ conf="$(csg_get_property cg.inverse.gromacs.conf)"
 [[ -f $conf ]] || die "${0##*/}: gromacs initial configuration file '$conf' not found (make sure it is in cg.inverse.filelist)"
 
 confout="$(csg_get_property cg.inverse.gromacs.conf_out)"
-mdrun_opts="$(csg_get_property --allow-empty cg.inverse.gromacs.mdrun.opts)"
 
 index="$(csg_get_property cg.inverse.gromacs.index)"
 [[ -f $index ]] || die "${0##*/}: grompp index file '$index' not found (make sure it is in cg.inverse.filelist)"
@@ -133,7 +153,8 @@ else
   echo "${0##*/}: No walltime defined, so no time limitation given to $mdrun"
 fi
 
-#>gmx-5.1 has new handling of bonded tables
+#gmx-5.1 has new handling of bonded tables
+
 if [[ ${mdrun_opts} != *tableb* ]]; then
   tables=
   for i in table_[abd][0-9]*.xvg; do
