@@ -82,8 +82,7 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads, int nm
 	    res_offset = (*bead)->getResnr();
 	}
         stringstream bname;
-	bname << (*bead)->getResnr() - res_offset + 1 << ":" << getResidue((*bead)->getResnr())->getName() << ":" << (*bead)->getName();
-        mol->AddBead((*bead), bname.str());
+        mol->AddBead(*bead);
         if(++beadcount == nbeads) {
             if(--nmolecules <= 0) break;
             mol = CreateMolecule(name);            
@@ -106,7 +105,7 @@ void Topology::CreateMoleculesByResidue()
     for(bead=_beads.begin(); bead!=_beads.end(); ++bead) {
         //MoleculeByIndex((*bead)->getResnr())->AddBead((*bead)->getId(), (*bead)->getName());
 
-        MoleculeByIndex((*bead)->getResnr())->AddBead((*bead), string("1:TRI:") + (*bead)->getName());
+        MoleculeByIndex((*bead)->getResnr())->AddBead((*bead));
     }
     
     /// \todo sort beads in molecules that all beads are stored in the same order. This is needed for the mapping!
@@ -119,10 +118,7 @@ void Topology::CreateOneBigMolecule(string name)
     BeadContainer::iterator bead;    
     
     for(bead=_beads.begin(); bead!=_beads.end(); ++bead) {
-        stringstream n("");
-        n << (*bead)->getResnr() +1 << ":" <<  _residues[(*bead)->getResnr()]->getName() << ":" << (*bead)->getName();
-        //cout << n.str() << endl;
-        mi->AddBead((*bead), n.str());
+        mi->AddBead((*bead));
     }    
 }
 
@@ -148,7 +144,7 @@ void Topology::Add(Topology *top)
     for(mol=top->_molecules.begin();mol!=top->_molecules.end(); ++mol) {
         Molecule *mi = CreateMolecule((*mol)->getName());
         for(int i=0; i<mi->BeadCount(); i++) {
-            mi->AddBead(mi->getBead(i), "invalid");
+            mi->AddBead(mi->getBead(i));
         }
     }
 }
@@ -184,7 +180,7 @@ void Topology::CopyTopologyData(Topology *top)
         Molecule *mi = CreateMolecule((*it_mol)->getName());
         for(int i=0; i<(*it_mol)->BeadCount(); i++) {
             int beadid = (*it_mol)->getBead(i)->getId();
-            mi->AddBead(_beads[beadid], (*it_mol)->getBeadName(i));
+            mi->AddBead(_beads[beadid]);
         }
     }
     // TODO: copy interactions
