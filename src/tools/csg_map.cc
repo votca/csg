@@ -103,7 +103,7 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                     if (bi->HasVel()) bn->setVel(bi->getVel());
                     if (bi->HasF()) bn->setF(bi->getF());
 
-                    mi->AddBead(hybtol->Beads()[beadid], (*it_mol)->getBeadName(i));
+                    mi->AddBead(hybtol->Beads()[beadid]);
 
                 }
 
@@ -119,7 +119,7 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                         bn->setOptions(bi->Options());
                         bn->setPos(bi->getPos());
                         if (bi->HasVel()) bn->setVel(bi->getVel());
-                        mi->AddBead(bi, bi->getName());
+                        mi->AddBead(bi);
                     }
                 }
                 
