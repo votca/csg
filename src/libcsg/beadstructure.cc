@@ -46,6 +46,35 @@ shared_ptr<GraphNode> BaseBeadToGraphNode(BaseBead *basebead) {
   return make_shared<GraphNode>(graphnode);
 }
 
+void BeadStructure::InitializeGraph_() {
+  cerr << "Graph up to Date " << graphUpToDate << endl;
+  if (!graphUpToDate) {
+    vector<Edge> connections_vector;
+    for (auto edge : connections_) {
+      connections_vector.push_back(edge);
+    }
+
+    unordered_map<int, GraphNode> graphnodes;
+    for (auto id_bead_ptr_pair : beads_) {
+      graphnodes_[id_bead_ptr_pair.first] =
+          BaseBeadToGraphNode(id_bead_ptr_pair.second);
+      graphnodes[id_bead_ptr_pair.first] =
+          *(graphnodes_[id_bead_ptr_pair.first]);
+    }
+    graph_ = make_shared<Graph>(Graph(connections_vector, graphnodes));
+    graphUpToDate = true;
+  }
+}
+
+void BeadStructure::CalculateStructure_() {
+
+  InitializeGraph_();
+  if (!structureIdUpToDate) {
+    findStructureId<GraphDistVisitor>(*graph_);
+    structureIdUpToDate = true;
+  }
+}
+
 /***************************
  * Public Facing Functions *
  ***************************/
@@ -80,35 +109,6 @@ void BeadStructure::ConnectBeads(int bead1_id, int bead2_id) {
   if (numberOfConnections != connections_.size()) {
     graphUpToDate = false;
     structureIdUpToDate = false;
-  }
-}
-
-void BeadStructure::InitializeGraph_() {
-  cerr << "Graph up to Date " << graphUpToDate << endl;
-  if (!graphUpToDate) {
-    vector<Edge> connections_vector;
-    for (auto edge : connections_) {
-      connections_vector.push_back(edge);
-    }
-
-    unordered_map<int, GraphNode> graphnodes;
-    for (auto id_bead_ptr_pair : beads_) {
-      graphnodes_[id_bead_ptr_pair.first] =
-          BaseBeadToGraphNode(id_bead_ptr_pair.second);
-      graphnodes[id_bead_ptr_pair.first] =
-          *(graphnodes_[id_bead_ptr_pair.first]);
-    }
-    graph_ = make_shared<Graph>(Graph(connections_vector, graphnodes));
-    graphUpToDate = true;
-  }
-}
-
-void BeadStructure::CalculateStructure_() {
-
-  InitializeGraph_();
-  if (!structureIdUpToDate) {
-    findStructureId<GraphDistVisitor>(*graph_);
-    structureIdUpToDate = true;
   }
 }
 
@@ -154,6 +154,23 @@ vector<BaseBead *> BeadStructure::getNeighBeads(int index) {
 BaseBead *BeadStructure::getBead(int index) {
   assert(beads_.count(index));
   return beads_[index];
+}
+
+vector<int> BeadStructure::getIdsOfBeadsWithName(const string &name){ 
+  vector<int> ids;
+  auto iterator = beads_.begin();
+  while(iterator!=beads_.end()){
+    if(iterator->second->getName() == name){
+      ids.push_back(iterator->second->getId());
+    }
+    ++iterator;
+  }
+  return ids;
+}
+
+string BeadStructure::getBeadName(int id){
+  assert(beads_.count(id));
+  return beads_[id]->getName();
 }
 
 vector<shared_ptr<BeadStructure>> BeadStructure::breakIntoMolecules() {
