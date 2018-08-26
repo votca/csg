@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-
+#include <stdexcept>
 #include <votca/csg/molecule.h>
 #include <iostream>
 
@@ -29,16 +29,36 @@ void Molecule::AddBead(Bead *bead, const string &name)
     bead->_mol = this;
 }
 
+Bead * Molecule::getBead(int bead){
+  if(bead<0 || bead>=_beads.size()){
+    throw invalid_argument("getBead bead out of range of vector");
+  }
+  return _beads[bead];
+}
+
+int Molecule::getBeadId(int bead){
+  if(bead<0 || bead>=_beads.size()){
+    throw invalid_argument("getBeadId bead out of range of vector");
+  }
+  return _beads[bead]->getId();
+}
+
 int Molecule::getBeadByName(const string &name)
 {
     map<string, int>::iterator iter = _beadmap.find(name);
     if(iter == _beadmap.end()) {
-        std::cout << "cannot find: <" << name << "> in " << _name << "\n";
-        return -1;        
+      string err = "bead name " + name + " is unrecognized in the molecule";
+      throw invalid_argument(err);
     }
-    //assert(iter != _beadmap.end());
-    //return (*iter).second;
     return _beadmap[name];
+}
+
+string Molecule::getBeadName(int bead){
+  if(bead<0 || bead>=_beads.size()){
+    throw invalid_argument("getBeadName bead out of range of vector");
+  }
+  return _bead_names[bead];
+
 }
 
 }}

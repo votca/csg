@@ -57,8 +57,8 @@ public:
     /// Add a bead to the molecule
     void AddBead(Bead *bead, const string &name);
     /// get the id of a bead in the molecule
-    Bead *getBead(int bead) { return _beads[bead]; }
-    int getBeadId(int bead) { return _beads[bead]->getId(); }
+    Bead *getBead(int bead);// { return _beads[bead]; }
+    int getBeadId(int bead);// { return _beads[bead]->getId(); }
     int getBeadIdByName(const string &name);
     
     /// get the number of beads in the molecule
@@ -66,11 +66,10 @@ public:
     
     /// find a bead by it's name
     int getBeadByName(const string &name);
-    string getBeadName(int bead) {return _bead_names[bead]; }
+    string getBeadName(int bead);// {return _bead_names[bead]; }
 
     /// Add an interaction to the molecule
-    void AddInteraction(Interaction *ic) { _interactions.push_back(ic);
-        }
+    void AddInteraction(Interaction *ic) { _interactions.push_back(ic);}
 
     vector<Interaction *> Interactions() { return _interactions; }
 
