@@ -30,7 +30,7 @@ using namespace votca::tools;
 using namespace std;
 
 
-class BaseBeadMap;
+class BeadMap;
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
@@ -41,22 +41,22 @@ public:
         : _in(in), _out(out) {}
     ~Map();
     
-    void AddBaseBeadMap(BaseBeadMap *bmap) { _maps.push_back(bmap); }
+    void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
 
     void Apply();
 
 protected:
     Molecule _in, _out;
-    vector<BaseBeadMap *> _maps;
+    vector<BeadMap *> _maps;
 };
 
 /*******************************************************
     Interface for all maps
 *******************************************************/
-class BaseBeadMap
+class BeadMap
 {
 public:
-    virtual ~BaseBeadMap() {};
+    virtual ~BeadMap() {};
     virtual void Apply() = 0;
     virtual void Initialize(Molecule *in, BaseBead *out, Property *opts_map, Property *opts_bead);
 protected:
@@ -66,7 +66,7 @@ protected:
     Property *_opts_bead;
 };
 
-inline void BaseBeadMap::Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map)
+inline void BeadMap::Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map)
 {
     _in = in; _out = out; _opts_map = opts_map; _opts_bead = opts_bead;
 }
@@ -75,7 +75,7 @@ inline void BaseBeadMap::Initialize(Molecule *in, BaseBead *out, Property *opts_
     Linear map for spherical beads
 *******************************************************/
 class Map_Sphere
-    : public BaseBeadMap
+    : public BeadMap
 {
 public:
     Map_Sphere() {}
