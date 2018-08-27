@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,21 @@
  *
  */
 
-#ifndef _MOLECULE_H
-#define	_MOLECULE_H
+#ifndef _VOTCA_CSG_MOLECULE_H
+#define	_VOTCA_CSG_MOLECULE_H
 
 #include <vector>
 #include <map>
 #include <string>
 #include <assert.h>
+
 #include "topologyitem.h"
-#include "bead.h"
+//#include "bead.h"
 
 namespace votca { namespace csg {
-using namespace votca::tools;
-
-using namespace std;
 
 class Interaction;
-
+class Bead;
 
 /**
     \brief information about molecules
@@ -42,33 +40,49 @@ class Interaction;
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem
+class MoleculeNew : public TopologyItem,
+                 public BeadStructure,
+                 public virtual Identity<int>,
+                 public virtual Name
 {
 public:            
-    /// get the molecule ID
-    int getId() const { return _id; }
-    
-    /// get the name of the molecule
-    const string &getName() const { return _name; }
-    
-    /// set the name of the molecule
-    void setName(const string &name) {  _name=name; }
-    
-    /// Add a bead to the molecule
-    void AddBead(Bead *bead, const string &name);
+   
+    /// Add a bead to the molecule, we will disable this
+    // 1. because Beadstructure already has a AddBead method
+    // 2. It makes no sense to add a different name to the bead
+    // this is simply confusing 
+    //void AddBead(Bead *bead, const string &name);
+    // Use instead:
+    // void AddBead(BaseBead * bead);
+
+
     /// get the id of a bead in the molecule
-    Bead *getBead(int bead);// { return _beads[bead]; }
-    int getBeadId(int bead);// { return _beads[bead]->getId(); }
-    int getBeadIdByName(const string &name);
+    // This also does not make since because the beadstructure stores
+    // the beads in a map, using the id of the bead, if you know the id
+    // you know the index they are the same. This as it is is just confusing
+    //int getBeadId(int bead) { return _beads[bead]->getId(); }
+
+    // This is a useful function to add to the beadstructure as the it is likey
+    // to be used by any thing that inherits the beadstructure, with the 
+    // exception that it should return a vector of all beads with the same name
+    // there is no guarantee that there is not more than one bead with the same
+    // name
+    //int getBeadIdByName(const string &name);
+    // Use instead: 
+    // vector<int> getIdsOfBeadsWithName(const string &name);
     
-    /// get the number of beads in the molecule
-    int BeadCount() const { return _beads.size(); }
-    
-    /// find a bead by it's name
-    int getBeadByName(const string &name);
-    string getBeadName(int bead);// {return _bead_names[bead]; }
+    /// find a bead by it's name, this is unsafe because there is nothing
+    // This is basically the same as the above function because the id is the index
+    // remove this one
+    //int getBeadByName(const string &name);
+
+    // Each bead has a unique Id so this is a safe option
+    // However, it makes since to put it in the beastructure class instead
+    //string getBeadName(int bead) {return _bead_names[bead]; }
 
     /// Add an interaction to the molecule
+    /// This is seperate from a Connect Beads method, an interaction does not
+    /// guarantee a bond as far as I know. Though I will need to check. 
     void AddInteraction(Interaction *ic) { _interactions.push_back(ic);}
 
     vector<Interaction *> Interactions() { return _interactions; }
@@ -80,38 +94,43 @@ public:
     T *getUserData() { return (T *)_userdata; }
     
 private:
-    // maps a name to a bead id
-    map<string, int> _beadmap;
-   vector<Interaction*> _interactions;
+    // maps a name to a bead id not needed
+    //map<string, int> _beadmap;
+  
+    vector<Interaction*> _interactions;
      
     // id of the molecules
-    int _id;
+    // int _id; not needed comes from the inherited Identity class
     
     // name of the molecule
-    string _name;
+    //string _name; Not needed comes from the inherited Name class
+    
     // the beads in the molecule
-    vector<Bead *> _beads;
-    vector<string> _bead_names;
+    // Not needed stored in the beadstructure
+    //vector<Bead *> _beads;
+
+    // Not needed the bead names are the names stored in each bead object
+    // vector<string> _bead_names;
 
     void *_userdata;
     
     /// constructor
-    Molecule(Topology *parent, int id, string name)
+    MoleculeNew(Topology *parent, int id, string name)
         : TopologyItem(parent), _id(id), _name(name)
     {}
 
     friend class Topology;
 };
-
+/*
 inline int Molecule::getBeadIdByName(const string &name)
 {
     int i = getBeadByName(name);
     if(i<0)
         return i;
     return _beads[i]->getId();
-}
+}*/
 
 }}
 
-#endif	/* _Molecule_H */
+#endif	// _VOTCA_CSG_MOLECULE_H
 

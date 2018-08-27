@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  */
-#include <stdexcept>
+
 #include <votca/csg/molecule.h>
 #include <iostream>
 
 namespace votca { namespace csg {
 
-void Molecule::AddBead(Bead *bead, const string &name)
+void MoleculeNew::AddBead(Bead *bead, const string &name)
 {
     _beads.push_back(bead);
     _bead_names.push_back(name);
@@ -29,36 +29,29 @@ void Molecule::AddBead(Bead *bead, const string &name)
     bead->_mol = this;
 }
 
-Bead * Molecule::getBead(int bead){
-  if(bead<0 || bead>=_beads.size()){
-    throw invalid_argument("getBead bead out of range of vector");
-  }
+Bead * MoleculeNew::getBead(int bead){
+  if(_beads.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
   return _beads[bead];
 }
 
-int Molecule::getBeadId(int bead){
-  if(bead<0 || bead>=_beads.size()){
-    throw invalid_argument("getBeadId bead out of range of vector");
-  }
+int MoleculeNew::getBeadId(int bead) {
+  if(_beads.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
   return _beads[bead]->getId();
 }
 
-int Molecule::getBeadByName(const string &name)
+string MoleculeNew::getBeadName(int bead){
+  if(_bead_names.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
+  return _bead_names[bead]; 
+}
+
+int MoleculeNew::getBeadByName(const string &name)
 {
     map<string, int>::iterator iter = _beadmap.find(name);
     if(iter == _beadmap.end()) {
-      string err = "bead name " + name + " is unrecognized in the molecule";
-      throw invalid_argument(err);
+        string err =  "cannot find: <" + name + "> in " + _name;
+        throw invalid_argument(err);
     }
     return _beadmap[name];
-}
-
-string Molecule::getBeadName(int bead){
-  if(bead<0 || bead>=_beads.size()){
-    throw invalid_argument("getBeadName bead out of range of vector");
-  }
-  return _bead_names[bead];
-
 }
 
 }}
