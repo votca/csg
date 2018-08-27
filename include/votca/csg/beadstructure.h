@@ -91,6 +91,11 @@ public:
   std::vector<int> getIdsOfBeadsWithName(const std::string &name);
 
   /**
+   * \brief Get the ids of all the beads
+   **/
+  std::vector<int> getBeadIds();
+  
+  /**
    * \brief Get the name of the bead by passing in its Id
    **/
   std::string getBeadName(int id);
@@ -104,7 +109,7 @@ public:
   void ConnectBeads(int bead1_id, int bead2_id);
 
   /**
-   * \breif Return a vector of all the beads neighboring the index
+   * \brief Return a vector of all the beads neighboring the index
    **/
   std::vector<BaseBead *> getNeighBeads(int index);
 

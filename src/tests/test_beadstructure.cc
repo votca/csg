@@ -68,6 +68,22 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_add_and_getbead) {
   bool strings_equal = !(beadName.compare("Carbon"));
   BOOST_CHECK(strings_equal);
 
+  TestBead testbead2;
+  testbead2.setId(10);
+  testbead2.setName("Hydrogen");
+  beadstructure.AddBead(&testbead2);
+  BOOST_CHECK_EQUAL(beadstructure.BeadCount(), 2);
+  vector_ids = beadstructure.getBeadIds();
+  BOOST_CHECK_EQUAL(vector_ids.size(),2);
+
+  bool id2_found = false;
+  bool id10_found = false;
+  for(auto id : vector_ids){
+    if(id==2) id2_found = true;
+    if(id10==10) id2_found = true;
+  }
+  BOOST_CHECK(id2_found);
+  BOOST_CHECK(id10_found);
 }
 
 BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {

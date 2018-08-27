@@ -168,6 +168,17 @@ vector<int> BeadStructure::getIdsOfBeadsWithName(const string &name){
   return ids;
 }
 
+vector<int> BeadStructure::getBeadIds(){
+  vector<int> ids;
+  auto iterator = beads_.begin();
+  while(iterator!=beads_.end()){
+    ids.push_back(iterator->second->getId());
+    ++iterator;
+  }
+  return ids;
+}
+
+
 string BeadStructure::getBeadName(int id){
   assert(beads_.count(id));
   return beads_[id]->getName();
