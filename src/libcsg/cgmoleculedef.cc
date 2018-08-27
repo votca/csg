@@ -140,7 +140,7 @@ Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
               "found.";
             throw runtime_error(err);
           }
-          atoms.push_back(i);
+          atoms.push_back(bead_ids.at(0));
         }
            
 	int NrBeads=1;
@@ -199,7 +199,6 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
           "name.";
         throw runtime_error(err);
       }
-      iout - bead_ids.at(0);
 
       Property *mdef = getMapByName((*def)->_mapping);
       if(!mdef)
@@ -219,7 +218,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
       }
       ////////////////////////////////////////////////////
 
-      bmap->Initialize(&in, out.getBead(iout), ((*def)->_options), mdef);
+      bmap->Initialize(&in, out.getBead(bead_ids.at(0)), ((*def)->_options), mdef);
       map->AddBeadMap(bmap);
 
     }
