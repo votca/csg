@@ -106,10 +106,15 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
     }
 
     for (size_t i = 0; i < beads.size(); ++i) {
-        int iin = in->getBeadByName(beads[i]);
-        if (iin < 0)
-            throw std::runtime_error(string("mapping error: molecule " + beads[i] + " does not exist"));
-        AddElem(in->getBead(iin), weights[i], fweights[i]);
+      vector<int> bead_ids = in->getIdsOfBeadsWithName(beads[i]);
+      if (bead_ids.size() == 0){
+        string err = "mapping error: molecule " + beads[i] + " does not exist";
+        throw std::runtime_error(err);
+      }else if(bead_ids.size()>1){
+        string err = "impossible to resolve correct bead from name " + 
+          beads[i] + " as more than one bead has the name.";
+      }
+      AddElem(in->getBead(bead_ids.at(0)), weights[i], fweights[i]);
     }
 }
 
