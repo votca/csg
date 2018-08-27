@@ -187,34 +187,41 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
 
     Map *map = new Map(in, out);
     for(vector<beaddef_t *>::iterator def = _beads.begin();
-            def != _beads.end(); ++def) {
+        def != _beads.end(); ++def) {
 
-        int iout = out.getBeadByName((*def)->_name);
-        if(iout < 0) 
-            throw runtime_error(string("mapping error: reference molecule "
-                    + (*def)->_name + " does not exist"));
-        
-        Property *mdef = getMapByName((*def)->_mapping);
-        if(!mdef)
-            throw runtime_error(string("mapping " + (*def)->_mapping + " not found"));
-        
-        /// TODO: change this to factory, do not hardcode!!
-        BeadMap *bmap;
-        switch((*def)->_symmetry) {
+      vector<int> bead_ids = out.getIdsOfBeadsWithName((*def)->_name);
+      if(bead_ids.size() == 0) {
+        throw runtime_error(string("mapping error: reference molecule "
+              + (*def)->_name + " does not exist"));
+      }else if(bead_ids.size()>1){
+        string err = "Impossible to resolve single bead with name "
+          + (*def)->_name + " as there exist more than a single bead with that "
+          "name.";
+        throw runtime_error(err);
+      }
+      iout - bead_ids.at(0);
+
+      Property *mdef = getMapByName((*def)->_mapping);
+      if(!mdef)
+        throw runtime_error(string("mapping " + (*def)->_mapping + " not found"));
+
+      /// TODO: change this to factory, do not hardcode!!
+      BeadMap *bmap;
+      switch((*def)->_symmetry) {
         case 1:
-            bmap = new Map_Sphere();
-            break;
+          bmap = new Map_Sphere();
+          break;
         case 3:
-            bmap = new Map_Ellipsoid();
-            break;
+          bmap = new Map_Ellipsoid();
+          break;
         default:
-            throw runtime_error(string("unknown symmetry in bead definition!"));
-        }
-        ////////////////////////////////////////////////////
-        
-        bmap->Initialize(&in, out.getBead(iout), ((*def)->_options), mdef);
-        map->AddBeadMap(bmap);
-        
+          throw runtime_error(string("unknown symmetry in bead definition!"));
+      }
+      ////////////////////////////////////////////////////
+
+      bmap->Initialize(&in, out.getBead(iout), ((*def)->_options), mdef);
+      map->AddBeadMap(bmap);
+
     }
     return map;
 }
