@@ -127,12 +127,20 @@ Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
 
         Tokenizer tok((*ibnd)->get("beads").value(), " \n\t");
         for (Tokenizer::iterator atom = tok.begin(); atom != tok.end(); ++atom) {
-            int i = minfo->getBeadIdByName(*atom);
-            if(i < 0)
-                throw runtime_error(string("error while trying to create bonded interaction, "
-                        "bead " + *atom + " not found"));
-
-            atoms.push_back(i);
+          vector<int> bead_ids = minfo->getIdsOfBeadsWithName(*atom);
+          if(bead_ids.size() == 0){
+            string err = "error while trying to create bonded interaction, "
+              "bead " + *atom + " not found";
+            throw runtime_error(err);
+          }else if(bead_ids.size()>1){
+            string err = "error trying to resolve beads while trying to "
+              "create a bonded reaction. More than one bead has the same "
+              "name it is therefore impossible to resolve the correct bead "
+              "based on the following name: " + *atom + " which is not "
+              "found.";
+            throw runtime_error(err);
+          }
+          atoms.push_back(i);
         }
            
 	int NrBeads=1;
