@@ -40,7 +40,7 @@ class Bead;
     \todo sort atoms in molecule
 
 */
-class MoleculeNew : public TopologyItem,
+class Molecule : public TopologyItem,
                  public BeadStructure,
                  public virtual Identity<int>,
                  public virtual Name
@@ -115,7 +115,7 @@ private:
     void *_userdata;
     
     /// constructor
-    MoleculeNew(Topology *parent, int id, string name)
+    Molecule(Topology *parent, int id, string name)
         : TopologyItem(parent), _id(id), _name(name)
     {}
 

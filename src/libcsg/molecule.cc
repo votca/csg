@@ -20,7 +20,7 @@
 
 namespace votca { namespace csg {
 
-void MoleculeNew::AddBead(Bead *bead, const string &name)
+void Molecule::AddBead(Bead *bead, const string &name)
 {
     _beads.push_back(bead);
     _bead_names.push_back(name);
@@ -29,22 +29,22 @@ void MoleculeNew::AddBead(Bead *bead, const string &name)
     bead->_mol = this;
 }
 
-Bead * MoleculeNew::getBead(int bead){
+Bead * Molecule::getBead(int bead){
   if(_beads.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
   return _beads[bead];
 }
 
-int MoleculeNew::getBeadId(int bead) {
+int Molecule::getBeadId(int bead) {
   if(_beads.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
   return _beads[bead]->getId();
 }
 
-string MoleculeNew::getBeadName(int bead){
+string Molecule::getBeadName(int bead){
   if(_bead_names.size()>=bead || bead<0) throw invalid_argument("bead was not found"); 
   return _bead_names[bead]; 
 }
 
-int MoleculeNew::getBeadByName(const string &name)
+int Molecule::getBeadByName(const string &name)
 {
     map<string, int>::iterator iter = _beadmap.find(name);
     if(iter == _beadmap.end()) {
