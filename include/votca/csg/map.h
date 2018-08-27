@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _map_H
-#define	_map_H
+#ifndef _VOTCA_CSG_MAP_H
+#define	_VOTCA_CSG_MAP_H
 
 #include <string>
 #include <vector>
@@ -30,7 +30,7 @@ using namespace votca::tools;
 using namespace std;
 
 
-class BeadMap;
+class BaseBeadMap;
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
@@ -41,32 +41,32 @@ public:
         : _in(in), _out(out) {}
     ~Map();
     
-    void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
+    void AddBaseBeadMap(BaseBeadMap *bmap) { _maps.push_back(bmap); }
 
     void Apply();
 
 protected:
     Molecule _in, _out;
-    vector<BeadMap *> _maps;
+    vector<BaseBeadMap *> _maps;
 };
 
 /*******************************************************
     Interface for all maps
 *******************************************************/
-class BeadMap
+class BaseBeadMap
 {
 public:
-    virtual ~BeadMap() {};
+    virtual ~BaseBeadMap() {};
     virtual void Apply() = 0;
-    virtual void Initialize(Molecule *in, Bead *out, Property *opts_map, Property *opts_bead);
+    virtual void Initialize(Molecule *in, BaseBead *out, Property *opts_map, Property *opts_bead);
 protected:
     Molecule *_in;
-    Bead *_out;
+    BaseBead *_out;
     Property *_opts_map;
     Property *_opts_bead;
 };
 
-inline void BeadMap::Initialize(Molecule *in, Bead *out, Property *opts_bead, Property *opts_map)
+inline void BaseBeadMap::Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map)
 {
     _in = in; _out = out; _opts_map = opts_map; _opts_bead = opts_bead;
 }
@@ -75,26 +75,26 @@ inline void BeadMap::Initialize(Molecule *in, Bead *out, Property *opts_bead, Pr
     Linear map for spherical beads
 *******************************************************/
 class Map_Sphere
-    : public BeadMap
+    : public BaseBeadMap
 {
 public:
     Map_Sphere() {}
     void Apply();
 
-    void Initialize(Molecule *in, Bead *out, Property *opts_bead, Property *opts_map);
+    void Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map);
 
 protected:
-    void AddElem(Bead *in, double weight, double force_weight);
+    void AddElem(BaseBead *in, double weight, double force_weight);
 
     struct element_t {
-        Bead *_in;
+        BaseBead *_in;
         double _weight;
         double _force_weight;
     };
     vector<element_t> _matrix;
 };
 
-inline void Map_Sphere::AddElem(Bead *in, double weight, double force_weight)
+inline void Map_Sphere::AddElem(BaseBead *in, double weight, double force_weight)
 {
     element_t el;
     el._in = in;
@@ -118,5 +118,5 @@ protected:
 
 }}
 
-#endif	/* _map_H */
+#endif	// _VOTCA_CSG_MAP_H
 
