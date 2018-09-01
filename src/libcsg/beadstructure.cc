@@ -151,9 +151,16 @@ vector<BaseBead *> BeadStructure::getNeighBeads(int index) {
   return neighbeads;
 }
 
-BaseBead *BeadStructure::getBead(int index) {
-  assert(beads_.count(index));
-  return beads_[index];
+BaseBead *BeadStructure::getBead(int id) {
+  if(id<0){
+    string err = "bead with negative id " + to_string(id);
+    throw invalid_argument(err);
+  }
+  if(beads_.count(id)){
+    string err = "bead with id: " + to_string(id) + " is not found.";
+    throw invalid_argument(err);
+  }
+  return beads_[id];
 }
 
 vector<int> BeadStructure::getIdsOfBeadsWithName(const string &name){ 
@@ -178,9 +185,15 @@ vector<int> BeadStructure::getBeadIds(){
   return ids;
 }
 
-
 string BeadStructure::getBeadName(int id){
-  assert(beads_.count(id));
+  if(id<0){
+    string err = "bead with negative id " + to_string(id);
+    throw invalid_argument(err);
+  }
+  if(beads_.count(id)){
+    string err = "bead with id: " + to_string(id) + " is not found.";
+    throw invalid_argument(err);
+  }
   return beads_[id]->getName();
 }
 
