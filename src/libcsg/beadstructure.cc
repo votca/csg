@@ -47,7 +47,6 @@ shared_ptr<GraphNode> BaseBeadToGraphNode(BaseBead *basebead) {
 }
 
 void BeadStructure::InitializeGraph_() {
-  cerr << "Graph up to Date " << graphUpToDate << endl;
   if (!graphUpToDate) {
     vector<Edge> connections_vector;
     for (auto edge : connections_) {
@@ -156,7 +155,7 @@ BaseBead *BeadStructure::getBead(int id) {
     string err = "bead with negative id " + to_string(id);
     throw invalid_argument(err);
   }
-  if(beads_.count(id)){
+  if(!beads_.count(id)){
     string err = "bead with id: " + to_string(id) + " is not found.";
     throw invalid_argument(err);
   }
@@ -190,7 +189,7 @@ string BeadStructure::getBeadName(int id){
     string err = "bead with negative id " + to_string(id);
     throw invalid_argument(err);
   }
-  if(beads_.count(id)){
+  if(!beads_.count(id)){
     string err = "bead with id: " + to_string(id) + " is not found.";
     throw invalid_argument(err);
   }
