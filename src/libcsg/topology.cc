@@ -81,7 +81,6 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads, int nm
 	if ( beadcount == 0 ) {
 	    res_offset = (*bead)->getResnr();
 	}
-        stringstream bname;
         mol->AddBead(*bead);
         if(++beadcount == nbeads) {
             if(--nmolecules <= 0) break;

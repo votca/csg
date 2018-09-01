@@ -49,7 +49,9 @@ class Molecule : public TopologyItem,
 {
 public:            
    
-
+    const std::string getLabel() const { 
+      return "Id "+std::to_string(getId())+":Molecule "+getName();
+    }
     /// Add an interaction to the molecule
     /// This is seperate from a Connect Beads method, an interaction does not
     /// guarantee a bond as far as I know. Though I will need to check. 

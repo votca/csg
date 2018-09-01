@@ -18,6 +18,8 @@
 #ifndef _VOTCA_CSG_BASEBEAD_H
 #define _VOTCA_CSG_BASEBEAD_H
 
+#include <string>
+
 #include <votca/csg/topologyitem.h>
 #include <votca/csg/moleculeitem.h>
 
@@ -44,6 +46,11 @@ class BaseBead : public TopologyItem,
                  public virtual Name,
                  public virtual Identity<int> {
 public:
+
+  virtual const std::string getLabel() const {
+    return "Id "+std::to_string(getId())+":Bead "+getName(); 
+  }
+
   /**
    * destructor
    */
