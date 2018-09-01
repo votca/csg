@@ -25,6 +25,7 @@
 #include <string>
 
 #include <votca/csg/basebead.h>
+#include <votca/csg/beadstructure.h>
 
 #include <votca/tools/graph.h>
 

@@ -58,15 +58,15 @@ class BeadMap
 public:
     virtual ~BeadMap() {};
     virtual void Apply() = 0;
-    virtual void Initialize(Molecule *in, BaseBead *out, Property *opts_map, Property *opts_bead);
+    virtual void Initialize(Molecule *in, Bead *out, Property *opts_map, Property *opts_bead);
 protected:
     Molecule *_in;
-    BaseBead *_out;
+    Bead *_out;
     Property *_opts_map;
     Property *_opts_bead;
 };
 
-inline void BeadMap::Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map)
+inline void BeadMap::Initialize(Molecule *in, Bead *out, Property *opts_bead, Property *opts_map)
 {
     _in = in; _out = out; _opts_map = opts_map; _opts_bead = opts_bead;
 }
@@ -81,20 +81,20 @@ public:
     Map_Sphere() {}
     void Apply();
 
-    void Initialize(Molecule *in, BaseBead *out, Property *opts_bead, Property *opts_map);
+    void Initialize(Molecule *in, Bead *out, Property *opts_bead, Property *opts_map);
 
 protected:
-    void AddElem(BaseBead *in, double weight, double force_weight);
+    void AddElem(Bead *in, double weight, double force_weight);
 
     struct element_t {
-        BaseBead *_in;
+        Bead *_in;
         double _weight;
         double _force_weight;
     };
     vector<element_t> _matrix;
 };
 
-inline void Map_Sphere::AddElem(BaseBead *in, double weight, double force_weight)
+inline void Map_Sphere::AddElem(Bead *in, double weight, double force_weight)
 {
     element_t el;
     el._in = in;
