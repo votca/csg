@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,8 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
         string err = "impossible to resolve correct bead from name " + 
           beads[i] + " as more than one bead has the name.";
       }
-      AddElem(in->getBead(bead_ids.at(0)), weights[i], fweights[i]);
+      Bead * bead = dynamic_cast<Bead *>(in->getBead(bead_ids.at(0)));
+      AddElem(bead, weights[i], fweights[i]);
     }
 }
 
