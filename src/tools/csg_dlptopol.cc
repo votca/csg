@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, Molecule &cg)
   out << "atoms " << cg.BeadCount() << endl;
     out << "# name  mass  charge  nrept  ifrozen (optional: ngroup, index, name/type, type/residue, index/res-ID) \n";
     for(int i=0; i<cg.BeadCount(); ++i) {
-        Bead *b=cg.getBead(i);
+        Bead *b=dynamic_cast<Bead *>(cg.getBead(i));
 
         string bname=b->getName();
         string btype=b->getType()->getName();

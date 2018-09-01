@@ -150,7 +150,7 @@ void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref)
             continue;
         int N = mol->BeadCount();
             for(int i=0; i<N; i++) {
-                Bead *b = mol->getBead(i);        
+                Bead *b = dynamic_cast<Bead *>(mol->getBead(i));        
                 if(!wildcmp(_filter.c_str(), b->getName().c_str()))
                     continue;
                 double r;

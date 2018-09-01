@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                     // copy atomistic beads of molecule
                     int beadid = (*it_mol)->getBead(i)->getId();
 
-                    Bead *bi = (*it_mol)->getBead(i);
+                    Bead *bi = dynamic_cast<Bead *>((*it_mol)->getBead(i));
                     BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
                     Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bi->getResnr(), bi->getM(), bi->getQ());
                     bn->setOptions(bi->Options());
@@ -111,9 +111,9 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                     // copy cg beads of molecule
                     Molecule *cgmol = top->Molecules()[mi->getId()];
                     for (int i = 0; i < cgmol->BeadCount(); i++) {
-                        Bead *bi = cgmol->getBead(i);
+                        Bead *bi = dynamic_cast<Bead *>(cgmol->getBead(i));
                         // todo: this is a bit dirty as a cg bead will always have the resid of its first parent
-                        Bead *bparent = (*it_mol)->getBead(0);
+                        Bead *bparent = dynamic_cast<Bead *>((*it_mol)->getBead(0));
                         BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
                         Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bparent->getResnr(), bi->getM(), bi->getQ());
                         bn->setOptions(bi->Options());
