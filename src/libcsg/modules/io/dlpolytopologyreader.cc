@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,7 +284,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top)
 	for (int replica=1;replica<nreplica;replica++){
           Molecule *mi_replica = top.CreateMolecule(mol_name);
 	  for(int i=0;i<mi->BeadCount();i++){
-	    Bead *bead=mi->getBead(i);
+	    Bead *bead= dynamic_cast<Bead *>(mi->getBead(i));
 	    BeadType *type = top.GetOrCreateBeadType(bead->Type()->getName());
 	    Bead *bead_replica = top.CreateBead(1, bead->getName(), type, res->getId(), bead->getM(), bead->getQ());
 	    mi_replica->AddBead(bead_replica);
