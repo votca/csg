@@ -539,7 +539,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       b = top.CreateBead(symmetry, bead_type_name, bead_type, residue_index,
                          mass, charge);
 
-      mol->AddBead(b, bead_type_name);
+      mol->AddBead(dynamic_cast<BaseBead *>(b));
       b->setMolecule(mol);
 
     } else {
