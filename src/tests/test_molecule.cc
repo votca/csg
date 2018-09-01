@@ -71,9 +71,8 @@ BOOST_AUTO_TEST_CASE(test_molecule_bead_methods){
 
   // Check that errors are thrown if bead does not exist in the molecule
   BOOST_CHECK_THROW(mol->getBead(0),invalid_argument);
-  BOOST_CHECK_THROW(mol->getBeadId(0),invalid_argument);
-  BOOST_CHECK_THROW(mol->getBeadIdByName("C1"),invalid_argument);
-  BOOST_CHECK_THROW(mol->getBeadByName("C2"),invalid_argument);
+  auto beads_with_same_name = mol->getIdsOfBeadsWithName("C1");
+  BOOST_CHECK_EQUAL(beads_with_same_name.size(),0);
   BOOST_CHECK_THROW(mol->getBeadName(0),invalid_argument);
    
   // Create bead
@@ -87,16 +86,16 @@ BOOST_AUTO_TEST_CASE(test_molecule_bead_methods){
   double charge = -0.87;
   Bead * b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
 
-  mol->AddBead(b,"C1_1");
+  mol->AddBead(b);
   
   auto b2 = mol->getBead(0);
   BOOST_CHECK_EQUAL(b2->getId(),b->getId());
-  BOOST_CHECK_EQUAL(mol->getBeadId(0),b->getId());
-  BOOST_CHECK_EQUAL(mol->getBeadIdByName("C1_1"),b->getId());
-  BOOST_CHECK_EQUAL(mol->getBeadByName("C1_1"),0);
+  beads_with_same_name =  mol->getIdsOfBeadsWithName("C1");
+  BOOST_CHECK_EQUAL(beads_with_same_name.size(),1);
+  BOOST_CHECK_EQUAL(beads_with_same_name.at(0),0);
   BOOST_CHECK_EQUAL(mol->BeadCount(),1);
   
-  bool string_eql = !(mol->getBeadName(0).compare("C1_1"));
+  bool string_eql = !(mol->getBeadName(0).compare("C1"));
   BOOST_CHECK(string_eql);
   
 }
@@ -117,11 +116,11 @@ BOOST_AUTO_TEST_CASE(test_molecule_interaction){
   double charge = -0.87;
   Bead * b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
 
-  mol->AddBead(b,"C1_1");
+  mol->AddBead(b);
  
   string name2 = "H1";
   Bead * b2 = top.CreateBead(symmetry,name2,b_type,resnr,mass,charge);
-  mol->AddBead(b2,"H1_1");
+  mol->AddBead(b2);
 
   BOOST_CHECK_EQUAL(mol->BeadCount(),2);
   
@@ -130,8 +129,6 @@ BOOST_AUTO_TEST_CASE(test_molecule_interaction){
 
   vector<Interaction *> bond_interactions = mol->Interactions();
   BOOST_CHECK_EQUAL(bond_interactions.size(),1);
-  BOOST_CHECK_EQUAL(bond_interactions.at(0)->getBeadId(0),0);
-  BOOST_CHECK_EQUAL(bond_interactions.at(0)->getBeadId(1),1);
 
 }
 
