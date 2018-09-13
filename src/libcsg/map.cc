@@ -106,9 +106,19 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
     }
 
     for (size_t i = 0; i < beads.size(); ++i) {
-      vector<int> bead_ids = in->getIdsOfBeadsWithName(beads[i]);
+      vector<string> bead_name_components;
+      Tokenizer tok_bead_name_components(beads[i], ":");
+      tok_bead_name_components.ToVector(bead_name_components);
+      string beadname = bead_name_components.at(2);
+      cout << "Size of vector of string of beads " << beads.size() << endl;
+      //vector<int> bead_ids = in->getIdsOfBeadsWithName(beads[i]);
+      vector<int> bead_ids = in->getIdsOfBeadsWithName(beadname);
+      for(auto v : beads){
+        cout << v << endl;
+      }
       if (bead_ids.size() == 0){
-        string err = "mapping error: molecule " + beads[i] + " does not exist";
+        //string err = "mapping error: bead " + beads[i] + " does not exist";
+        string err = "mapping error: bead " + beadname + " does not exist";
         throw std::runtime_error(err);
       }else if(bead_ids.size()>1){
         string err = "impossible to resolve correct bead from name " + 
