@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <memory>
 
 #include <assert.h>
 #include <votca/tools/types.h>
@@ -42,11 +43,11 @@ using namespace votca::tools;
 class Interaction;
 class ExclusionList;
 
-typedef vector<Molecule *> MoleculeContainer;
-typedef vector<Bead *> BeadContainer;
-typedef vector<BeadType *> BeadTypeContainer;
-typedef vector<Residue *> ResidueContainer;
-typedef vector<Interaction *> InteractionContainer;
+typedef vector<std::shared_ptr<Molecule>> MoleculeContainer;
+typedef vector<std::shared_ptr<Bead>> BeadContainer;
+typedef vector<std::shared_ptr<BeadType>> BeadTypeContainer;
+typedef vector<std::shared_ptr<Residue> > ResidueContainer;
+typedef vector<std::shared_ptr<Interaction>> InteractionContainer;
 
 
 using namespace std;
@@ -415,28 +416,28 @@ protected:
 inline Bead *Topology::CreateBead(byte_t symmetry, string name, BeadType *type, int resnr, double m, double q)
 {
     
-    Bead *b = new Bead(this, _beads.size(), type, symmetry, name, resnr, m, q);    
+    auto b = std::shared_ptr<Bead>(new Bead(this, _beads.size(), type, symmetry, name, resnr, m, q));    
     _beads.push_back(b);
     return b;
 }
 
 inline Molecule *Topology::CreateMolecule(string name)
 {
-    Molecule *mol = new Molecule(this, _molecules.size(), name);
+    auto mol = std::shared_ptr<Molecule>(new Molecule(this, _molecules.size(), name));
     _molecules.push_back(mol);
     return mol;
 }
 
 inline Residue *Topology::CreateResidue(string name, int id)
 {
-    Residue *res = new Residue(this, id, name);
+    auto res = std::shared_ptr<Residue>(new Residue(this, id, name));
     _residues.push_back(res);
     return res;
 }
 
 inline Residue *Topology::CreateResidue(string name)
 {
-    Residue *res = new Residue(this, _molecules.size(), name);
+    auto res = std::shared_ptr<Residue>(new Residue(this, _molecules.size(), name));
     _residues.push_back(res);
     return res;
 }
