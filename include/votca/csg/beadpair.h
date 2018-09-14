@@ -18,6 +18,8 @@
 #ifndef _BEADPAIR_H
 #define	_BEADPAIR_H
 
+#include <memory>
+
 namespace votca { namespace csg {
 using namespace votca::tools;
 
@@ -30,12 +32,12 @@ using namespace votca::tools;
  */
 
 class BeadPair
-    : public std::pair<Bead *, Bead *>
+    : public std::pair<std::shared_ptr<Bead>,std::shared_ptr<Bead>>
 {
 public:
     BeadPair() {}
-    BeadPair(Bead *bead1, Bead *bead2, vec r)
-            : std::pair<Bead *, Bead *>(bead1, bead2), _r(r), _dist(abs(r)) {}
+    BeadPair(std::shared_ptr<Bead> bead1, std::shared_ptr<Bead> bead2, vec r)
+            : std::pair<std::shared_ptr<Bead>, std::shared_ptr<Bead>>(bead1, bead2), _r(r), _dist(abs(r)) {}
         
     virtual ~BeadPair() {}
 

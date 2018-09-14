@@ -30,7 +30,7 @@ using namespace std;
  * Internal Functions *
  **********************/
 
-shared_ptr<GraphNode> BaseBeadToGraphNode(BaseBead *basebead) {
+shared_ptr<GraphNode> BaseBeadToGraphNode(shared_ptr<BaseBead> basebead) {
   unordered_map<string, double> attributes1;
   unordered_map<string, string> attributes2;
 
@@ -138,18 +138,18 @@ bool BeadStructure::isStructureEquivalent(BeadStructure &beadstructure) {
   return *graph_ == *beadstructure.graph_;
 }
 
-vector<BaseBead *> BeadStructure::getNeighBeads(int index) {
+vector<shared_ptr<BaseBead>> BeadStructure::getNeighBeads(int index) {
   if (!graphUpToDate)
     InitializeGraph_();
   auto neighbor_ids = graph_->getNeighVertices(index);
-  vector<BaseBead *> neighbeads;
+  vector<shared_ptr<BaseBead>> neighbeads;
   for (auto node_id : neighbor_ids) {
     neighbeads.push_back(beads_[node_id]);
   }
   return neighbeads;
 }
 
-BaseBead *BeadStructure::getBead(int id) {
+shared_ptr<BaseBead> BeadStructure::getBead(int id) {
   if(id<0){
     string err = "bead with negative id " + to_string(id);
     throw invalid_argument(err);

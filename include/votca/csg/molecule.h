@@ -54,9 +54,9 @@ public:
     /// Add an interaction to the molecule
     /// This is seperate from a Connect Beads method, an interaction does not
     /// guarantee a bond as far as I know. Though I will need to check. 
-    void AddInteraction(Interaction *ic) { _interactions.push_back(ic);}
+    void AddInteraction(std::shared_ptr<Interaction> ic) { _interactions.push_back(ic);}
 
-    vector<Interaction *> Interactions() { return _interactions; }
+    vector<std::shared_ptr<Interaction>> Interactions() { return _interactions; }
 
     template<typename T>
     void setUserData(T *userdata) { _userdata = (void*)userdata; }
@@ -66,7 +66,7 @@ public:
     
 private:
   
-    vector<Interaction*> _interactions;
+    vector<std::shared_ptr<Interaction>> _interactions;
      
     void *_userdata;
     

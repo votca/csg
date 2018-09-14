@@ -47,7 +47,7 @@ public:
     CGMoleculeDef() {}
     ~CGMoleculeDef();
         
-    Molecule *CreateMolecule(Topology & top);
+    std::shared_ptr<Molecule> CreateMolecule(Topology & top);
     Map *CreateMap(Molecule &in, Molecule &out);
 
     void Load(string filename);

@@ -18,6 +18,7 @@
 #ifndef _exclusionlist_H
 #define	_exclusionlist_H
 
+#include <memory>
 #include <iostream>
 #include <list>
 #include <map>
@@ -49,36 +50,36 @@ public:
 	void ExcludeList(iteratable &l);
     
     struct exclusion_t {
-        Bead *_atom;
-        list<Bead *> _exclude;
+        std::shared_ptr<Bead> _atom;
+        list<std::shared_ptr<Bead>> _exclude;
     };    
 
     void CreateExclusions(Topology *top);
-    exclusion_t *GetExclusions(Bead *bead);
+    exclusion_t *GetExclusions(std::shared_ptr<Bead> bead);
     
     typedef list< exclusion_t * >::iterator iterator;
     
     iterator begin() { return _exclusions.begin(); }
     iterator end() { return _exclusions.end(); }
     
-    bool IsExcluded(Bead *bead1, Bead *bead2);
+    bool IsExcluded(std::shared_ptr<Bead> bead1,std::shared_ptr<Bead> bead2);
 
     template<typename iteratable>
-    void InsertExclusion(Bead *bead, iteratable &excluded);
+    void InsertExclusion(std::shared_ptr<Bead> bead, iteratable &excluded);
 
-    void InsertExclusion(Bead *bead1, Bead *bead2);
+    void InsertExclusion(std::shared_ptr<Bead> bead1, std::shared_ptr<Bead> bead2);
 
-    void RemoveExclusion(Bead *bead1, Bead *bead2);
+    void RemoveExclusion(std::shared_ptr<Bead> bead1, std::shared_ptr<Bead> bead2);
 private:
     list< exclusion_t * > _exclusions;
-    map<Bead *, exclusion_t *> _excl_by_bead;
+    map<std::shared_ptr<Bead> , exclusion_t *> _excl_by_bead;
     
     friend std::ostream &operator<<(std::ostream &out, ExclusionList& exl);
 };
 
-inline ExclusionList::exclusion_t * ExclusionList::GetExclusions(Bead *bead)
+inline ExclusionList::exclusion_t * ExclusionList::GetExclusions(std::shared_ptr<Bead> bead)
 {
-   map<Bead *, exclusion_t *>::iterator iter  = _excl_by_bead.find(bead);
+   map<std::shared_ptr<Bead> , exclusion_t *>::iterator iter  = _excl_by_bead.find(bead);
    if(iter == _excl_by_bead.end()) return NULL;
    return (*iter).second;
 }
@@ -107,11 +108,11 @@ inline void ExclusionList::ExcludeList( iteratable &l ) {
 }
 
 template<typename iteratable>
-inline void ExclusionList::InsertExclusion(Bead *bead1_, iteratable &l)
+inline void ExclusionList::InsertExclusion(std::shared_ptr<Bead> bead1_, iteratable &l)
 {
 	for(typename iteratable::iterator i=l.begin(); i!=l.end(); ++i) {
-		Bead *bead1 = bead1_;
-		;Bead *bead2 = *i;
+    std::shared_ptr<Bead> bead1 = bead1_;
+    std::shared_ptr<Bead> bead2 = *i;
 		if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
 		if(bead1==bead2) continue;
 		if(IsExcluded(bead1, bead2)) continue;
@@ -127,7 +128,7 @@ inline void ExclusionList::InsertExclusion(Bead *bead1_, iteratable &l)
 }
 
 //template<>
-inline void ExclusionList::InsertExclusion(Bead *bead1, Bead *bead2) {
+inline void ExclusionList::InsertExclusion(std::shared_ptr<Bead> bead1,std::shared_ptr<Bead> bead2) {
     if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
 	if(bead1==bead2) return;
 	if(IsExcluded(bead1, bead2)) return;
@@ -142,7 +143,7 @@ inline void ExclusionList::InsertExclusion(Bead *bead1, Bead *bead2) {
 	e->_exclude.push_back(bead2);
 }
 
-inline void ExclusionList::RemoveExclusion(Bead *bead1, Bead *bead2) {
+inline void ExclusionList::RemoveExclusion(std::shared_ptr<Bead> bead1,std::shared_ptr<Bead> bead2) {
     if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
     if(bead1==bead2) return;
     if(!IsExcluded(bead1, bead2)) return;

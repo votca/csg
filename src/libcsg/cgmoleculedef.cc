@@ -94,22 +94,18 @@ void CGMoleculeDef::ParseMapping(Property &options)
         _maps[(*iter)->get("name").as<string>()] = *iter;
 }
 
-Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
+shared_ptr<Molecule> CGMoleculeDef::CreateMolecule(Topology & top)
 {   
     // add the residue names
-    Residue *res = top.CreateResidue(_name);
-    Molecule *minfo = top.CreateMolecule(_name);
+    auto res = top.CreateResidue(_name);
+    auto minfo = top.CreateMolecule(_name);
     
     // create the atoms
-    vector<beaddef_t *>::iterator iter;
-    for(iter = _beads.begin(); iter != _beads.end(); ++iter) {
-        Bead *bead;
-        BeadType *bt = top.GetOrCreateBeadType((*iter)->_type);
-        bead = top.CreateBead((*iter)->_symmetry, (*iter)->_name, bt, res->getId(), 0, 0);
-        minfo->AddBead(bead);
-
-        bead->setOptions(*(*iter)->_options);
-        
+    for( auto bead : _beads ){
+        auto bt = top.GetOrCreateBeadType(bead->_type);
+        auto beadnew = top.CreateBead(bead->_symmetry, bead->_name, bt, res->getId(), 0, 0);
+        minfo->AddBead(beadnew);
+        beadnew->setOptions(*(bead->_options));
     }    
     
     // create the bonds
@@ -156,14 +152,14 @@ Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
 
         int index=0;
         while(!atoms.empty()) {
-            Interaction *ic;
+            shared_ptr<Interaction> ic;
 
             if((*ibnd)->name() == "bond")
-                ic = new IBond(atoms);
+                ic = shared_ptr<IBond>(new IBond(atoms));
             else if((*ibnd)->name() == "angle")
-                ic = new IAngle(atoms);
+                ic = shared_ptr<IAngle>(new IAngle(atoms));
             else if((*ibnd)->name() == "dihedral")
-                ic = new IDihedral(atoms);
+                ic = shared_ptr<IDihedral>(new IDihedral(atoms));
             else
                 throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
 
@@ -217,8 +213,8 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
           throw runtime_error(string("unknown symmetry in bead definition!"));
       }
       ////////////////////////////////////////////////////
-      Bead * bead = dynamic_cast<Bead *>(out.getBead(bead_ids.at(0)));
-      bmap->Initialize(&in, bead, ((*def)->_options), mdef);
+      auto bead = dynamic_pointer_cast<Bead>(out.getBead(bead_ids.at(0)));
+      bmap->Initialize(make_shared<Molecule>(in),bead, ((*def)->_options), mdef);
       map->AddBeadMap(bmap);
 
     }

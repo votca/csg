@@ -36,16 +36,16 @@ int BeadList::Generate(Topology &top, const string &select)
         pSelect=select;
     }
     
-    for(iter=top.Beads().begin(); iter!=top.Beads().end();++iter) {
-        if (!selectByName){
-            if(wildcmp(pSelect.c_str(), (*iter)->getType()->getName().c_str())) {
-                push_back(*iter);
-            }
-        }else{
-            if(wildcmp(pSelect.c_str(), (*iter)->getName().c_str())) {
-                push_back(*iter);
-            }
+    for(auto bead : top.Beads()){
+      if (!selectByName){
+        if(wildcmp(pSelect.c_str(), bead->getType()->getName().c_str())) {
+          push_back(bead);
         }
+      }else{
+        if(wildcmp(pSelect.c_str(), bead->getName().c_str())) {
+          push_back(bead);
+        }
+      }
     }
     return size();
 }
@@ -53,7 +53,6 @@ int BeadList::Generate(Topology &top, const string &select)
 
 int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select, vec ref, double radius)
 {
-    BeadContainer::iterator iter;
     _topology = &top;
     bool selectByName=false;
     string pSelect; //parsed selection string
@@ -66,15 +65,15 @@ int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select, 
         pSelect=select;
     }
 
-    for(iter=top.Beads().begin(); iter!=top.Beads().end();++iter) {
-        if (abs(_topology->BCShortestConnection(ref, (*iter)->getPos())) > radius) continue;
+    for(auto bead : top.Beads()){
+      if (abs(_topology->BCShortestConnection(ref, bead->getPos())) > radius) continue;
         if (!selectByName){
-            if(wildcmp(pSelect.c_str(), (*iter)->getType()->getName().c_str())) {
-                push_back(*iter);
+            if(wildcmp(pSelect.c_str(), bead->getType()->getName().c_str())) {
+                push_back(bead);
             }
         }else{
-            if(wildcmp(pSelect.c_str(), (*iter)->getName().c_str())) {
-                push_back(*iter);
+            if(wildcmp(pSelect.c_str(), bead->getName().c_str())) {
+                push_back(bead);
             }
         }
     }

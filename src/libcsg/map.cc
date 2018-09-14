@@ -37,12 +37,10 @@ Map::~Map()
 
 void Map::Apply()
 {
-    vector<BeadMap *>::iterator iter;
-    for(iter=_maps.begin();iter!=_maps.end();++iter)
-        (*iter)->Apply();
+    for(auto bm : _maps) bm->Apply();
 }
 
-void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Property *opts_map) {
+void Map_Sphere::Initialize(shared_ptr<Molecule> in, shared_ptr<Bead> out, Property *opts_bead, Property *opts_map) {
     BeadMap::Initialize(in, out, opts_bead, opts_map);
     
     vector<string> beads;
@@ -124,7 +122,7 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
         string err = "impossible to resolve correct bead from name " + 
           beads[i] + " as more than one bead has the name.";
       }
-      Bead * bead = dynamic_cast<Bead *>(in->getBead(bead_ids.at(0)));
+      auto bead = in->getBead(bead_ids.at(0));
       AddElem(bead, weights[i], fweights[i]);
     }
 }
@@ -196,7 +194,7 @@ void Map_Ellipsoid::Apply()
     bPos=bVel=bF=false;
 
     // the following is needed for pbc treatment
-    Topology *top = _out->getParent();
+    auto top = _out->getParent();
     double max_dist = 0.5*top->ShortestBoxSize();
     vec r0 = vec(0,0,0);
     if(_matrix.size() > 0) {
@@ -209,7 +207,7 @@ void Map_Ellipsoid::Apply()
     n = 0;
     _out->ParentBeads().clear();
     for(iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-       Bead *bead = iter->_in;
+       auto bead = iter->_in;
        _out->ParentBeads().push_back(bead->getId());
        if(bead->HasPos()) {
             vec r = top->BCShortestConnection(r0, bead->getPos());
@@ -252,21 +250,21 @@ void Map_Ellipsoid::Apply()
     // calculate the tensor of gyration
     c=c/(double)n;    
     for(iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-        if((*iter)._weight == 0) continue;
-        Bead *bead = iter->_in;
-            vec v = bead->getPos() - c;
-            //v = vec(1, 0.5, 0) * 0.*(drand48()-0.5)
-            //    + vec(0.5, -1, 0) * (drand48()-0.5)
-            //    + vec(0, 0, 1) * (drand48()-0.5);
-        
-            //Normalize the tensor with 1/number_of_atoms_per_bead
-            m[0][0] += v.getX()*v.getX()/(double)_matrix.size();
-            m[0][1] += v.getX()*v.getY()/(double)_matrix.size();
-            m[0][2] += v.getX()*v.getZ()/(double)_matrix.size();
-            m[1][1] += v.getY()*v.getY()/(double)_matrix.size();
-            m[1][2] += v.getY()*v.getZ()/(double)_matrix.size();
-            m[2][2] += v.getZ()*v.getZ()/(double)_matrix.size();
-        
+      if((*iter)._weight == 0) continue;
+      auto bead = iter->_in;
+      vec v = bead->getPos() - c;
+      //v = vec(1, 0.5, 0) * 0.*(drand48()-0.5)
+      //    + vec(0.5, -1, 0) * (drand48()-0.5)
+      //    + vec(0, 0, 1) * (drand48()-0.5);
+
+      //Normalize the tensor with 1/number_of_atoms_per_bead
+      m[0][0] += v.getX()*v.getX()/(double)_matrix.size();
+      m[0][1] += v.getX()*v.getY()/(double)_matrix.size();
+      m[0][2] += v.getX()*v.getZ()/(double)_matrix.size();
+      m[1][1] += v.getY()*v.getY()/(double)_matrix.size();
+      m[1][2] += v.getY()*v.getZ()/(double)_matrix.size();
+      m[2][2] += v.getZ()*v.getZ()/(double)_matrix.size();
+
     }
     m[1][0] = m[0][1];
     m[2][0] = m[0][2];
@@ -275,15 +273,6 @@ void Map_Ellipsoid::Apply()
     // calculate the eigenvectors
     matrix::eigensystem_t es;
     m.SolveEigensystem(es);
-    
-    //vec eigenv1=es.eigenvecs[0];
-    //vec eigenv2=es.eigenvecs[1];
-    //vec eigenv3=es.eigenvecs[2];
-    
-/*    _out->seteigenvec1(eigenv1);
-    _out->seteigenvec2(eigenv2);
-    _out->seteigenvec3(eigenv3);
-  */  
     
     vec u = es.eigenvecs[0];
     vec v = _matrix[1]._in->getPos() - _matrix[0]._in->getPos();
@@ -302,9 +291,6 @@ void Map_Ellipsoid::Apply()
     w.normalize();
     _out->setW(w);
     
-    //out.BeadV(_out) = v;
-    
-    //out.BeadW(_out) = es.eigenvecs[2];
 }
 
 }}

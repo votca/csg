@@ -15,6 +15,7 @@
  *
  */
 
+#include <memory>
 #include <algorithm>
 #include <votca/csg/topology.h>
 #include <votca/csg/exclusionlist.h>
@@ -32,21 +33,20 @@ void ExclusionList::Clear(void)
     
 void ExclusionList::CreateExclusions(Topology *top) {
 	InteractionContainer &ic = top->BondedInteractions();
-	InteractionContainer::iterator ia;
 
-	for (ia = ic.begin(); ia != ic.end(); ++ia) {
-		int beads_in_int = (*ia)->BeadCount();
-		list<Bead *> l;
+  for(auto ia : ic ){
+    int beads_in_int = ia->BeadCount();
+		list<shared_ptr<Bead>> l;
 
 		for (int ibead = 0; ibead < beads_in_int; ibead ++) {
-			int ii = (*ia)->getBeadId(ibead);
+			int ii = ia->getBeadId(ibead);
 			l.push_back(top->getBead(ii));
 		}
 		ExcludeList(l);
 	}
 }
 
-bool ExclusionList::IsExcluded(Bead *bead1, Bead *bead2) {
+bool ExclusionList::IsExcluded(shared_ptr<Bead> bead1, shared_ptr<Bead> bead2) {
     exclusion_t *excl;
     if(bead1->getMolecule() != bead2->getMolecule()) return false;
     if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
