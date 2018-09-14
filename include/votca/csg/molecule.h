@@ -18,6 +18,7 @@
 #ifndef _VOTCA_CSG_MOLECULE_H
 #define	_VOTCA_CSG_MOLECULE_H
 
+#include <memory>
 #include <vector>
 #include <map>
 #include <string>
@@ -25,8 +26,6 @@
 
 #include "beadstructure.h"
 #include "topologyitem.h"
-
-//#include "bead.h"
 
 namespace votca { namespace csg {
 
@@ -72,7 +71,7 @@ private:
     void *_userdata;
     
     /// constructor
-    Molecule(Topology *parent, int id, string name)
+    Molecule(std::shared_ptr<Topology> parent, int id, string name)
         : TopologyItem(parent), Identity(id), Name(name)
     {}
 

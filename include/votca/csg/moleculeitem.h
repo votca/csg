@@ -18,6 +18,7 @@
 #ifndef _VOTCA_CSG_MOLECULEITEM_H
 #define _VOTCA_CSG_MOLECULEITEM_H
 
+#include <memory>
 #include <cassert>
 
 namespace votca {
@@ -32,7 +33,7 @@ public:
   /**
    * Returns the molecule the pointer points at
    */
-  Molecule *getMolecule() {
+  std::shared_ptr<Molecule> getMolecule() {
     assert(_mol != nullptr);
     return _mol;
   }
@@ -40,12 +41,12 @@ public:
   /**
    * stores a pointer to a molecule
    */
-  void setMolecule(Molecule *mol) { _mol = mol; }
+  void setMolecule(std::shared_ptr<Molecule> mol) { _mol = mol; }
 
 protected:
-  MoleculeItem(Molecule *mol) : _mol(mol) {}
+  MoleculeItem(std::shared_ptr<Molecule> mol) : _mol(mol) {}
 
-  Molecule *_mol = nullptr;
+  std::shared_ptr<Molecule> _mol = nullptr;
 };
 }
 }

@@ -77,7 +77,7 @@ void BeadStructure::CalculateStructure_() {
  * Public Facing Functions *
  ***************************/
 
-void BeadStructure::AddBead(BaseBead *bead) {
+void BeadStructure::AddBead(shared_ptr<BaseBead> bead) {
   if (beads_.count(bead->getId())) {
     string err = "Cannot add bead with Id ";
     err += to_string(bead->getId());

@@ -18,6 +18,8 @@
 #ifndef _TOPOLOGYITEM_H
 #define	_TOPOLOGYITEM_H
 
+#include <memory>
+
 namespace votca { namespace csg {
 
 class Topology;
@@ -26,12 +28,12 @@ class TopologyItem
 {
 public:    
     virtual ~TopologyItem() {}
-    Topology *getParent() { return _parent; }
+    std::shared_ptr<Topology> getParent() { return _parent; }
 protected:
-    TopologyItem(Topology *parent)
+    TopologyItem(std::shared_ptr<Topology> parent)
         : _parent(parent) {}
     
-    Topology *_parent;
+    std::shared_ptr<Topology> _parent;
     
     friend class Topology;
 };

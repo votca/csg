@@ -88,7 +88,7 @@ public:
      *
      * The function creates a new bead and adds it to the list of beads.     
      */
-    virtual Bead *CreateBead(byte_t symmetry, string name, BeadType *type, int resnr, double m, double q);
+    virtual std::shared_ptr<Bead> CreateBead(byte_t symmetry, string name, shared_ptr<BeadType> type, int resnr, double m, double q);
 
      /**
      * \brief get bead type or create it
@@ -97,14 +97,14 @@ public:
      *
      * Returns an existing bead type or creates one if it doesn't exist yet
      */
-    virtual BeadType *GetOrCreateBeadType(string name);
+    virtual std::shared_ptr<BeadType> GetOrCreateBeadType(string name);
 
     /**
      * \brief creates a new molecule
      * \param name name of the molecule
      * \return pointer to created molecule
      */
-    virtual Molecule *CreateMolecule(string name);
+    virtual std::shared_ptr<Molecule> CreateMolecule(string name);
 
     /**
      *  \brief checks weather molecules with the same name really contain the same number of beads
@@ -116,8 +116,8 @@ public:
      * @param name residue name
      * @return created residue
      */
-    virtual Residue *CreateResidue(string name);
-    virtual Residue *CreateResidue(string name, int id);
+    virtual std::shared_ptr<Residue> CreateResidue(string name);
+    virtual std::shared_ptr<Residue> CreateResidue(string name, int id);
     
     /** 
      * \brief create molecules based on the residue
@@ -167,7 +167,7 @@ public:
      * @param index molecule number
      * @return pointer to molecule
      */
-    Molecule *MoleculeByIndex(int index);
+    std::shared_ptr<Molecule> MoleculeByIndex(int index);
     
     /**
      * access containter with all beads
@@ -193,13 +193,13 @@ public:
      */
     InteractionContainer &BondedInteractions() { return _interactions; }
     
-    void AddBondedInteraction(Interaction *ic);
-    std::list<Interaction *> InteractionsInGroup(const string &group);
+    void AddBondedInteraction(std::shared_ptr<Interaction> ic);
+    std::list<std::shared_ptr<Interaction>> InteractionsInGroup(const string &group);
     
-    BeadType *getBeadType(const int i) const { return _beadtypes[i]; }
-    Bead *getBead(const int i) const { return _beads[i]; }
-    Residue *getResidue(const int i) const { return _residues[i]; }
-    Molecule *getMolecule(const int i) const { return _molecules[i]; }
+    std::shared_ptr<BeadType> getBeadType(const int i) const { return _beadtypes[i]; }
+    std::shared_ptr<Bead> getBead(const int i) const { return _beads[i]; }
+    std::shared_ptr<Residue> getResidue(const int i) const { return _residues[i]; }
+    std::shared_ptr<Molecule> getMolecule(const int i) const { return _molecules[i]; }
        
     /**
      * delete all molecule information
@@ -212,13 +212,13 @@ public:
      * \brief adds all the beads+molecules+residues from other topology
      * \param top topology to add
      */
-    void Add(Topology *top);
+    void Add(std::shared_ptr<Topology> top);
 
     /**
      * \brief copy topology data of different topology
      * \param top topology to copy from
      */
-    void CopyTopologyData(Topology *top);
+    void CopyTopologyData(std::shared_ptr<Topology> top);
 
     /**
      *  \brief rename all the molecules in range
@@ -399,10 +399,10 @@ protected:
     
     ExclusionList _exclusions;
     
-    map<string, int> _interaction_groups;
-    map<string, int> _beadtype_map;
+    std::map<std::string, int> _interaction_groups;
+    std::map<std::string, int> _beadtype_map;
     
-    map<string, list<Interaction *> > _interactions_by_group;
+    std::map<std::string, std::list<std::shared_ptr<Interaction> > > _interactions_by_group;
     
     double _time;
     int _step;
@@ -410,39 +410,39 @@ protected:
     bool _has_force;
 
     /// The particle group (For H5MD file format)
-    string _particle_group;
+    std::string _particle_group;
 };
 
-inline Bead *Topology::CreateBead(byte_t symmetry, string name, BeadType *type, int resnr, double m, double q)
+inline std::shared_ptr<Bead> Topology::CreateBead(byte_t symmetry, string name, shared_ptr<BeadType> type, int resnr, double m, double q)
 {
     
-    auto b = std::shared_ptr<Bead>(new Bead(this, _beads.size(), type, symmetry, name, resnr, m, q));    
+    auto b = std::shared_ptr<Bead>(new Bead(std::make_shared<Topology>(*this), _beads.size(), type, symmetry, name, resnr, m, q));    
     _beads.push_back(b);
     return b;
 }
 
-inline Molecule *Topology::CreateMolecule(string name)
+inline std::shared_ptr<Molecule> Topology::CreateMolecule(string name)
 {
-    auto mol = std::shared_ptr<Molecule>(new Molecule(this, _molecules.size(), name));
+    auto mol = std::shared_ptr<Molecule>(new Molecule(std::make_shared<Topology>(*this), _molecules.size(), name));
     _molecules.push_back(mol);
     return mol;
 }
 
-inline Residue *Topology::CreateResidue(string name, int id)
+inline std::shared_ptr<Residue> Topology::CreateResidue(string name, int id)
 {
-    auto res = std::shared_ptr<Residue>(new Residue(this, id, name));
+    auto res = std::shared_ptr<Residue>(new Residue(std::make_shared<Topology>(*this), id, name));
     _residues.push_back(res);
     return res;
 }
 
-inline Residue *Topology::CreateResidue(string name)
+inline std::shared_ptr<Residue> Topology::CreateResidue(string name)
 {
-    auto res = std::shared_ptr<Residue>(new Residue(this, _molecules.size(), name));
+    auto res = std::shared_ptr<Residue>(new Residue(std::make_shared<Topology>(*this), _molecules.size(), name));
     _residues.push_back(res);
     return res;
 }
 
-inline Molecule *Topology::MoleculeByIndex(int index)
+inline std::shared_ptr<Molecule> Topology::MoleculeByIndex(int index)
 {
     return _molecules[index];
 }
