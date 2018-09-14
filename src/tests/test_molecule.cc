@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE(test_molecule_interaction){
   string molecule_name = "Methane";
   Molecule * mol = top.CreateMolecule(molecule_name);
 
-  string bead_type_name = "1";
-  BeadType * b_type = top.GetOrCreateBeadType(bead_type_name);
+  string bead_type_name2 = "1";
+  BeadType * b_type = top.GetOrCreateBeadType(bead_type_name2);
 
   int symmetry = 1;
   string name = "C1";
@@ -119,17 +119,155 @@ BOOST_AUTO_TEST_CASE(test_molecule_interaction){
   mol->AddBead(b);
  
   string name2 = "H1";
-  Bead * b2 = top.CreateBead(symmetry,name2,b_type,resnr,mass,charge);
+  string bead_type_name = "2";
+  mass = 0.1;
+  charge = 0.4;
+  BeadType * b_type2 = top.GetOrCreateBeadType(bead_type_name2);
+  Bead * b2 = top.CreateBead(symmetry,name2,b_type2,resnr,mass,charge);
   mol->AddBead(b2);
 
-  BOOST_CHECK_EQUAL(mol->BeadCount(),2);
+  string name3 = "H2";
+  b2 = top.CreateBead(symmetry,name3,b_type2,resnr,mass,charge);
+  mol->AddBead(b2);
+  string name4 = "H3";
+  b2 = top.CreateBead(symmetry,name4,b_type2,resnr,mass,charge);
+  mol->AddBead(b2);
+  string name5 = "H4";
+  b2 = top.CreateBead(symmetry,name5,b_type2,resnr,mass,charge);
+  mol->AddBead(b2);
+  BOOST_CHECK_EQUAL(mol->BeadCount(),5);
   
   IBond bond_interaction(0,1);  
   mol->AddInteraction(&bond_interaction);
 
-  vector<Interaction *> bond_interactions = mol->Interactions();
-  BOOST_CHECK_EQUAL(bond_interactions.size(),1);
+  IBond bond_interaction2(0,2);  
+  mol->AddInteraction(&bond_interaction2);
 
+  IBond bond_interaction3(0,3);  
+  mol->AddInteraction(&bond_interaction3);
+
+  IBond bond_interaction4(0,4);  
+  mol->AddInteraction(&bond_interaction4);
+
+  vector<Interaction *> bond_interactions = mol->Interactions();
+  BOOST_CHECK_EQUAL(bond_interactions.size(),4);
+
+}
+
+BOOST_AUTO_TEST_CASE(test_comparison_of_molecules){
+
+  Topology top;
+  string molecule_name = "Methane";
+  Molecule * mol = top.CreateMolecule(molecule_name);
+
+  string molecule_name2 = "Methane2";
+  Molecule * mol2 = top.CreateMolecule(molecule_name2);
+
+  string bead_type_name = "1";
+  BeadType * b_type = top.GetOrCreateBeadType(bead_type_name);
+
+  int symmetry = 1;
+  double mass = 1.21;
+  double charge = -0.87;
+
+  int resnr = 0;
+  string name_C1 = "C";
+  Bead * b1_C = top.CreateBead(symmetry,name_C1,b_type,resnr,mass,charge);
+  b1_C->setId(0);
+  
+  mol->AddBead(b1_C);
+
+  // Adding the hydrogens 
+  string bead_type_name2 = "2";
+  mass = 0.1;
+  charge = 0.4;
+  BeadType * b_type2 = top.GetOrCreateBeadType(bead_type_name2);
+
+  string name2 = "H";
+  Bead * b1_H = top.CreateBead(symmetry,name2,b_type2,resnr,mass,charge);
+  b1_H->setId(1);
+  mol->AddBead(b1_H);
+  string name3 = "H";
+  Bead * b2_H = top.CreateBead(symmetry,name3,b_type2,resnr,mass,charge);
+  b2_H->setId(2);
+  mol->AddBead(b2_H);
+  string name4 = "H";
+  Bead * b3_H = top.CreateBead(symmetry,name4,b_type2,resnr,mass,charge);
+  b3_H->setId(3);
+  mol->AddBead(b3_H);
+  string name5 = "H";
+  Bead * b4_H = top.CreateBead(symmetry,name5,b_type2,resnr,mass,charge);
+  b4_H->setId(4);
+  mol->AddBead(b4_H);
+
+  mol->ConnectBeads(0,1);
+  mol->ConnectBeads(0,2);
+  mol->ConnectBeads(0,3);
+  mol->ConnectBeads(0,4);
+
+  //
+  //      H1
+  //      |
+  // H2 - C0 - H4
+  //      |
+  //      H5
+  //
+
+
+  BOOST_CHECK_EQUAL(mol->BeadCount(),5);
+
+  // Create the second molecule 
+  mass = 1.21;
+  charge = -0.87;
+  int resnr2 = 1;
+  string name_C2 = "C";
+  Bead * b2_C = top.CreateBead(symmetry,name_C2,b_type,resnr2,mass,charge);
+  b2_C->setId(5);
+  mol2->AddBead(b2_C);
+
+  mass = 0.1;
+  charge = 0.4;
+  string name6 = "H"; 
+  Bead * b5_H = top.CreateBead(symmetry,name6,b_type2,resnr2,mass,charge);
+  b5_H->setId(6);
+  mol2->AddBead(b5_H);
+  string name7 = "H";
+  Bead * b6_H = top.CreateBead(symmetry,name7,b_type2,resnr2,mass,charge);
+  b5_H->setId(7);
+  mol2->AddBead(b6_H);
+  string name8 = "H";
+  Bead * b7_H = top.CreateBead(symmetry,name8,b_type2,resnr2,mass,charge);
+  b5_H->setId(8);
+  mol2->AddBead(b7_H);
+
+  mol2->ConnectBeads(5,6);
+  mol2->ConnectBeads(5,7);
+  mol2->ConnectBeads(5,8);
+
+  //
+  //      H1              H7
+  //      |               |
+  // H2 - C0 - H4    H6 - C5 - H8
+  //      |
+  //      H3
+  //
+  BOOST_CHECK(!mol->isStructureEquivalent(*mol2));
+
+  string name9 = "H";
+  Bead * b8_H = top.CreateBead(symmetry,name9,b_type2,resnr2,mass,charge);
+  b8_H->setId(9);
+  mol2->AddBead(b8_H);
+  mol2->ConnectBeads(5,9);
+
+  //
+  //      H1              H7
+  //      |               |
+  // H2 - C0 - H4    H6 - C5 - H8
+  //      |               |
+  //      H3              H9
+  //
+  BOOST_CHECK(mol->isStructureEquivalent(*mol2));
+  
 }
 
   
