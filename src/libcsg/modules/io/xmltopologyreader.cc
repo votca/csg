@@ -175,7 +175,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads, i
         }
     }
     for (int mn = 0; mn < nmols; mn++) {
-        Molecule *mi = _top->CreateMolecule(molname);
+        auto mi = _top->CreateMolecule(molname);
         XMLMolecule *xmlMolecule = new XMLMolecule(molname, nmols);
         xmlMolecule->pid = mi->getId();
         xmlMolecule->mi = mi;
@@ -192,8 +192,8 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads, i
             } else {
                 _top->CreateResidue(molname, resnr);
             }
-            BeadType *type = _top->GetOrCreateBeadType(b.type);
-            Bead *bead = _top->CreateBead(1, b.name, type, resnr, b.mass, b.q);
+            auto type = _top->GetOrCreateBeadType(b.type);
+            auto bead = _top->CreateBead(1, b.name, type, resnr, b.mass, b.q);
             mi->AddBead(bead);
 
             // Data for bonded terms.
@@ -255,7 +255,6 @@ void XMLTopologyReader::ParseBond(Property &p) {
     tok.ToVector(bead_list);
     if (bead_list.size() % 2 == 1)
         throw runtime_error("Wrong number of beads in bond: " + name);
-    Interaction *ic = NULL;
     typedef pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
     int b_index = 0;
     for (vector<string>::iterator it = bead_list.begin(); it != bead_list.end(); ) {
@@ -269,7 +268,7 @@ void XMLTopologyReader::ParseBond(Property &p) {
                 XMLMolecule &xmlMolecule = *itm->second;
                 XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atname];
                 XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
-                ic = new IBond(xmlBead1.pid, xmlBead2.pid);
+                auto ic = shared_ptr<IBond>(new IBond(xmlBead1.pid, xmlBead2.pid));
                 ic->setGroup(name);
                 ic->setIndex(b_index);
                 ic->setMolecule(xmlMolecule.pid);
@@ -293,7 +292,6 @@ void XMLTopologyReader::ParseAngle(Property &p) {
     tok.ToVector(bead_list);
     if (bead_list.size() % 3 == 1)
         throw runtime_error("Wrong number of beads in angle: " + name);
-    Interaction *ic = NULL;
     typedef pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
     int b_index = 0;
     for (vector<string>::iterator it = bead_list.begin(); it != bead_list.end(); ) {
@@ -309,7 +307,7 @@ void XMLTopologyReader::ParseAngle(Property &p) {
                 XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atname];
                 XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
                 XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atname];
-                ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
+                auto ic = shared_ptr<IAngle>(new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid));
                 ic->setGroup(name);
                 ic->setIndex(b_index);
                 ic->setMolecule(xmlMolecule.pid);
@@ -331,7 +329,6 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
     tok.ToVector(bead_list);
     if (bead_list.size() % 4 == 1)
         throw runtime_error("Wrong number of beads in dihedral: " + name);
-    Interaction *ic = NULL;
     typedef pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
     int b_index = 0;
     for (vector<string>::iterator it = bead_list.begin(); it != bead_list.end(); ) {
@@ -350,8 +347,8 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
                 XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
                 XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atname];
                 XMLBead &xmlBead4 = *xmlMolecule.name2beads[b4.atname];
-                ic = new IDihedral(xmlBead1.pid, xmlBead2.pid,
-                                   xmlBead3.pid, xmlBead4.pid);
+                auto ic = shared_ptr<IDihedral>(new IDihedral(xmlBead1.pid, xmlBead2.pid,
+                                   xmlBead3.pid, xmlBead4.pid));
                 ic->setGroup(name);
                 ic->setIndex(b_index);
                 ic->setMolecule(xmlMolecule.pid);

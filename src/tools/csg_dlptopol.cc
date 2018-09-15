@@ -115,8 +115,7 @@ bool DLPTopolApp::EvaluateTopology(Topology *top, Topology *top_ref)
 
   // find all unique molecular types
 
-  for(iter=mols.begin(); iter!=mols.end(); ++iter) {
-    Molecule *mol = *iter;
+  for(auto mol : mols ){
 
     // molecules are ignored during the mapping stage 
     // i.e. the ignored ones do not enter the CG topology (*top) - ?
@@ -215,7 +214,7 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, Molecule &cg)
   out << "atoms " << cg.BeadCount() << endl;
     out << "# name  mass  charge  nrept  ifrozen (optional: ngroup, index, name/type, type/residue, index/res-ID) \n";
     for(int i=0; i<cg.BeadCount(); ++i) {
-        Bead *b=dynamic_cast<Bead *>(cg.getBead(i));
+        auto b=dynamic_pointer_cast<Bead>(cg.getBead(i));
 
         string bname=b->getName();
         string btype=b->getType()->getName();
@@ -232,15 +231,13 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, Molecule &cg)
 void DLPTopolApp::WriteMoleculeInteractions(ostream &out, Molecule &cg)
 {
     InteractionContainer ics=cg.Interactions();
-    vector<Interaction *>::iterator iter;
 
     stringstream sout;
 
     int n_entries = 0;
     int nb=-1;
 
-    for(iter=ics.begin(); iter!=ics.end(); ++iter) {
-        Interaction *ic = *iter;
+    for(auto ic : ics ){
         if(nb != ic->BeadCount()) {
 
 	    if(sout.str()!="") 

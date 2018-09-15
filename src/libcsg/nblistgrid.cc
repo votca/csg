@@ -32,9 +32,9 @@ void NBListGrid::Generate(BeadList &list1, BeadList &list2, bool do_exclusions)
     InitializeGrid(top->getBox());
 
     // Add all beads of list1
-    for(iter = list1.begin(); iter != list1.end(); ++iter)
+    for(iter = list1.begin(); iter != list1.end(); ++iter){
         getCell((*iter)->getPos())._beads.push_back(*iter);
-
+    }
 
     for(iter = list2.begin(); iter != list2.end(); ++iter) {
         cell_t &cell = getCell((*iter)->getPos());
@@ -139,7 +139,7 @@ NBListGrid::cell_t &NBListGrid::getCell(const vec &r)
     return getCell(a,b,c);
  }
 
-void NBListGrid::TestBead(NBListGrid::cell_t &cell, Bead *bead)
+void NBListGrid::TestBead(NBListGrid::cell_t &cell, shared_ptr<Bead> bead)
 {
     TestCell(cell, bead);
     for(vector<cell_t*>::iterator iter=cell._neighbours.begin();
@@ -148,7 +148,7 @@ void NBListGrid::TestBead(NBListGrid::cell_t &cell, Bead *bead)
         }
 }
 
-void NBListGrid::TestCell(NBListGrid::cell_t &cell, Bead *bead)
+void NBListGrid::TestCell(NBListGrid::cell_t &cell, shared_ptr<Bead> bead)
 {
     BeadList::iterator iter;
     vec u = bead->getPos();

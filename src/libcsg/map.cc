@@ -122,7 +122,8 @@ void Map_Sphere::Initialize(shared_ptr<Molecule> in, shared_ptr<Bead> out, Prope
         string err = "impossible to resolve correct bead from name " + 
           beads[i] + " as more than one bead has the name.";
       }
-      auto bead = in->getBead(bead_ids.at(0));
+      auto basebead = in->getBead(bead_ids.at(0));
+      auto bead = dynamic_pointer_cast<Bead>(basebead);
       AddElem(bead, weights[i], fweights[i]);
     }
 }
@@ -136,7 +137,7 @@ void Map_Sphere::Apply()
     _out->ParentBeads().clear();
 
     // the following is needed for pbc treatment
-    Topology *top = _out->getParent();
+    auto top = _out->getParent();
     double max_dist = 0.5*top->ShortestBoxSize();
     vec r0 = vec(0,0,0);
     string name0;
@@ -152,7 +153,7 @@ void Map_Sphere::Apply()
     double M = 0;
 
     for(iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-        Bead *bead = iter->_in;
+        auto bead = iter->_in;
         _out->ParentBeads().push_back(bead->getId());
         M+=bead->getM();
         if(bead->HasPos()) {

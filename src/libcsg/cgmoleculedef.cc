@@ -174,9 +174,9 @@ shared_ptr<Molecule> CGMoleculeDef::CreateMolecule(Topology & top)
     return minfo;
 }
 
-Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
+Map *CGMoleculeDef::CreateMap(shared_ptr<Molecule> in, shared_ptr<Molecule> out)
 {       
-    if((unsigned int)out.BeadCount() != _beads.size()) {
+    if((unsigned int)out->BeadCount() != _beads.size()) {
         throw runtime_error("number of beads for cg molecule and mapping definition do "
                 "not match, check your molecule naming.");
     }
@@ -185,7 +185,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
     for(vector<beaddef_t *>::iterator def = _beads.begin();
         def != _beads.end(); ++def) {
 
-      vector<int> bead_ids = out.getIdsOfBeadsWithName((*def)->_name);
+      vector<int> bead_ids = out->getIdsOfBeadsWithName((*def)->_name);
       if(bead_ids.size() == 0) {
         throw runtime_error(string("mapping error: reference molecule "
               + (*def)->_name + " does not exist"));
@@ -213,8 +213,8 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
           throw runtime_error(string("unknown symmetry in bead definition!"));
       }
       ////////////////////////////////////////////////////
-      auto bead = dynamic_pointer_cast<Bead>(out.getBead(bead_ids.at(0)));
-      bmap->Initialize(make_shared<Molecule>(in),bead, ((*def)->_options), mdef);
+      auto bead = dynamic_pointer_cast<Bead>(out->getBead(bead_ids.at(0)));
+      bmap->Initialize(in,bead, ((*def)->_options), mdef);
       map->AddBeadMap(bmap);
 
     }

@@ -144,13 +144,12 @@ void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref)
 {
     // loop over all molecules
     bool did_something = false;
-    for(MoleculeContainer::iterator imol=top->Molecules().begin(); imol!=top->Molecules().end(); ++imol) {
-        Molecule *mol = *imol;
+    for(auto mol : top->Molecules() ){
         if(!wildcmp(_molname.c_str(),mol->getName().c_str())) 
             continue;
         int N = mol->BeadCount();
             for(int i=0; i<N; i++) {
-                Bead *b = dynamic_cast<Bead *>(mol->getBead(i));        
+                auto b = dynamic_pointer_cast<Bead>(mol->getBead(i));        
                 if(!wildcmp(_filter.c_str(), b->getName().c_str()))
                     continue;
                 double r;

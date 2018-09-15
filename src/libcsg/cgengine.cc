@@ -44,8 +44,9 @@ TopologyMap *CGEngine::CreateCGTopology(Topology &in, Topology &out)
     MoleculeContainer &mols = in.Molecules();
     MoleculeContainer::iterator iter;
     TopologyMap *m = new TopologyMap(&in, &out);
-    for(iter=mols.begin(); iter!=mols.end(); ++iter) {
-        Molecule *mol = *iter;
+//    for(iter=mols.begin(); iter!=mols.end(); ++iter) {
+    for(auto mol : mols){
+//        Molecule *mol = *iter;
         if(IsIgnored(mol->getName())) continue;
         CGMoleculeDef *def = getMoleculeDef(mol->getName());
         if(!def) {
@@ -58,8 +59,8 @@ TopologyMap *CGEngine::CreateCGTopology(Topology &in, Topology &out)
                  << "--------------------------------------\n";
             continue;
         }
-        Molecule *mcg = def->CreateMolecule(out);
-        Map *map = def->CreateMap(*mol, *mcg);
+        auto mcg = def->CreateMolecule(out);
+        Map *map = def->CreateMap(mol, mcg);
         m->AddMoleculeMap(map);
     }
     out.RebuildExclusions();    

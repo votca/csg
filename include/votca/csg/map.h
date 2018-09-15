@@ -38,7 +38,7 @@ class BeadMap;
 class Map
 {
 public:
-    Map(Molecule &in, Molecule &out)
+    Map(std::shared_ptr<Molecule> in, std::shared_ptr<Molecule> out)
         : _in(in), _out(out) {}
     ~Map();
     
@@ -47,7 +47,7 @@ public:
     void Apply();
 
 protected:
-    Molecule _in, _out;
+    std::shared_ptr<Molecule> _in, _out;
     vector<BeadMap *> _maps;
 };
 

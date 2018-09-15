@@ -95,7 +95,7 @@ bool XYZReader::NextFrame(Topology &top)
                         boost::lexical_cast<string>(_line) +
                         " in xyz file\n" + line);
 
-            Bead *b;
+            std::shared_ptr<Bead> b;
             if(_topology)
                 b = top.CreateBead(1, fields[0]+boost::lexical_cast<string>(i),
                         top.GetOrCreateBeadType(fields[0]), 0, 0, 0);

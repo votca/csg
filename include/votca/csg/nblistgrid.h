@@ -51,8 +51,8 @@ protected:
     cell_t &getCell(const vec &r);
     cell_t &getCell(const int &a, const int &b, const int &c);
 
-    void TestBead(cell_t &cell, Bead *bead);
-    void TestCell(cell_t &cell, Bead *bead);
+    void TestBead(cell_t &cell, std::shared_ptr<Bead> bead);
+    void TestCell(cell_t &cell, std::shared_ptr<Bead> bead);
 };
 
 inline NBListGrid::cell_t &NBListGrid::getCell(const int &a, const int &b, const int &c)

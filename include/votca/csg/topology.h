@@ -369,7 +369,7 @@ public:
     }
 
     template<typename iteratable>
-    void InsertExclusion(Bead *bead1, iteratable &l);
+    void InsertExclusion(shared_ptr<Bead> bead1, iteratable &l);
 
     bool HasVel(){return _has_vel;}
     void SetHasVel(const bool v){ _has_vel=v;}
@@ -448,7 +448,7 @@ inline std::shared_ptr<Molecule> Topology::MoleculeByIndex(int index)
 }
 
 template<typename iteratable>
-inline void Topology::InsertExclusion(Bead *bead1, iteratable &l) {
+inline void Topology::InsertExclusion(shared_ptr<Bead> bead1, iteratable &l) {
     _exclusions.InsertExclusion(bead1, l);
 }
 
