@@ -6,7 +6,7 @@ foreach(PROG
   test_interaction
   test_lammpsdatareader 
   test_lammpsdumpreaderwriter
-  test_molecule
+  test_molecule_csg
   test_pdbreader )
 
   file(GLOB ${PROG}_SOURCES ${PROG}.cc)
