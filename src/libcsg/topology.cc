@@ -214,17 +214,16 @@ list<shared_ptr<Interaction>> Topology::InteractionsInGroup(const string &group)
 
 shared_ptr<BeadType> Topology::GetOrCreateBeadType(string name)
 {
-    map<string, int>::iterator iter;
-    
-    iter = _beadtype_map.find(name);
+
+    auto iter = _beadtype_map.find(name);
     if(iter == _beadtype_map.end()) {
-        auto bt = shared_ptr<BeadType>(new BeadType(make_shared<Topology>(*this), _beadtypes.size(), name));
-        _beadtypes.push_back(bt);
-        _beadtype_map[name] = bt->getId();
-        return bt;
-    }
-    else {
-        return _beadtypes[(*iter).second];
+      auto bt = new BeadType(make_shared<Topology>(*this), _beadtypes.size(), name);
+      auto shared_bt = make_shared<BeadType>(*bt);
+      _beadtypes.push_back(shared_bt);
+      _beadtype_map[name] = shared_bt->getId();
+      return shared_bt;
+    } else {
+      return _beadtypes[(*iter).second];
     }
     throw runtime_error("Unable to get or create bead type");
 }

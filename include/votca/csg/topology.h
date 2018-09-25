@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _topology_H
-#define	_topology_H
+#ifndef VOTCA_CSG_TOPOLOGY_H
+#define	VOTCA_CSG_TOPOLOGY_H
 
 #include <vector>
 #include <map>
@@ -416,30 +416,34 @@ protected:
 inline std::shared_ptr<Bead> Topology::CreateBead(byte_t symmetry, string name, shared_ptr<BeadType> type, int resnr, double m, double q)
 {
     
-    auto b = std::shared_ptr<Bead>(new Bead(std::make_shared<Topology>(*this), _beads.size(), type, symmetry, name, resnr, m, q));    
-    _beads.push_back(b);
-    return b;
+    auto b = new Bead(std::make_shared<Topology>(*this), _beads.size(), type, symmetry, name, resnr, m, q);  
+    auto shared_b = std::make_shared<Bead>(*b);  
+    _beads.push_back(shared_b);
+    return shared_b;
 }
 
 inline std::shared_ptr<Molecule> Topology::CreateMolecule(string name)
 {
-    auto mol = std::shared_ptr<Molecule>(new Molecule(std::make_shared<Topology>(*this), _molecules.size(), name));
-    _molecules.push_back(mol);
-    return mol;
+    auto mol = new Molecule(std::make_shared<Topology>(*this), _molecules.size(), name);
+    auto shared_mol = std::make_shared<Molecule>(*mol);
+    _molecules.push_back(shared_mol);
+    return shared_mol;
 }
 
 inline std::shared_ptr<Residue> Topology::CreateResidue(string name, int id)
 {
-    auto res = std::shared_ptr<Residue>(new Residue(std::make_shared<Topology>(*this), id, name));
-    _residues.push_back(res);
-    return res;
+    auto res = new Residue(std::make_shared<Topology>(*this), id, name);
+    auto shared_res = std::make_shared<Residue>(*res);
+    _residues.push_back(shared_res);
+    return shared_res;
 }
 
 inline std::shared_ptr<Residue> Topology::CreateResidue(string name)
 {
-    auto res = std::shared_ptr<Residue>(new Residue(std::make_shared<Topology>(*this), _molecules.size(), name));
-    _residues.push_back(res);
-    return res;
+    auto res = new Residue(std::make_shared<Topology>(*this), _molecules.size(), name);
+    auto shared_res = std::make_shared<Residue>(*res);
+    _residues.push_back(shared_res);
+    return shared_res;
 }
 
 inline std::shared_ptr<Molecule> Topology::MoleculeByIndex(int index)
@@ -456,5 +460,5 @@ inline void Topology::InsertExclusion(shared_ptr<Bead> bead1, iteratable &l) {
 
 #include "interaction.h"
 
-#endif	/* _topology_H */
+#endif	// VOTCA_CSG_TOPOLOGY_H 
 

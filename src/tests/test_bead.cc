@@ -80,6 +80,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
 }
 
+
 BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
 	Topology top;
