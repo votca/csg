@@ -1,5 +1,5 @@
-/* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+/*
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,285 +15,267 @@
  *
  */
 
-#include <votca/csg/topology.h>
-#include <votca/csg/interaction.h>
-#include <votca/tools/rangeparser.h>
 #include <stdexcept>
+#include <votca/csg/interaction.h>
+#include <votca/csg/topology.h>
+#include <votca/tools/rangeparser.h>
 
-namespace votca { namespace csg {
+namespace votca {
+namespace csg {
 
-Topology::~Topology()
-{
-    Cleanup();
-    if(_bc)
-        delete (_bc);
-    _bc = NULL;
+Topology::~Topology() {
+  Cleanup();
+  if (_bc)
+    delete (_bc);
+  _bc = NULL;
 }
 
-void Topology::Cleanup()
-{
+void Topology::Cleanup() {
   _beads.clear();
   _molecules.clear();
   _residues.clear();
   _interactions.clear();
   // cleanup _bc object
-  if(_bc)
+  if (_bc)
     delete (_bc);
   _bc = new OpenBox();
 }
 
 /// \todo implement checking, only used in xml topology reader
-void Topology::CreateMoleculesByRange(string name, int first, int nbeads, int nmolecules)
-{
+void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
+                                      int nmolecules) {
   auto mol = CreateMolecule(name);
-  int beadcount=0;
-  int res_offset=0;
+  int beadcount = 0;
+  int res_offset = 0;
 
-  for( auto bead : _beads ){
-    //xml numbering starts with 1
-    if(--first > 0) continue;
-    //This is not 100% correct, but let's assume for now that the resnr do increase
-    if ( beadcount == 0 ) {
+  for (auto bead : _beads) {
+    // xml numbering starts with 1
+    if (--first > 0)
+      continue;
+    // This is not 100% correct, but let's assume for now that the resnr do
+    // increase
+    if (beadcount == 0) {
       res_offset = (bead)->getResnr();
     }
     mol->AddBead(bead);
-    if(++beadcount == nbeads) {
-      if(--nmolecules <= 0) break;
-      mol = CreateMolecule(name);            
+    if (++beadcount == nbeads) {
+      if (--nmolecules <= 0)
+        break;
+      mol = CreateMolecule(name);
       beadcount = 0;
     }
   }
 }
 
-void Topology::CreateMoleculesByResidue()
-{
-    // first create a molecule for each residue    
-    for(auto res : _residues ){
-        CreateMolecule(res->getName());
+void Topology::CreateMoleculesByResidue() {
+  // first create a molecule for each residue
+  for (auto res : _residues) {
+    CreateMolecule(res->getName());
+  }
+
+  // add the beads to the corresponding molecules based on their resid
+  for (auto bead : _beads) {
+    MoleculeByIndex(bead->getResnr())->AddBead(bead);
+  }
+
+  /// \todo sort beads in molecules that all beads are stored in the same order.
+  /// This is needed for the mapping!
+}
+
+void Topology::CreateOneBigMolecule(string name) {
+  auto mi = CreateMolecule(name);
+  for (auto bead : _beads) {
+    mi->AddBead(bead);
+  }
+}
+
+void Topology::Add(shared_ptr<Topology> top) {
+  int res0 = ResidueCount();
+
+  for (auto bead : top->_beads) {
+    auto type = GetOrCreateBeadType(bead->getType()->getName());
+    CreateBead(bead->getSymmetry(), bead->getName(), type,
+               bead->getResnr() + res0, bead->getM(), bead->getQ());
+  }
+
+  for (auto res : top->_residues)
+    CreateResidue(res->getName());
+
+  for (auto mol : top->_molecules) {
+    auto mi = CreateMolecule(mol->getName());
+    for (int i = 0; i < mi->BeadCount(); i++) {
+      mi->AddBead(mi->getBead(i));
     }
-    
-    // add the beads to the corresponding molecules based on their resid
-    for(auto bead : _beads ){
-        MoleculeByIndex(bead->getResnr())->AddBead(bead);
+  }
+}
+
+void Topology::CopyTopologyData(shared_ptr<Topology> top) {
+  _bc->setBox(top->getBox());
+  _time = top->_time;
+  _step = top->_step;
+
+  // cleanup old data
+  Cleanup();
+
+  // copy all residues
+  for (auto res : top->_residues) {
+    CreateResidue(res->getName());
+  }
+
+  // create all beads
+  for (auto bead : top->_beads) {
+    auto type = GetOrCreateBeadType(bead->getType()->getName());
+    auto bn = CreateBead(bead->getSymmetry(), bead->getName(), type,
+                         bead->getResnr(), bead->getM(), bead->getQ());
+
+    bn->setOptions(bead->Options());
+  }
+
+  // copy all molecules
+  for (auto mol : top->_molecules) {
+    auto mi = CreateMolecule(mol->getName());
+    for (int i = 0; i < mol->BeadCount(); i++) {
+      int beadid = mol->getBead(i)->getId();
+      mi->AddBead(_beads[beadid]);
     }
-    
-    /// \todo sort beads in molecules that all beads are stored in the same order. This is needed for the mapping!
+  }
 }
 
-void Topology::CreateOneBigMolecule(string name)
-{
-    auto mi = CreateMolecule(name);
-    for(auto bead : _beads){    
-        mi->AddBead(bead);
-    }    
+void Topology::RenameMolecules(string range, string name) {
+  RangeParser rp;
+  RangeParser::iterator i;
+
+  rp.Parse(range);
+  for (i = rp.begin(); i != rp.end(); ++i) {
+    if ((unsigned int)*i > _molecules.size())
+      throw runtime_error(
+          string("RenameMolecules: num molecules smaller than"));
+    getMolecule(*i - 1)->setName(name);
+  }
 }
 
-void Topology::Add(shared_ptr<Topology> top)
-{
-    int res0=ResidueCount();
-    
-    for( auto bead : top->_beads ){
-      auto type =  GetOrCreateBeadType(bead->getType()->getName());
-      CreateBead(bead->getSymmetry(), bead->getName(), type, bead->getResnr()+res0, bead->getM(), bead->getQ());
+void Topology::RenameBeadType(string name, string newname) {
+  for (auto bead : _beads) {
+    auto type = GetOrCreateBeadType(bead->getType()->getName());
+    if (wildcmp(name.c_str(), bead->getType()->getName().c_str())) {
+      type->setName(newname);
     }
-    
-    for(auto res : top->_residues ) CreateResidue(res->getName());
-  
-    for(auto mol : top->_molecules ){
-        auto mi = CreateMolecule(mol->getName());
-        for(int i=0; i<mi->BeadCount(); i++) {
-            mi->AddBead(mi->getBead(i));
-        }
+  }
+}
+
+void Topology::SetBeadTypeMass(string name, double value) {
+  for (auto bead : _beads) {
+    if (wildcmp(name.c_str(), bead->getType()->getName().c_str())) {
+      bead->setM(value);
     }
+  }
 }
 
-void Topology::CopyTopologyData(shared_ptr<Topology> top)
-{
-    _bc->setBox(top->getBox());
-    _time = top->_time;
-    _step = top->_step;
+void Topology::CheckMoleculeNaming(void) {
+  map<string, int> nbeads;
 
-    // cleanup old data
-    Cleanup();
-
-    // copy all residues
-    for(auto res : top->_residues){
-        CreateResidue(res->getName());
+  for (auto mol : _molecules) {
+    map<string, int>::iterator entry = nbeads.find(mol->getName());
+    if (entry != nbeads.end()) {
+      if (entry->second != mol->BeadCount())
+        throw runtime_error("There are molecules which have the same name but "
+                            "different number of bead "
+                            "please check the section manual topology handling "
+                            "in the votca manual");
+      continue;
     }
-
-    // create all beads
-    for(auto bead : top->_beads ){
-        auto type =  GetOrCreateBeadType(bead->getType()->getName());
-        auto bn = CreateBead(bead->getSymmetry(), bead->getName(), type, bead->getResnr(), bead->getM(), bead->getQ());
-        bn->setOptions(bead->Options());
-    }
-
-    // copy all molecules
-    for(auto mol : top->_molecules ){
-        auto mi = CreateMolecule(mol->getName());
-        for(int i=0; i<mol->BeadCount(); i++) {
-            int beadid = mol->getBead(i)->getId();
-            mi->AddBead(_beads[beadid]);
-        }
-    }
+    nbeads[mol->getName()] = mol->BeadCount();
+  }
 }
 
-void Topology::RenameMolecules(string range, string name)
-{
-    RangeParser rp;
-    RangeParser::iterator i;
-    
-    rp.Parse(range);
-    for(i=rp.begin();i!=rp.end();++i) {
-        if((unsigned int)*i > _molecules.size())
-            throw runtime_error(string("RenameMolecules: num molecules smaller than"));
-        getMolecule(*i-1)->setName(name);
-    }
+void Topology::AddBondedInteraction(std::shared_ptr<Interaction> ic) {
+  map<string, int>::iterator iter;
+  iter = _interaction_groups.find(ic->getGroup());
+  if (iter != _interaction_groups.end())
+    ic->setGroupId((*iter).second);
+  else {
+    int i = _interaction_groups.size();
+    _interaction_groups[ic->getGroup()] = i;
+    ic->setGroupId(i);
+  }
+  _interactions.push_back(ic);
+  _interactions_by_group[ic->getGroup()].push_back(ic);
 }
 
-void Topology::RenameBeadType(string name, string newname)
-{
-    for(auto bead : _beads ){
-      auto type =  GetOrCreateBeadType(bead->getType()->getName());
-      if (wildcmp(name.c_str(),bead->getType()->getName().c_str())) {
-	type->setName(newname);
-      }
-    }
+list<shared_ptr<Interaction>>
+Topology::InteractionsInGroup(const string &group) {
+  map<string, list<shared_ptr<Interaction>>>::iterator iter;
+  iter = _interactions_by_group.find(group);
+  if (iter == _interactions_by_group.end())
+    return list<shared_ptr<Interaction>>();
+  return iter->second;
 }
 
-void Topology::SetBeadTypeMass(string name, double value)
-{
-    for(auto bead : _beads){
-      if (wildcmp(name.c_str(),bead->getType()->getName().c_str())) {
-	bead->setM(value);
-      }
-    }
+shared_ptr<BeadType> Topology::GetOrCreateBeadType(string name) {
+
+  auto iter = _beadtype_map.find(name);
+  if (iter == _beadtype_map.end()) {
+    auto bt =
+        new BeadType(make_shared<Topology>(*this), _beadtypes.size(), name);
+    auto shared_bt = make_shared<BeadType>(*bt);
+    _beadtypes.push_back(shared_bt);
+    _beadtype_map[name] = shared_bt->getId();
+    return shared_bt;
+  } else {
+    return _beadtypes[(*iter).second];
+  }
+  throw runtime_error("Unable to get or create bead type");
 }
 
-void Topology::CheckMoleculeNaming(void)
-{
-    map<string,int> nbeads;
-
-    for(auto mol : _molecules){
-        map<string,int>::iterator entry = nbeads.find(mol->getName());
-        if(entry != nbeads.end()) {
-            if(entry->second != mol->BeadCount())
-                throw runtime_error("There are molecules which have the same name but different number of bead "
-                        "please check the section manual topology handling in the votca manual");
-            continue;
-        }
-        nbeads[mol->getName()] = mol->BeadCount();
-    }
+vec Topology::BCShortestConnection(const vec &r_i, const vec &r_j) const {
+  return _bc->BCShortestConnection(r_i, r_j);
 }
 
-
-void Topology::AddBondedInteraction(std::shared_ptr<Interaction> ic)
-{
-    map<string,int>::iterator iter;
-    iter = _interaction_groups.find(ic->getGroup());
-    if(iter!=_interaction_groups.end())
-        ic->setGroupId((*iter).second);
-    else {
-        int i= _interaction_groups.size();
-        _interaction_groups[ic->getGroup()] = i;
-        ic->setGroupId(i);
-    }
-    _interactions.push_back(ic);
-    _interactions_by_group[ic->getGroup()].push_back(ic);
+vec Topology::getDist(int bead1, int bead2) const {
+  return BCShortestConnection(getBead(bead1)->getPos(),
+                              getBead(bead2)->getPos());
 }
 
-list<shared_ptr<Interaction>> Topology::InteractionsInGroup(const string &group)
-{
-    map<string, list<shared_ptr<Interaction>> >::iterator iter;
-    iter = _interactions_by_group.find(group);
-    if(iter == _interactions_by_group.end())
-        return list<shared_ptr<Interaction>>();
-    return iter->second;
-}
+double Topology::BoxVolume() { return _bc->BoxVolume(); }
 
-
-shared_ptr<BeadType> Topology::GetOrCreateBeadType(string name)
-{
-
-    auto iter = _beadtype_map.find(name);
-    if(iter == _beadtype_map.end()) {
-      auto bt = new BeadType(make_shared<Topology>(*this), _beadtypes.size(), name);
-      auto shared_bt = make_shared<BeadType>(*bt);
-      _beadtypes.push_back(shared_bt);
-      _beadtype_map[name] = shared_bt->getId();
-      return shared_bt;
-    } else {
-      return _beadtypes[(*iter).second];
-    }
-    throw runtime_error("Unable to get or create bead type");
-}
-
-vec Topology::BCShortestConnection(const vec &r_i, const vec &r_j) const
-{
-    return _bc->BCShortestConnection(r_i, r_j);
-}
-
-vec Topology::getDist(int bead1, int bead2) const
-{
-    return BCShortestConnection(
-            getBead(bead1)->getPos(),
-            getBead(bead2)->getPos());
-}
-
-double Topology::BoxVolume()
-{
-    return _bc->BoxVolume();
-}
-
-void Topology::RebuildExclusions()
-{
-    _exclusions.CreateExclusions(this);
-}
+void Topology::RebuildExclusions() { _exclusions.CreateExclusions(this); }
 
 BoundaryCondition::eBoxtype Topology::autoDetectBoxType(const matrix &box) {
-    // set the box type to OpenBox in case "box" is the zero matrix,
-    // to OrthorhombicBox in case "box" is a diagonal matrix,
-    // or to TriclinicBox otherwise
-    if(box.get(0,0)==0 && box.get(0,1)==0 && box.get(0,2)==0 &&
-       box.get(1,0)==0 && box.get(1,1)==0 && box.get(1,2)==0 &&
-       box.get(2,0)==0 && box.get(2,1)==0 && box.get(2,2)==0) {
-        //cout << "box open\n";
-        return BoundaryCondition::typeOpen;
-    }
-    else
-    if(box.get(0,1)==0 && box.get(0,2)==0 &&
-       box.get(1,0)==0 && box.get(1,2)==0 &&
-       box.get(2,0)==0 && box.get(2,1)==0) {
-        //cout << "box orth\n";
-        return BoundaryCondition::typeOrthorhombic;
-    }
-    else {
-        //cout << "box tric\n";
-        return BoundaryCondition::typeTriclinic;
-    }
+  // set the box type to OpenBox in case "box" is the zero matrix,
+  // to OrthorhombicBox in case "box" is a diagonal matrix,
+  // or to TriclinicBox otherwise
+  if (box.get(0, 0) == 0 && box.get(0, 1) == 0 && box.get(0, 2) == 0 &&
+      box.get(1, 0) == 0 && box.get(1, 1) == 0 && box.get(1, 2) == 0 &&
+      box.get(2, 0) == 0 && box.get(2, 1) == 0 && box.get(2, 2) == 0) {
     return BoundaryCondition::typeOpen;
+  } else if (box.get(0, 1) == 0 && box.get(0, 2) == 0 && box.get(1, 0) == 0 &&
+             box.get(1, 2) == 0 && box.get(2, 0) == 0 && box.get(2, 1) == 0) {
+    return BoundaryCondition::typeOrthorhombic;
+  } else {
+    return BoundaryCondition::typeTriclinic;
+  }
+  return BoundaryCondition::typeOpen;
 }
 
-double Topology::ShortestBoxSize()
-{
-    vec _box_a = getBox().getCol(0);
-    vec _box_b = getBox().getCol(1);
-    vec _box_c = getBox().getCol(2);
+double Topology::ShortestBoxSize() {
+  vec _box_a = getBox().getCol(0);
+  vec _box_b = getBox().getCol(1);
+  vec _box_c = getBox().getCol(2);
 
-    // create plane normals
-    vec _norm_a = _box_b ^ _box_c;
-    vec _norm_b = _box_c ^ _box_a;
-    vec _norm_c = _box_a ^ _box_b;
+  // create plane normals
+  vec _norm_a = _box_b ^ _box_c;
+  vec _norm_b = _box_c ^ _box_a;
+  vec _norm_c = _box_a ^ _box_b;
 
-    _norm_a.normalize();
-    _norm_b.normalize();
-    _norm_c.normalize();
+  _norm_a.normalize();
+  _norm_b.normalize();
+  _norm_c.normalize();
 
-    double la = _box_a * _norm_a;
-    double lb = _box_b * _norm_b;
-    double lc = _box_c * _norm_c;
+  double la = _box_a * _norm_a;
+  double lb = _box_b * _norm_b;
+  double lc = _box_c * _norm_c;
 
-    return min(la, min(lb, lc));
+  return min(la, min(lb, lc));
 }
-
-}}
+}
+}
