@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,54 +72,47 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
             // we want to combine atomistic and coarse-grained into one topology
             Topology *hybtol = new Topology();
 
-            ResidueContainer::iterator it_res;
-            MoleculeContainer::iterator it_mol;
-
             hybtol->setBox(top->getBox());
             hybtol->setTime(top->getTime());
             hybtol->setStep(top->getStep());
 
             // copy all residues from both
-            for (it_res = top_ref->Residues().begin(); it_res != top_ref->Residues().end(); ++it_res) {
-                hybtol->CreateResidue((*it_res)->getName());
-            }
-            for (it_res = top->Residues().begin(); it_res != top->Residues().end(); ++it_res) {
-                hybtol->CreateResidue((*it_res)->getName());
-            }
+            for(auto res : top_ref->Residues() ) hybtol->CreateResidue((res)->getName());
+            for(auto res : top->Residues() ) hybtol->CreateResidue((res)->getName());
 
             // copy all molecules and beads
           
-            for(it_mol=top_ref->Molecules().begin();it_mol!=top_ref->Molecules().end(); ++it_mol) {
-                Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
-                for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
+            for(auto mol : top_ref->Molecules() ){
+                auto mi = hybtol->CreateMolecule(mol->getName());
+                for (int i = 0; i < mol->BeadCount(); i++) {
                     // copy atomistic beads of molecule
-                    int beadid = (*it_mol)->getBead(i)->getId();
+                    int beadid = mol->getBead(i)->getId();
 
-                    Bead *bi = (*it_mol)->getBead(i);
-                    BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
-                    Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bi->getResnr(), bi->getM(), bi->getQ());
+                    auto bi = dynamic_pointer_cast<Bead>(mol->getBead(i));
+                    auto type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
+                    auto bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bi->getResnr(), bi->getM(), bi->getQ());
                     bn->setOptions(bi->Options());
                     bn->setPos(bi->getPos());
                     if (bi->HasVel()) bn->setVel(bi->getVel());
                     if (bi->HasF()) bn->setF(bi->getF());
 
-                    mi->AddBead(hybtol->Beads()[beadid], (*it_mol)->getBeadName(i));
+                    mi->AddBead(hybtol->Beads()[beadid]);
 
                 }
 
                 if (mi->getId() < top->MoleculeCount()) {
                     // copy cg beads of molecule
-                    Molecule *cgmol = top->Molecules()[mi->getId()];
+                    auto cgmol = top->Molecules()[mi->getId()];
                     for (int i = 0; i < cgmol->BeadCount(); i++) {
-                        Bead *bi = cgmol->getBead(i);
+                        auto bi = dynamic_pointer_cast<Bead>(cgmol->getBead(i));
                         // todo: this is a bit dirty as a cg bead will always have the resid of its first parent
-                        Bead *bparent = (*it_mol)->getBead(0);
-                        BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
-                        Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bparent->getResnr(), bi->getM(), bi->getQ());
+                        auto bparent = dynamic_pointer_cast<Bead>(mol->getBead(0));
+                        auto type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
+                        auto bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bparent->getResnr(), bi->getM(), bi->getQ());
                         bn->setOptions(bi->Options());
                         bn->setPos(bi->getPos());
                         if (bi->HasVel()) bn->setVel(bi->getVel());
-                        mi->AddBead(bi, bi->getName());
+                        mi->AddBead(bi);
                     }
                 }
                 

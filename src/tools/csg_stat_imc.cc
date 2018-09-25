@@ -110,8 +110,8 @@ void Imc::BeginEvaluate(Topology *top, Topology *top_atom)
             iter != _bonded.end(); ++iter) {
         string name = (*iter)->get("name").value();
 
-        std::list<Interaction *> list = top->InteractionsInGroup(name);
-        if (list.empty() )
+        auto li = top->InteractionsInGroup(name);
+        if (li.empty() )
             throw std::runtime_error("Bonded interaction '" + name + "' defined in options xml-file, but not in topology - check name definition in the mapping file again");
     }
 }
@@ -202,7 +202,7 @@ public:
 
     HistogramNew *_hist;
 
-    bool FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist) {
+    bool FoundPair(shared_ptr<Bead>,shared_ptr<Bead> b2, const vec &r, const double dist) {
         _hist->Process(dist);
         return false;
     }
@@ -279,11 +279,8 @@ void Imc::Worker::DoBonded(Topology *top)
         _current_hists[i._index].Clear();
 
         // now fill with new data
-        std::list<Interaction *> list = top->InteractionsInGroup(name);
-
-        std::list<Interaction *>::iterator ic_iter;
-        for(ic_iter=list.begin(); ic_iter!=list.end(); ++ic_iter) {
-            Interaction *ic = *ic_iter;
+        auto ics = top->InteractionsInGroup(name);
+        for(auto ic : ics ){
             double v = ic->EvaluateVar(*top);
             _current_hists[i._index].Process(v);
         }

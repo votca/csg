@@ -504,12 +504,12 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
 
     // We want to start with an index of 0 not 1
     // atomId;
-    Bead *b;
+    std::shared_ptr<Bead> b;
     if (topology_) {
 
       atomIdToIndex_[atomId] = atomIndex - startingIndex;
       atomIdToMoleculeId_[atomId] = moleculeId;
-      Molecule *mol;
+      std::shared_ptr<Molecule> mol;
       if (!molecules_.count(moleculeId)) {
         mol = top.CreateMolecule("UNKNOWN");
         molecules_[moleculeId] = mol;
@@ -529,7 +529,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       }
 
       string bead_type_name = to_string(atomTypeId + 1);
-      BeadType *bead_type = top.GetOrCreateBeadType(bead_type_name);
+      auto bead_type = top.GetOrCreateBeadType(bead_type_name);
       if (atomtypes_.count(atomTypeId) == 0) {
         string err = "Unrecognized atomTypeId, the atomtypes map "
                      "may be uninitialized";
@@ -539,7 +539,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       b = top.CreateBead(symmetry, bead_type_name, bead_type, residue_index,
                          mass, charge);
 
-      mol->AddBead(b, bead_type_name);
+      mol->AddBead(dynamic_pointer_cast<BaseBead>(b));
       b->setMolecule(mol);
 
     } else {
@@ -589,7 +589,7 @@ void LAMMPSDataReader::ReadBonds_(Topology &top) {
       int atom1Index = atomIdToIndex_[atom1Id];
       int atom2Index = atomIdToIndex_[atom2Id];
 
-      Interaction *ic = new IBond(atom1Index, atom2Index);
+      auto ic = std::shared_ptr<IBond>( new IBond(atom1Index, atom2Index));
       ic->setGroup("BONDS");
       ic->setIndex(bondId);
       auto b = top.getBead(atom1Index);
@@ -647,7 +647,7 @@ void LAMMPSDataReader::ReadAngles_(Topology &top) {
       int atom2Index = atomIdToIndex_[atom2Id];
       int atom3Index = atomIdToIndex_[atom3Id];
 
-      Interaction *ic = new IAngle(atom1Index, atom2Index, atom3Index);
+      auto ic = std::shared_ptr<IAngle>( new IAngle(atom1Index, atom2Index, atom3Index));
       ic->setGroup("ANGLES");
       ic->setIndex(angleId);
       auto b = top.getBead(atom1Index);
@@ -708,8 +708,8 @@ void LAMMPSDataReader::ReadDihedrals_(Topology &top) {
       int atom3Index = atomIdToIndex_[atom3Id];
       int atom4Index = atomIdToIndex_[atom4Id];
 
-      Interaction *ic =
-          new IDihedral(atom1Index, atom2Index, atom3Index, atom4Index);
+      auto ic =
+          std::shared_ptr<IDihedral>(new IDihedral(atom1Index, atom2Index, atom3Index, atom4Index));
       ic->setGroup("DIHEDRALS");
       ic->setIndex(dihedralId);
       auto b = top.getBead(atom1Index);

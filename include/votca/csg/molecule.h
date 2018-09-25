@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,22 @@
  *
  */
 
-#ifndef _MOLECULE_H
-#define	_MOLECULE_H
+#ifndef _VOTCA_CSG_MOLECULE_H
+#define	_VOTCA_CSG_MOLECULE_H
 
+#include <memory>
 #include <vector>
 #include <map>
 #include <string>
 #include <assert.h>
+
+#include "beadstructure.h"
 #include "topologyitem.h"
-#include "bead.h"
 
 namespace votca { namespace csg {
-using namespace votca::tools;
-
-using namespace std;
 
 class Interaction;
-
+class Bead;
 
 /**
     \brief information about molecules
@@ -42,37 +41,22 @@ class Interaction;
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem
+class Molecule : public TopologyItem,
+                 public BeadStructure,
+                 public virtual Identity<int>,
+                 public virtual Name
 {
 public:            
-    /// get the molecule ID
-    int getId() const { return _id; }
-    
-    /// get the name of the molecule
-    const string &getName() const { return _name; }
-    
-    /// set the name of the molecule
-    void setName(const string &name) {  _name=name; }
-    
-    /// Add a bead to the molecule
-    void AddBead(Bead *bead, const string &name);
-    /// get the id of a bead in the molecule
-    Bead *getBead(int bead) { return _beads[bead]; }
-    int getBeadId(int bead) { return _beads[bead]->getId(); }
-    int getBeadIdByName(const string &name);
-    
-    /// get the number of beads in the molecule
-    int BeadCount() const { return _beads.size(); }
-    
-    /// find a bead by it's name
-    int getBeadByName(const string &name);
-    string getBeadName(int bead) {return _bead_names[bead]; }
-
+   
+    const std::string getLabel() const { 
+      return "Id "+std::to_string(getId())+":Molecule "+getName();
+    }
     /// Add an interaction to the molecule
-    void AddInteraction(Interaction *ic) { _interactions.push_back(ic);
-        }
+    /// This is seperate from a Connect Beads method, an interaction does not
+    /// guarantee a bond as far as I know. Though I will need to check. 
+    void AddInteraction(std::shared_ptr<Interaction> ic) { _interactions.push_back(ic);}
 
-    vector<Interaction *> Interactions() { return _interactions; }
+    vector<std::shared_ptr<Interaction>> Interactions() { return _interactions; }
 
     template<typename T>
     void setUserData(T *userdata) { _userdata = (void*)userdata; }
@@ -81,38 +65,20 @@ public:
     T *getUserData() { return (T *)_userdata; }
     
 private:
-    // maps a name to a bead id
-    map<string, int> _beadmap;
-   vector<Interaction*> _interactions;
+  
+    vector<std::shared_ptr<Interaction>> _interactions;
      
-    // id of the molecules
-    int _id;
-    
-    // name of the molecule
-    string _name;
-    // the beads in the molecule
-    vector<Bead *> _beads;
-    vector<string> _bead_names;
-
     void *_userdata;
     
     /// constructor
-    Molecule(Topology *parent, int id, string name)
-        : TopologyItem(parent), _id(id), _name(name)
+    Molecule(std::shared_ptr<Topology> parent, int id, string name)
+        : Name(name), Identity(id), TopologyItem(parent)
     {}
 
     friend class Topology;
 };
 
-inline int Molecule::getBeadIdByName(const string &name)
-{
-    int i = getBeadByName(name);
-    if(i<0)
-        return i;
-    return _beads[i]->getId();
-}
-
 }}
 
-#endif	/* _Molecule_H */
+#endif	// _VOTCA_CSG_MOLECULE_H
 

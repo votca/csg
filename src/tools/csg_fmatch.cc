@@ -151,7 +151,7 @@ void CGForceMatching::BeginEvaluate(Topology *top, Topology *top_atom)
     _x=Eigen::VectorXd::Zero(_col_cntr);
 
     if(_has_existing_forces) {
-        _top_force.CopyTopologyData(top);
+        _top_force.CopyTopologyData(make_shared<Topology>(*top));
         _trjreader_force = TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
         if(_trjreader_force == NULL)
             throw runtime_error(string("input format not supported: ") + _op_vm["trj-force"].as<string>());
@@ -444,24 +444,19 @@ void CGForceMatching::LoadOptions(const string &file)
 
 void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) 
 {
-    std::list<Interaction *> interList;
-    std::list<Interaction *>::iterator interListIter;
+    for(auto ic : conf->InteractionsInGroup(sinfo->splineName)){
 
-    interList = conf->InteractionsInGroup(sinfo->splineName);
-
-    for (interListIter = interList.begin(); interListIter != interList.end(); ++interListIter) {
-
-        int beads_in_int = (*interListIter)->BeadCount(); // 2 for bonds, 3 for angles, 4 for dihedrals
+        int beads_in_int = ic->BeadCount(); // 2 for bonds, 3 for angles, 4 for dihedrals
 
         CubicSpline &SP = sinfo->Spline;
 
         int &mpos = sinfo->matr_pos;
 
-        double var = (*interListIter)->EvaluateVar(*conf); // value of bond, angle, or dihedral
+        double var = ic->EvaluateVar(*conf); // value of bond, angle, or dihedral
 
         for (int loop = 0; loop < beads_in_int; loop++) {
-            int ii = (*interListIter)->getBeadId(loop);
-            vec gradient = (*interListIter)->Grad(*conf, loop);
+            int ii = ic->getBeadId(loop);
+            vec gradient = ic->Grad(*conf, loop);
 
             SP.AddToFitMatrix(_A, var,
                     _least_sq_offset + 3 * _nbeads * _frame_counter + ii, mpos, -gradient.x());

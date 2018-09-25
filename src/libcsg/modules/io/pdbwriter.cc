@@ -38,9 +38,7 @@ void PDBWriter::Write(Topology *conf)
 {
     Topology *top = conf;
     fprintf(_out, "MODEL     %4d\n", conf->getStep());
-    for(BeadContainer::iterator iter=conf->Beads().begin();
-    iter!=conf->Beads().end(); ++iter) {
-        Bead *bi = *iter;
+    for(auto bi : conf->Beads() ){
         vec r = bi->getPos();
         //truncate strings if necessary
         string resname="";
@@ -65,7 +63,7 @@ void PDBWriter::Write(Topology *conf)
 		//we skip the charge
           
         if(bi->getSymmetry()>=2) {
-           vec ru = 0.1*bi->getU() + r;
+           vec ru = 0.1*(bi->getU()) + r;
        
             fprintf(_out,
                 "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
@@ -77,7 +75,7 @@ void PDBWriter::Write(Topology *conf)
                 ru.x(), ru.y(), ru.z()); //we skip the charge
         }
         if(bi->getSymmetry()>=3) {
-           vec rv = 0.1*bi->getV() + r;
+           vec rv = 0.1*(bi->getV()) + r;
             fprintf(_out,
                 "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
                 bi->getId()+1,   // atom serial number

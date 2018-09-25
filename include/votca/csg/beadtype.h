@@ -18,6 +18,7 @@
 #ifndef _BEADTYPE_H
 #define	_BEADTYPE_H
 
+#include <memory>
 #include <string>
 #include "topologyitem.h"
 
@@ -42,7 +43,7 @@ private:
     int _id;
     string _name;
     
-    BeadType(Topology *parent, int id, const string &name)
+    BeadType(std::shared_ptr<Topology> parent, int id, const string &name)
     : TopologyItem(parent), _id(id), _name(name) {}
     friend class Topology;
 };

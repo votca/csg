@@ -103,32 +103,32 @@ bool GROReader::NextFrame(Topology &top)
 	  hasVel=false;
 	}
 
-        Bead *b;
-        if(_topology){
-	  int resnr = boost::lexical_cast<int>(resNum);
-          if (resnr < 1)
-            throw std::runtime_error("Misformated gro file, resnr has to be > 0");
-	  //TODO: fix the case that resnr is not in ascending order
-	  if(resnr > top.ResidueCount()) {
-	    while ((resnr-1)>top.ResidueCount()){ //gro resnr should start with 1 but accept sloppy files
-	      top.CreateResidue("DUMMY"); // create dummy residue, hopefully it will never show
-	      cout << "Warning: residue numbers not continous, create DUMMY residue with nr " << top.ResidueCount() << endl;
-	    }
-            top.CreateResidue(resName);
-	  }
-          //this is not correct, but still better than no type at all!
-	  BeadType *type = top.GetOrCreateBeadType(atName);
+  shared_ptr<Bead> b;
+  if(_topology){
+    int resnr = boost::lexical_cast<int>(resNum);
+    if (resnr < 1)
+      throw std::runtime_error("Misformated gro file, resnr has to be > 0");
+    //TODO: fix the case that resnr is not in ascending order
+    if(resnr > top.ResidueCount()) {
+      while ((resnr-1)>top.ResidueCount()){ //gro resnr should start with 1 but accept sloppy files
+        top.CreateResidue("DUMMY"); // create dummy residue, hopefully it will never show
+        cout << "Warning: residue numbers not continous, create DUMMY residue with nr " << top.ResidueCount() << endl;
+      }
+      top.CreateResidue(resName);
+    }
+    //this is not correct, but still better than no type at all!
+    auto type = top.GetOrCreateBeadType(atName);
 
-	  // res -1 as internal number starts with 0
-	  b = top.CreateBead(1, atName, type, resnr-1, 1., 0.);
-	} else {
-          b = top.getBead(i);
-	}
+    // res -1 as internal number starts with 0
+    b = top.CreateBead(1, atName, type, resnr-1, 1., 0.);
+  } else {
+    b = top.getBead(i);
+  }
 
-        b->setPos(vec(
-          boost::lexical_cast<double>(x),
-          boost::lexical_cast<double>(y),
-          boost::lexical_cast<double>(z)
+  b->setPos(vec(
+        boost::lexical_cast<double>(x),
+        boost::lexical_cast<double>(y),
+        boost::lexical_cast<double>(z)
         ));
 	if (hasVel) {
           boost::algorithm::trim(vx);

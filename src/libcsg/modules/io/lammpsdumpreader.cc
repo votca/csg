@@ -182,7 +182,7 @@ void LAMMPSDumpReader::ReadAtoms(Topology &top, string itemline) {
 	int atom_id = boost::lexical_cast<int>(fields2[id]);
 	if (atom_id > _natoms)
            throw std::runtime_error("Error: found atom with id "+ boost::lexical_cast<string>(atom_id) + " but only "+ boost::lexical_cast<string>(_natoms) + " atoms defined in header of file '" + _fname + "'");
-        Bead *b = top.getBead(atom_id-1);
+        auto b = top.getBead(atom_id-1);
         b->HasPos(pos);
         b->HasF(force);
         b->HasVel(vel);
@@ -222,7 +222,7 @@ void LAMMPSDumpReader::ReadAtoms(Topology &top, string itemline) {
             else if(fields[j] == "fz")
                 b->F().z() = boost::lexical_cast<double>(*itok);
             else if((fields[j] == "type")&&_topology){
-                BeadType *type = top.GetOrCreateBeadType(*itok);
+                auto type = top.GetOrCreateBeadType(*itok);
                 b->setType(type);
             }
         }

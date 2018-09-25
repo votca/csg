@@ -294,7 +294,7 @@ bool DLPOLYTrajectoryReader::NextFrame(Topology &conf)
 		 boost::lexical_cast<string>(i+1) + " but got " + boost::lexical_cast<string>(id));
 	}
 
-	Bead *b = conf.getBead(i);
+	auto b = conf.getBead(i);
 	vec atom_vec[3]{0.0,0.0,0.0};
 	for (int j=0;j<min(navecs,2)+1;j++){
 

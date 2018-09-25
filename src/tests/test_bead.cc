@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_bead_constructor) {
 	Topology top;
 
 	string bead_type_name = "C1";
-	BeadType * b_type = top.GetOrCreateBeadType(bead_type_name);
+	auto b_type = top.GetOrCreateBeadType(bead_type_name);
 
 	int symmetry = 1;
 	string name = "dummy";
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 	Topology top;
 
 	string bead_type_name = "C1";
-	BeadType * b_type = top.GetOrCreateBeadType(bead_type_name);
+	auto b_type = top.GetOrCreateBeadType(bead_type_name);
 
 	int symmetry = 1;
 	string name = "dummy";
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 	double mass = 1.21;
 	double charge = -0.87;
 
-	Bead * b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
+	auto b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
 
 	BOOST_CHECK_EQUAL(round_(b->getM(),3),round_(mass,3));
 	BOOST_CHECK_EQUAL(round_(b->getQ(),3),round_(charge,3));
@@ -80,12 +80,13 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
 }
 
+
 BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
 	Topology top;
 
 	string bead_type_name = "C1";
-	BeadType * b_type = top.GetOrCreateBeadType(bead_type_name);
+	auto b_type = top.GetOrCreateBeadType(bead_type_name);
 
 	int symmetry = 1;
 	string name = "dummy";
@@ -93,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
 	double mass = 1.21;
 	double charge = -0.87;
 
-	Bead * b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
+	auto b = top.CreateBead(symmetry,name,b_type,resnr,mass,charge);
 
 	double newMass = 9.4;
 	double newCharge = 2.6;
@@ -108,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
 	b->setVel(xyz_vel);
 
 	string molecule_name = "TestMol";
-	Molecule * mol = top.CreateMolecule(molecule_name);
+	auto mol = top.CreateMolecule(molecule_name);
 
 	b->setMolecule(mol);
 	

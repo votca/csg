@@ -25,6 +25,7 @@
 #include <string>
 
 #include <votca/csg/basebead.h>
+#include <votca/csg/beadstructure.h>
 
 #include <votca/tools/graph.h>
 
@@ -78,12 +79,27 @@ public:
    *
    * The same bead cannot be added twice.
    **/
-  void AddBead(BaseBead *bead);
+  void AddBead(std::shared_ptr<BaseBead> bead);
 
   /**
    * \brief Get the bead with the specified id
    **/
-  BaseBead *getBead(int id);
+  shared_ptr<BaseBead> getBead(int id);
+
+  /**
+   * \brief Gets all the bead iDs with the particular name 
+   **/
+  std::vector<int> getIdsOfBeadsWithName(const std::string &name);
+
+  /**
+   * \brief Get the ids of all the beads
+   **/
+  std::vector<int> getBeadIds();
+  
+  /**
+   * \brief Get the name of the bead by passing in its Id
+   **/
+  std::string getBeadName(int id);
 
   /**
    * \brief Create a connection between two beads in the structure
@@ -94,12 +110,12 @@ public:
   void ConnectBeads(int bead1_id, int bead2_id);
 
   /**
-   * \breif Return a vector of all the beads neighboring the index
+   * \brief Return a vector of all the beads neighboring the index
    **/
-  std::vector<BaseBead *> getNeighBeads(int index);
+  std::vector<std::shared_ptr<BaseBead>> getNeighBeads(int index);
 
   /**
-   * \breif Bread the beadstructure up into molecular units
+   * \brief Bread the beadstructure up into molecular units
    *
    * If a beadstructure is composed of several unconnected networks of beads.
    * These structures will be broken up into their own bead structures and
@@ -108,7 +124,7 @@ public:
   std::vector<std::shared_ptr<BeadStructure>> breakIntoMolecules();
 
   /**
-   * \breif Compare the topology of two bead structures
+   * \brief Compare the topology of two bead structures
    *
    * This function looks at how the beads are arranged within the bead structure
    * and determines if the topology is the same.
@@ -127,7 +143,7 @@ private:
   bool graphUpToDate;
   shared_ptr<votca::tools::Graph> graph_;
   std::set<Edge> connections_;
-  std::map<int, BaseBead *> beads_;
+  std::map<int,std::shared_ptr<BaseBead>> beads_;
   std::map<int, std::shared_ptr<votca::tools::GraphNode>> graphnodes_;
 };
 }

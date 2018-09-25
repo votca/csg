@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ void GmxTopolApp::WriteAtoms(ostream &out, Molecule &cg)
     out << "[atoms]\n";
     out << "; nr type resnr residue atom cgnr charge mass\n";
     for(int i=0; i<cg.BeadCount(); ++i) {
-        Bead *b=cg.getBead(i);
+        auto b= dynamic_pointer_cast<Bead>(cg.getBead(i));
        
         out << format("%d %s 1 RES %s %d %f %f\n")
             % (i+1) % b->getType()->getName() % b->getName() % (i+1) % b->getQ() % b->getM();
@@ -87,13 +87,9 @@ void GmxTopolApp::WriteInteractions(ostream &out, Molecule &cg)
 {
     int nb=-1;
     
-    Interaction *ic;
-    vector<Interaction *>::iterator iter;
-  
     InteractionContainer &ics=cg.getParent()->BondedInteractions();
 
-    for(iter=ics.begin(); iter!=ics.end(); ++iter) {
-        ic = *iter;
+    for( auto ic : ics ){
         if(ic->getMolecule() != cg.getId()) continue;
         if(nb != ic->BeadCount()) {
             nb=ic->BeadCount();

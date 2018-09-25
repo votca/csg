@@ -55,10 +55,35 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_add_and_getbead) {
   BeadStructure beadstructure;
   TestBead testbead;
   testbead.setId(2);
-  beadstructure.AddBead(&testbead);
+  testbead.setName("Carbon");
+  beadstructure.AddBead(make_shared<TestBead>(testbead));
   BOOST_CHECK_EQUAL(beadstructure.BeadCount(), 1);
   auto testbead2 = beadstructure.getBead(2);
   BOOST_CHECK_EQUAL(testbead2->getId(), testbead.getId());
+  
+  vector<int> vector_ids = beadstructure.getIdsOfBeadsWithName("Carbon");
+  BOOST_CHECK_EQUAL(vector_ids.at(0),2);
+  
+  string beadName = beadstructure.getBeadName(2);
+  bool strings_equal = !(beadName.compare("Carbon"));
+  BOOST_CHECK(strings_equal);
+
+  TestBead testbead3;
+  testbead3.setId(10);
+  testbead3.setName("Hydrogen");
+  beadstructure.AddBead(make_shared<TestBead>(testbead3));
+  BOOST_CHECK_EQUAL(beadstructure.BeadCount(), 2);
+  vector_ids = beadstructure.getBeadIds();
+  BOOST_CHECK_EQUAL(vector_ids.size(),2);
+
+  bool id2_found = false;
+  bool id10_found = false;
+  for(auto id : vector_ids){
+    if(id==2) id2_found = true;
+    if(id==10) id10_found = true;
+  }
+  BOOST_CHECK(id2_found);
+  BOOST_CHECK(id10_found);
 }
 
 BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {
@@ -69,8 +94,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {
   TestBead testbead2;
   testbead2.setId(2);
   testbead2.setName("Carbon");
-  beadstructure.AddBead(&testbead1);
-  beadstructure.AddBead(&testbead2);
+  beadstructure.AddBead(make_shared<TestBead>(testbead1));
+  beadstructure.AddBead(make_shared<TestBead>(testbead2));
   beadstructure.ConnectBeads(1, 2);
 }
 
@@ -97,8 +122,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleMolecule) {
   testbead5.setName("Hydrogen");
   testbead5.setId(5);
 
-  beadstructure.AddBead(&testbead1);
-  beadstructure.AddBead(&testbead2);
+  beadstructure.AddBead(make_shared<TestBead>(testbead1));
+  beadstructure.AddBead(make_shared<TestBead>(testbead2));
   BOOST_CHECK(!beadstructure.isSingleMolecule());
 
   // C - C
@@ -106,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleMolecule) {
   BOOST_CHECK(beadstructure.isSingleMolecule());
 
   // C - C  O
-  beadstructure.AddBead(&testbead3);
+  beadstructure.AddBead(make_shared<TestBead>(testbead3));
   BOOST_CHECK(!beadstructure.isSingleMolecule());
 
   // C - C - O
@@ -114,8 +139,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleMolecule) {
   BOOST_CHECK(beadstructure.isSingleMolecule());
 
   // C - C - O  H - H
-  beadstructure.AddBead(&testbead4);
-  beadstructure.AddBead(&testbead5);
+  beadstructure.AddBead(make_shared<TestBead>(testbead4));
+  beadstructure.AddBead(make_shared<TestBead>(testbead5));
   beadstructure.ConnectBeads(4, 5);
   BOOST_CHECK(!beadstructure.isSingleMolecule());
 }
@@ -167,28 +192,28 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isStructureEquivalent) {
   testbead10.setId(10);
 
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
-  beadstructure1.AddBead(&testbead1);
+  beadstructure1.AddBead(make_shared<TestBead>(testbead1));
   BOOST_CHECK(!beadstructure1.isStructureEquivalent(beadstructure2));
-  beadstructure2.AddBead(&testbead6);
+  beadstructure2.AddBead(make_shared<TestBead>(testbead6));
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
 
-  beadstructure1.AddBead(&testbead2);
-  beadstructure2.AddBead(&testbead7);
+  beadstructure1.AddBead(make_shared<TestBead>(testbead2));
+  beadstructure2.AddBead(make_shared<TestBead>(testbead7));
 
   beadstructure1.ConnectBeads(1, 2);
   BOOST_CHECK(!beadstructure1.isStructureEquivalent(beadstructure2));
   beadstructure2.ConnectBeads(6, 7);
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
 
-  beadstructure1.AddBead(&testbead3);
-  beadstructure1.AddBead(&testbead4);
-  beadstructure1.AddBead(&testbead5);
+  beadstructure1.AddBead(make_shared<TestBead>(testbead3));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead4));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead5));
   beadstructure1.ConnectBeads(2, 3);
   beadstructure1.ConnectBeads(4, 5);
 
-  beadstructure2.AddBead(&testbead10);
-  beadstructure2.AddBead(&testbead8);
-  beadstructure2.AddBead(&testbead9);
+  beadstructure2.AddBead(make_shared<TestBead>(testbead10));
+  beadstructure2.AddBead(make_shared<TestBead>(testbead8));
+  beadstructure2.AddBead(make_shared<TestBead>(testbead9));
   beadstructure2.ConnectBeads(7, 8);
   beadstructure2.ConnectBeads(9, 10);
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
@@ -243,14 +268,14 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_getNeighBeads) {
   testbead8.setName("Hydrogen");
   testbead8.setId(8);
 
-  beadstructure1.AddBead(&testbead1);
-  beadstructure1.AddBead(&testbead2);
-  beadstructure1.AddBead(&testbead3);
-  beadstructure1.AddBead(&testbead4);
-  beadstructure1.AddBead(&testbead5);
-  beadstructure1.AddBead(&testbead6);
-  beadstructure1.AddBead(&testbead7);
-  beadstructure1.AddBead(&testbead8);
+  beadstructure1.AddBead(make_shared<TestBead>(testbead1));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead2));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead3));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead4));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead5));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead6));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead7));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead8));
 
   // At this point non of the beads are connected so should return a vector of
   // size 0
@@ -347,28 +372,28 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoMolecules) {
 
   // Methane
   BeadStructure beadstructure1;
-  beadstructure1.AddBead(&testbead1);
-  beadstructure1.AddBead(&testbead2);
-  beadstructure1.AddBead(&testbead3);
-  beadstructure1.AddBead(&testbead4);
-  beadstructure1.AddBead(&testbead5);
+  beadstructure1.AddBead(make_shared<TestBead>(testbead1));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead2));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead3));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead4));
+  beadstructure1.AddBead(make_shared<TestBead>(testbead5));
 
   // Water
   BeadStructure beadstructure2;
-  beadstructure2.AddBead(&testbead6);
-  beadstructure2.AddBead(&testbead7);
-  beadstructure2.AddBead(&testbead8);
+  beadstructure2.AddBead(make_shared<TestBead>(testbead6));
+  beadstructure2.AddBead(make_shared<TestBead>(testbead7));
+  beadstructure2.AddBead(make_shared<TestBead>(testbead8));
 
   // Methane and Water
   BeadStructure beadstructure;
-  beadstructure.AddBead(&testbead1);
-  beadstructure.AddBead(&testbead2);
-  beadstructure.AddBead(&testbead3);
-  beadstructure.AddBead(&testbead4);
-  beadstructure.AddBead(&testbead5);
-  beadstructure.AddBead(&testbead6);
-  beadstructure.AddBead(&testbead7);
-  beadstructure.AddBead(&testbead8);
+  beadstructure.AddBead(make_shared<TestBead>(testbead1));
+  beadstructure.AddBead(make_shared<TestBead>(testbead2));
+  beadstructure.AddBead(make_shared<TestBead>(testbead3));
+  beadstructure.AddBead(make_shared<TestBead>(testbead4));
+  beadstructure.AddBead(make_shared<TestBead>(testbead5));
+  beadstructure.AddBead(make_shared<TestBead>(testbead6));
+  beadstructure.AddBead(make_shared<TestBead>(testbead7));
+  beadstructure.AddBead(make_shared<TestBead>(testbead8));
 
   // Connect beads
   // Methane
@@ -422,9 +447,9 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoMolecules) {
   testbead10.setId(10);
 
   // Adding the water
-  beadstructure.AddBead(&testbead9);
-  beadstructure.AddBead(&testbead10);
-  beadstructure.AddBead(&testbead11);
+  beadstructure.AddBead(make_shared<TestBead>(testbead9));
+  beadstructure.AddBead(make_shared<TestBead>(testbead10));
+  beadstructure.AddBead(make_shared<TestBead>(testbead11));
 
   beadstructure.ConnectBeads(9, 10);
   beadstructure.ConnectBeads(11, 10);
@@ -456,7 +481,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_catchError) {
     testbead1.setName("Hydrogen");
 
     BeadStructure beadstructure1;
-    BOOST_CHECK_THROW(beadstructure1.AddBead(&testbead1), runtime_error);
+    BOOST_CHECK_THROW(beadstructure1.AddBead(make_shared<TestBead>(testbead1)), runtime_error);
   }
 
   {
@@ -485,13 +510,13 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_catchError) {
     testbead6.setId(5);
 
     BeadStructure beadstructure;
-    beadstructure.AddBead(&testbead1);
-    beadstructure.AddBead(&testbead2);
-    beadstructure.AddBead(&testbead3);
-    beadstructure.AddBead(&testbead4);
-    beadstructure.AddBead(&testbead5);
+    beadstructure.AddBead(make_shared<TestBead>(testbead1));
+    beadstructure.AddBead(make_shared<TestBead>(testbead2));
+    beadstructure.AddBead(make_shared<TestBead>(testbead3));
+    beadstructure.AddBead(make_shared<TestBead>(testbead4));
+    beadstructure.AddBead(make_shared<TestBead>(testbead5));
 
-    BOOST_CHECK_THROW(beadstructure.AddBead(&testbead6), invalid_argument);
+    BOOST_CHECK_THROW(beadstructure.AddBead(make_shared<TestBead>(testbead6)), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(0, 1), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(5, 6), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(1, 1), invalid_argument);

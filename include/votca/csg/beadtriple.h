@@ -19,9 +19,9 @@
 #define	BEADTRIPLE_H
 
 #include <tuple>
+#include <memory>
 
 namespace votca { namespace csg {
-using namespace votca::tools;
 
 /**
    \brief A particle pair
@@ -32,12 +32,12 @@ using namespace votca::tools;
  */
 
 class BeadTriple   
-    : public std::tuple<Bead *, Bead *, Bead *>
+    : public std::tuple<std::shared_ptr<Bead>,std::shared_ptr<Bead>,std::shared_ptr<Bead>>
 {
 public:
     BeadTriple() {}
-    BeadTriple(Bead *bead1, Bead *bead2, Bead *bead3, vec r12, vec r13, vec r23)    
-        : std::tuple<Bead*, Bead *, Bead *>(bead1, bead2, bead3), _r12(r12), _r13(r13), _r23(r23), _dist12(abs(r12)), _dist13(abs(r13)), _dist23(abs(r23)) {}
+    BeadTriple(std::shared_ptr<Bead> bead1, std::shared_ptr<Bead> bead2, std::shared_ptr<Bead> bead3, vec r12, vec r13, vec r23)    
+        : std::tuple<std::shared_ptr<Bead>, std::shared_ptr<Bead>, std::shared_ptr<Bead>>(bead1, bead2, bead3), _r12(r12), _r13(r13), _r23(r23), _dist12(abs(r12)), _dist13(abs(r13)), _dist23(abs(r23)) {}
         
     virtual ~BeadTriple() {}
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2015 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,36 +110,40 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Molecule &atomistic, Molecule &
     ExclusionList *ex = new ExclusionList();
     //exclude all with all
     {
-        list<Bead *> excl_list;
+        list<shared_ptr<Bead>> excl_list;
         for(int i=0; i<atomistic.BeadCount(); ++i) {
-            excl_list.push_back(atomistic.getBead(i));
+            excl_list.push_back(dynamic_pointer_cast<Bead>(atomistic.getBead(i)));
         }
         ex->ExcludeList(excl_list);
     }
 
     //remove exclusions from inside a mapped bead
-    Topology *at_top = atomistic.getParent();
+    auto at_top = atomistic.getParent();
     for(int i=0; i<cg.BeadCount(); ++i) {
-        vector<int> &w = cg.getBead(i)->ParentBeads();
-	list<Bead *> excl_list;
-        for(std::vector<int>::iterator it = w.begin(); it != w.end(); ++it){
-            excl_list.push_back(at_top->getBead(*it));
-	}
-	ex->Remove(excl_list);
+      vector<int> &w = dynamic_pointer_cast<Bead>(cg.getBead(i))->ParentBeads();
+      list<shared_ptr<Bead>> excl_list;
+      for(auto val : w ){
+        excl_list.push_back(dynamic_pointer_cast<Bead>(at_top->getBead(val)));
+      }
+      ex->Remove(excl_list);
     }
 
     //remove exclusion which come from atomistic topology and hence bonds and angles
-    Topology *cg_top = cg.getParent();
+    auto cg_top = cg.getParent();
     for(int i=0; i<cg.BeadCount()-1; ++i) {
         for(int j=i+1; j<cg.BeadCount(); ++j) {
-	    if (cg_top->getExclusions().IsExcluded(cg.getBead(i),cg.getBead(j))){
-              vector<int> &w = cg.getBead(i)->ParentBeads();
-              vector<int> &v = cg.getBead(j)->ParentBeads();
-              for(std::vector<int>::iterator itw = w.begin(); itw != w.end(); ++itw){
-                  for(std::vector<int>::iterator itv = v.begin(); itv != v.end(); ++itv){
-                      ex->RemoveExclusion(at_top->getBead(*itw),at_top->getBead(*itv));
-		  }
-	      }
+          auto bead_i = dynamic_pointer_cast<Bead>(cg.getBead(i));
+          auto bead_j = dynamic_pointer_cast<Bead>(cg.getBead(j));
+	    if (cg_top->getExclusions().IsExcluded(bead_i,bead_j)){
+              vector<int> &w = bead_i->ParentBeads();
+              vector<int> &v = bead_j->ParentBeads();
+              for(auto w_val : w){
+                for(auto v_val : v){
+                    auto bead_w = dynamic_pointer_cast<Bead>(at_top->getBead(w_val));
+                    auto bead_v = dynamic_pointer_cast<Bead>(at_top->getBead(v_val));
+                    ex->RemoveExclusion(bead_w,bead_v);
+                  }
+              }
             }
         }
     }

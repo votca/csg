@@ -261,8 +261,8 @@ bool H5MDTrajectoryReader::NextFrame(Topology &top) {  // NOLINT const reference
 
     // Topology has to be defined in the xml file or in other
     // topology files. The h5md only stores the trajectory data.
-    Bead *b = top.getBead(atom_id);
-    if (b == NULL)
+    auto b = top.getBead(atom_id);
+    if (b == nullptr)
       throw runtime_error("Bead not found: " + boost::lexical_cast<string>(atom_id));
 
     b->setPos(vec(x, y, z));

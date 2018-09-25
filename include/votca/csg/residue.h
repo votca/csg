@@ -48,7 +48,7 @@ public:
     string _name;
 private:
         /// constructor
-    Residue(Topology *parent, int id, const string &name)
+    Residue(std::shared_ptr<Topology> parent, int id, const string &name)
         : TopologyItem(parent), _id(id), _name(name)
     {}
     friend class Topology;

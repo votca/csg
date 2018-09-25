@@ -51,8 +51,7 @@ void LAMMPSDumpWriter::Write(Topology *conf)
     }
     fprintf(_out, "\n");
 
-    for(BeadContainer::iterator iter=conf->Beads().begin(); iter!=conf->Beads().end(); ++iter) {
-        Bead *bi = *iter;
+    for(auto bi : conf->Beads() ){
         fprintf(_out,"%i %i", bi->getId()+1, bi->getType()->getId());
         fprintf(_out," %f %f %f",bi->getPos().getX(), bi->getPos().getY(), bi->getPos().getZ());
         if(v) {

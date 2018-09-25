@@ -77,7 +77,7 @@ private:
 
   // First int is the molecule id
   // Second int is the molecule ptr
-  std::map<int, Molecule *> molecules_;
+  std::map<int,std::shared_ptr<Molecule>> molecules_;
 
   // First int is the atom id second the molecule id
   std::map<int, int> atomIdToMoleculeId_;

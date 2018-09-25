@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2015 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top)
         }
 
         for(int imol=0; imol<mtop.molblock[iblock].nmol; ++imol) {
-            Molecule *mi = top.CreateMolecule(molname);
+            auto mi = top.CreateMolecule(molname);
 
 #if GROMACS_VERSION >= 20190000
             size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -79,12 +79,10 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top)
             for(size_t iatom=0; iatom<natoms_mol; iatom++) {
                 t_atom *a = &(atoms->atom[iatom]);
 
-                BeadType *type = top.GetOrCreateBeadType(*(atoms->atomtype[iatom]));
-                Bead *bead = top.CreateBead(1, *(atoms->atomname[iatom]), type, a->resind + res_offset, a->m, a->q);
+                auto type = top.GetOrCreateBeadType(*(atoms->atomtype[iatom]));
+                auto bead = top.CreateBead(1, *(atoms->atomname[iatom]), type, a->resind + res_offset, a->m, a->q);
 
-                stringstream nm;
-                nm << bead->getResnr() + 1 - res_offset << ":" <<  top.getResidue(bead->getResnr())->getName() << ":" << bead->getName();
-                mi->AddBead(bead, nm.str());
+                mi->AddBead(bead);
             }
 
             // add exclusions
@@ -92,7 +90,7 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top)
                 // read exclusions
                 t_blocka * excl = &(mol->excls);
                 // insert exclusions
-                list<Bead *> excl_list;
+                list<shared_ptr<Bead>> excl_list;
                 for(int k=excl->index[iatom]; k<excl->index[iatom+1]; k++) {
                 	excl_list.push_back(top.getBead(excl->a[k]+ifirstatom));
                 }

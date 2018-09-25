@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,29 +71,33 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref)
 	  }
 	}
 
-        cout << "\nList of residues:\n";
-	for (int i=0; i<top->ResidueCount(); i++){
-	  cout << i << " name: " << top->getResidue(i)->getName() <<
-	    " id: " << top->getResidue(i)->getId() << endl;
-	}
+  cout << "\nList of residues:\n";
+  for (int i=0; i<top->ResidueCount(); i++){
+    cout << i << " name: " << top->getResidue(i)->getName() <<
+      " id: " << top->getResidue(i)->getId() << endl;
+  }
 
-        cout << "\nList of molecules:\n";
-        MoleculeContainer::iterator mol;
-        for (mol = top->Molecules().begin(); mol != top->Molecules().end(); ++mol) {
-            cout << "molecule: " << (*mol)->getId() + 1 << " " << (*mol)->getName()
-                    << " beads: " << (*mol)->BeadCount() << endl;
-            for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-	        int resnr=(*mol)->getBead(i)->getResnr();
-                cout << (*mol)->getBeadId(i) << " Name " <<
-                        (*mol)->getBeadName(i) << " Type " <<
-			(*mol)->getBead(i)->getType()->getName() << " Mass " <<
-			(*mol)->getBead(i)->getM() << " Resnr " <<
-			resnr << " Resname " <<
-			top->getResidue(resnr)->getName() << " Charge " <<
-			(*mol)->getBead(i)->getQ() <<
-			endl;
-            }
-        }
+  cout << "\nList of molecules:\n";
+  MoleculeContainer::iterator mol;
+  for(auto mol : top->Molecules() ){
+    cout << "molecule: " << mol->getId() + 1 << " " << mol->getName()
+      << " beads: " << mol->BeadCount() << endl;
+
+    auto bead_ids = mol->getBeadIds();
+    for( auto i : bead_ids ){
+      auto bead = dynamic_pointer_cast<Bead>(mol->getBead(i));
+      int resnr= bead->getResnr();
+      cout << i << " Name " <<
+        mol->getBeadName(i) << " Type " <<
+        bead->getType()->getName() << " Mass " <<
+        bead->getMass() << " Resnr " <<
+        resnr << " Resname " <<
+        top->getResidue(resnr)->getName() << " Charge " <<
+        bead->getQ() <<
+        endl;
+
+    }
+  }
     }
     else {
         cout << "\nList of exclusions:\n" << top->getExclusions();

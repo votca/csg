@@ -15,6 +15,7 @@
  *
  */
 
+#include <memory>
 #include <algorithm>
 #include <votca/csg/topology.h>
 #include <votca/csg/exclusionlist.h>
@@ -32,21 +33,20 @@ void ExclusionList::Clear(void)
     
 void ExclusionList::CreateExclusions(Topology *top) {
 	InteractionContainer &ic = top->BondedInteractions();
-	InteractionContainer::iterator ia;
 
-	for (ia = ic.begin(); ia != ic.end(); ++ia) {
-		int beads_in_int = (*ia)->BeadCount();
-		list<Bead *> l;
+  for(auto ia : ic ){
+    int beads_in_int = ia->BeadCount();
+		list<shared_ptr<Bead>> l;
 
 		for (int ibead = 0; ibead < beads_in_int; ibead ++) {
-			int ii = (*ia)->getBeadId(ibead);
+			int ii = ia->getBeadId(ibead);
 			l.push_back(top->getBead(ii));
 		}
 		ExcludeList(l);
 	}
 }
 
-bool ExclusionList::IsExcluded(Bead *bead1, Bead *bead2) {
+bool ExclusionList::IsExcluded(shared_ptr<Bead> bead1, shared_ptr<Bead> bead2) {
     exclusion_t *excl;
     if(bead1->getMolecule() != bead2->getMolecule()) return false;
     if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
@@ -61,7 +61,7 @@ bool compareAtomIdiExclusionList(const ExclusionList::exclusion_t *a, const Excl
     return a->_atom->getId() < b->_atom->getId();
 }
 
-bool compareAtomIdBeadList(const Bead *a, const Bead *b){
+bool compareAtomIdBeadList( shared_ptr<const Bead> a, shared_ptr<const Bead> b){
     return a->getId() < b->getId();
 }
 
@@ -69,15 +69,13 @@ std::ostream &operator<<(std::ostream &out, ExclusionList& exl)
 {
     exl._exclusions.sort(compareAtomIdiExclusionList);
     
-    list<ExclusionList::exclusion_t*>::iterator ex;
-    for(ex=exl._exclusions.begin();ex!=exl._exclusions.end();++ex) {
-        (*ex)->_exclude.sort(compareAtomIdBeadList);
-        list<Bead *>::iterator i;
-        out << (int)((*ex)->_atom->getId()) + 1;
-        for(i=(*ex)->_exclude.begin(); i!=(*ex)->_exclude.end(); ++i) {
-            out << " " << ((*i)->getId()+1);
-        }
-        out << endl;
+    for(auto ex : exl._exclusions ){
+      ex->_exclude.sort(compareAtomIdBeadList);
+      out << (int)(ex->_atom->getId()) + 1;
+      for(auto i : ex->_exclude ){
+        out << " " << (i->getId()+1);
+      }
+      out << endl;
     }
     return out;
 }

@@ -40,9 +40,7 @@ void XYZWriter::Write(Topology *conf)
     fprintf(_out, "%d\n", (int)top->Beads().size());
     fprintf(_out, "frame: %d time: %f\n", top->getStep()+1, top->getTime());
 
-    for(BeadContainer::iterator iter=conf->Beads().begin();
-    iter!=conf->Beads().end(); ++iter) {
-        Bead *bi = *iter;
+    for( auto bi : conf->Beads() ){
         vec r = bi->getPos();
         //truncate strings if necessary
         string atomname = bi->getName();

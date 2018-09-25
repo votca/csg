@@ -70,7 +70,7 @@ class XMLMolecule {
   int pid;
   vector<XMLBead*> beads;
   map<string, XMLBead*> name2beads;
-  Molecule *mi;
+  std::shared_ptr<Molecule> mi;
 };
 
 /**

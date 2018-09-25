@@ -111,7 +111,7 @@ void DLPOLYTrajectoryWriter::Write(Topology *conf)
     }
 
     for (int i=0;i<conf->BeadCount(); i++){
-      Bead *bead=conf->getBead(i);
+      auto bead=conf->getBead(i);
 
       // AB: DL_POLY needs bead TYPE, not name!
 

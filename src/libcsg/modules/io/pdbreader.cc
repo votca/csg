@@ -71,7 +71,7 @@ bool PDBReader::NextFrame(Topology &top) {
   // WARNING we are assuming in the bead_vec that the indices of the beads
   //         correspond to the order in which they are read in. As in the first
   //         bead read in will be at index 0, etc...
-  vector<Bead *> bead_vec;
+  vector<std::shared_ptr<Bead>> bead_vec;
   ////////////////////////////////////////////////////////////////////////////////
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
@@ -234,7 +234,7 @@ bool PDBReader::NextFrame(Topology &top) {
 
       bead_count++;
 
-      Bead *b;
+      std::shared_ptr<Bead> b;
       // Only read the CONECT keyword if the topology is set too true
       if (_topology) {
         int resnr;
@@ -262,7 +262,7 @@ bool PDBReader::NextFrame(Topology &top) {
           top.CreateResidue(resName);
         }
         // This is not correct, but still better than no type at all!
-        BeadType *type = top.GetOrCreateBeadType(atName);
+        auto type = top.GetOrCreateBeadType(atName);
 
         // Determine if the charge has been provided in the .pdb file or if we
         // will be assuming it is 0
@@ -414,7 +414,7 @@ bool PDBReader::NextFrame(Topology &top) {
     // Molecule map
     // First int - is the index of the molecule
     // Molecule* - is a pointer to the Molecule object
-    map<int, Molecule *> mol_map;
+    map<int, std::shared_ptr<Molecule>> mol_map;
 
     // Used to reindex the molecules so that they start at 0 and progress
     // with out gaps in their ids.
@@ -427,7 +427,7 @@ bool PDBReader::NextFrame(Topology &top) {
 
       string mol_name = "PDB Molecule " + boost::lexical_cast<string>(ind);
 
-      Molecule *mi = top.CreateMolecule(mol_name);
+      auto mi = top.CreateMolecule(mol_name);
       mol_map[mol->first] = mi;
       mol_reInd_map[mol->first] = ind;
 
@@ -436,8 +436,7 @@ bool PDBReader::NextFrame(Topology &top) {
       for (auto atm_temp = atm_list.begin(); atm_temp != atm_list.end();
            atm_temp++) {
 
-        string residuename = "DUM";
-        mi->AddBead(bead_vec.at(*atm_temp - 1), residuename);
+        mi->AddBead(bead_vec.at(*atm_temp - 1));
       }
       ind++;
     }
@@ -452,12 +451,12 @@ bool PDBReader::NextFrame(Topology &top) {
       // Should be able to just look at one of the atoms the bond is attached
       // too because the other will also be attached to the same molecule.
       int mol_ind = atm_molecule[atm_id1];
-      Molecule *mi = mol_map[mol_ind];
+      auto mi = mol_map[mol_ind];
       // Grab the id of the bead associated with the atom
       // It may be the case that the atom id's and bead id's are different
       int bead_id1 = bead_vec.at(atm_id1 - 1)->getId();
       int bead_id2 = bead_vec.at(atm_id2 - 1)->getId();
-      Interaction *ic = new IBond(bead_id1, bead_id2);
+      auto ic = std::shared_ptr<Interaction>(new IBond(bead_id1, bead_id2));
       ic->setGroup("BONDS");
       ic->setIndex(bond_indx);
       bond_indx++;
