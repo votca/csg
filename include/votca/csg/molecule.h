@@ -73,7 +73,7 @@ private:
     
     /// constructor
     Molecule(Topology *parent, int id, string name)
-        : TopologyItem(parent), Identity(id), Name(name)
+        : Name(name), Identity(id), TopologyItem(parent)
     {}
 
     friend class Topology;
