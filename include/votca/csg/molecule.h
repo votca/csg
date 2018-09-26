@@ -42,10 +42,10 @@ class Bead;
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem,
-                 public BeadStructure,
+class Molecule : public virtual Name,
                  public virtual Identity<int>,
-                 public virtual Name
+                 public TopologyItem,
+                 public BeadStructure
 {
 public:            
    
