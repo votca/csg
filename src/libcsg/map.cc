@@ -124,7 +124,7 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
         string err = "impossible to resolve correct bead from name " + 
           beads[i] + " as more than one bead has the name.";
       }
-      Bead * bead = dynamic_cast<Bead *>(in->getBead(bead_ids.at(0)));
+      Bead * bead = in->getBead<Bead *>(bead_ids.at(0));
       AddElem(bead, weights[i], fweights[i]);
     }
 }

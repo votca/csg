@@ -75,7 +75,7 @@ void GmxTopolApp::WriteAtoms(ostream &out, Molecule &cg)
     out << "[atoms]\n";
     out << "; nr type resnr residue atom cgnr charge mass\n";
     for(int i=0; i<cg.BeadCount(); ++i) {
-        Bead *b= dynamic_cast<Bead *>(cg.getBead(i));
+        Bead *b= cg.getBead<Bead *>(i);
        
         out << format("%d %s 1 RES %s %d %f %f\n")
             % (i+1) % b->getType()->getName() % b->getName() % (i+1) % b->getQ() % b->getM();

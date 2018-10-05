@@ -217,7 +217,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
           throw runtime_error(string("unknown symmetry in bead definition!"));
       }
       ////////////////////////////////////////////////////
-      Bead * bead = dynamic_cast<Bead *>(out.getBead(bead_ids.at(0)));
+      Bead * bead = out.getBead<Bead *>(bead_ids.at(0));
       bmap->Initialize(&in, bead, ((*def)->_options), mdef);
       map->AddBeadMap(bmap);
 

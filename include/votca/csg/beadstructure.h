@@ -23,6 +23,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 
 #include <votca/csg/basebead.h>
 #include <votca/csg/beadstructure.h>
@@ -84,7 +85,29 @@ public:
   /**
    * \brief Get the bead with the specified id
    **/
-  BaseBead *getBead(int id);
+  template<typename T>
+  T getBead(int id) const {
+    if(id<0){                                                                      
+      std::string err = "bead with negative id " + std::to_string(id);                       
+      throw std::invalid_argument(err);                                                 
+    }                                                                              
+    if(!beads_.count(id)){                                                         
+      std::string err = "bead with id: " + std::to_string(id) + " is not found.";            
+      throw std::invalid_argument(err);                                                 
+    }
+
+    using G = typename std::remove_pointer<T>::type;    
+    if(G::getClassType()=="base"){
+      return dynamic_cast<T>(beads_.at(id));
+    }
+    if(G::getClassType()==beads_.at(id)->getInstanceType()){
+      return dynamic_cast<T>(beads_.at(id));
+    }
+
+    std::string err = "You cannot get bead of type "+ G::getClassType() + " as "
+      "the original instance was of type " + beads_.at(id)->getInstanceType();
+    throw std::invalid_argument(err);
+  }
 
   /**
    * \brief Gets all the bead iDs with the particular name 
@@ -134,6 +157,9 @@ public:
    *
    **/
   bool isStructureEquivalent(BeadStructure &beadstructure);
+
+protected:
+  std::list<std::string> unallowed_bead_types_;
 
 private:
   void InitializeGraph_();

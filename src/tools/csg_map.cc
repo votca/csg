@@ -93,9 +93,9 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                 Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
                 for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
                     // copy atomistic beads of molecule
-                    int beadid = (*it_mol)->getBead(i)->getId();
+                    int beadid = (*it_mol)->getBead<Bead *>(i)->getId();
 
-                    Bead *bi = dynamic_cast<Bead *>((*it_mol)->getBead(i));
+                    Bead *bi = (*it_mol)->getBead<Bead *>(i);
                     BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
                     Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bi->getResnr(), bi->getM(), bi->getQ());
                     bn->setOptions(bi->Options());
@@ -111,9 +111,9 @@ void EvalConfiguration(Topology *top, Topology *top_ref) {
                     // copy cg beads of molecule
                     Molecule *cgmol = top->Molecules()[mi->getId()];
                     for (int i = 0; i < cgmol->BeadCount(); i++) {
-                        Bead *bi = dynamic_cast<Bead *>(cgmol->getBead(i));
+                        Bead *bi = cgmol->getBead<Bead *>(i);
                         // todo: this is a bit dirty as a cg bead will always have the resid of its first parent
-                        Bead *bparent = dynamic_cast<Bead *>((*it_mol)->getBead(0));
+                        Bead *bparent = (*it_mol)->getBead<Bead *>(0);
                         BeadType *type = hybtol->GetOrCreateBeadType(bi->getType()->getName());
                         Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(), type, bparent->getResnr(), bi->getM(), bi->getQ());
                         bn->setOptions(bi->Options());

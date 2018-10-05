@@ -78,6 +78,14 @@ void BeadStructure::CalculateStructure_() {
  ***************************/
 
 void BeadStructure::AddBead(BaseBead *bead) {
+
+  for(auto unallowed_class : unallowed_bead_types_){
+    if(bead->getInstanceType() == unallowed_class){
+      throw runtime_error("Cannot store class type"
+          " "+bead->getInstanceType()+" in the container.");
+    }
+  }
+
   if (beads_.count(bead->getId())) {
     string err = "Cannot add bead with Id ";
     err += to_string(bead->getId());
@@ -148,7 +156,7 @@ vector<BaseBead *> BeadStructure::getNeighBeads(int index) {
   }
   return neighbeads;
 }
-
+/*
 BaseBead *BeadStructure::getBead(int id) {
   if(id<0){
     string err = "bead with negative id " + to_string(id);
@@ -160,7 +168,7 @@ BaseBead *BeadStructure::getBead(int id) {
   }
   return beads_[id];
 }
-
+*/
 vector<int> BeadStructure::getIdsOfBeadsWithName(const string &name){ 
   vector<int> ids;
   auto iterator = beads_.begin();

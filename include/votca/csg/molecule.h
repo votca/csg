@@ -74,7 +74,9 @@ private:
     /// constructor
     Molecule(Topology *parent, int id, string name)
         : Name(name), Identity(id), TopologyItem(parent)
-    {}
+    {
+      unallowed_bead_types_ = {"base"};
+    }
 
     friend class Topology;
 };

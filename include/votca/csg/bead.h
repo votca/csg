@@ -318,6 +318,7 @@ public:
    */
   void setOptions(Property &options) { _options = &options; }
 
+  static std::string getClassType() { return class_type_; }
 protected:
   vector<int> _parent_beads;
 
@@ -353,12 +354,16 @@ protected:
     _bV = false;
     _bW = false;
     _bF = false;
+    instance_type_ = "bead";
   }
 
   void *_userdata;
 
   friend class Topology;
   friend class Molecule;
+
+private:
+  static const std::string class_type_;
 };
 
 inline void Bead::setVel(const vec &r) {

@@ -85,7 +85,7 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref)
 
     auto bead_ids = (*mol)->getBeadIds();
     for( auto i : bead_ids ){
-      Bead * bead = dynamic_cast<Bead *>((*mol)->getBead(i));
+      Bead * bead = (*mol)->getBead<Bead *>(i);
       int resnr= bead->getResnr();
       cout << i << " Name " <<
         (*mol)->getBeadName(i) << " Type " <<

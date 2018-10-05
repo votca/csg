@@ -284,7 +284,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top)
 	for (int replica=1;replica<nreplica;replica++){
           Molecule *mi_replica = top.CreateMolecule(mol_name);
 	  for(int i=0;i<mi->BeadCount();i++){
-	    Bead *bead= dynamic_cast<Bead *>(mi->getBead(i));
+	    Bead *bead= mi->getBead<Bead *>(i);
 	    BeadType *type = top.GetOrCreateBeadType(bead->Type()->getName());
 	    Bead *bead_replica = top.CreateBead(1, bead->getName(), type, res->getId(), bead->getM(), bead->getQ());
 	    mi_replica->AddBead(bead_replica);
@@ -293,7 +293,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top)
 	  InteractionContainer ics=mi->Interactions();
           for(vector<Interaction *>::iterator ic=ics.begin(); ic!=ics.end(); ++ic) {
             Interaction *ic_replica=NULL;
-	    int offset = mi_replica->getBead(0)->getId() - mi->getBead(0)->getId();
+	    int offset = mi_replica->getBead<Bead *>(0)->getId() - mi->getBead<Bead *>(0)->getId();
 	    if ((*ic)->BeadCount() == 2) {
 	      ic_replica = new IBond((*ic)->getBeadId(0)+offset,(*ic)->getBeadId(1)+offset);
 	    } else if ((*ic)->BeadCount() == 3) {

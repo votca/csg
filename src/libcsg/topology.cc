@@ -143,7 +143,7 @@ void Topology::Add(Topology *top)
     for(mol=top->_molecules.begin();mol!=top->_molecules.end(); ++mol) {
         Molecule *mi = CreateMolecule((*mol)->getName());
         for(int i=0; i<mi->BeadCount(); i++) {
-            mi->AddBead(mi->getBead(i));
+            mi->AddBead(mi->getBead<Bead *>(i));
         }
     }
 }
@@ -178,7 +178,7 @@ void Topology::CopyTopologyData(Topology *top)
     for(it_mol=top->_molecules.begin();it_mol!=top->_molecules.end(); ++it_mol) {
         Molecule *mi = CreateMolecule((*it_mol)->getName());
         for(int i=0; i<(*it_mol)->BeadCount(); i++) {
-            int beadid = (*it_mol)->getBead(i)->getId();
+            int beadid = ((*it_mol)->getBead<Bead *>(i))->getId();
             mi->AddBead(_beads[beadid]);
         }
     }
@@ -289,11 +289,11 @@ vec Topology::BCShortestConnection(const vec &r_i, const vec &r_j) const
     return _bc->BCShortestConnection(r_i, r_j);
 }
 
-vec Topology::getDist(int bead1, int bead2) const
+vec Topology::getDist(int bead1,int bead2) const
 {
     return BCShortestConnection(
-            getBead(bead1)->getPos(),
-            getBead(bead2)->getPos());
+            (getBead(bead1))->getPos(),
+            (getBead(bead2))->getPos());
 }
 
 double Topology::BoxVolume()

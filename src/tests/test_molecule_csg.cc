@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_molecule_bead_methods){
   BOOST_CHECK_EQUAL(mol->BeadCount(),0);
 
   // Check that errors are thrown if bead does not exist in the molecule
-  BOOST_CHECK_THROW(mol->getBead(0),invalid_argument);
+  BOOST_CHECK_THROW(mol->getBead<Bead *>(0),invalid_argument);
   auto beads_with_same_name = mol->getIdsOfBeadsWithName("C1");
   BOOST_CHECK_EQUAL(beads_with_same_name.size(),0);
   BOOST_CHECK_THROW(mol->getBeadName(0),invalid_argument);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_molecule_bead_methods){
 
   mol->AddBead(b);
   
-  auto b2 = mol->getBead(0);
+  auto b2 = mol->getBead<Bead *>(0);
   BOOST_CHECK_EQUAL(b2->getId(),b->getId());
   beads_with_same_name =  mol->getIdsOfBeadsWithName("C1");
   BOOST_CHECK_EQUAL(beads_with_same_name.size(),1);

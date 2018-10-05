@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_add_and_getbead) {
   testbead.setName("Carbon");
   beadstructure.AddBead(&testbead);
   BOOST_CHECK_EQUAL(beadstructure.BeadCount(), 1);
-  auto testbead2 = beadstructure.getBead(2);
+  auto testbead2 = beadstructure.getBead<TestBead *>(2);
   BOOST_CHECK_EQUAL(testbead2->getId(), testbead.getId());
   
   vector<int> vector_ids = beadstructure.getIdsOfBeadsWithName("Carbon");
