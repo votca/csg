@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
         Bead *bead;
         BeadType *bt = top.GetOrCreateBeadType((*iter)->_type);
         bead = top.CreateBead((*iter)->_symmetry, (*iter)->_name, bt, res->getId(), 0, 0);
-        minfo->AddBead(bead, bead->getName());
+        minfo->AddBead(bead);
 
         bead->setOptions(*(*iter)->_options);
         
@@ -127,12 +127,20 @@ Molecule * CGMoleculeDef::CreateMolecule(Topology & top)
 
         Tokenizer tok((*ibnd)->get("beads").value(), " \n\t");
         for (Tokenizer::iterator atom = tok.begin(); atom != tok.end(); ++atom) {
-            int i = minfo->getBeadIdByName(*atom);
-            if(i < 0)
-                throw runtime_error(string("error while trying to create bonded interaction, "
-                        "bead " + *atom + " not found"));
-
-            atoms.push_back(i);
+          vector<int> bead_ids = minfo->getIdsOfBeadsWithName(*atom);
+          if(bead_ids.size() == 0){
+            string err = "error while trying to create bonded interaction, "
+              "bead " + *atom + " not found";
+            throw runtime_error(err);
+          }else if(bead_ids.size()>1){
+            string err = "error trying to resolve beads while trying to "
+              "create a bonded reaction. More than one bead has the same "
+              "name it is therefore impossible to resolve the correct bead "
+              "based on the following name: " + *atom + " which is not "
+              "found.";
+            throw runtime_error(err);
+          }
+          atoms.push_back(bead_ids.at(0));
         }
            
 	int NrBeads=1;
@@ -179,34 +187,40 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out)
 
     Map *map = new Map(in, out);
     for(vector<beaddef_t *>::iterator def = _beads.begin();
-            def != _beads.end(); ++def) {
+        def != _beads.end(); ++def) {
 
-        int iout = out.getBeadByName((*def)->_name);
-        if(iout < 0) 
-            throw runtime_error(string("mapping error: reference molecule "
-                    + (*def)->_name + " does not exist"));
-        
-        Property *mdef = getMapByName((*def)->_mapping);
-        if(!mdef)
-            throw runtime_error(string("mapping " + (*def)->_mapping + " not found"));
-        
-        /// TODO: change this to factory, do not hardcode!!
-        BeadMap *bmap;
-        switch((*def)->_symmetry) {
+      vector<int> bead_ids = out.getIdsOfBeadsWithName((*def)->_name);
+      if(bead_ids.size() == 0) {
+        throw runtime_error(string("mapping error: reference molecule "
+              + (*def)->_name + " does not exist"));
+      }else if(bead_ids.size()>1){
+        string err = "Impossible to resolve single bead with name "
+          + (*def)->_name + " as there exist more than a single bead with that "
+          "name.";
+        throw runtime_error(err);
+      }
+
+      Property *mdef = getMapByName((*def)->_mapping);
+      if(!mdef)
+        throw runtime_error(string("mapping " + (*def)->_mapping + " not found"));
+
+      /// TODO: change this to factory, do not hardcode!!
+      BeadMap *bmap;
+      switch((*def)->_symmetry) {
         case 1:
-            bmap = new Map_Sphere();
-            break;
+          bmap = new Map_Sphere();
+          break;
         case 3:
-            bmap = new Map_Ellipsoid();
-            break;
+          bmap = new Map_Ellipsoid();
+          break;
         default:
-            throw runtime_error(string("unknown symmetry in bead definition!"));
-        }
-        ////////////////////////////////////////////////////
-        
-        bmap->Initialize(&in, out.getBead(iout), ((*def)->_options), mdef);
-        map->AddBeadMap(bmap);
-        
+          throw runtime_error(string("unknown symmetry in bead definition!"));
+      }
+      ////////////////////////////////////////////////////
+      Bead * bead = out.getBead<Bead *>(bead_ids.at(0));
+      bmap->Initialize(&in, bead, ((*def)->_options), mdef);
+      map->AddBeadMap(bmap);
+
     }
     return map;
 }

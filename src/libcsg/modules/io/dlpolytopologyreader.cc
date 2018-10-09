@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,14 +219,9 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top)
 	    string beadname = beadtype + "#" + boost::lexical_cast<string>(i+1);
 	    Bead *bead = top.CreateBead(1, beadname, type, res->getId(), mass, charge);
 
-            stringstream nm;
-            nm << bead->getResnr() + 1 << ":" <<  top.getResidue(bead->getResnr())->getName() << ":" << bead->getName();
-            mi->AddBead(bead, nm.str());
+      mi->AddBead(bead);
 	    id_map[i]=bead->getId();
 	    i++;
-#ifdef DEBUG
-	    cout << "Atom identification in maps '" << nm.str() << "'" << endl;
-#endif
 	  }
 	  matoms += repeater;
 	}
@@ -289,17 +284,16 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top)
 	for (int replica=1;replica<nreplica;replica++){
           Molecule *mi_replica = top.CreateMolecule(mol_name);
 	  for(int i=0;i<mi->BeadCount();i++){
-	    Bead *bead=mi->getBead(i);
+	    Bead *bead= mi->getBead<Bead *>(i);
 	    BeadType *type = top.GetOrCreateBeadType(bead->Type()->getName());
-	    string beadname=mi->getBeadName(i);
-	    Bead *bead_replica = top.CreateBead(1, bead->getName(), type, res->getId(), bead->getMass(), bead->getQ());
-	    mi_replica->AddBead(bead_replica,beadname);
+	    Bead *bead_replica = top.CreateBead(1, bead->getName(), type, res->getId(), bead->getM(), bead->getQ());
+	    mi_replica->AddBead(bead_replica);
 	  }
 	  matoms+=mi->BeadCount();
 	  InteractionContainer ics=mi->Interactions();
           for(vector<Interaction *>::iterator ic=ics.begin(); ic!=ics.end(); ++ic) {
             Interaction *ic_replica=NULL;
-	    int offset = mi_replica->getBead(0)->getId() - mi->getBead(0)->getId();
+	    int offset = mi_replica->getBead<Bead *>(0)->getId() - mi->getBead<Bead *>(0)->getId();
 	    if ((*ic)->BeadCount() == 2) {
 	      ic_replica = new IBond((*ic)->getBeadId(0)+offset,(*ic)->getBeadId(1)+offset);
 	    } else if ((*ic)->BeadCount() == 3) {

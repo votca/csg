@@ -436,8 +436,7 @@ bool PDBReader::NextFrame(Topology &top) {
       for (auto atm_temp = atm_list.begin(); atm_temp != atm_list.end();
            atm_temp++) {
 
-        string residuename = "DUM";
-        mi->AddBead(bead_vec.at(*atm_temp - 1), residuename);
+        mi->AddBead(bead_vec.at(*atm_temp - 1));
       }
       ind++;
     }

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,10 +106,26 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead, Proper
     }
 
     for (size_t i = 0; i < beads.size(); ++i) {
-        int iin = in->getBeadByName(beads[i]);
-        if (iin < 0)
-            throw std::runtime_error(string("mapping error: molecule " + beads[i] + " does not exist"));
-        AddElem(in->getBead(iin), weights[i], fweights[i]);
+      vector<string> bead_name_components;
+      Tokenizer tok_bead_name_components(beads[i], ":");
+      tok_bead_name_components.ToVector(bead_name_components);
+      string beadname = bead_name_components.at(2);
+      cout << "Size of vector of string of beads " << beads.size() << endl;
+      //vector<int> bead_ids = in->getIdsOfBeadsWithName(beads[i]);
+      vector<int> bead_ids = in->getIdsOfBeadsWithName(beadname);
+      for(auto v : beads){
+        cout << v << endl;
+      }
+      if (bead_ids.size() == 0){
+        //string err = "mapping error: bead " + beads[i] + " does not exist";
+        string err = "mapping error: bead " + beadname + " does not exist";
+        throw std::runtime_error(err);
+      }else if(bead_ids.size()>1){
+        string err = "impossible to resolve correct bead from name " + 
+          beads[i] + " as more than one bead has the name.";
+      }
+      Bead * bead = in->getBead<Bead *>(bead_ids.at(0));
+      AddElem(bead, weights[i], fweights[i]);
     }
 }
 

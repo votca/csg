@@ -192,7 +192,7 @@ private:
 };
 
 inline double IBond::EvaluateVar(const Topology &top) {
-  return abs(top.getDist(_beads[0], _beads[1]));
+  return abs(top.getDist(this->_beads[0],this->_beads[1]));
 }
 
 inline vec IBond::Grad(const Topology &top, int bead) {

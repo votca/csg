@@ -45,11 +45,47 @@ shared_ptr<GraphNode> BaseBeadToGraphNode(BaseBead *basebead) {
   return make_shared<GraphNode>(graphnode);
 }
 
+void BeadStructure::InitializeGraph_() {
+  if (!graphUpToDate) {
+    vector<Edge> connections_vector;
+    for (auto edge : connections_) {
+      connections_vector.push_back(edge);
+    }
+
+    unordered_map<int, GraphNode> graphnodes;
+    for (auto id_bead_ptr_pair : beads_) {
+      graphnodes_[id_bead_ptr_pair.first] =
+          BaseBeadToGraphNode(id_bead_ptr_pair.second);
+      graphnodes[id_bead_ptr_pair.first] =
+          *(graphnodes_[id_bead_ptr_pair.first]);
+    }
+    graph_ = make_shared<Graph>(Graph(connections_vector, graphnodes));
+    graphUpToDate = true;
+  }
+}
+
+void BeadStructure::CalculateStructure_() {
+
+  InitializeGraph_();
+  if (!structureIdUpToDate) {
+    findStructureId<GraphDistVisitor>(*graph_);
+    structureIdUpToDate = true;
+  }
+}
+
 /***************************
  * Public Facing Functions *
  ***************************/
 
 void BeadStructure::AddBead(BaseBead *bead) {
+
+  for(auto unallowed_class : unallowed_bead_types_){
+    if(bead->getInstanceType() == unallowed_class){
+      throw runtime_error("Cannot store class type"
+          " "+bead->getInstanceType()+" in the container.");
+    }
+  }
+
   if (beads_.count(bead->getId())) {
     string err = "Cannot add bead with Id ";
     err += to_string(bead->getId());
@@ -79,35 +115,6 @@ void BeadStructure::ConnectBeads(int bead1_id, int bead2_id) {
   if (numberOfConnections != connections_.size()) {
     graphUpToDate = false;
     structureIdUpToDate = false;
-  }
-}
-
-void BeadStructure::InitializeGraph_() {
-  cerr << "Graph up to Date " << graphUpToDate << endl;
-  if (!graphUpToDate) {
-    vector<Edge> connections_vector;
-    for (auto edge : connections_) {
-      connections_vector.push_back(edge);
-    }
-
-    unordered_map<int, GraphNode> graphnodes;
-    for (auto id_bead_ptr_pair : beads_) {
-      graphnodes_[id_bead_ptr_pair.first] =
-          BaseBeadToGraphNode(id_bead_ptr_pair.second);
-      graphnodes[id_bead_ptr_pair.first] =
-          *(graphnodes_[id_bead_ptr_pair.first]);
-    }
-    graph_ = make_shared<Graph>(Graph(connections_vector, graphnodes));
-    graphUpToDate = true;
-  }
-}
-
-void BeadStructure::CalculateStructure_() {
-
-  InitializeGraph_();
-  if (!structureIdUpToDate) {
-    findStructureId<GraphDistVisitor>(*graph_);
-    structureIdUpToDate = true;
   }
 }
 
@@ -149,10 +156,51 @@ vector<BaseBead *> BeadStructure::getNeighBeads(int index) {
   }
   return neighbeads;
 }
+/*
+BaseBead *BeadStructure::getBead(int id) {
+  if(id<0){
+    string err = "bead with negative id " + to_string(id);
+    throw invalid_argument(err);
+  }
+  if(!beads_.count(id)){
+    string err = "bead with id: " + to_string(id) + " is not found.";
+    throw invalid_argument(err);
+  }
+  return beads_[id];
+}
+*/
+vector<int> BeadStructure::getIdsOfBeadsWithName(const string &name){ 
+  vector<int> ids;
+  auto iterator = beads_.begin();
+  while(iterator!=beads_.end()){
+    if(iterator->second->getName() == name){
+      ids.push_back(iterator->second->getId());
+    }
+    ++iterator;
+  }
+  return ids;
+}
 
-BaseBead *BeadStructure::getBead(int index) {
-  assert(beads_.count(index));
-  return beads_[index];
+vector<int> BeadStructure::getBeadIds(){
+  vector<int> ids;
+  auto iterator = beads_.begin();
+  while(iterator!=beads_.end()){
+    ids.push_back(iterator->second->getId());
+    ++iterator;
+  }
+  return ids;
+}
+
+string BeadStructure::getBeadName(int id){
+  if(id<0){
+    string err = "bead with negative id " + to_string(id);
+    throw invalid_argument(err);
+  }
+  if(!beads_.count(id)){
+    string err = "bead with id: " + to_string(id) + " is not found.";
+    throw invalid_argument(err);
+  }
+  return beads_[id]->getName();
 }
 
 vector<shared_ptr<BeadStructure>> BeadStructure::breakIntoMolecules() {

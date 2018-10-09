@@ -23,8 +23,10 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 
 #include <votca/csg/basebead.h>
+#include <votca/csg/beadstructure.h>
 
 #include <votca/tools/graph.h>
 
@@ -83,7 +85,44 @@ public:
   /**
    * \brief Get the bead with the specified id
    **/
-  BaseBead *getBead(int id);
+  template<typename T>
+  T getBead(int id) const {
+    if(id<0){                                                                      
+      std::string err = "bead with negative id " + std::to_string(id);                       
+      throw std::invalid_argument(err);                                                 
+    }                                                                              
+    if(!beads_.count(id)){                                                         
+      std::string err = "bead with id: " + std::to_string(id) + " is not found.";            
+      throw std::invalid_argument(err);                                                 
+    }
+
+    using G = typename std::remove_pointer<T>::type;    
+    if(G::getClassType()=="base"){
+      return dynamic_cast<T>(beads_.at(id));
+    }
+    if(G::getClassType()==beads_.at(id)->getInstanceType()){
+      return dynamic_cast<T>(beads_.at(id));
+    }
+
+    std::string err = "You cannot get bead of type "+ G::getClassType() + " as "
+      "the original instance was of type " + beads_.at(id)->getInstanceType();
+    throw std::invalid_argument(err);
+  }
+
+  /**
+   * \brief Gets all the bead iDs with the particular name 
+   **/
+  std::vector<int> getIdsOfBeadsWithName(const std::string &name);
+
+  /**
+   * \brief Get the ids of all the beads
+   **/
+  std::vector<int> getBeadIds();
+  
+  /**
+   * \brief Get the name of the bead by passing in its Id
+   **/
+  std::string getBeadName(int id);
 
   /**
    * \brief Create a connection between two beads in the structure
@@ -94,12 +133,12 @@ public:
   void ConnectBeads(int bead1_id, int bead2_id);
 
   /**
-   * \breif Return a vector of all the beads neighboring the index
+   * \brief Return a vector of all the beads neighboring the index
    **/
   std::vector<BaseBead *> getNeighBeads(int index);
 
   /**
-   * \breif Bread the beadstructure up into molecular units
+   * \brief Bread the beadstructure up into molecular units
    *
    * If a beadstructure is composed of several unconnected networks of beads.
    * These structures will be broken up into their own bead structures and
@@ -108,7 +147,7 @@ public:
   std::vector<std::shared_ptr<BeadStructure>> breakIntoMolecules();
 
   /**
-   * \breif Compare the topology of two bead structures
+   * \brief Compare the topology of two bead structures
    *
    * This function looks at how the beads are arranged within the bead structure
    * and determines if the topology is the same.
@@ -118,6 +157,9 @@ public:
    *
    **/
   bool isStructureEquivalent(BeadStructure &beadstructure);
+
+protected:
+  std::list<std::string> unallowed_bead_types_;
 
 private:
   void InitializeGraph_();

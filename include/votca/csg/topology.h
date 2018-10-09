@@ -323,7 +323,7 @@ public:
      * calculates the smallest distance between two beads with correct treatment
      * of pbc
      */
-    vec getDist(int bead1, int bead2) const;
+    vec getDist(int bead1,int bead2) const;
     
     /**
      * \brief calculate shortest vector connecting two points

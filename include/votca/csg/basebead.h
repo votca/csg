@@ -18,6 +18,8 @@
 #ifndef _VOTCA_CSG_BASEBEAD_H
 #define _VOTCA_CSG_BASEBEAD_H
 
+#include <string>
+
 #include <votca/csg/topologyitem.h>
 #include <votca/csg/moleculeitem.h>
 
@@ -27,6 +29,7 @@
 
 namespace votca {
 namespace csg {
+
 using namespace votca::tools;
 
 class BeadType;
@@ -44,10 +47,15 @@ class BaseBead : public TopologyItem,
                  public virtual Name,
                  public virtual Identity<int> {
 public:
+
+  virtual const std::string getLabel() const {
+    return "Id "+std::to_string(getId())+":Bead "+getName(); 
+  }
+
   /**
    * destructor
    */
-  virtual ~BaseBead() {}
+  virtual ~BaseBead()  {}
 
   /**
    * get the bead type
@@ -106,18 +114,22 @@ public:
   /** set has position to true */
   void HasPos(bool true_or_false) { _bPos = true_or_false; }
 
+  std::string getInstanceType() { return instance_type_; } 
+  static std::string getClassType() { return class_type_; }
+
 protected:
   BaseBead()
       : TopologyItem(nullptr), MoleculeItem(nullptr), _type(nullptr), 
-      _mass(0.0), _bPos(false){};
-
+      _mass(0.0), _bPos(false),  instance_type_("base"){};
 
   BeadType *_type;
-
   double _mass;
   vec _pos;
-
   bool _bPos;
+  std::string instance_type_;
+
+private:
+  static const std::string class_type_;
 };
 
 inline void BaseBead::setPos(const vec &r) {
