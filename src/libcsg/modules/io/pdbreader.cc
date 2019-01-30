@@ -16,13 +16,9 @@
  */
 
 #include "pdbreader.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/lexical_cast.hpp>
-#include <sstream>
-#include <unordered_map>
-#include <vector>
-#include <votca/tools/getline.h>
+
+#include <stdexcept>
+#include <votca/csg/topology.h>
 
 namespace votca {
 namespace csg {
@@ -279,8 +275,8 @@ bool PDBReader::NextFrame(Topology &top) {
         // 6 - charge               (double)
         //
         // res -1 as internal number starts with 0
-        b = top.CreateBead(1, atName, atName, resnr - 1, this->getMass(atName),
-                           ch);
+        b = top.CreateBead(1, atName, weak_type, resnr - 1,
+                           _elements.getMass(atName), ch);
       } else {
         b = top.getBead(bead_count - 1);
       }
