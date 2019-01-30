@@ -19,17 +19,19 @@
 #include <votca_config.h>
 #endif
 
-#include <iostream>
-#include <string>
-
-#include <votca/csg/topology.h>
-
-#include "gmxtopologyreader.h"
-
-#include <gromacs/fileio/tpxio.h>
 #include <gromacs/mdtypes/inputrec.h>
 #include <gromacs/topology/atoms.h>
+#include <gromacs/topology/block.h>
 #include <gromacs/topology/topology.h>
+#include <iostream>
+#include <stddef.h>
+#include <string>
+#include <votca/csg/bead.h>
+#include <votca/csg/molecule.h>
+#include <votca/csg/topology.h>
+#include <votca/tools/matrix.h>
+
+#include "gmxtopologyreader.h"
 
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
@@ -93,8 +95,8 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
                                     a->resind + res_offset, a->m, a->q);
 
         stringstream nm;
-        nm << bead->getResnr() + 1 - res_offset << ":"
-           << top.getResidue(bead->getResnr())->getName() << ":"
+        nm << bead->getResidueNumber() + 1 - res_offset << ":"
+           << top.getResidue(bead->getResidueNumber())->getName() << ":"
            << bead->getName();
         mi->AddBead(bead, nm.str());
       }

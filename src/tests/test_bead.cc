@@ -19,13 +19,17 @@
 
 #define BOOST_TEST_MODULE bead_test
 #include <boost/test/unit_test.hpp>
-
+#include <math.h>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/beadtype.h>
-#include <votca/csg/molecule.h>
 #include <votca/csg/topology.h>
 #include <votca/tools/vec.h>
+
+namespace votca {
+namespace csg {
+class Molecule;
+}  // namespace csg
+}  // namespace votca
 
 using namespace std;
 using namespace votca::csg;
@@ -72,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
   BOOST_CHECK_EQUAL(round_(b->getQ(), 3), round_(charge, 3));
   BOOST_CHECK_EQUAL(b->getId(), 0);
   BOOST_CHECK_EQUAL(b->getName(), name);
-  BOOST_CHECK_EQUAL(b->getResnr(), resnr);
+  BOOST_CHECK_EQUAL(b->getResidueNumber(), resnr);
   BOOST_CHECK_EQUAL(b->getSymmetry(), symmetry);
 }
 

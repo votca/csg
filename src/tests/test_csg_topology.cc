@@ -16,9 +16,15 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE csg_topology_test
-#include "../../include/votca/csg/topology.h"
 #include <boost/test/unit_test.hpp>
-#include <iostream>
+#include <math.h>
+#include <string>
+#include <votca/tools/matrix.h>
+#include <votca/tools/types.h>
+#include <votca/tools/vec.h>
+
+#include "../../include/votca/csg/interaction.h"
+#include "../../include/votca/csg/topology.h"
 
 // used for rounding doubles so we can compare them
 double round_(double v, int p) {
@@ -111,7 +117,7 @@ BOOST_AUTO_TEST_CASE(create_bead) {
 
   BOOST_CHECK_EQUAL(round_(bead_ptr->getQ() * 10, 1), 3.0);
   BOOST_CHECK_EQUAL(round_(bead_ptr->getMass() * 10, 2), 11);
-  BOOST_CHECK_EQUAL(bead_ptr->getResnr(), residue_number);
+  BOOST_CHECK_EQUAL(bead_ptr->getResidueNumber(), residue_number);
   BOOST_CHECK_EQUAL(bead_ptr->getSymmetry(), symmetry);
   BOOST_CHECK(bead_ptr->getName() == bead_name);
 

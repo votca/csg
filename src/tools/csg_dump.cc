@@ -15,8 +15,13 @@
  *
  */
 
-#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <votca/csg/boundarycondition.h>
 #include <votca/csg/csgapplication.h>
+#include <votca/csg/exclusionlist.h>
+#include <votca/csg/topology.h>
+#include <votca/tools/matrix.h>
 
 using namespace std;
 using namespace votca::csg;
@@ -81,7 +86,7 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
       cout << "molecule: " << (*mol)->getId() + 1 << " " << (*mol)->getName()
            << " beads: " << (*mol)->BeadCount() << endl;
       for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-        int resnr = (*mol)->getBead(i)->getResnr();
+        int resnr = (*mol)->getBead(i)->getResidueNumber();
 
         cout << (*mol)->getBeadId(i) << " Name " << (*mol)->getBeadName(i)
              << " Type " << (*mol)->getBead(i)->getType() << " Mass "

@@ -15,11 +15,12 @@
  *
  */
 
-#include <boost/tokenizer.hpp>
 #include <fstream>
-#include <iostream>
-#include <math.h>
+#include <stddef.h>
+#include <stdexcept>
+#include <string>
 #include <votca/csg/csgapplication.h>
+#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 using namespace std;
@@ -111,7 +112,7 @@ class CsgMapApp : public CsgApplication {
           }
 
           Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(),
-                                        bi->getType(), bi->getResnr(),
+                                        bi->getType(), bi->getResidueNumber(),
                                         bi->getMass(), bi->getQ());
           bn->setOptions(bi->Options());
           bn->setPos(bi->getPos());
@@ -129,9 +130,9 @@ class CsgMapApp : public CsgApplication {
             // todo: this is a bit dirty as a cg bead will always have the resid
             // of its first parent
             Bead *bparent = (*it_mol)->getBead(0);
-            Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(),
-                                          bi->getType(), bparent->getResnr(),
-                                          bi->getMass(), bi->getQ());
+            Bead *bn = hybtol->CreateBead(
+                bi->getSymmetry(), bi->getName(), bi->getType(),
+                bparent->getResidueNumber(), bi->getMass(), bi->getQ());
             bn->setOptions(bi->Options());
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());

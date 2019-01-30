@@ -15,14 +15,11 @@
  *
  */
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
-#include <iomanip>
-#include <iostream>
+#include <stddef.h>
+#include <votca/csg/molecule.h>
 #include <votca/csg/topology.h>
-#include <votca/tools/getline.h>
 #include <votca/tools/tokenizer.h>
 
 #ifndef HAVE_NO_CONFIG
@@ -30,6 +27,13 @@
 #endif
 
 #include "dlpolytopologyreader.h"
+
+namespace votca {
+namespace csg {
+class Bead;
+class Residue;
+}  // namespace csg
+}  // namespace votca
 
 using namespace votca::tools;
 using namespace std;
@@ -250,8 +254,8 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
               top.CreateBead(1, beadname, beadtype, res->getId(), mass, charge);
 
           stringstream nm;
-          nm << bead->getResnr() + 1 << ":"
-             << top.getResidue(bead->getResnr())->getName() << ":"
+          nm << bead->getResidueNumber() + 1 << ":"
+             << top.getResidue(bead->getResidueNumber())->getName() << ":"
              << bead->getName();
           mi->AddBead(bead, nm.str());
           id_map[i] = bead->getId();

@@ -15,13 +15,17 @@
  *
  */
 
-#include <boost/lexical_cast.hpp>
-#include <regex>
-#include <stdexcept>
-#include <unordered_set>
+#include <assert.h>
+#include <stddef.h>
+#include <string>
+#include <votca/csg/boundarycondition.h>
 #include <votca/csg/interaction.h>
+#include <votca/csg/molecule.h>
+#include <votca/csg/openbox.h>
 #include <votca/csg/topology.h>
+#include <votca/tools/matrix.h>
 #include <votca/tools/rangeparser.h>
+#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
@@ -82,11 +86,11 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
     // This is not 100% correct, but let's assume for now that the resnr do
     // increase
     if (beadcount == 0) {
-      res_offset = (*bead)->getResnr();
+      res_offset = (*bead)->getResidueNumber();
     }
     stringstream bname;
-    bname << (*bead)->getResnr() - res_offset + 1 << ":"
-          << getResidue((*bead)->getResnr())->getName() << ":"
+    bname << (*bead)->getResidueNumber() - res_offset + 1 << ":"
+          << getResidue((*bead)->getResidueNumber())->getName() << ":"
           << (*bead)->getName();
     mol->AddBead((*bead), bname.str());
     if (++beadcount == nbeads) {
@@ -108,10 +112,10 @@ void Topology::CreateMoleculesByResidue() {
   // add the beads to the corresponding molecules based on their resid
   BeadContainer::iterator bead;
   for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
-    // MoleculeByIndex((*bead)->getResnr())->AddBead((*bead)->getId(),
+    // MoleculeByIndex((*bead)->getResidueNumber())->AddBead((*bead)->getId(),
     // (*bead)->getName());
 
-    MoleculeByIndex((*bead)->getResnr())
+    MoleculeByIndex((*bead)->getResidueNumber())
         ->AddBead((*bead), string("1:TRI:") + (*bead)->getName());
   }
 
@@ -126,8 +130,9 @@ void Topology::CreateOneBigMolecule(string name) {
 
   for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
     stringstream n("");
-    n << (*bead)->getResnr() + 1 << ":"
-      << _residues[(*bead)->getResnr()]->getName() << ":" << (*bead)->getName();
+    n << (*bead)->getResidueNumber() + 1 << ":"
+      << _residues[(*bead)->getResidueNumber()]->getName() << ":"
+      << (*bead)->getName();
     // cout << n.str() << endl;
     mi->AddBead((*bead), n.str());
   }
@@ -143,8 +148,8 @@ void Topology::Add(Topology *top) {
   for (bead = top->_beads.begin(); bead != top->_beads.end(); ++bead) {
     Bead *bi = *bead;
     string type = bi->getType();
-    CreateBead(bi->getSymmetry(), bi->getName(), type, bi->getResnr() + res0,
-               bi->getMass(), bi->getQ());
+    CreateBead(bi->getSymmetry(), bi->getName(), type,
+               bi->getResidueNumber() + res0, bi->getMass(), bi->getQ());
   }
 
   for (res = top->_residues.begin(); res != top->_residues.end(); ++res) {
@@ -183,7 +188,7 @@ void Topology::CopyTopologyData(Topology *top) {
     Bead *bi = *it_bead;
     string type = bi->getType();
     Bead *bn = CreateBead(bi->getSymmetry(), bi->getName(), type,
-                          bi->getResnr(), bi->getMass(), bi->getQ());
+                          bi->getResidueNumber(), bi->getMass(), bi->getQ());
     bn->setOptions(bi->Options());
   }
 

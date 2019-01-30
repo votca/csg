@@ -54,7 +54,8 @@ class Bead : public BaseBead {
   virtual ~Bead() {}
 
   /**
-   * get the residu number of the bead
+   * Get The residue number of the bead, not the residue number is not the same
+   * as the molecule number. Residues are components of molecules.
    * \return residue id
    */
   const int &getResidueNumber() const { return residue_number_; }
