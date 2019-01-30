@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <string>
+#include <unordered_set>  // IWYU pragma: keep
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
