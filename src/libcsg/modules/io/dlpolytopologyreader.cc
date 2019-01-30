@@ -15,8 +15,9 @@
  *
  */
 
-#include <boost/filesystem/convenience.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/algorithm/string/case_conv.hpp>  // IWYU pragma: keep
+#include <boost/filesystem/convenience.hpp>      // IWYU pragma: keep
+#include <boost/filesystem/path.hpp>             // IWYU pragma: keep
 #include <fstream>
 #include <stddef.h>
 #include <votca/csg/molecule.h>
