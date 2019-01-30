@@ -18,12 +18,14 @@
 #ifndef _VOTCA_CSG_BEAD_H
 #define _VOTCA_CSG_BEAD_H
 
-#include "basebead.h"
+#include <assert.h>
 #include <cassert>
 #include <string>
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
 #include <votca/tools/vec.h>
+
+#include "basebead.h"
 
 namespace votca {
 namespace csg {
@@ -55,7 +57,7 @@ class Bead : public BaseBead {
    * get the residu number of the bead
    * \return residue id
    */
-  const int &getResnr() const { return residue_number_; }
+  const int &getResidueNumber() const { return residue_number_; }
 
   /**
    * get the mass of the bead
@@ -329,7 +331,7 @@ class Bead : public BaseBead {
   byte_t symmetry_;
   double charge_;
 
-  int residue_number_;
+  int residue_number_ = -1;
 
   vec velocity_, bead_force_, u_, v_, w_;
 
@@ -341,8 +343,8 @@ class Bead : public BaseBead {
 
   /// constructur
   Bead(Topology *owner, int id, std::string type, byte_t symmetry,
-       std::string name, int resnr, double m, double q)
-      : symmetry_(symmetry), charge_(q), residue_number_(resnr) {
+       std::string name, int residue_number, double m, double q)
+      : symmetry_(symmetry), charge_(q), residue_number_(residue_number) {
     topology_item_._parent = owner;
     setId(id);
     setType(type);

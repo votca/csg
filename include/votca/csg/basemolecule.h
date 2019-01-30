@@ -19,6 +19,7 @@
 #define _VOTCA_CSG_BASEMOLECULE_H
 
 #include <assert.h>
+#include <cassert>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -45,7 +46,8 @@ namespace TOOLS = votca::tools;
     \todo sort atoms in molecule
 
 */
-class BaseMolecule : public BeadStructure {
+template <class T>
+class BaseMolecule : public BeadStructure<T> {
  public:
   /// get the molecule ID
   int getId() const { return id_.getId(); }
@@ -58,7 +60,7 @@ class BaseMolecule : public BeadStructure {
 
   // The bead already has a name handled by beadstructure, but we need to
   // override it
-  void AddBead(BaseBead *bead);
+  void AddBead(T *bead);
 
   // Might be more than one bead with the same name
   std::unordered_set<int> getBeadIdsByName(const std::string &name) const;
@@ -75,6 +77,50 @@ class BaseMolecule : public BeadStructure {
 
   std::unordered_map<std::string, std::unordered_set<int>> bead_name_and_ids_;
 };
+
+template <class T>
+void BaseMolecule<T>::AddBead(T *bead) {
+  assert(!BeadStructure<T>::beads_.count(bead->getId()) &&
+         "Cannot add a bead to the basemolecule"
+         " when it has been previously added.");
+
+  BeadStructure<T>::AddBead(bead);
+  bead_name_and_ids_[bead->getName()].insert(bead->getId());
+  bead->setMolecule(this);
+}
+
+template <class T>
+const std::string BaseMolecule<T>::getBeadName(int id) const {
+  assert(BeadStructure<T>::beads_.count(id) &&
+         "Cannot get bead name for bead id because "
+         "is is not stored in the base molecule.");
+  return BeadStructure<T>::beads_.at(id)->getName();
+}
+
+template <class T>
+const std::string &BaseMolecule<T>::getBeadType(const int &id) const {
+  assert(beads_.count(id) &&
+         "Cannot get bead type with id beacuse "
+         "bead is not stored in base molecule.");
+  return BeadStructure<T>::beads_.at(id)->getType();
+}
+
+template <class T>
+const TOOLS::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
+  assert(BeadStructure<T>::beads_.count(id) &&
+         "Cannot get bead position with id because "
+         "bead is not stored in the base molecule.");
+  return BeadStructure<T>::beads_.at(id)->getPos();
+}
+
+template <class T>
+unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
+    const std::string &name) const {
+  assert(bead_name_and_ids_.count(name) &&
+         "BaseMolecule does not contain any "
+         "beads with name ");
+  return bead_name_and_ids_.at(name);
+}
 
 }  // namespace csg
 }  // namespace votca
