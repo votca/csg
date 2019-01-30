@@ -16,6 +16,7 @@
  */
 
 #include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/path.hpp>
 #include <fstream>
 #include <stddef.h>
 #include <votca/csg/molecule.h>

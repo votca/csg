@@ -19,10 +19,11 @@
 #include <votca_config.h>
 #endif
 
-#include <gromacs/mdtypes/inputrec.h>
-#include <gromacs/topology/atoms.h>
+#include <gromacs/fileio/tpxio.h>      // IWYU pragma: keep
+#include <gromacs/mdtypes/inputrec.h>  // IWYU pragma: keep
+#include <gromacs/topology/atoms.h>    // IWYU pragma: keep
 #include <gromacs/topology/block.h>
-#include <gromacs/topology/topology.h>
+#include <gromacs/topology/topology.h>  // IWYU pragma: keep
 #include <iostream>
 #include <stddef.h>
 #include <string>
@@ -31,7 +32,7 @@
 #include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 
-#include "gmxtopologyreader.h"
+#include "gmxtopologyreader.h"  // IWYU pragma: keep
 
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
