@@ -20,16 +20,11 @@
 #define BOOST_TEST_MODULE triplelist_test
 #include <boost/test/unit_test.hpp>
 #include <string>
+#include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
 #include <votca/csg/topology.h>
 #include <votca/csg/triplelist.h>
 #include <votca/tools/vec.h>
-
-namespace votca {
-namespace csg {
-class Bead;
-}  // namespace csg
-}  // namespace votca
 
 using namespace std;
 using namespace votca::csg;
