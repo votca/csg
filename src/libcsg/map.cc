@@ -107,10 +107,12 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
 
   for (size_t i = 0; i < beads.size(); ++i) {
     // int iin = in->getBeadByName(beads[i]);
-    unordered_set<int> bead_ids = in->getBeadIdsByName(beads[i]);
+    // unordered_set<int> bead_ids = in->getBeadIdsByName(beads[i]);
+    cout << "in map Initialize " << beads[i] << endl;
+    unordered_set<int> bead_ids = in->getBeadIdsByType(beads[i]);
     assert(bead_ids.size() == 1 &&
            "More than a single bead with the same "
-           "name, maybe the globally unique bead id should be used instaed.");
+           "type, maybe the globally unique bead id should be used instaed.");
     int bead_id = *bead_ids.begin();
     if (bead_id < 0)
       throw std::runtime_error(

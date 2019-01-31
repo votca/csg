@@ -130,9 +130,11 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     Tokenizer tok((*ibnd)->get("beads").value(), " \n\t");
     for (Tokenizer::iterator atom = tok.begin(); atom != tok.end(); ++atom) {
       // int i = minfo->getBeadIdByName(*atom);
-      unordered_set<int> bead_ids = minfo->getBeadIdsByName(*atom);
+      // unordered_set<int> bead_ids = minfo->getBeadIdsByName(*atom);
+      cout << "Create Molecule cgmol " << *atom << endl;
+      unordered_set<int> bead_ids = minfo->getBeadIdsByType(*atom);
       assert(bead_ids.size() == 1 &&
-             "There is more than one bead with that name "
+             "There is more than one bead with that type "
              "if you want a unique identifier you should probably just use the "
              "beads global unique id.");
       int bead_id = *bead_ids.begin();
@@ -196,7 +198,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
 
     cout << (*def)->_name << endl;
     // int iout = out.getBeadByName((*def)->_name);
-    unordered_set<int> bead_ids = out.getBeadIdsByName((*def)->_name);
+    unordered_set<int> bead_ids = out.getBeadIdsByType((*def)->_name);
     assert(
         bead_ids.size() == 1 &&
         "There should only be one bead, if you want a "

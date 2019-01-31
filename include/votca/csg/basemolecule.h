@@ -130,7 +130,7 @@ std::unordered_set<int> BaseMolecule<T>::getBeadIdsByType(
   std::unordered_set<int> bead_ids;
   for (const std::pair<const int, T *> &id_and_bead :
        BeadStructure<T>::beads_) {
-    if (type.compare(id_and_bead->getType()) == 0) {
+    if (type.compare(id_and_bead.second->getType()) == 0) {
       bead_ids.insert(id_and_bead.first);
     }
   }
