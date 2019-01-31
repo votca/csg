@@ -20,7 +20,6 @@
 
 #include <list>
 #include <map>
-#include <unordered_map>
 #include <vector>
 
 #include "bead.h"
@@ -373,7 +372,7 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
-  unordered_map<int, std::string> getResidueIdsAndNames() const {
+  map<int, std::string> getResidueIdsAndNames() const {
     return residue_ids_and_names_;
   }
 
@@ -385,7 +384,7 @@ class Topology {
   BoundaryCondition::eBoxtype autoDetectBoxType(const matrix &box);
 
   /// bead types in the topology
-  std::unordered_map<std::string, int> beadtypes_;
+  std::map<std::string, int> beadtypes_;
 
   /// beads in the topology
   BeadContainer _beads;
@@ -406,7 +405,7 @@ class Topology {
   std::map<std::string, std::list<Interaction *> > _interactions_by_group;
 
   // Need some way to keep track of the unique residue ids
-  std::unordered_map<int, std::string> residue_ids_and_names_;
+  std::map<int, std::string> residue_ids_and_names_;
   int max_residue_id_;
   double _time;
   int _step;

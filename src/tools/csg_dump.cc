@@ -16,6 +16,7 @@
  */
 
 #include <iostream>
+#include <map>
 #include <string>
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/csgapplication.h>
@@ -75,8 +76,7 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
     }
 
     cout << "\nList of residues:\n";
-    unordered_map<int, string> residue_ids_and_names =
-        top->getResidueIdsAndNames();
+    map<int, string> residue_ids_and_names = top->getResidueIdsAndNames();
     for (pair<const int, string> &id_and_name : residue_ids_and_names) {
       cout << id_and_name.first << " name: " << id_and_name.second
            << " id: " << id_and_name.first << endl;

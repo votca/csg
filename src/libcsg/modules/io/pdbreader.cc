@@ -16,8 +16,10 @@
  */
 
 #include "pdbreader.h"
+
 #include <boost/filesystem.hpp>
 #include <stdexcept>
+#include <unordered_map>
 #include <votca/csg/topology.h>
 
 namespace votca {
