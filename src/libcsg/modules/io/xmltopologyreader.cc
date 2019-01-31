@@ -201,12 +201,10 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
     unordered_map<string, int> residuename_residuenumber;
     for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
          itb != xmlBeads.end(); ++itb, ++resit) {
-      cout << "Cycling residues " << *resit << endl;
       stringstream bname;
       XMLBead &b = **itb;
 
       if (residuename_residuenumber.count(molname) == 0) {
-        cout << "molname " << molname << endl;
         residuename_residuenumber[molname] = 1;
       } else {
         ++residuename_residuenumber[molname];

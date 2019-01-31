@@ -67,9 +67,9 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr,
-                                 molecule_constants::molecule_name_unassigned,
-                                 residue_name, mass, charge);
+  Bead* b = top.CreateBead<Bead>(
+      symmetry, name, bead_type_name, resnr, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
 
   BOOST_CHECK_CLOSE(b->getMass(), mass, 1e-5);
   BOOST_CHECK_CLOSE(b->getQ(), charge, 1e-5);
@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr,
-                                 molecule_constants::molecule_name_unassigned,
-                                 residue_name, mass, charge);
+  Bead* b = top.CreateBead<Bead>(
+      symmetry, name, bead_type_name, resnr, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
 
   double newMass = 9.4;
   double newCharge = 2.6;
