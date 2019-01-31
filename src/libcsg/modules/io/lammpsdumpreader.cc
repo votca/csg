@@ -123,12 +123,14 @@ void LAMMPSDumpReader::ReadNumAtoms(Topology &top, string itemline) {
 
 void LAMMPSDumpReader::ReadAtoms(Topology &top, string itemline) {
   if (_topology) {
-    top.CreateResidue("dum");
-    if (!top.BeadTypeExist("no")) {
-      top.RegisterBeadType("no");
+    /*    top.CreateResidue("dum");*/
+    if (!top.BeadTypeExist(bead_constants::bead_type_unassigned)) {
+      top.RegisterBeadType(bead_constants::bead_type_unassigned);
     }
     for (int i = 0; i < _natoms; ++i) {
-      (void)top.CreateBead(1, "no", "no", 0, 0, 0);
+      (void)top.CreateBead<Bead>(1, "no", "no",
+                                 bead_constants::residue_number_unassigned,
+                                 bead_constants::residue_name_unassigned, 0, 0);
     }
   }
 

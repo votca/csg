@@ -33,7 +33,7 @@ bool XYZReader::ReadTopology(string file, Topology &top) {
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open topology file: " + file);
 
-  if (_topology) top.CreateResidue("DUM");
+  // if (_topology) top.CreateResidue("DUM");
 
   NextFrame(top);
 
@@ -98,8 +98,9 @@ bool XYZReader::NextFrame(Topology &top) {
         if (!top.BeadTypeExist(bead_type)) {
           top.RegisterBeadType(bead_type);
         }
-        b = top.CreateBead(1, fields[0] + boost::lexical_cast<string>(i),
-                           bead_type, 0, 0, 0);
+        b = top.CreateBead<Bead>(1, fields[0] + boost::lexical_cast<string>(i),
+                                 bead_type, 0,
+                                 bead_constants::residue_name_unassigned, 0, 0);
       } else
         b = top.getBead(i);
 

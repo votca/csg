@@ -18,17 +18,19 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <iostream>
+#include <votca/csg/bead.h>
 #include <votca/csg/cgmoleculedef.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/topology.h>
 #include <votca/tools/tokenizer.h>
 
+using namespace votca::tools;
+using namespace std;
+
 namespace votca {
 namespace csg {
 
-using namespace std;
 using boost::lexical_cast;
-
 CGMoleculeDef::~CGMoleculeDef() {
   {
     vector<beaddef_t *>::iterator i;
@@ -61,6 +63,7 @@ void CGMoleculeDef::ParseBeads(Property &options) {
     beaddef_t *beaddef = new beaddef_t;
     beaddef->_options = p;
 
+    beaddef->residue_number_ = bead_constants::residue_number_unassigned;
     beaddef->_name = p->get("name").as<string>();
     beaddef->_type = p->get("type").as<string>();
     beaddef->_mapping = p->get("mapping").as<string>();
@@ -91,7 +94,7 @@ void CGMoleculeDef::ParseMapping(Property &options) {
 
 Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
   // add the residue names
-  Residue *res = top.CreateResidue(_name);
+  // Residue *res = top.CreateResidue(_name);
   Molecule *minfo = top.CreateMolecule(_name);
 
   // create the atoms
@@ -103,8 +106,8 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     if (!top.BeadTypeExist(type)) {
       top.RegisterBeadType(type);
     }
-    bead = top.CreateBead((*iter)->_symmetry, (*iter)->_name, type,
-                          res->getId(), 0, 0);
+    bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
+                                (*iter)->residue_number_, _name, 0, 0);
     minfo->AddBead(bead, bead->getName());
 
     bead->setOptions(*(*iter)->_options);

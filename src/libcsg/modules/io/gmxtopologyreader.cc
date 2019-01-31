@@ -19,14 +19,14 @@
 #include <votca_config.h>
 #endif
 
-#include <string>
-#include <iostream>
 #include "gmxtopologyreader.h"
+#include <iostream>
+#include <string>
 
 #include <gromacs/fileio/tpxio.h>
+#include <gromacs/mdtypes/inputrec.h>
 #include <gromacs/topology/atoms.h>
 #include <gromacs/topology/topology.h>
-#include <gromacs/mdtypes/inputrec.h>
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
 #undef bool
@@ -61,13 +61,15 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
 
     string molname = *(mol->name);
 
-    int res_offset = top.ResidueCount();
+    // This is to check that you are not adding another residue with the same id
+    // as one that was previously added
+    // int res_offset = top.ResidueCount();
 
     t_atoms *atoms = &(mol->atoms);
 
-    for (int i = 0; i < atoms->nres; i++) {
-      top.CreateResidue(*(atoms->resinfo[i].name));
-    }
+    //    for (int i = 0; i < atoms->nres; i++) {
+    //      top.CreateResidue(*(atoms->resinfo[i].name));
+    //    }
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
       Molecule *mi = top.CreateMolecule(molname);
@@ -80,17 +82,23 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
       // read the atoms
       for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
         t_atom *a = &(atoms->atom[iatom]);
+        string residue_name = *(atoms->resinfo[iatom].name);
 
         string bead_type = *(atoms->atomtype[iatom]);
         if (!top.BeadTypeExist(bead_type)) {
           top.RegisterBeadType(bead_type);
         }
-        Bead *bead = top.CreateBead(1, *(atoms->atomname[iatom]), bead_type,
-                                    a->resind + res_offset, a->m, a->q);
+        //        Bead *bead = top.CreateBead(1, *(atoms->atomname[iatom]),
+        //        bead_type,
+        //                                    a->resind + res_offset, a->m,
+        //                                    a->q);
 
+        Bead *bead =
+            top.CreateBead<Bead>(1, *(atoms->atomname[iatom]), bead_type,
+                                 a->resind, residue_name, a->m, a->q);
         stringstream nm;
-        nm << bead->getResidueNumber() + 1 - res_offset << ":"
-           << top.getResidue(bead->getResidueNumber())->getName() << ":"
+        // nm << bead->getResidueNumber() + 1 - res_offset << ":"
+        nm << bead->getResidueNumber() << ":" << bead->getResidueName() << ":"
            << bead->getName();
         mi->AddBead(bead, nm.str());
       }

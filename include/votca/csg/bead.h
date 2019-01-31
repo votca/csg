@@ -27,14 +27,19 @@
 
 #include "basebead.h"
 
+namespace TOOLS = votca::tools;
+
 namespace votca {
 namespace csg {
 
 class Topology;
 class Molecule;
 
-using namespace votca::tools;
-
+namespace bead_constants {
+const int residue_number_unassigned = -1;
+const std::string residue_name_unassigned = "unassigned";
+const std::string bead_type_unassigned = "unassigned";
+}  // namespace bead_constants
 /**
  * \brief information about a bead
  *
@@ -43,8 +48,6 @@ using namespace votca::tools;
  * charge and the residue it belongs to. The coordinates are stored in the
  * configuration class.
  *
- * \todo change resnr to pointer
- * \todo make sure bead belongs to topology
  **/
 class Bead : public BaseBead {
  public:
@@ -59,6 +62,11 @@ class Bead : public BaseBead {
    * \return residue id
    */
   const int &getResidueNumber() const { return residue_number_; }
+
+  //  void setResidueName(std::string residue_name) {
+  //  residue_name_.setName(residue_name);}
+
+  std::string getResidueName() const { return residue_name_.getName(); }
 
   /**
    * get the mass of the bead
@@ -100,19 +108,19 @@ class Bead : public BaseBead {
    *
    * \return bead symmetry
    */
-  byte_t getSymmetry() const { return symmetry_; }
+  TOOLS::byte_t getSymmetry() const { return symmetry_; }
 
   /**
    * set the velocity of the bead
    * @param r bead velocity
    */
-  void setVel(const vec &r);
+  void setVel(const TOOLS::vec &r);
 
   /**
    * get the velocity of the bead
    * \return bead velocity
    */
-  const vec &getVel() const;
+  const TOOLS::vec &getVel() const;
 
   /**
    * \brief set first orientation (normal vector) vector of bead
@@ -121,7 +129,7 @@ class Bead : public BaseBead {
    *
    * @param u bead orientation u
    */
-  void setU(const vec &u);
+  void setU(const TOOLS::vec &u);
 
   /**
    * \brief get first orientation (normal vector) vector of bead
@@ -138,7 +146,7 @@ class Bead : public BaseBead {
    *
    * \return bead orientation u
    */
-  const vec &getU() const;
+  const TOOLS::vec &getU() const;
 
   /**
    * \brief set second orientation vector of bead
@@ -147,7 +155,7 @@ class Bead : public BaseBead {
    *
    * @param v bead orientation v
    */
-  void setV(const vec &v);
+  void setV(const TOOLS::vec &v);
 
   /**
    * \brief get second orientation vector of bead
@@ -160,7 +168,7 @@ class Bead : public BaseBead {
    *
    * \return bead orientation u
    */
-  const vec &getV() const;
+  const TOOLS::vec &getV() const;
 
   /**
    * \brief set third orientation vector of bead
@@ -169,7 +177,7 @@ class Bead : public BaseBead {
    *
    * @param w bead orientation w
    */
-  void setW(const vec &w);
+  void setW(const TOOLS::vec &w);
 
   /**
    * \brief get third orientation vector of bead
@@ -181,13 +189,13 @@ class Bead : public BaseBead {
    *
    * \return bead orientation w
    */
-  const vec &getW() const;
+  const TOOLS::vec &getW() const;
 
   /**
    * direct access (read/write) to the velocity of the bead
    * \return reference to velocity
    */
-  vec &Vel() {
+  TOOLS::vec &Vel() {
     assert(bead_velocity_set_);
     return velocity_;
   }
@@ -196,7 +204,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to orientation u of the bead
    * \return reference to u
    */
-  vec &U() {
+  TOOLS::vec &U() {
     assert(bU_);
     return u_;
   }
@@ -205,7 +213,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the orientation v of the bead
    * \return reference to v
    */
-  vec &V() {
+  TOOLS::vec &V() {
     assert(bV_);
     return v_;
   }
@@ -214,7 +222,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the orientation w of the bead
    * \return reference to w
    */
-  vec &W() {
+  TOOLS::vec &W() {
     assert(bW_);
     return w_;
   }
@@ -223,7 +231,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the force of the bead
    * \return reference to force
    */
-  vec &F() {
+  TOOLS::vec &F() {
     assert(bead_force_set_);
     return bead_force_;
   }
@@ -232,7 +240,7 @@ class Bead : public BaseBead {
    * set force acting on bead
    * @param bead_force force
    */
-  void setF(const vec &bead_force);
+  void setF(const TOOLS::vec &bead_force);
 
   /**
    * \brief get the force acting on the bead
@@ -242,7 +250,7 @@ class Bead : public BaseBead {
    *
    * \return force on bead
    */
-  const vec &getF() const;
+  const TOOLS::vec &getF() const;
 
   /** does this configuration store velocities? */
   bool HasVel() { return bead_velocity_set_; }
@@ -314,27 +322,28 @@ class Bead : public BaseBead {
    *
    * \return Property object containing options
    */
-  Property &Options() { return *options_; }
+  TOOLS::Property &Options() { return *options_; }
 
   /**
    * update pointer to options object of bead
    * \param options pointer to options object of bead
    */
-  void setOptions(Property &options) { options_ = &options; }
+  void setOptions(TOOLS::Property &options) { options_ = &options; }
 
  protected:
   std::vector<int> parent_beads_;
 
+  TOOLS::Name residue_name_;
   // TODO: this is so far a pointer. this should change! each bead should have
   // own options.
-  Property *options_;
+  TOOLS::Property *options_;
 
-  byte_t symmetry_;
+  TOOLS::byte_t symmetry_;
   double charge_;
 
   int residue_number_ = -1;
 
-  vec velocity_, bead_force_, u_, v_, w_;
+  TOOLS::vec velocity_, bead_force_, u_, v_, w_;
 
   bool bead_velocity_set_;
   bool bU_;
@@ -343,13 +352,15 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(Topology *owner, int id, std::string type, byte_t symmetry,
-       std::string name, int residue_number, double m, double q)
+  Bead(Topology *owner, int id, std::string type, TOOLS::byte_t symmetry,
+       std::string name, int residue_number, std::string residue_name, double m,
+       double q)
       : symmetry_(symmetry), charge_(q), residue_number_(residue_number) {
     topology_item_._parent = owner;
     setId(id);
     setType(type);
     setName(name);
+    residue_name_.setName(residue_name);
     setMass(m);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
@@ -365,52 +376,52 @@ class Bead : public BaseBead {
   friend class Molecule;
 };
 
-inline void Bead::setVel(const vec &r) {
+inline void Bead::setVel(const TOOLS::vec &r) {
   bead_velocity_set_ = true;
   velocity_ = r;
 }
 
-inline const vec &Bead::getVel() const {
+inline const TOOLS::vec &Bead::getVel() const {
   assert(bead_velocity_set_);
   return velocity_;
 }
 
-inline void Bead::setU(const vec &u) {
+inline void Bead::setU(const TOOLS::vec &u) {
   bU_ = true;
   u_ = u;
 }
 
-inline const vec &Bead::getU() const {
+inline const TOOLS::vec &Bead::getU() const {
   assert(bU_);
   return u_;
 }
 
-inline void Bead::setV(const vec &v) {
+inline void Bead::setV(const TOOLS::vec &v) {
   bV_ = true;
   v_ = v;
 }
 
-inline const vec &Bead::getV() const {
+inline const TOOLS::vec &Bead::getV() const {
   assert(bV_);
   return v_;
 }
 
-inline void Bead::setW(const vec &w) {
+inline void Bead::setW(const TOOLS::vec &w) {
   bW_ = true;
   w_ = w;
 }
 
-inline const vec &Bead::getW() const {
+inline const TOOLS::vec &Bead::getW() const {
   assert(bW_);
   return w_;
 }
 
-inline void Bead::setF(const vec &bead_force) {
+inline void Bead::setF(const TOOLS::vec &bead_force) {
   bead_force_set_ = true;
   bead_force_ = bead_force;
 }
 
-inline const vec &Bead::getF() const {
+inline const TOOLS::vec &Bead::getF() const {
   assert(bead_force_set_);
   return bead_force_;
 }

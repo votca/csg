@@ -80,7 +80,7 @@ class CsgMapApp : public CsgApplication {
       // we want to combine atomistic and coarse-grained into one topology
       Topology *hybtol = new Topology();
 
-      ResidueContainer::iterator it_res;
+      // ResidueContainer::iterator it_res;
       MoleculeContainer::iterator it_mol;
 
       hybtol->setBox(top->getBox());
@@ -88,14 +88,14 @@ class CsgMapApp : public CsgApplication {
       hybtol->setStep(top->getStep());
 
       // copy all residues from both
-      for (it_res = top_ref->Residues().begin();
+      /*for (it_res = top_ref->Residues().begin();
            it_res != top_ref->Residues().end(); ++it_res) {
         hybtol->CreateResidue((*it_res)->getName());
       }
       for (it_res = top->Residues().begin(); it_res != top->Residues().end();
            ++it_res) {
         hybtol->CreateResidue((*it_res)->getName());
-      }
+      }*/
 
       // copy all molecules and beads
 
@@ -111,9 +111,10 @@ class CsgMapApp : public CsgApplication {
             hybtol->RegisterBeadType(bi->getType());
           }
 
-          Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(),
-                                        bi->getType(), bi->getResidueNumber(),
-                                        bi->getMass(), bi->getQ());
+          Bead *bn = hybtol->CreateBead<Bead>(
+              bi->getSymmetry(), bi->getName(), bi->getType(),
+              bi->getResidueNumber(), bi->getResidueName(), bi->getMass(),
+              bi->getQ());
           bn->setOptions(bi->Options());
           bn->setPos(bi->getPos());
           if (bi->HasVel()) bn->setVel(bi->getVel());
@@ -130,9 +131,10 @@ class CsgMapApp : public CsgApplication {
             // todo: this is a bit dirty as a cg bead will always have the resid
             // of its first parent
             Bead *bparent = (*it_mol)->getBead(0);
-            Bead *bn = hybtol->CreateBead(
+            Bead *bn = hybtol->CreateBead<Bead>(
                 bi->getSymmetry(), bi->getName(), bi->getType(),
-                bparent->getResidueNumber(), bi->getMass(), bi->getQ());
+                bparent->getResidueNumber(), bparent->getResidueName(),
+                bi->getMass(), bi->getQ());
             bn->setOptions(bi->Options());
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());

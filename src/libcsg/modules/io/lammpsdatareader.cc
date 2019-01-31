@@ -516,13 +516,13 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       double mass =
           boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
 
-      int residue_index = moleculeId;
-      if (residue_index >= top.ResidueCount()) {
-        while ((residue_index - 1) >= top.ResidueCount()) {
-          top.CreateResidue("DUM");
-        }
-        top.CreateResidue("DUM");
-      }
+      /*      int residue_index = moleculeId;
+            if (residue_index >= top.ResidueCount()) {
+              while ((residue_index - 1) >= top.ResidueCount()) {
+                top.CreateResidue("DUM");
+              }
+              top.CreateResidue("DUM");
+            }*/
 
       string bead_type_name = to_string(atomTypeId + 1);
       if (!top.BeadTypeExist(bead_type_name)) {
@@ -535,8 +535,9 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
         throw runtime_error(err);
       }
 
-      b = top.CreateBead(symmetry, bead_type_name, bead_type_name,
-                         residue_index, mass, charge);
+      b = top.CreateBead<Bead>(
+          symmetry, bead_type_name, bead_type_name, moleculeId,
+          bead_constants::residue_name_unassigned, mass, charge);
 
       mol->AddBead(b, bead_type_name);
       b->setMolecule(mol);

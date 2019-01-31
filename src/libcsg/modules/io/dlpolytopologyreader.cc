@@ -148,7 +148,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
   // TODO: fix residue naming / assignment - DL_POLY has no means to recognise
   // residues!
-  Residue *res = top.CreateResidue("no");
+  // Residue *res = top.CreateResidue("no");
 
   if (boost::filesystem::basename(filepath).size() == 0) {
     if (filepath.parent_path().string().size() == 0) {
@@ -252,13 +252,17 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
         for (int j = 0; j < repeater; j++) {
 
           string beadname = beadtype + "#" + boost::lexical_cast<string>(i + 1);
-          Bead *bead =
-              top.CreateBead(1, beadname, beadtype, res->getId(), mass, charge);
+          Bead *bead = top.CreateBead<Bead>(
+              1, beadname, beadtype, bead_constants::residue_number_unassigned,
+              bead_constants::residue_name_unassigned, mass, charge);
 
           stringstream nm;
-          nm << bead->getResidueNumber() + 1 << ":"
-             << top.getResidue(bead->getResidueNumber())->getName() << ":"
-             << bead->getName();
+          nm << bead->getResidueNumber() + 1
+             << ":"
+             //             <<
+             //             top.getResidue(bead->getResidueNumber())->getName()
+             //             << ":"
+             << bead->getResidueName() << ":" << bead->getName();
           mi->AddBead(bead, nm.str());
           id_map[i] = bead->getId();
           i++;
@@ -340,8 +344,10 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
           Bead *bead = mi->getBead(i);
           string type = bead->getType();
           Bead *bead_replica =
-              top.CreateBead(1, bead->getName(), type, res->getId(),
-                             bead->getMass(), bead->getQ());
+              top.CreateBead<Bead>(1, bead->getName(), type,
+                                   bead_constants::residue_number_unassigned,
+                                   bead_constants::residue_name_unassigned,
+                                   bead->getMass(), bead->getQ());
           mi_replica->AddBead(bead_replica, bead->getName());
         }
         matoms += mi->BeadCount();

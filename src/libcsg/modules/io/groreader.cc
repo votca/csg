@@ -21,6 +21,9 @@
 #include <fstream>
 #include <iostream>
 #include <votca/tools/getline.h>
+#include <votca/tools/vec.h>
+
+using namespace votca::tools;
 
 namespace votca {
 namespace csg {
@@ -102,29 +105,33 @@ bool GROReader::NextFrame(Topology &top) {
 
     Bead *b;
     if (_topology) {
-      int resnr = boost::lexical_cast<int>(resNum);
-      if (resnr < 1)
-        throw std::runtime_error("Misformated gro file, resnr has to be > 0");
-      // TODO: fix the case that resnr is not in ascending order
-      if (resnr > top.ResidueCount()) {
-        while ((resnr - 1) > top.ResidueCount()) {  // gro resnr should start
-                                                    // with 1 but accept sloppy
-                                                    // files
-          top.CreateResidue("DUMMY");  // create dummy residue, hopefully it
-                                       // will never show
-          cout << "Warning: residue numbers not continous, create DUMMY "
-                  "residue with nr "
-               << top.ResidueCount() << endl;
-        }
-        top.CreateResidue(resName);
-      }
+      int residue_number = boost::lexical_cast<int>(resNum);
+      if (residue_number < 1)
+        throw std::runtime_error(
+            "Misformated gro file, residue_number has to be > 0");
+      // TODO: fix the case that residue_number is not in ascending order
+      /*  if (residue_number > top.ResidueCount()) {
+          while ((residue_number - 1) > top.ResidueCount()) {  // gro
+        residue_number should start
+                                                      // with 1 but accept
+        sloppy
+                                                      // files
+            top.CreateResidue("DUMMY");  // create dummy residue, hopefully it
+                                         // will never show
+            cout << "Warning: residue numbers not continous, create DUMMY "
+                    "residue with nr "
+                 << top.ResidueCount() << endl;
+          }
+          top.CreateResidue(resName);
+        }*/
       // this is not correct, but still better than no type at all!
       if (!top.BeadTypeExist(atName)) {
         top.RegisterBeadType(atName);
       }
 
       // res -1 as internal number starts with 0
-      b = top.CreateBead(1, atName, atName, resnr - 1, 1., 0.);
+      b = top.CreateBead<Bead>(1, atName, atName, residue_number - 1,
+                               bead_constants::residue_name_unassigned, 1., 0.);
     } else {
       b = top.getBead(i);
     }

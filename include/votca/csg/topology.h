@@ -47,7 +47,6 @@ class ExclusionList;
 
 typedef std::vector<Molecule *> MoleculeContainer;
 typedef std::vector<Bead *> BeadContainer;
-typedef std::vector<Residue *> ResidueContainer;
 typedef std::vector<Interaction *> InteractionContainer;
 
 /**
@@ -61,7 +60,11 @@ typedef std::vector<Interaction *> InteractionContainer;
 class Topology {
  public:
   /// constructor
-  Topology() : _time(0.0), _has_vel(false), _has_force(false) {
+  Topology()
+      : _time(0.0),
+        _has_vel(false),
+        _has_force(false),
+        max_residue_id_(bead_constants::residue_number_unassigned) {
     _bc = new OpenBox();
   }
   virtual ~Topology();
@@ -77,15 +80,18 @@ class Topology {
    * \param symmetry symmetry of the bead, 1: spherical 3: ellipsoidal
    * \param name name of the bead
    * \param type bead type
-   * \param resnr residue number
+   * \param residue_number residue number
+   * \param residue_name residue name
    * \param m mass
    * \param q charge
    * \return pointer to created bead
    *
    * The function creates a new bead and adds it to the list of beads.
    */
-  virtual Bead *CreateBead(byte_t symmetry, std::string name, std::string type,
-                           int resnr, double m, double q);
+  template <class T>
+  T *CreateBead(TOOLS::byte_t symmetry, std::string name, std::string type,
+                int residue_number, std::string residue_name, double m,
+                double q);
 
   /**
    * \brief get bead type or create it
@@ -110,20 +116,12 @@ class Topology {
   void CheckMoleculeNaming(void);
 
   /**
-   * \brief create a new resiude
-   * @param name residue name
-   * @return created residue
-   */
-  virtual Residue *CreateResidue(std::string name);
-  virtual Residue *CreateResidue(std::string name, int id);
-
-  /**
    * \brief create molecules based on the residue
    *
    * This function scans the topology and creates molecules based on the resiude
    * id. All beads with the same resid are put int one molecule.
    */
-  void CreateMoleculesByResidue();
+  // void CreateMoleculesByResidue();
 
   /**
    * \brief put the whole topology in one molecule
@@ -159,7 +157,7 @@ class Topology {
    * number of residues in the system
    * \return number of residues
    */
-  int ResidueCount() { return _residues.size(); }
+  // int ResidueCount() { return _residues.size(); }
 
   /**
    * get molecule by index
@@ -178,7 +176,7 @@ class Topology {
    * access containter with all residues
    * @return bead container
    */
-  ResidueContainer &Residues() { return _residues; }
+  // ResidueContainer &Residues() { return _residues; }
 
   /**
    * access  containter with all molecules
@@ -201,7 +199,7 @@ class Topology {
   int getBeadTypeId(std::string type) const;
   //    std::string getBeadType(const int i) { return (_beadtypes[i]); }
   Bead *getBead(const int i) const { return _beads[i]; }
-  Residue *getResidue(const int i) const { return _residues[i]; }
+  // Residue *getResidue(const int i) const { return _residues[i]; }
   Molecule *getMolecule(const int i) const { return _molecules[i]; }
 
   /**
@@ -375,6 +373,12 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
+  unordered_map<int, std::string> getResidueIdsAndNames() const {
+    return residue_ids_and_names_;
+  }
+
+  int getMaxResidueId() const { return max_residue_id_; }
+
  protected:
   BoundaryCondition *_bc;
 
@@ -390,7 +394,7 @@ class Topology {
   MoleculeContainer _molecules;
 
   /// residues in the topology
-  ResidueContainer _residues;
+  // ResidueContainer _residues;
 
   /// bonded interactions in the topology
   InteractionContainer _interactions;
@@ -401,6 +405,9 @@ class Topology {
 
   std::map<std::string, std::list<Interaction *> > _interactions_by_group;
 
+  // Need some way to keep track of the unique residue ids
+  std::unordered_map<int, std::string> residue_ids_and_names_;
+  int max_residue_id_;
   double _time;
   int _step;
   bool _has_vel;
@@ -410,13 +417,19 @@ class Topology {
   std::string _particle_group;
 };
 
-inline Bead *Topology::CreateBead(byte_t symmetry, std::string name,
-                                  std::string type, int resnr, double m,
-                                  double q) {
+template <class T>
+inline T *Topology::CreateBead(byte_t symmetry, std::string name,
+                               std::string type, int residue_number,
+                               std::string residue_name, double m, double q) {
 
-  Bead *b = new Bead(this, _beads.size(), type, symmetry, name, resnr, m, q);
-  _beads.push_back(b);
-  return b;
+  T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
+                  residue_name, m, q);
+  residue_ids_and_names_[residue_number] = residue_name;
+  if (residue_number > max_residue_id_) {
+    max_residue_id_ = residue_number;
+  }
+  _beads.push_back(bead);
+  return bead;
 }
 
 inline Molecule *Topology::CreateMolecule(std::string name) {
@@ -424,7 +437,7 @@ inline Molecule *Topology::CreateMolecule(std::string name) {
   _molecules.push_back(mol);
   return mol;
 }
-
+/*
 inline Residue *Topology::CreateResidue(std::string name, int id) {
   Residue *res = new Residue(this, id, name);
   _residues.push_back(res);
@@ -436,7 +449,7 @@ inline Residue *Topology::CreateResidue(std::string name) {
   _residues.push_back(res);
   return res;
 }
-
+*/
 inline Molecule *Topology::MoleculeByIndex(int index) {
   return _molecules[index];
 }

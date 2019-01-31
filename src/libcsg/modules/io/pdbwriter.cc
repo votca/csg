@@ -41,8 +41,9 @@ void PDBWriter::Write(Topology *conf) {
     vec r = bi->getPos();
     // truncate strings if necessary
     string resname = "";
-    if (top->getResidue(bi->getResidueNumber()))
-      resname = top->getResidue(bi->getResidueNumber())->getName();
+    // if (top->getResidue(bi->getResidueNumber()))
+    // resname = top->getResidue(bi->getResidueNumber())->getName();
+    resname = bi->getResidueName();
     string atomname = bi->getName();
     if (resname.size() > 3) {
       resname = resname.substr(0, 3);

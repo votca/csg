@@ -75,9 +75,11 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
     }
 
     cout << "\nList of residues:\n";
-    for (int i = 0; i < top->ResidueCount(); i++) {
-      cout << i << " name: " << top->getResidue(i)->getName()
-           << " id: " << top->getResidue(i)->getId() << endl;
+    unordered_map<int, string> residue_ids_and_names =
+        top->getResidueIdsAndNames();
+    for (pair<const int, string> &id_and_name : residue_ids_and_names) {
+      cout << id_and_name.first << " name: " << id_and_name.second
+           << " id: " << id_and_name.first << endl;
     }
 
     cout << "\nList of molecules:\n";
@@ -91,8 +93,8 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
         cout << (*mol)->getBeadId(i) << " Name " << (*mol)->getBeadName(i)
              << " Type " << (*mol)->getBead(i)->getType() << " Mass "
              << (*mol)->getBead(i)->getMass() << " Resnr " << resnr
-             << " Resname " << top->getResidue(resnr)->getName() << " Charge "
-             << (*mol)->getBead(i)->getQ() << endl;
+             << " Resname " << (*mol)->getBead(i)->getResidueName()
+             << " Charge " << (*mol)->getBead(i)->getQ() << endl;
       }
     }
   } else {

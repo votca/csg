@@ -63,7 +63,9 @@ void GROWriter::Write(Topology *conf) {
 
   for (i = 0; i < top->BeadCount(); i++) {
     resnr = top->getBead(i)->getResidueNumber();
-    string resname = top->getResidue(resnr)->getName();
+    string resname =
+        top->getBead(i)
+            ->getResidueName();  // top->getResidue(resnr)->getName();
     string atomname = top->getBead(i)->getName();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),

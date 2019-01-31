@@ -21,6 +21,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <stdio.h>
+#include <votca/csg/bead.h>
+#include <votca/csg/topology.h>
 
 namespace votca {
 namespace csg {
@@ -166,7 +168,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
         }
       }
       xmlResidues.push_back(resid);
-      XMLBead *xmlBead = new XMLBead(atname, attype, atmass, atq);
+      XMLBead *xmlBead = new XMLBead(atname, attype, resid, atmass, atq);
       xmlBeads.push_back(xmlBead);
     } else {
       throw std::runtime_error(
@@ -178,9 +180,11 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
         "Number of elements in bead-vector and residue-vector are not "
         "identical");
   // Create molecule in topology. Replicate data.
-  int resnr = _top->ResidueCount();
+  //  int resnr = _top->ResidueCount();
+  int max_residue_id = _top->getMaxResidueId();
   if (!xmlResidues.empty()) {
-    if (xmlResidues.front() != resnr + 1 && xmlResidues.front() != -1) {
+    if (xmlResidues.front() != max_residue_id + 1 &&
+        xmlResidues.front() != -1) {
       throw std::runtime_error(
           "Residue count for beads in topology.molecules.molecule has to be "
           "greater than the number of residues already in the topology");
@@ -197,19 +201,21 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
          itb != xmlBeads.end(); ++itb, ++resit) {
       stringstream bname;
       XMLBead &b = **itb;
-      if (*resit != -1) {
+      /*if (*resit != -1) {
         if (_top->ResidueCount() < *resit) {
           resnr = *resit - 1;
           _top->CreateResidue(molname, resnr);
         }
       } else {
         _top->CreateResidue(molname, resnr);
-      }
+      }*/
 
       if (!_top->BeadTypeExist(b.type)) {
         _top->RegisterBeadType(b.type);
       }
-      Bead *bead = _top->CreateBead(1, b.name, b.type, resnr, b.mass, b.q);
+      Bead *bead = _top->CreateBead<Bead>(
+          1, b.name, b.type, (*resit), bead_constants::residue_name_unassigned,
+          b.mass, b.q);
       bname << _mol_index << ":" << molname << ":" << b.name;
       mi->AddBead(bead, bname.str());
 
@@ -222,7 +228,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       xmlMolecule->name2beads.insert(make_pair(b.name, b_rep));
       _bead_index++;
     }
-    resnr++;
+    // resnr++;
   }
   _mol_index++;
 

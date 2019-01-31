@@ -230,30 +230,33 @@ bool PDBReader::NextFrame(Topology &top) {
       Bead *b;
       // Only read the CONECT keyword if the topology is set too true
       if (_topology) {
-        int resnr;
+        int residue_number;
         try {
-          resnr = boost::lexical_cast<int>(resNum);
+          residue_number = boost::lexical_cast<int>(resNum);
         } catch (bad_lexical_cast &) {
           throw std::runtime_error(
               "Cannot convert resNum='" + resNum +
               "' to int, that usallly means: misformated pdb file");
         }
-        if (resnr < 1)
-          throw std::runtime_error("Misformated pdb file, resnr has to be > 0");
-        // TODO: fix the case that resnr is not in ascending order
-        if (resnr > top.ResidueCount()) {
-          while ((resnr - 1) > top.ResidueCount()) {  // pdb resnr should start
-                                                      // with 1 but accept
-                                                      // sloppy files
+        if (residue_number < 1)
+          throw std::runtime_error(
+              "Misformated pdb file, residue_number has to be > 0");
+        // TODO: fix the case that residue_number is not in ascending order
+        /*        if (residue_number > top.ResidueCount()) {
+                  while ((residue_number - 1) > top.ResidueCount()) {  // pdb
+           residue_number should start
+                                                              // with 1 but
+           accept
+                                                              // sloppy files
 
-            // create dummy residue, hopefully it will never show
-            top.CreateResidue("DUMMY");
-            cout << "Warning: residue numbers not continous, create DUMMY "
-                    "residue with nr "
-                 << top.ResidueCount() << endl;
-          }
-          top.CreateResidue(resName);
-        }
+                    // create dummy residue, hopefully it will never show
+                    top.CreateResidue("DUMMY");
+                    cout << "Warning: residue numbers not continous, create
+           DUMMY " "residue with nr "
+                         << top.ResidueCount() << endl;
+                  }
+                  top.CreateResidue(resName);
+                }*/
         // This is not correct, but still better than no type at all!
         if (!top.BeadTypeExist(atName)) {
           top.RegisterBeadType(atName);
@@ -275,8 +278,8 @@ bool PDBReader::NextFrame(Topology &top) {
         // 6 - charge               (double)
         //
         // res -1 as internal number starts with 0
-        b = top.CreateBead(1, atName, atName, resnr - 1,
-                           _elements.getMass(atName), ch);
+        b = top.CreateBead<Bead>(1, atName, atName, residue_number - 1, resName,
+                                 _elements.getMass(atName), ch);
       } else {
         b = top.getBead(bead_count - 1);
       }
