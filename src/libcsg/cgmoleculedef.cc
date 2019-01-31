@@ -194,6 +194,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
   for (vector<beaddef_t *>::iterator def = _beads.begin(); def != _beads.end();
        ++def) {
 
+    cout << (*def)->_name << endl;
     // int iout = out.getBeadByName((*def)->_name);
     unordered_set<int> bead_ids = out.getBeadIdsByName((*def)->_name);
     assert(
