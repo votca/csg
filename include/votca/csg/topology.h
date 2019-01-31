@@ -29,7 +29,6 @@
 #include "molecule.h"
 #include "openbox.h"
 #include "orthorhombicbox.h"
-#include "residue.h"
 #include "triclinicbox.h"
 #include <assert.h>
 #include <votca/tools/matrix.h>
@@ -115,14 +114,6 @@ class Topology {
   void CheckMoleculeNaming(void);
 
   /**
-   * \brief create molecules based on the residue
-   *
-   * This function scans the topology and creates molecules based on the resiude
-   * id. All beads with the same resid are put int one molecule.
-   */
-  // void CreateMoleculesByResidue();
-
-  /**
    * \brief put the whole topology in one molecule
    * \param name name of the new molecule
    *
@@ -153,12 +144,6 @@ class Topology {
   int BeadCount() { return _beads.size(); }
 
   /**
-   * number of residues in the system
-   * \return number of residues
-   */
-  // int ResidueCount() { return _residues.size(); }
-
-  /**
    * get molecule by index
    * @param index molecule number
    * @return pointer to molecule
@@ -170,12 +155,6 @@ class Topology {
    * @return bead container
    */
   BeadContainer &Beads() { return _beads; }
-
-  /**
-   * access containter with all residues
-   * @return bead container
-   */
-  // ResidueContainer &Residues() { return _residues; }
 
   /**
    * access  containter with all molecules
@@ -196,9 +175,7 @@ class Topology {
   void RegisterBeadType(std::string name);
 
   int getBeadTypeId(std::string type) const;
-  //    std::string getBeadType(const int i) { return (_beadtypes[i]); }
   Bead *getBead(const int i) const { return _beads[i]; }
-  // Residue *getResidue(const int i) const { return _residues[i]; }
   Molecule *getMolecule(const int i) const { return _molecules[i]; }
 
   /**
@@ -372,7 +349,7 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
-  map<int, std::string> getResidueIdsAndNames() const {
+  std::map<int, std::string> getResidueIdsAndNames() const {
     return residue_ids_and_names_;
   }
 
@@ -391,9 +368,6 @@ class Topology {
 
   /// molecules in the topology
   MoleculeContainer _molecules;
-
-  /// residues in the topology
-  // ResidueContainer _residues;
 
   /// bonded interactions in the topology
   InteractionContainer _interactions;
@@ -436,19 +410,7 @@ inline Molecule *Topology::CreateMolecule(std::string name) {
   _molecules.push_back(mol);
   return mol;
 }
-/*
-inline Residue *Topology::CreateResidue(std::string name, int id) {
-  Residue *res = new Residue(this, id, name);
-  _residues.push_back(res);
-  return res;
-}
 
-inline Residue *Topology::CreateResidue(std::string name) {
-  Residue *res = new Residue(this, _molecules.size(), name);
-  _residues.push_back(res);
-  return res;
-}
-*/
 inline Molecule *Topology::MoleculeByIndex(int index) {
   return _molecules[index];
 }

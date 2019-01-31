@@ -243,22 +243,7 @@ bool PDBReader::NextFrame(Topology &top) {
         if (residue_number < 1)
           throw std::runtime_error(
               "Misformated pdb file, residue_number has to be > 0");
-        // TODO: fix the case that residue_number is not in ascending order
-        /*        if (residue_number > top.ResidueCount()) {
-                  while ((residue_number - 1) > top.ResidueCount()) {  // pdb
-           residue_number should start
-                                                              // with 1 but
-           accept
-                                                              // sloppy files
 
-                    // create dummy residue, hopefully it will never show
-                    top.CreateResidue("DUMMY");
-                    cout << "Warning: residue numbers not continous, create
-           DUMMY " "residue with nr "
-                         << top.ResidueCount() << endl;
-                  }
-                  top.CreateResidue(resName);
-                }*/
         // This is not correct, but still better than no type at all!
         if (!top.BeadTypeExist(atName)) {
           top.RegisterBeadType(atName);

@@ -33,7 +33,6 @@
 namespace votca {
 namespace csg {
 class Bead;
-class Residue;
 }  // namespace csg
 }  // namespace votca
 
@@ -146,10 +145,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
   string line;
 
-  // TODO: fix residue naming / assignment - DL_POLY has no means to recognise
-  // residues!
-  // Residue *res = top.CreateResidue("no");
-
   if (boost::filesystem::basename(filepath).size() == 0) {
     if (filepath.parent_path().string().size() == 0) {
       _fname = "FIELD";  // DL_POLY uses fixed file names in current/working
@@ -257,12 +252,8 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
               bead_constants::residue_name_unassigned, mass, charge);
 
           stringstream nm;
-          nm << bead->getResidueNumber() + 1
-             << ":"
-             //             <<
-             //             top.getResidue(bead->getResidueNumber())->getName()
-             //             << ":"
-             << bead->getResidueName() << ":" << bead->getName();
+          nm << bead->getResidueNumber() + 1 << ":" << bead->getResidueName()
+             << ":" << bead->getName();
           mi->AddBead(bead, nm.str());
           id_map[i] = bead->getId();
           i++;
@@ -346,8 +337,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
           Bead *bead_replica =
               top.CreateBead<Bead>(1, bead->getName(), type,
                                    bead_constants::residue_number_unassigned,
-                                   bead_constants::residue_name_unassigned,
-                                   bead->getMass(), bead->getQ());
+                                   mol_name, bead->getMass(), bead->getQ());
           mi_replica->AddBead(bead_replica, bead->getName());
         }
         matoms += mi->BeadCount();
