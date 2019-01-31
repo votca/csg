@@ -20,7 +20,6 @@
 
 #include <memory>
 
-#include <votca/csg/moleculeitem.h>
 #include <votca/csg/topologyitem.h>
 
 #include <votca/tools/identity.h>
@@ -60,10 +59,10 @@ class BaseBead {
   void setName(std::string name) { return name_.setName(name); }
 
   /// Sets the molecule the bead is attached too
-  void setMolecule(Molecule *molecule) { molecule_item_.setMolecule(molecule); }
+  void setMoleculeId(int molecule_id) { molecule_id_.setId(molecule_id); }
 
   /// Gets the molecule pointer the bead is attached too
-  Molecule *getMolecule() const { return molecule_item_.getMolecule(); }
+  int getMoleculeId() const { return molecule_id_.getId(); }
 
   /// Gets the topology pointer the bead is attached too
   Topology *getParent() const { return topology_item_.getParent(); }
@@ -120,15 +119,11 @@ class BaseBead {
   void HasPos(bool true_or_false) { bead_position_set_ = true_or_false; }
 
  protected:
-  BaseBead()
-      : topology_item_(nullptr),
-        molecule_item_(nullptr),
-        mass_(0.0),
-        bead_position_set_(false){};
+  BaseBead() : topology_item_(nullptr), mass_(0.0), bead_position_set_(false){};
 
   TopologyItem topology_item_;
-  MoleculeItem molecule_item_;
 
+  TOOLS::Identity<int> molecule_id_;
   TOOLS::Identity<int> id_;
   TOOLS::Name name_;
   TOOLS::Name type_;

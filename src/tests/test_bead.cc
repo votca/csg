@@ -106,10 +106,8 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   vec xyz_vel(-2.0, 0.32, 32.0);
   b->setVel(xyz_vel);
 
-  string molecule_name = "TestMol";
-  Molecule* mol = top.CreateMolecule(molecule_name);
-
-  b->setMolecule(mol);
+  int molecule_id = 1;
+  b->setMoleculeId(molecule_id);
 
   BOOST_CHECK_CLOSE(b->getMass(), newMass, 1e-5);
   BOOST_CHECK_CLOSE(b->getQ(), newCharge, 1e-5);
@@ -119,9 +117,7 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   auto new_xyz_vel = b->getVel();
   BOOST_CHECK(new_xyz_vel.isClose(xyz_vel, 3));
 
-  auto mol_new = b->getMolecule();
-  bool same = !(molecule_name.compare(mol_new->getName()));
-  BOOST_CHECK(same);
+  BOOST_CHECK_EQUAL(b->getMoleculeId(), molecule_id);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

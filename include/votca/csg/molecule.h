@@ -42,7 +42,7 @@ class Interaction;
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem, public MoleculeBase<Bead> {
+class Molecule : public TopologyItem, public BaseMolecule<Bead> {
  public:
   /// get the molecule ID
   // int getId() const { return _id; }

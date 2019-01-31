@@ -94,7 +94,8 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
           << ":"
           // << getResidue((*bead)->getResidueNumber())->getName() << ":"
           << (*bead)->getResidueName() << ":" << (*bead)->getName();
-    mol->AddBead((*bead), bname.str());
+    mol->AddBead((*bead));
+    // mol->AddBead((*bead), bname.str());
     if (++beadcount == nbeads) {
       if (--nmolecules <= 0) break;
       mol = CreateMolecule(name);
@@ -138,7 +139,8 @@ void Topology::CreateOneBigMolecule(string name) {
       //<< _residues[(*bead)->getResidueNumber()]->getName() << ":"
       << (*bead)->getName();
     // cout << n.str() << endl;
-    mi->AddBead((*bead), n.str());
+    mi->AddBead((*bead));
+    // mi->AddBead((*bead), n.str());
   }
 }
 
@@ -166,8 +168,11 @@ void Topology::Add(Topology *top) {
   // \todo beadnames in molecules!!
   for (mol = top->_molecules.begin(); mol != top->_molecules.end(); ++mol) {
     Molecule *mi = CreateMolecule((*mol)->getName());
-    for (int i = 0; i < mi->BeadCount(); i++) {
-      mi->AddBead(mi->getBead(i), "invalid");
+    vector<int> bead_ids = mi->getBeadIds();
+    // for (int i = 0; i < mi->BeadCount(); i++) {
+    for (const int &bead_id : bead_ids) {
+      mi->AddBead(mi->getBead(bead_id));
+      // mi->AddBead(mi->getBead(i), "invalid");
     }
   }
 }
@@ -206,9 +211,12 @@ void Topology::CopyTopologyData(Topology *top) {
   for (it_mol = top->_molecules.begin(); it_mol != top->_molecules.end();
        ++it_mol) {
     Molecule *mi = CreateMolecule((*it_mol)->getName());
-    for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
-      int beadid = (*it_mol)->getBead(i)->getId();
-      mi->AddBead(_beads[beadid], (*it_mol)->getBeadName(i));
+    vector<int> bead_ids = (*it_mol)->getBeadIds();
+    for (const int &bead_id : bead_ids) {
+      // for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
+      // int beadid = (*it_mol)->getBead()->getId();
+      mi->AddBead(_beads[bead_id]);
+      // mi->AddBead(_beads[beadid], (*it_mol)->getBeadName(i));
     }
   }
   // TODO: copy interactions

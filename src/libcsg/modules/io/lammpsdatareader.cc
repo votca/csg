@@ -531,8 +531,10 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
           symmetry, bead_type_name, bead_type_name, moleculeId,
           bead_constants::residue_name_unassigned, mass, charge);
 
-      mol->AddBead(b, bead_type_name);
-      b->setMolecule(mol);
+      // mol->AddBead(b, bead_type_name);
+      mol->AddBead(b);
+      // b->setMolecule(mol);
+      b->setMoleculeId(mol->getId());
 
     } else {
       b = top.getBead(atomIndex - startingIndex);
@@ -584,8 +586,8 @@ void LAMMPSDataReader::ReadBonds_(Topology &top) {
       Interaction *ic = new IBond(atom1Index, atom2Index);
       ic->setGroup("BONDS");
       ic->setIndex(bondId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
       top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
@@ -642,8 +644,8 @@ void LAMMPSDataReader::ReadAngles_(Topology &top) {
       Interaction *ic = new IAngle(atom1Index, atom2Index, atom3Index);
       ic->setGroup("ANGLES");
       ic->setIndex(angleId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
       top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
@@ -704,8 +706,8 @@ void LAMMPSDataReader::ReadDihedrals_(Topology &top) {
           new IDihedral(atom1Index, atom2Index, atom3Index, atom4Index);
       ic->setGroup("DIHEDRALS");
       ic->setIndex(dihedralId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
       top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);

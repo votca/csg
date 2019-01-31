@@ -64,13 +64,15 @@ class BaseMolecule : public BeadStructure<T> {
   // Might be more than one bead with the same name
   std::unordered_set<int> getBeadIdsByName(const std::string &name) const;
 
+  std::unordered_set<int> getBeadIdsByType(const std::string &name) const;
+
   const std::string &getBeadType(const int &id) const;
 
   const TOOLS::vec &getBeadPosition(const int &id) const;
 
   const std::string getBeadName(int bead) const;
 
- private:
+ protected:
   TOOLS::Identity<int> id_;
   TOOLS::Name name_;
 
@@ -85,7 +87,7 @@ void BaseMolecule<T>::AddBead(T *bead) {
 
   BeadStructure<T>::AddBead(bead);
   bead_name_and_ids_[bead->getName()].insert(bead->getId());
-  bead->setMolecule(this);
+  bead->setMoleculeId(getId());
 }
 
 template <class T>
@@ -98,7 +100,7 @@ const std::string BaseMolecule<T>::getBeadName(int id) const {
 
 template <class T>
 const std::string &BaseMolecule<T>::getBeadType(const int &id) const {
-  assert(beads_.count(id) &&
+  assert(BeadStructure<T>::beads_.count(id) &&
          "Cannot get bead type with id beacuse "
          "bead is not stored in base molecule.");
   return BeadStructure<T>::beads_.at(id)->getType();
@@ -113,12 +115,26 @@ const TOOLS::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
 }
 
 template <class T>
-unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
+std::unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
     const std::string &name) const {
   assert(bead_name_and_ids_.count(name) &&
          "BaseMolecule does not contain any "
          "beads with name ");
   return bead_name_and_ids_.at(name);
+}
+
+template <class T>
+std::unordered_set<int> BaseMolecule<T>::getBeadIdsByType(
+    const std::string &type) const {
+
+  std::unordered_set<int> bead_ids;
+  for (const std::pair<const int, T *> &id_and_bead :
+       BeadStructure<T>::beads_) {
+    if (type.compare(id_and_bead->getType()) == 0) {
+      bead_ids.insert(id_and_bead.first);
+    }
+  }
+  return bead_ids;
 }
 
 }  // namespace csg

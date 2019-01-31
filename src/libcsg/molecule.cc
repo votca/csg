@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+/*
 
 #include <iostream>
 #include <votca/csg/molecule.h>
@@ -22,7 +23,6 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
 void Molecule::AddBead(Bead *bead, const string &name) {
   _beads.push_back(bead);
   _bead_names.push_back(name);
@@ -41,4 +41,4 @@ int Molecule::getBeadByName(const string &name) {
 }
 
 }  // namespace csg
-}  // namespace votca
+}  // namespace votca*/

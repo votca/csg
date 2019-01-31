@@ -102,11 +102,13 @@ class CsgMapApp : public CsgApplication {
       for (it_mol = top_ref->Molecules().begin();
            it_mol != top_ref->Molecules().end(); ++it_mol) {
         Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
-        for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
+        vector<int> bead_ids = (*it_mol)->getBeadIds();
+        for (const int &bead_id : bead_ids) {
+          // for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
           // copy atomistic beads of molecule
-          int beadid = (*it_mol)->getBead(i)->getId();
+          // int beadid = (*it_mol)->getBead(i)->getId();
 
-          Bead *bi = (*it_mol)->getBead(i);
+          Bead *bi = (*it_mol)->getBead(bead_id);
           if (!hybtol->BeadTypeExist(bi->getType())) {
             hybtol->RegisterBeadType(bi->getType());
           }
@@ -120,14 +122,16 @@ class CsgMapApp : public CsgApplication {
           if (bi->HasVel()) bn->setVel(bi->getVel());
           if (bi->HasF()) bn->setF(bi->getF());
 
-          mi->AddBead(hybtol->Beads()[beadid], (*it_mol)->getBeadName(i));
+          mi->AddBead(hybtol->Beads()[bead_id]);
         }
 
         if (mi->getId() < top->MoleculeCount()) {
           // copy cg beads of molecule
           Molecule *cgmol = top->Molecules()[mi->getId()];
-          for (int i = 0; i < cgmol->BeadCount(); i++) {
-            Bead *bi = cgmol->getBead(i);
+          vector<int> bead_ids = cgmol->getBeadIds();
+          for (const int &bead_id : bead_ids) {
+            // for (int i = 0; i < cgmol->BeadCount(); i++) {
+            Bead *bi = cgmol->getBead(bead_id);
             // todo: this is a bit dirty as a cg bead will always have the resid
             // of its first parent
             Bead *bparent = (*it_mol)->getBead(0);
@@ -138,7 +142,7 @@ class CsgMapApp : public CsgApplication {
             bn->setOptions(bi->Options());
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());
-            mi->AddBead(bi, bi->getName());
+            mi->AddBead(bi);
           }
         }
       }

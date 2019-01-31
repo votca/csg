@@ -97,6 +97,8 @@ class BeadStructure {
    **/
   std::vector<T *> getNeighBeads(int index);
 
+  std::vector<int> getBeadIds() const;
+
   TOOLS::Graph getGraph();
   /**
    * \brief Compare the topology of two bead structures
@@ -283,6 +285,11 @@ template <class T>
 T *BeadStructure<T>::getBead(int index) {
   assert(beads_.count(index));
   return beads_[index];
+}
+
+template <class T>
+std::vector<int> BeadStructure<T>::getBeadIds() const {
+  return graph_.getVertices();
 }
 
 }  // namespace csg

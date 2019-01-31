@@ -92,7 +92,8 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
         // nm << bead->getResidueNumber() + 1 - res_offset << ":"
         nm << bead->getResidueNumber() << ":" << bead->getResidueName() << ":"
            << bead->getName();
-        mi->AddBead(bead, nm.str());
+        // mi->AddBead(bead, nm.str());
+        mi->AddBead(bead);
       }
 
       // add exclusions

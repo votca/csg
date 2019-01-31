@@ -108,7 +108,8 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     }
     bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
                                 (*iter)->residue_number_, _name, 0, 0);
-    minfo->AddBead(bead, bead->getName());
+    // minfo->AddBead(bead, bead->getName());
+    minfo->AddBead(bead);
 
     bead->setOptions(*(*iter)->_options);
   }
@@ -128,14 +129,20 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
 
     Tokenizer tok((*ibnd)->get("beads").value(), " \n\t");
     for (Tokenizer::iterator atom = tok.begin(); atom != tok.end(); ++atom) {
-      int i = minfo->getBeadIdByName(*atom);
-      if (i < 0)
+      // int i = minfo->getBeadIdByName(*atom);
+      unordered_set<int> bead_ids = minfo->getBeadIdsByName(*atom);
+      assert(bead_ids.size() == 1 &&
+             "There is more than one bead with that name "
+             "if you want a unique identifier you should probably just use the "
+             "beads global unique id.");
+      int bead_id = *bead_ids.begin();
+      if (bead_id < 0)
         throw runtime_error(
             string("error while trying to create bonded interaction, "
                    "bead " +
                    *atom + " not found"));
 
-      atoms.push_back(i);
+      atoms.push_back(bead_id);
     }
 
     int NrBeads = 1;
@@ -187,8 +194,14 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
   for (vector<beaddef_t *>::iterator def = _beads.begin(); def != _beads.end();
        ++def) {
 
-    int iout = out.getBeadByName((*def)->_name);
-    if (iout < 0)
+    // int iout = out.getBeadByName((*def)->_name);
+    unordered_set<int> bead_ids = out.getBeadIdsByName((*def)->_name);
+    assert(
+        bead_ids.size() == 1 &&
+        "There should only be one bead, if you want a "
+        "more unique specifier the beads globally unique id should be used.");
+    int bead_id = *bead_ids.begin();
+    if (bead_id < 0)
       throw runtime_error(string("mapping error: reference molecule " +
                                  (*def)->_name + " does not exist"));
 
@@ -210,7 +223,7 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
     }
     ////////////////////////////////////////////////////
 
-    bmap->Initialize(&in, out.getBead(iout), ((*def)->_options), mdef);
+    bmap->Initialize(&in, out.getBead(bead_id), ((*def)->_options), mdef);
     map->AddBeadMap(bmap);
   }
   return map;

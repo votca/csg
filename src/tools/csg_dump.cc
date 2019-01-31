@@ -87,14 +87,17 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
     for (mol = top->Molecules().begin(); mol != top->Molecules().end(); ++mol) {
       cout << "molecule: " << (*mol)->getId() + 1 << " " << (*mol)->getName()
            << " beads: " << (*mol)->BeadCount() << endl;
-      for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-        int resnr = (*mol)->getBead(i)->getResidueNumber();
 
-        cout << (*mol)->getBeadId(i) << " Name " << (*mol)->getBeadName(i)
-             << " Type " << (*mol)->getBead(i)->getType() << " Mass "
-             << (*mol)->getBead(i)->getMass() << " Resnr " << resnr
-             << " Resname " << (*mol)->getBead(i)->getResidueName()
-             << " Charge " << (*mol)->getBead(i)->getQ() << endl;
+      vector<int> bead_ids = (*mol)->getBeadIds();
+      // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
+      for (const int &bead_id : bead_ids) {
+        int resnr = (*mol)->getBead(bead_id)->getResidueNumber();
+
+        cout << bead_id << " Name " << (*mol)->getBeadName(bead_id) << " Type "
+             << (*mol)->getBead(bead_id)->getType() << " Mass "
+             << (*mol)->getBead(bead_id)->getMass() << " Resnr " << resnr
+             << " Resname " << (*mol)->getBead(bead_id)->getResidueName()
+             << " Charge " << (*mol)->getBead(bead_id)->getQ() << endl;
       }
     }
   } else {
