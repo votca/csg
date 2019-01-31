@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "bead.h"
-#include "beadtype.h"
 #include "boundarycondition.h"
 #include "exclusionlist.h"
 #include "molecule.h"
@@ -90,15 +89,6 @@ class Topology {
   T *CreateBead(TOOLS::byte_t symmetry, std::string name, std::string type,
                 int residue_number, std::string residue_name, double m,
                 double q);
-
-  /**
-   * \brief get bead type or create it
-   * \param name typename
-   * \return pointer to bead type
-   *
-   * Returns an existing bead type or creates one if it doesn't exist yet
-   */
-  // virtual std::string GetOrCreateBeadType(std::string name);
 
   /**
    * \brief creates a new molecule
