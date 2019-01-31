@@ -18,6 +18,7 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE triplelist_test
+#include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <string>
 #include <votca/csg/bead.h>
@@ -83,18 +84,18 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   BeadTriple *triplefront, *tripleback;
 
   triplefront = triplelist.front();
-  BOOST_CHECK_EQUAL(triplefront->bead1()->getMass(), 1.0);
-  BOOST_CHECK_EQUAL(triplefront->bead2()->getMass(), 2.0);
-  BOOST_CHECK_EQUAL(triplefront->bead3()->getMass(), 3.0);
+  BOOST_CHECK_CLOSE(triplefront->bead1()->getMass(), 1.0, 1e-5);
+  BOOST_CHECK_CLOSE(triplefront->bead2()->getMass(), 2.0, 1e-5);
+  BOOST_CHECK_CLOSE(triplefront->bead3()->getMass(), 3.0, 1e-5);
   BOOST_CHECK_EQUAL(triplefront->bead1()->getResidueNumber(), 0);
   BOOST_CHECK_EQUAL(triplefront->bead2()->getResidueNumber(), 0);
   BOOST_CHECK_EQUAL(triplefront->bead3()->getResidueNumber(), 0);
   BOOST_CHECK_EQUAL(triplelist.size(), 1);
 
   tripleback = triplelist.back();
-  BOOST_CHECK_EQUAL(tripleback->bead1()->getMass(), 1.0);
-  BOOST_CHECK_EQUAL(tripleback->bead2()->getMass(), 2.0);
-  BOOST_CHECK_EQUAL(tripleback->bead3()->getMass(), 3.0);
+  BOOST_CHECK_CLOSE(tripleback->bead1()->getMass(), 1.0, 1e-5);
+  BOOST_CHECK_CLOSE(tripleback->bead2()->getMass(), 2.0, 1e-5);
+  BOOST_CHECK_CLOSE(tripleback->bead3()->getMass(), 3.0, 1e-5);
   BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueNumber(), 0);
   BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueNumber(), 0);
   BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueNumber(), 0);

@@ -26,16 +26,14 @@ using namespace boost;
 using namespace std;
 
 bool XYZReader::ReadTopology(string file, Topology &top) {
-  _topology = true;
   top.Cleanup();
 
   _fl.open(file.c_str());
-  if (!_fl.is_open())
+  if (!_fl.is_open()) {
     throw std::ios_base::failure("Error on open topology file: " + file);
+  }
 
-  // if (_topology) top.CreateResidue("DUM");
-
-  NextFrame(top);
+  ReadFrame<true>(top);
 
   _fl.close();
 
@@ -44,42 +42,42 @@ bool XYZReader::ReadTopology(string file, Topology &top) {
 
 bool XYZReader::Open(const string &file) {
   _fl.open(file.c_str());
-  if (!_fl.is_open())
+  if (!_fl.is_open()) {
     throw std::ios_base::failure("Error on open trajectory file: " + file);
+  }
   _line = 0;
   return true;
 }
 
 void XYZReader::Close() { _fl.close(); }
 
-bool XYZReader::FirstFrame(Topology &top) {
-  _topology = false;
-  NextFrame(top);
-  return true;
-}
+bool XYZReader::FirstFrame(Topology &top) { return NextFrame(top); }
 
 bool XYZReader::NextFrame(Topology &top) {
+  bool success = ReadFrame<false>(top);
+  return success;
+}
+
+template <bool topology>
+bool XYZReader::ReadFrame(Topology &top) {
   string line;
   getline(_fl, line);
   ++_line;
-  // cout << "natoms : " << line << endl;
   if (!_fl.eof()) {
     // read the number of atoms
-    _natoms = boost::lexical_cast<int>(line);
-    if (!_topology && _natoms != top.BeadCount())
+    int natoms = boost::lexical_cast<int>(line);
+    if (!topology && natoms != top.BeadCount())
       throw std::runtime_error(
           "number of beads in topology and trajectory differ");
 
     // the title line
     getline(_fl, line);
     ++_line;
-    // cout << "title : " << line << endl;
 
     // read atoms
-    for (int i = 0; i < _natoms; ++i) {
+    for (int i = 0; i < natoms; ++i) {
       getline(_fl, line);
       ++_line;
-      // cout << "coords : " << line << endl;
       if (_fl.eof())
         throw std::runtime_error("unexpected end of file in xyz file");
 
@@ -93,17 +91,20 @@ bool XYZReader::NextFrame(Topology &top) {
                                  " in xyz file\n" + line);
 
       Bead *b;
-      if (_topology) {
+      if (topology) {
+
         string bead_type = fields[0];
         if (!top.BeadTypeExist(bead_type)) {
           top.RegisterBeadType(bead_type);
         }
+
         b = top.CreateBead<Bead>(1, fields[0] + boost::lexical_cast<string>(i),
                                  bead_type, 0,
                                  bead_constants::residue_name_unassigned, 0, 0);
-      } else
-        b = top.getBead(i);
 
+      } else {
+        b = top.getBead(i);
+      }
       // convert to nm from A
       b->setPos(vec(boost::lexical_cast<double>(fields[1]) / 10.0,
                     boost::lexical_cast<double>(fields[2]) / 10.0,
@@ -111,7 +112,6 @@ bool XYZReader::NextFrame(Topology &top) {
     }
   }
   return !_fl.eof();
-  ;
 }
 
 }  // namespace csg
