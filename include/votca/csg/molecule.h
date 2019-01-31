@@ -33,6 +33,9 @@ namespace TOOLS = votca::tools;
 
 class Interaction;
 
+namespace molecule_constants {
+const std::string molecule_name_unassigned = "unassigned";
+}
 /**
     \brief information about molecules
 
@@ -68,6 +71,8 @@ class Molecule : public TopologyItem, public BaseMolecule<Bead> {
   // Switched again to getBeadIdsByName
   // int getBeadByName(const std::string &name);
   // std::string getBeadName(int bead) {return _bead_names[bead]; }
+
+  std::unordered_set<int> getBeadIdsByLabel(const std::string &label);
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
@@ -108,6 +113,20 @@ class Molecule : public TopologyItem, public BaseMolecule<Bead> {
 
   friend class Topology;
 };
+
+inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
+    const std::string &label) {
+  std::unordered_set<int> bead_ids;
+  for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
+    std::cout << "Lable of bead " << id_and_bead.second->getLabel()
+              << std::endl;
+    if (label.compare(id_and_bead.second->getLabel()) == 0) {
+      bead_ids.insert(id_and_bead.first);
+    }
+  }
+  return bead_ids;
+}
+
 /*
 inline int Molecule::getBeadIdByName(const std::string &name)
 {

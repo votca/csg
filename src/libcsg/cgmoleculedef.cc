@@ -40,6 +40,7 @@ CGMoleculeDef::~CGMoleculeDef() {
 }
 
 void CGMoleculeDef::Load(string filename) {
+  cout << "Loading options from file " << filename << endl;
   load_property_from_xml(_options, filename);
   // parse xml tree
   _name = _options.get("cg_molecule.name").as<string>();
@@ -61,6 +62,9 @@ void CGMoleculeDef::ParseBeads(Property &options) {
        ++iter) {
     Property *p = *iter;
     beaddef_t *beaddef = new beaddef_t;
+    cout << "While parsing options " << endl;
+    string s(p->get("beads").value());
+    cout << s << endl;
     beaddef->_options = p;
 
     beaddef->residue_number_ = bead_constants::residue_number_unassigned;
@@ -75,6 +79,11 @@ void CGMoleculeDef::ParseBeads(Property &options) {
     if (_beads_by_name.find(beaddef->_name) != _beads_by_name.end())
       throw std::runtime_error(string("bead name ") + beaddef->_name +
                                " not unique in mapping");
+    cout << "Parsing Beads " << endl;
+    cout << beaddef->residue_number_ << endl;
+    cout << beaddef->_name << endl;
+    cout << beaddef->_type << endl;
+    cout << beaddef->_mapping << endl;
     _beads.push_back(beaddef);
     _beads_by_name[beaddef->_name] = beaddef;
   }
@@ -106,8 +115,10 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     if (!top.BeadTypeExist(type)) {
       top.RegisterBeadType(type);
     }
+    cout << "CGMoleculeDef creating bead with residue number "
+         << (*iter)->residue_number_ << endl;
     bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
-                                (*iter)->residue_number_, _name, 0, 0);
+                                (*iter)->residue_number_, _name, _name, 0, 0);
     // minfo->AddBead(bead, bead->getName());
     minfo->AddBead(bead);
 
@@ -198,7 +209,9 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
 
     cout << (*def)->_name << endl;
     // int iout = out.getBeadByName((*def)->_name);
+    cout << "CreateMap bead name " << (*def)->_name << endl;
     unordered_set<int> bead_ids = out.getBeadIdsByType((*def)->_name);
+    cout << "Number of beads " << bead_ids.size() << endl;
     assert(
         bead_ids.size() == 1 &&
         "There should only be one bead, if you want a "
@@ -225,7 +238,9 @@ Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
         throw runtime_error(string("unknown symmetry in bead definition!"));
     }
     ////////////////////////////////////////////////////
-
+    cout << "Getting the beads before initalize" << endl;
+    string s((*def)->_options->get("beads").value());
+    cout << s << endl;
     bmap->Initialize(&in, out.getBead(bead_id), ((*def)->_options), mdef);
     map->AddBeadMap(bmap);
   }

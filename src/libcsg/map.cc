@@ -48,7 +48,9 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
   vector<double> fweights;
 
   // get the beads
+  cout << "Getting the beads " << endl;
   string s(_opts_bead->get("beads").value());
+  cout << s << endl;
   Tokenizer tok_beads(s, " \n\t");
   tok_beads.ToVector(beads);
 
@@ -109,10 +111,12 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
     // int iin = in->getBeadByName(beads[i]);
     // unordered_set<int> bead_ids = in->getBeadIdsByName(beads[i]);
     cout << "in map Initialize " << beads[i] << endl;
-    unordered_set<int> bead_ids = in->getBeadIdsByType(beads[i]);
+    // unordered_set<int> bead_ids = in->getBeadIdsByType(beads[i]);
+    unordered_set<int> bead_ids = in->getBeadIdsByLabel(beads[i]);
+    cout << "Total number of beads " << bead_ids.size() << endl;
     assert(bead_ids.size() == 1 &&
            "More than a single bead with the same "
-           "type, maybe the globally unique bead id should be used instaed.");
+           "label, maybe the globally unique bead id should be used instaed.");
     int bead_id = *bead_ids.begin();
     if (bead_id < 0)
       throw std::runtime_error(

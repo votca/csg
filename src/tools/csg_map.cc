@@ -115,8 +115,8 @@ class CsgMapApp : public CsgApplication {
 
           Bead *bn = hybtol->CreateBead<Bead>(
               bi->getSymmetry(), bi->getName(), bi->getType(),
-              bi->getResidueNumber(), bi->getResidueName(), bi->getMass(),
-              bi->getQ());
+              bi->getResidueNumber(), bi->getResidueName(),
+              (*it_mol)->getName(), bi->getMass(), bi->getQ());
           bn->setOptions(bi->Options());
           bn->setPos(bi->getPos());
           if (bi->HasVel()) bn->setVel(bi->getVel());
@@ -138,7 +138,7 @@ class CsgMapApp : public CsgApplication {
             Bead *bn = hybtol->CreateBead<Bead>(
                 bi->getSymmetry(), bi->getName(), bi->getType(),
                 bparent->getResidueNumber(), bparent->getResidueName(),
-                bi->getMass(), bi->getQ());
+                cgmol->getName(), bi->getMass(), bi->getQ());
             bn->setOptions(bi->Options());
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());

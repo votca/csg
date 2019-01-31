@@ -98,9 +98,10 @@ bool XYZReader::ReadFrame(Topology &top) {
           top.RegisterBeadType(bead_type);
         }
 
-        b = top.CreateBead<Bead>(1, fields[0] + boost::lexical_cast<string>(i),
-                                 bead_type, 0,
-                                 bead_constants::residue_name_unassigned, 0, 0);
+        b = top.CreateBead<Bead>(
+            1, fields[0] + boost::lexical_cast<string>(i), bead_type, 0,
+            bead_constants::residue_name_unassigned,
+            molecule_constants::molecule_name_unassigned, 0, 0);
 
       } else {
         b = top.getBead(i);

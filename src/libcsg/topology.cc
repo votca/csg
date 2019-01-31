@@ -156,9 +156,12 @@ void Topology::Add(Topology *top) {
     string type = bi->getType();
     //    CreateBead(bi->getSymmetry(), bi->getName(), type,
     //               bi->getResidueNumber() + res0, bi->getMass(), bi->getQ());
+
+    std::string molecule_name =
+        top->getMolecule(bi->getMoleculeId())->getName();
     CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
                      bi->getResidueNumber(), bi->getResidueName(),
-                     bi->getMass(), bi->getQ());
+                     molecule_name, bi->getMass(), bi->getQ());
   }
   /*
     for (res = top->_residues.begin(); res != top->_residues.end(); ++res) {
@@ -199,9 +202,10 @@ void Topology::CopyTopologyData(Topology *top) {
   for (it_bead = top->_beads.begin(); it_bead != top->_beads.end(); ++it_bead) {
     Bead *bi = *it_bead;
     string type = bi->getType();
+    string molecule_name = top->getMolecule(bi->getMoleculeId())->getName();
     Bead *bn = CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
                                 bi->getResidueNumber(), bi->getResidueName(),
-                                bi->getMass(), bi->getQ());
+                                molecule_name, bi->getMass(), bi->getQ());
     // Bead *bn = CreateBead(bi->getSymmetry(), bi->getName(), type,
     //                       bi->getResidueNumber(), bi->getMass(), bi->getQ());
     bn->setOptions(bi->Options());

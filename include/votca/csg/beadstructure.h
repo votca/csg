@@ -289,7 +289,11 @@ T *BeadStructure<T>::getBead(int index) {
 
 template <class T>
 std::vector<int> BeadStructure<T>::getBeadIds() const {
-  return graph_.getVertices();
+  std::vector<int> bead_ids;
+  for (const std::pair<const int, T *> &id_bead_ptr_pair : beads_) {
+    bead_ids.push_back(id_bead_ptr_pair.first);
+  }
+  return bead_ids;
 }
 
 }  // namespace csg

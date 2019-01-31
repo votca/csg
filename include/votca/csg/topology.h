@@ -87,8 +87,8 @@ class Topology {
    */
   template <class T>
   T *CreateBead(TOOLS::byte_t symmetry, std::string name, std::string type,
-                int residue_number, std::string residue_name, double m,
-                double q);
+                int residue_number, std::string residue_name,
+                std::string molecule_name, double m, double q);
 
   /**
    * \brief creates a new molecule
@@ -339,11 +339,12 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
-  std::map<int, std::string> getResidueIdsAndNames() const {
-    return residue_ids_and_names_;
+  std::map<std::string, std::map<int, std::string>> getResidueIdsAndNames()
+      const {
+    return moleculename_residue_ids_and_names_;
   }
 
-  int getMaxResidueId() const { return max_residue_id_; }
+  //  int getMaxResidueId() const { return max_residue_id_; }
 
  protected:
   BoundaryCondition *_bc;
@@ -366,10 +367,11 @@ class Topology {
 
   std::map<std::string, int> _interaction_groups;
 
-  std::map<std::string, std::list<Interaction *> > _interactions_by_group;
+  std::map<std::string, std::list<Interaction *>> _interactions_by_group;
 
   // Need some way to keep track of the unique residue ids
-  std::map<int, std::string> residue_ids_and_names_;
+  std::map<std::string, std::map<int, std::string>>
+      moleculename_residue_ids_and_names_;
   int max_residue_id_;
   double _time;
   int _step;
@@ -383,14 +385,14 @@ class Topology {
 template <class T>
 inline T *Topology::CreateBead(byte_t symmetry, std::string name,
                                std::string type, int residue_number,
-                               std::string residue_name, double m, double q) {
+                               std::string residue_name,
+                               std::string molecule_name, double m, double q) {
 
   T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
                   residue_name, m, q);
-  residue_ids_and_names_[residue_number] = residue_name;
-  if (residue_number > max_residue_id_) {
-    max_residue_id_ = residue_number;
-  }
+
+  moleculename_residue_ids_and_names_[molecule_name][residue_number] =
+      residue_name;
   _beads.push_back(bead);
   return bead;
 }

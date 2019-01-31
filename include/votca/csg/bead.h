@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <cassert>
+#include <sstream>
 #include <string>
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
@@ -36,6 +37,7 @@ class Topology;
 class Molecule;
 
 namespace bead_constants {
+const std::string bead_name_unassigned = "unassigned";
 const int residue_number_unassigned = -1;
 const std::string residue_name_unassigned = "unassigned";
 const std::string bead_type_unassigned = "unassigned";
@@ -62,9 +64,6 @@ class Bead : public BaseBead {
    * \return residue id
    */
   const int &getResidueNumber() const { return residue_number_; }
-
-  //  void setResidueName(std::string residue_name) {
-  //  residue_name_.setName(residue_name);}
 
   std::string getResidueName() const { return residue_name_.getName(); }
 
@@ -289,6 +288,23 @@ class Bead : public BaseBead {
   std::vector<int> &ParentBeads() { return parent_beads_; };
 
   /**
+   * \brief Label describes the beads identity based on three attributes
+   *
+   * 1. The Residue number
+   * 2. The name of the residue
+   * 3. The name of the bead
+   *
+   * It is returned in the following format:
+   *
+   * ResidueNumber:ResidueName:BeadName
+   **/
+  std::string getLabel() {
+    std::stringstream label;
+    label << getResidueNumber() + 1 << ":" << getResidueName() << ":"
+          << getName();
+    return label.str();
+  };
+  /**
    * \brief Function to add arbitrary user data to bead
    *
    * The user can attach pointers to own created objects to beads. Currently
@@ -334,6 +350,9 @@ class Bead : public BaseBead {
   std::vector<int> parent_beads_;
 
   TOOLS::Name residue_name_;
+
+  // Bead label is composed of ResidueNumber:ResidueName:bead_name
+  TOOLS::Name bead_label_;
   // TODO: this is so far a pointer. this should change! each bead should have
   // own options.
   TOOLS::Property *options_;
@@ -435,6 +454,7 @@ inline void Bead::HasU(bool b) { bU_ = b; }
 inline void Bead::HasV(bool b) { bV_ = b; }
 
 inline void Bead::HasW(bool b) { bW_ = b; }
+
 }  // namespace csg
 }  // namespace votca
 

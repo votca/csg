@@ -266,7 +266,7 @@ bool PDBReader::NextFrame(Topology &top) {
         //
         // res -1 as internal number starts with 0
         b = top.CreateBead<Bead>(1, atName, atName, residue_number - 1, resName,
-                                 _elements.getMass(atName), ch);
+                                 resName, _elements.getMass(atName), ch);
       } else {
         b = top.getBead(bead_count - 1);
       }

@@ -249,7 +249,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
           string beadname = beadtype + "#" + boost::lexical_cast<string>(i + 1);
           Bead *bead = top.CreateBead<Bead>(
               1, beadname, beadtype, bead_constants::residue_number_unassigned,
-              bead_constants::residue_name_unassigned, mass, charge);
+              bead_constants::residue_name_unassigned, mol_name, mass, charge);
 
           stringstream nm;
           nm << bead->getResidueNumber() + 1 << ":" << bead->getResidueName()
@@ -337,10 +337,10 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
           // for (int i = 0; i < mi->BeadCount(); i++) {
           Bead *bead = mi->getBead(bead_id);
           string type = bead->getType();
-          Bead *bead_replica =
-              top.CreateBead<Bead>(1, bead->getName(), type,
-                                   bead_constants::residue_number_unassigned,
-                                   mol_name, bead->getMass(), bead->getQ());
+          Bead *bead_replica = top.CreateBead<Bead>(
+              1, bead->getName(), type,
+              bead_constants::residue_number_unassigned, mol_name, mol_name,
+              bead->getMass(), bead->getQ());
           // mi_replica->AddBead(bead_replica, bead->getName());
           mi_replica->AddBead(bead_replica);
         }

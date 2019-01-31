@@ -67,7 +67,8 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   double charge = -1.0;
   Bead *b;
   b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           mass, charge);
+                           molecule_constants::molecule_name_unassigned, mass,
+                           charge);
   pos[0] = 0.0;
   pos[1] = 0.0;
   pos[2] = 0.0;
@@ -81,7 +82,8 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   mass = 2.0;
   charge = -2.0;
   b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           mass, charge);
+                           molecule_constants::molecule_name_unassigned, mass,
+                           charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;
@@ -95,7 +97,8 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   mass = 3.0;
   charge = -3.0;
   b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           mass, charge);
+                           molecule_constants::molecule_name_unassigned, mass,
+                           charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;

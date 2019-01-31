@@ -122,7 +122,8 @@ BOOST_AUTO_TEST_CASE(test_command) {
           vec bead_pos(x, y, z);
           Bead *bead_ptr = top.CreateBead<Bead>(
               symmetry, bead_name, bead_type_name, residue_number,
-              bead_constants::residue_name_unassigned, mass, charge);
+              bead_constants::residue_name_unassigned,
+              molecule_constants::molecule_name_unassigned, mass, charge);
           bead_ptr->setId(number_of_H2);
           bead_ptr->setPos(bead_pos);
           number_of_H2++;

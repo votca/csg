@@ -127,9 +127,13 @@ void LAMMPSDumpReader::ReadAtoms(Topology &top, string itemline) {
       top.RegisterBeadType(bead_constants::bead_type_unassigned);
     }
     for (int i = 0; i < _natoms; ++i) {
-      (void)top.CreateBead<Bead>(1, "no", "no",
+      cout << "Reading atoms in dump reader " << endl;
+      (void)top.CreateBead<Bead>(1, bead_constants::bead_name_unassigned,
+                                 bead_constants::bead_type_unassigned,
                                  bead_constants::residue_number_unassigned,
-                                 bead_constants::residue_name_unassigned, 0, 0);
+                                 bead_constants::residue_name_unassigned,
+                                 molecule_constants::molecule_name_unassigned,
+                                 0, 0);
     }
   }
 

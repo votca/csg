@@ -103,9 +103,9 @@ BOOST_AUTO_TEST_CASE(create_bead) {
   double mass = 1.1;
   double charge = 0.3;
 
-  auto bead_ptr =
-      top.CreateBead<Bead>(symmetry, bead_name, bead_type_name, residue_number,
-                           residue_name, mass, charge);
+  auto bead_ptr = top.CreateBead<Bead>(
+      symmetry, bead_name, bead_type_name, residue_number, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
 
   BOOST_CHECK_CLOSE(bead_ptr->getQ(), 0.3, 1e-5);
   BOOST_CHECK_CLOSE(bead_ptr->getMass(), 1.1, 1e-5);
@@ -140,21 +140,21 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
 
   // Create 3 beads
   string bead_name = "bead_test";
-  auto bead_ptr =
-      top.CreateBead<Bead>(symmetry, bead_name, bead_type_name, residue_number,
-                           residue_name, mass, charge);
+  auto bead_ptr = top.CreateBead<Bead>(
+      symmetry, bead_name, bead_type_name, residue_number, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr->setId(0);
 
   string bead_name2 = "bead_test2";
-  auto bead_ptr2 =
-      top.CreateBead<Bead>(symmetry, bead_name2, bead_type_name, residue_number,
-                           residue_name, mass, charge);
+  auto bead_ptr2 = top.CreateBead<Bead>(
+      symmetry, bead_name2, bead_type_name, residue_number, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr2->setId(1);
 
   string bead_name3 = "bead_test3";
-  auto bead_ptr3 =
-      top.CreateBead<Bead>(symmetry, bead_name3, bead_type_name, residue_number,
-                           residue_name, mass, charge);
+  auto bead_ptr3 = top.CreateBead<Bead>(
+      symmetry, bead_name3, bead_type_name, residue_number, residue_name,
+      molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr3->setId(2);
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 3);

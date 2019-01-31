@@ -205,6 +205,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
     }
     Bead *b = top.CreateBead<Bead>(
         symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
+        molecule_constants::molecule_name_unassigned,
         elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
@@ -320,6 +321,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
     }
     Bead *b = top.CreateBead<Bead>(
         symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
+        molecule_constants::molecule_name_unassigned,
         elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),

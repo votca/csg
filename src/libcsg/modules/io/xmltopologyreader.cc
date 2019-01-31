@@ -180,16 +180,17 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
         "Number of elements in bead-vector and residue-vector are not "
         "identical");
   // Create molecule in topology. Replicate data.
-  int resnr = _top->getMaxResidueId() + 1;
-  int max_residue_id = _top->getMaxResidueId();
-  if (!xmlResidues.empty()) {
-    if (xmlResidues.front() != max_residue_id + 1 &&
-        xmlResidues.front() != -1) {
-      throw std::runtime_error(
-          "Residue count for beads in topology.molecules.molecule has to be "
-          "greater than the number of residues already in the topology");
-    }
-  }
+  // int resnr = _top->getMaxResidueId() + 1;
+  /*  int max_residue_id = _top->getMaxResidueId();
+    if (!xmlResidues.empty()) {
+      if (xmlResidues.front() != max_residue_id + 1 &&
+          xmlResidues.front() != -1) {
+        throw std::runtime_error(
+            "Residue count for beads in topology.molecules.molecule has to be "
+            "greater than the number of residues already in the topology");
+      }
+    }*/
+
   for (int mn = 0; mn < nmols; mn++) {
     Molecule *mi = _top->CreateMolecule(molname);
     XMLMolecule *xmlMolecule = new XMLMolecule(molname, nmols);
@@ -197,23 +198,36 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
     xmlMolecule->mi = mi;
     _molecules.insert(make_pair(molname, xmlMolecule));
     vector<int>::iterator resit = xmlResidues.begin();
+    unordered_map<string, int> residuename_residuenumber;
     for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
          itb != xmlBeads.end(); ++itb, ++resit) {
+      cout << "Cycling residues " << *resit << endl;
       stringstream bname;
       XMLBead &b = **itb;
-      if (*resit != -1) {
+
+      if (residuename_residuenumber.count(molname) == 0) {
+        cout << "molname " << molname << endl;
+        residuename_residuenumber[molname] = 1;
+      } else {
+        ++residuename_residuenumber[molname];
+      }
+      /* (*resit != -1) {
         if ((_top->getMaxResidueId() + 1) < *resit) {
           resnr = *resit - 1;
         }
-      }
-
+      }else{
+        resnr = 0;
+      }*/
+      // cout << "resnr " << resnr << endl;
       if (!_top->BeadTypeExist(b.type)) {
         _top->RegisterBeadType(b.type);
       }
-      Bead *bead = _top->CreateBead<Bead>(1, b.name, b.type, resnr, molname,
-                                          b.mass, b.q);
-      bname << _mol_index << ":" << molname << ":" << b.name;
+      Bead *bead = _top->CreateBead<Bead>(1, b.name, b.type,
+                                          residuename_residuenumber[molname],
+                                          molname, molname, b.mass, b.q);
+      // bname << _mol_index << ":" << molname << ":" << b.name;
       // mi->AddBead(bead, bname.str());
+      bead->setMoleculeId(_mol_index);
       mi->AddBead(bead);
 
       // Data for bonded terms.
@@ -225,7 +239,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       xmlMolecule->name2beads.insert(make_pair(b.name, b_rep));
       _bead_index++;
     }
-    resnr++;
+    // resnr++;
   }
   _mol_index++;
 

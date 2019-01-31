@@ -507,7 +507,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       atomIdToMoleculeId_[atomId] = moleculeId;
       Molecule *mol;
       if (!molecules_.count(moleculeId)) {
-        mol = top.CreateMolecule("UNKNOWN");
+        mol = top.CreateMolecule(molecule_constants::molecule_name_unassigned);
         molecules_[moleculeId] = mol;
       } else {
         mol = molecules_[moleculeId];
@@ -527,10 +527,11 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
         throw runtime_error(err);
       }
 
-      b = top.CreateBead<Bead>(
-          symmetry, bead_type_name, bead_type_name, moleculeId,
-          bead_constants::residue_name_unassigned, mass, charge);
-
+      cout << "Reading data from lammps data reader " << endl;
+      b = top.CreateBead<Bead>(symmetry, bead_type_name, bead_type_name,
+                               bead_constants::residue_number_unassigned,
+                               bead_constants::residue_name_unassigned,
+                               mol->getName(), mass, charge);
       // mol->AddBead(b, bead_type_name);
       mol->AddBead(b);
       // b->setMolecule(mol);
