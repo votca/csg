@@ -202,6 +202,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   Elements elements;
   int residue_num = 1;
+  string residue_name = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
@@ -210,9 +211,9 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
     if (!top.BeadTypeExist(atom_type)) {
       top.RegisterBeadType(atom_type);
     }
-    Bead *b =
-        top.CreateBead(symmetry, atom_types.at(ind), atom_type, residue_num,
-                       elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead<Bead>(
+        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
+        elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));
@@ -315,6 +316,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   Elements elements;
   int residue_num = 1;
+  string residue_name = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
@@ -324,9 +326,9 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
     if (!top.BeadTypeExist(atom_type)) {
       top.RegisterBeadType(atom_type);
     }
-    Bead *b =
-        top.CreateBead(symmetry, atom_types.at(ind), atom_type, residue_num,
-                       elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead<Bead>(
+        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
+        elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));

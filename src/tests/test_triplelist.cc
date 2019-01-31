@@ -45,11 +45,13 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
 
   int symmetry = 1;
   string name = "dummy1";
+  string residue_name = "Residue";
   int resnr = 0;
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   symmetry = 1;
   name = "dummy2";
@@ -57,7 +59,8 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   mass = 2.0;
   charge = -2.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   symmetry = 1;
   name = "dummy3";
@@ -65,7 +68,8 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   mass = 3.0;
   charge = -3.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);

@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace votca::csg;
-
+using namespace votca::tools;
 BOOST_AUTO_TEST_SUITE(beadtriple_test)
 
 BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
@@ -42,10 +42,12 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   int symmetry = 1;
   string name = "dummy1";
   int resnr = 0;
+  string residue_name = "DNA";
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   symmetry = 1;
   name = "dummy2";
@@ -53,7 +55,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   symmetry = 1;
   name = "dummy3";
@@ -61,7 +64,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, mass, charge);
+  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
+                       mass, charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);

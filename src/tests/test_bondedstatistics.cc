@@ -108,28 +108,32 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     top.RegisterBeadType(bead_type_name);
 
     int residue_number = 1;
+    string residue_name = "protein";
     double mass = 1.1;
     double charge = 0.3;
 
     // Create 3 beads
     string bead_name = "bead_test";
     vec pos_bead1(5.0, 3.0, 5.0);
-    auto bead_ptr = top.CreateBead(symmetry, bead_name, bead_type_name,
-                                   residue_number, mass, charge);
+    auto bead_ptr =
+        top.CreateBead<Bead>(symmetry, bead_name, bead_type_name,
+                             residue_number, residue_name, mass, charge);
     bead_ptr->setId(0);
     bead_ptr->setPos(pos_bead1);
 
     string bead_name2 = "bead_test2";
     vec pos_bead2(5.0, 4.0, 5.0);
-    auto bead_ptr2 = top.CreateBead(symmetry, bead_name2, bead_type_name,
-                                    residue_number, mass, charge);
+    auto bead_ptr2 =
+        top.CreateBead<Bead>(symmetry, bead_name2, bead_type_name,
+                             residue_number, residue_name, mass, charge);
     bead_ptr2->setId(1);
     bead_ptr2->setPos(pos_bead2);
 
     string bead_name3 = "bead_test3";
     vec pos_bead3(5.0, 6.0, 5.0);
-    auto bead_ptr3 = top.CreateBead(symmetry, bead_name3, bead_type_name,
-                                    residue_number, mass, charge);
+    auto bead_ptr3 =
+        top.CreateBead<Bead>(symmetry, bead_name3, bead_type_name,
+                             residue_number, residue_name, mass, charge);
     bead_ptr3->setId(2);
     bead_ptr3->setPos(pos_bead3);
 
