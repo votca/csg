@@ -339,9 +339,9 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
-  std::map<std::string, std::pair<int, std::map<int, std::string>>>
-      getResidueIdsAndNames() const {
-    return moleculename_residue_ids_and_names_;
+  std::map<int, std::set<std::pair<int, std::string>>> getResidueIdsAndNames()
+      const {
+    return molecule_id_and_residue_id_and_name_;
   }
 
   //  int getMaxResidueId() const { return max_residue_id_; }
@@ -371,8 +371,12 @@ class Topology {
 
   // Need some way to keep track of the unique residue ids , id of the molecule
   // type
-  std::map<std::string, std::pair<int, std::map<int, std::string>>>
-      moleculename_residue_ids_and_names_;
+  std::map<std::string, int> molecule_name_and_type_id_;
+  std::map<int, std::set<std::pair<int, std::string>>>
+      molecule_id_and_residue_id_and_name_;
+
+  // std::map<std::string, std::pair<int, std::map<int, std::string>>>
+  //    moleculename_residue_ids_and_names_;
   int max_residue_id_;
   double _time;
   int _step;
@@ -390,18 +394,16 @@ inline T *Topology::CreateBead(byte_t symmetry, std::string name,
                                std::string molecule_name, double m, double q) {
 
   int molecule_type_id;
-  if (moleculename_residue_ids_and_names_.count(molecule_name) == 0) {
-    molecule_type_id =
-        static_cast<int>(moleculename_residue_ids_and_names_.size()) + 1;
+
+  if (molecule_name_and_type_id_.count(molecule_name) == 0) {
+    molecule_type_id = static_cast<int>(molecule_name_and_type_id_.size()) + 1;
+    molecule_name_and_type_id_[molecule_name] = molecule_type_id;
   } else {
-    molecule_type_id = moleculename_residue_ids_and_names_[molecule_name].first;
+    molecule_type_id = molecule_name_and_type_id_[molecule_name];
   }
 
-  std::map<int, std::string> res_number_and_name;
-  res_number_and_name[residue_number] = residue_name;
-  moleculename_residue_ids_and_names_[molecule_name] =
-      std::pair<int, std::map<int, std::string>>(molecule_type_id,
-                                                 res_number_and_name);
+  std::pair<int, std::string> element{residue_number, residue_name};
+  molecule_id_and_residue_id_and_name_[molecule_type_id].insert(element);
 
   T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
                   residue_name, molecule_type_id, m, q);
