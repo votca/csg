@@ -76,21 +76,21 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
     }
 
     cout << "\nList of residues:\n";
-    map<std::string, map<int, string>> moleculename_residue_ids_and_names =
-        top->getResidueIdsAndNames();
+    map<std::string, pair<int, map<int, string>>>
+        moleculename_residue_ids_and_names = top->getResidueIdsAndNames();
     //    for (pair<const int, string> &id_and_name : residue_ids_and_names) {
     //      cout << id_and_name.first << " name: " << id_and_name.second
     //           << " id: " << id_and_name.first << endl;
     //    }
-    int molecular_type_index = 0;
-    for (const pair<string, map<int, string>> &id_and_res_num_and_res_name :
-         moleculename_residue_ids_and_names) {
+    for (const pair<string, pair<int, map<int, string>>> &
+             id_and_res_num_and_res_name : moleculename_residue_ids_and_names) {
+      int molecular_type_id = id_and_res_num_and_res_name.second.first;
       for (const pair<int, string> &res_num_and_res_name :
-           id_and_res_num_and_res_name.second) {
-        cout << molecular_type_index << " name: " << res_num_and_res_name.second
+           id_and_res_num_and_res_name.second.second) {
+        cout << molecular_type_id - 1
+             << " name: " << res_num_and_res_name.second
              << " id: " << res_num_and_res_name.first << endl;
       }
-      ++molecular_type_index;
     }
 
     cout << "\nList of molecules:\n";

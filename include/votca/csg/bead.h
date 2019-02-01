@@ -300,8 +300,7 @@ class Bead : public BaseBead {
    **/
   std::string getLabel() {
     std::stringstream label;
-    label << getResidueNumber() + 1 << ":" << getResidueName() << ":"
-          << getName();
+    label << molecule_type_id_ << ":" << getResidueName() << ":" << getName();
     return label.str();
   };
   /**
@@ -360,6 +359,8 @@ class Bead : public BaseBead {
   TOOLS::byte_t symmetry_;
   double charge_;
 
+  int molecule_type_id_ = -1;
+
   int residue_number_ = -1;
 
   TOOLS::vec velocity_, bead_force_, u_, v_, w_;
@@ -372,9 +373,12 @@ class Bead : public BaseBead {
 
   /// constructur
   Bead(Topology *owner, int id, std::string type, TOOLS::byte_t symmetry,
-       std::string name, int residue_number, std::string residue_name, double m,
-       double q)
-      : symmetry_(symmetry), charge_(q), residue_number_(residue_number) {
+       std::string name, int residue_number, std::string residue_name,
+       int molecule_type_id, double m, double q)
+      : symmetry_(symmetry),
+        charge_(q),
+        molecule_type_id_(molecule_type_id),
+        residue_number_(residue_number) {
     topology_item_._parent = owner;
     setId(id);
     setType(type);

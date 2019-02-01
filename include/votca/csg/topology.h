@@ -339,8 +339,8 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
-  std::map<std::string, std::map<int, std::string>> getResidueIdsAndNames()
-      const {
+  std::map<std::string, std::pair<int, std::map<int, std::string>>>
+      getResidueIdsAndNames() const {
     return moleculename_residue_ids_and_names_;
   }
 
@@ -369,8 +369,9 @@ class Topology {
 
   std::map<std::string, std::list<Interaction *>> _interactions_by_group;
 
-  // Need some way to keep track of the unique residue ids
-  std::map<std::string, std::map<int, std::string>>
+  // Need some way to keep track of the unique residue ids , id of the molecule
+  // type
+  std::map<std::string, std::pair<int, std::map<int, std::string>>>
       moleculename_residue_ids_and_names_;
   int max_residue_id_;
   double _time;
@@ -388,11 +389,23 @@ inline T *Topology::CreateBead(byte_t symmetry, std::string name,
                                std::string residue_name,
                                std::string molecule_name, double m, double q) {
 
-  T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
-                  residue_name, m, q);
+  int molecule_type_id;
+  if (moleculename_residue_ids_and_names_.count(molecule_name) == 0) {
+    molecule_type_id =
+        static_cast<int>(moleculename_residue_ids_and_names_.size()) + 1;
+  } else {
+    molecule_type_id = moleculename_residue_ids_and_names_[molecule_name].first;
+  }
 
-  moleculename_residue_ids_and_names_[molecule_name][residue_number] =
-      residue_name;
+  std::map<int, std::string> res_number_and_name;
+  res_number_and_name[residue_number] = residue_name;
+  moleculename_residue_ids_and_names_[molecule_name] =
+      std::pair<int, std::map<int, std::string>>(molecule_type_id,
+                                                 res_number_and_name);
+
+  T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
+                  residue_name, molecule_type_id, m, q);
+
   _beads.push_back(bead);
   return bead;
 }
