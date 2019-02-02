@@ -328,7 +328,7 @@ class Topology {
   void setMoleculeNamesAndIds(
       std::map<std::string, int> molecule_name_and_ids) {
     assert(
-        moleculename_and_type_id_.size() == 0 &&
+        molecule_name_and_type_id_.size() == 0 &&
         "Cannot set the molecule "
         "names and ids in the topology object because the molecule names and "
         "ids are not empty");
