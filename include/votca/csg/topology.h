@@ -104,14 +104,6 @@ class Topology {
   void CheckMoleculeNaming(void);
 
   /**
-   * \brief put the whole topology in one molecule
-   * \param name name of the new molecule
-   *
-   *  This function creates one big molecule for all beads in the topology.
-   */
-  void CreateOneBigMolecule(std::string name);
-
-  /**
    * \brief create molecules based on blocks of atoms
    * \param name molecule name
    * \param first first bead
@@ -172,12 +164,6 @@ class Topology {
    * delete all molecule information
    */
   void ClearMoleculeList() { _molecules.clear(); }
-
-  /**
-   * \brief adds all the beads+molecules+residues from other topology
-   * \param top topology to add
-   */
-  void Add(Topology *top);
 
   /**
    * \brief copy topology data of different topology
@@ -339,12 +325,33 @@ class Topology {
   bool HasForce() { return _has_force; }
   void SetHasForce(const bool v) { _has_force = v; }
 
+  void setMoleculeNamesAndIds(
+      std::map<std::string, int> molecule_name_and_ids) {
+    assert(
+        moleculename_and_type_id_.size() == 0 &&
+        "Cannot set the molecule "
+        "names and ids in the topology object because the molecule names and "
+        "ids are not empty");
+    molecule_name_and_type_id_ = molecule_name_and_ids;
+  }
+
+  void setResidueIdsAndNames(
+      std::map<int, std::set<std::pair<int, std::string>>>
+          molecule_id_residue_name_and_ids) {
+    assert(molecule_id_and_residue_id_and_name_.size() == 0 &&
+           "Cannot set the "
+           "molecules residue names and ids as it is not empty.");
+    molecule_id_and_residue_id_and_name_ = molecule_id_residue_name_and_ids;
+  }
+
+  std::map<std::string, int> getMoleculeNamesAndIds() const {
+    return molecule_name_and_type_id_;
+  }
+
   std::map<int, std::set<std::pair<int, std::string>>> getResidueIdsAndNames()
       const {
     return molecule_id_and_residue_id_and_name_;
   }
-
-  //  int getMaxResidueId() const { return max_residue_id_; }
 
  protected:
   BoundaryCondition *_bc;

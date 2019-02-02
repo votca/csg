@@ -80,7 +80,6 @@ class CsgMapApp : public CsgApplication {
       // we want to combine atomistic and coarse-grained into one topology
       Topology *hybtol = new Topology();
 
-      // ResidueContainer::iterator it_res;
       MoleculeContainer::iterator it_mol;
 
       hybtol->setBox(top->getBox());
@@ -88,14 +87,8 @@ class CsgMapApp : public CsgApplication {
       hybtol->setStep(top->getStep());
 
       // copy all residues from both
-      /*for (it_res = top_ref->Residues().begin();
-           it_res != top_ref->Residues().end(); ++it_res) {
-        hybtol->CreateResidue((*it_res)->getName());
-      }
-      for (it_res = top->Residues().begin(); it_res != top->Residues().end();
-           ++it_res) {
-        hybtol->CreateResidue((*it_res)->getName());
-      }*/
+      hybtol->setMoleculeNamesAndIds(top->getMoleculeNamesAndIds());
+      hybtol->setResidueIdsAndNames(top->getResidueIdsAndNames());
 
       // copy all molecules and beads
 
@@ -104,9 +97,6 @@ class CsgMapApp : public CsgApplication {
         Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
         vector<int> bead_ids = (*it_mol)->getBeadIds();
         for (const int &bead_id : bead_ids) {
-          // for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
-          // copy atomistic beads of molecule
-          // int beadid = (*it_mol)->getBead(i)->getId();
 
           Bead *bi = (*it_mol)->getBead(bead_id);
           if (!hybtol->BeadTypeExist(bi->getType())) {
@@ -117,7 +107,7 @@ class CsgMapApp : public CsgApplication {
               bi->getSymmetry(), bi->getName(), bi->getType(),
               bi->getResidueNumber(), bi->getResidueName(),
               (*it_mol)->getName(), bi->getMass(), bi->getQ());
-          bn->setOptions(bi->Options());
+
           bn->setPos(bi->getPos());
           if (bi->HasVel()) bn->setVel(bi->getVel());
           if (bi->HasF()) bn->setF(bi->getF());
@@ -130,16 +120,12 @@ class CsgMapApp : public CsgApplication {
           Molecule *cgmol = top->Molecules()[mi->getId()];
           vector<int> bead_ids = cgmol->getBeadIds();
           for (const int &bead_id : bead_ids) {
-            // for (int i = 0; i < cgmol->BeadCount(); i++) {
             Bead *bi = cgmol->getBead(bead_id);
-            // todo: this is a bit dirty as a cg bead will always have the resid
-            // of its first parent
             Bead *bparent = (*it_mol)->getBead(0);
             Bead *bn = hybtol->CreateBead<Bead>(
                 bi->getSymmetry(), bi->getName(), bi->getType(),
                 bparent->getResidueNumber(), bparent->getResidueName(),
                 cgmol->getName(), bi->getMass(), bi->getQ());
-            bn->setOptions(bi->Options());
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());
             mi->AddBead(bi);

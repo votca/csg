@@ -40,7 +40,7 @@ bool is_digits(const std::string &str) {
 Topology::~Topology() {
   Cleanup();
   if (_bc) delete (_bc);
-  _bc = NULL;
+  _bc = nullptr;
 }
 
 void Topology::Cleanup() {
@@ -57,11 +57,10 @@ void Topology::Cleanup() {
     _molecules.clear();
   }
   // cleanup residues
-  /*  {
-      ResidueContainer::iterator i;
-      for (i = _residues.begin(); i < _residues.end(); ++i) delete (*i);
-      _residues.clear();
-    }*/
+  {
+    molecule_id_and_residue_id_and_name_.clear();
+    molecule_name_and_type_id_.clear();
+  }
   // cleanup interactions
   {
     InteractionContainer::iterator i;
@@ -86,16 +85,8 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
     if (--first > 0) continue;
     // This is not 100% correct, but let's assume for now that the resnr do
     // increase
-    /*    if (beadcount == 0) {
-          res_offset = (*bead)->getResidueNumber();
-        }*/
-    stringstream bname;
-    bname << (*bead)->getResidueNumber() - res_offset + 1
-          << ":"
-          // << getResidue((*bead)->getResidueNumber())->getName() << ":"
-          << (*bead)->getResidueName() << ":" << (*bead)->getName();
     mol->AddBead((*bead));
-    // mol->AddBead((*bead), bname.str());
+
     if (++beadcount == nbeads) {
       if (--nmolecules <= 0) break;
       mol = CreateMolecule(name);
@@ -104,85 +95,8 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
   }
 }
 
-/*
-/// \todo clean up CreateMoleculesByResidue!
-void Topology::CreateMoleculesByResidue() {
-  // first create a molecule for each residue
-  ResidueContainer::iterator res;
-  for (res = _residues.begin(); res != _residues.end(); ++res) {
-    CreateMolecule((*res)->getName());
-  }
-
-  // add the beads to the corresponding molecules based on their resid
-  BeadContainer::iterator bead;
-  for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
-    // MoleculeByIndex((*bead)->getResidueNumber())->AddBead((*bead)->getId(),
-    // (*bead)->getName());
-
-    MoleculeByIndex((*bead)->getResidueNumber())
-        ->AddBead((*bead), string("1:TRI:") + (*bead)->getName());
-  }
-
-  /// \todo sort beads in molecules that all beads are stored in the same order.
-  /// This is needed for the mapping!
-}*/
-
-void Topology::CreateOneBigMolecule(string name) {
-  Molecule *mi = CreateMolecule(name);
-
-  BeadContainer::iterator bead;
-
-  for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
-    stringstream n("");
-    n << (*bead)->getResidueNumber() + 1 << ":" << (*bead)->getResidueName()
-      << ":"
-      //<< _residues[(*bead)->getResidueNumber()]->getName() << ":"
-      << (*bead)->getName();
-    // cout << n.str() << endl;
-    mi->AddBead((*bead));
-    // mi->AddBead((*bead), n.str());
-  }
-}
-
-void Topology::Add(Topology *top) {
-  BeadContainer::iterator bead;
-  //  ResidueContainer::iterator res;
-  MoleculeContainer::iterator mol;
-
-  //  int res0 = ResidueCount();
-
-  for (bead = top->_beads.begin(); bead != top->_beads.end(); ++bead) {
-    Bead *bi = *bead;
-    string type = bi->getType();
-    //    CreateBead(bi->getSymmetry(), bi->getName(), type,
-    //               bi->getResidueNumber() + res0, bi->getMass(), bi->getQ());
-
-    std::string molecule_name =
-        top->getMolecule(bi->getMoleculeId())->getName();
-    CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
-                     bi->getResidueNumber(), bi->getResidueName(),
-                     molecule_name, bi->getMass(), bi->getQ());
-  }
-  /*
-    for (res = top->_residues.begin(); res != top->_residues.end(); ++res) {
-      CreateResidue((*res)->getName());
-    }
-  */
-  // \todo beadnames in molecules!!
-  for (mol = top->_molecules.begin(); mol != top->_molecules.end(); ++mol) {
-    Molecule *mi = CreateMolecule((*mol)->getName());
-    vector<int> bead_ids = mi->getBeadIds();
-    // for (int i = 0; i < mi->BeadCount(); i++) {
-    for (const int &bead_id : bead_ids) {
-      mi->AddBead(mi->getBead(bead_id));
-      // mi->AddBead(mi->getBead(i), "invalid");
-    }
-  }
-}
-
 void Topology::CopyTopologyData(Topology *top) {
   BeadContainer::iterator it_bead;
-  //  ResidueContainer::iterator it_res;
   MoleculeContainer::iterator it_mol;
 
   _bc->setBox(top->getBox());
@@ -192,11 +106,9 @@ void Topology::CopyTopologyData(Topology *top) {
   // cleanup old data
   Cleanup();
 
-  // copy all residues
-  /*  for (it_res = top->_residues.begin(); it_res != top->_residues.end();
-         ++it_res) {
-      CreateResidue((*it_res)->getName());
-    }*/
+  // Copy residue info
+  setResidueIdsAndNames(top->getResidueIdsAndNames());
+  setMoleculeNamesAndIds(top->getMoleculeNamesAndIds());
 
   // create all beads
   for (it_bead = top->_beads.begin(); it_bead != top->_beads.end(); ++it_bead) {
@@ -206,9 +118,6 @@ void Topology::CopyTopologyData(Topology *top) {
     Bead *bn = CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
                                 bi->getResidueNumber(), bi->getResidueName(),
                                 molecule_name, bi->getMass(), bi->getQ());
-    // Bead *bn = CreateBead(bi->getSymmetry(), bi->getName(), type,
-    //                       bi->getResidueNumber(), bi->getMass(), bi->getQ());
-    bn->setOptions(bi->Options());
   }
 
   // copy all molecules
@@ -217,18 +126,9 @@ void Topology::CopyTopologyData(Topology *top) {
     Molecule *mi = CreateMolecule((*it_mol)->getName());
     vector<int> bead_ids = (*it_mol)->getBeadIds();
     for (const int &bead_id : bead_ids) {
-      // for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
-      // int beadid = (*it_mol)->getBead()->getId();
       mi->AddBead(_beads[bead_id]);
-      // mi->AddBead(_beads[beadid], (*it_mol)->getBeadName(i));
     }
   }
-  // TODO: copy interactions
-  // InteractionContainer::iterator it_ia;
-  // for(it_ia=top->_interaction.begin();it_ia=top->_interactions.end();++it_ia)
-  // {
-
-  //}
 }
 
 int Topology::getBeadTypeId(string type) const {
@@ -242,9 +142,10 @@ void Topology::RenameMolecules(string range, string name) {
 
   rp.Parse(range);
   for (i = rp.begin(); i != rp.end(); ++i) {
-    if ((unsigned int)*i > _molecules.size())
+    if ((unsigned int)*i > _molecules.size()) {
       throw runtime_error(
           string("RenameMolecules: num molecules smaller than"));
+    }
     getMolecule(*i - 1)->setName(name);
   }
 }
@@ -279,9 +180,8 @@ void Topology::CheckMoleculeNaming(void) {
       if (entry->second != (*iter)->BeadCount())
         throw runtime_error(
             "There are molecules which have the same name but different number "
-            "of bead "
-            "please check the section manual topology handling in the votca "
-            "manual");
+            "of bead please check the section manual topology handling in the "
+            "votca manual");
       continue;
     }
     nbeads[(*iter)->getName()] = (*iter)->BeadCount();
@@ -291,9 +191,9 @@ void Topology::CheckMoleculeNaming(void) {
 void Topology::AddBondedInteraction(Interaction *ic) {
   map<string, int>::iterator iter;
   iter = _interaction_groups.find(ic->getGroup());
-  if (iter != _interaction_groups.end())
+  if (iter != _interaction_groups.end()) {
     ic->setGroupId((*iter).second);
-  else {
+  } else {
     int i = _interaction_groups.size();
     _interaction_groups[ic->getGroup()] = i;
     ic->setGroupId(i);

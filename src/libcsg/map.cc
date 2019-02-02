@@ -18,29 +18,38 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <numeric>
+#include <string>
+#include <votca/csg/bead.h>
 #include <votca/csg/map.h>
 #include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
+#include <votca/tools/vec.h>
+
+using namespace votca::tools;
+using namespace std;
 
 namespace votca {
 namespace csg {
 
-using namespace std;
-
 Map::~Map() {
   vector<BeadMap *>::iterator iter;
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) delete (*iter);
+  for (iter = _maps.begin(); iter != _maps.end(); ++iter) {
+    delete (*iter);
+  }
   _maps.clear();
 }
 
 void Map::Apply() {
   vector<BeadMap *>::iterator iter;
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) (*iter)->Apply();
+  for (iter = _maps.begin(); iter != _maps.end(); ++iter) {
+    (*iter)->Apply();
+  }
 }
 
 void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
                             Property *opts_map) {
+
   BeadMap::Initialize(in, out, opts_bead, opts_map);
 
   vector<string> beads;
@@ -48,9 +57,7 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
   vector<double> fweights;
 
   // get the beads
-  cout << "Getting the beads " << endl;
   string s(_opts_bead->get("beads").value());
-  cout << s << endl;
   Tokenizer tok_beads(s, " \n\t");
   tok_beads.ToVector(beads);
 
@@ -59,12 +66,12 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
   tok_weights.ConvertToVector<double>(weights);
 
   // check weather weights and # beads matches
-  if (beads.size() != weights.size())
+  if (beads.size() != weights.size()) {
     throw runtime_error(
         string("number of subbeads in " + opts_bead->get("name").as<string>() +
                " and number of weights in map " +
                opts_map->get("name").as<string>() + " do not match"));
-
+  }
   // normalize the weights
   double norm = 1. / std::accumulate(weights.begin(), weights.end(), 0.);
 
@@ -101,26 +108,24 @@ void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
           "A d coefficient is nonzero while weights is zero in mapping " +
           opts_map->get("name").as<string>());
     }
-    if (weights[i] != 0)
+    if (weights[i] != 0) {
       fweights[i] = d[i] / weights[i];
-    else
+    } else {
       fweights[i] = 0;
+    }
   }
 
   for (size_t i = 0; i < beads.size(); ++i) {
-    // int iin = in->getBeadByName(beads[i]);
-    // unordered_set<int> bead_ids = in->getBeadIdsByName(beads[i]);
-    cout << "in map Initialize " << beads[i] << endl;
-    // unordered_set<int> bead_ids = in->getBeadIdsByType(beads[i]);
     unordered_set<int> bead_ids = in->getBeadIdsByLabel(beads[i]);
-    cout << "Total number of beads " << bead_ids.size() << endl;
     assert(bead_ids.size() == 1 &&
-           "More than a single bead with the same "
-           "label, maybe the globally unique bead id should be used instaed.");
+           "More than a single bead with the same label, maybe the globally "
+           "unique bead id should be used instead.");
+
     int bead_id = *bead_ids.begin();
-    if (bead_id < 0)
+    if (bead_id < 0) {
       throw std::runtime_error(
           string("mapping error: molecule " + beads[i] + " does not exist"));
+    }
     AddElem(in->getBead(bead_id), weights[i], fweights[i]);
   }
 }
@@ -130,7 +135,7 @@ void Map_Sphere::Apply() {
   vec cg(0., 0., 0.), f(0., 0., 0.), vel(0., 0., 0.);
   bool bPos, bVel, bF;
   bPos = bVel = bF = false;
-  _out->ParentBeads().clear();
+  _out->ClearParentBeads();
 
   // the following is needed for pbc treatment
   Topology *top = _out->getParent();
@@ -150,7 +155,7 @@ void Map_Sphere::Apply() {
 
   for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
     Bead *bead = iter->_in;
-    _out->ParentBeads().push_back(bead->getId());
+    _out->AddParentBead(bead->getId());
     M += bead->getMass();
     if (bead->HasPos()) {
       vec r = top->BCShortestConnection(r0, bead->getPos());
@@ -163,7 +168,6 @@ void Map_Sphere::Apply() {
             boost::lexical_cast<string>(bead->getId() + 1) + ")" +
             +" , molecule " +
             boost::lexical_cast<string>(bead->getMoleculeId() + 1) + ")");
-        //+ boost::lexical_cast<string>(bead->getMolecule()->getId()+1) + ")" );
       }
       cg += (*iter)._weight * (r + r0);
       bPos = true;
@@ -203,15 +207,16 @@ void Map_Ellipsoid::Apply() {
 
   int n;
   n = 0;
-  _out->ParentBeads().clear();
+  _out->ClearParentBeads();
   for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
     Bead *bead = iter->_in;
-    _out->ParentBeads().push_back(bead->getId());
+    _out->AddParentBead(bead->getId());
     if (bead->HasPos()) {
       vec r = top->BCShortestConnection(r0, bead->getPos());
-      if (abs(r) > max_dist)
+      if (abs(r) > max_dist) {
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box");
+      }
       cg += (*iter)._weight * (r + r0);
       bPos = true;
     }
@@ -220,9 +225,6 @@ void Map_Ellipsoid::Apply() {
       bVel = true;
     }
     if (bead->HasF()) {
-      /// \todo fix me, right calculation should be F_i = m_cg / sum(w_i) *
-      /// sum(w_i/m_i*F_i)
-      // f += (*iter)._weight * _in->getBeadF((*iter)._in);
       f += (*iter)._force_weight * bead->getF();
       bF = true;
     }
@@ -250,9 +252,6 @@ void Map_Ellipsoid::Apply() {
     if ((*iter)._weight == 0) continue;
     Bead *bead = iter->_in;
     vec v = bead->getPos() - c;
-    // v = vec(1, 0.5, 0) * 0.*(drand48()-0.5)
-    //    + vec(0.5, -1, 0) * (drand48()-0.5)
-    //    + vec(0, 0, 1) * (drand48()-0.5);
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
     m[0][0] += v.getX() * v.getX() / (double)_matrix.size();
@@ -270,15 +269,6 @@ void Map_Ellipsoid::Apply() {
   matrix::eigensystem_t es;
   m.SolveEigensystem(es);
 
-  // vec eigenv1=es.eigenvecs[0];
-  // vec eigenv2=es.eigenvecs[1];
-  // vec eigenv3=es.eigenvecs[2];
-
-  /*    _out->seteigenvec1(eigenv1);
-      _out->seteigenvec2(eigenv2);
-      _out->seteigenvec3(eigenv3);
-    */
-
   vec u = es.eigenvecs[0];
   vec v = _matrix[1]._in->getPos() - _matrix[0]._in->getPos();
   v.normalize();
@@ -295,10 +285,6 @@ void Map_Ellipsoid::Apply() {
   w = u ^ v;
   w.normalize();
   _out->setW(w);
-
-  // out.BeadV(_out) = v;
-
-  // out.BeadW(_out) = es.eigenvecs[2];
 }
 
 }  // namespace csg
