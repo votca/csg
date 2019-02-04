@@ -88,11 +88,6 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
         Bead *bead =
             top.CreateBead<Bead>(1, *(atoms->atomname[iatom]), bead_type,
                                  a->resind, residue_name, molname, a->m, a->q);
-        stringstream nm;
-        // nm << bead->getResidueNumber() + 1 - res_offset << ":"
-        nm << bead->getResidueNumber() << ":" << bead->getResidueName() << ":"
-           << bead->getName();
-        // mi->AddBead(bead, nm.str());
         mi->AddBead(bead);
       }
 

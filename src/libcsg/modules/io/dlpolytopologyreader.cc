@@ -251,15 +251,12 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
               1, beadname, beadtype, bead_constants::residue_number_unassigned,
               bead_constants::residue_name_unassigned, mol_name, mass, charge);
 
-          stringstream nm;
-          nm << bead->getResidueNumber() + 1 << ":" << bead->getResidueName()
-             << ":" << bead->getName();
-          // mi->AddBead(bead, nm.str());
           mi->AddBead(bead);
           id_map[i] = bead->getId();
           i++;
 #ifdef DEBUG
-          cout << "Atom identification in maps '" << nm.str() << "'" << endl;
+          cout << "Atom identification in maps '" << bead->getLabel() << "'"
+               << endl;
 #endif
         }
         matoms += repeater;
