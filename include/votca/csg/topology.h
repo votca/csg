@@ -407,13 +407,11 @@ class Topology {
   std::map<int, std::set<std::pair<int, std::string>>>
       molecule_id_and_residue_id_and_name_;
 
-  // std::map<std::string, std::pair<int, std::map<int, std::string>>>
-  //    moleculename_residue_ids_and_names_;
-  int max_residue_id_;
   double _time;
   int _step;
   bool _has_vel;
   bool _has_force;
+  int max_residue_id_;
 
   /// The particle group (For H5MD file format)
   std::string _particle_group;
