@@ -126,6 +126,7 @@ class CsgMapApp : public CsgApplication {
                 bi->getSymmetry(), bi->getName(), bi->getType(),
                 bparent->getResidueNumber(), bparent->getResidueName(),
                 cgmol->getName(), bi->getMass(), bi->getQ());
+
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());
             mi->AddBead(bi);

@@ -21,6 +21,7 @@
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
+
 #include <votca/tools/graph.h>
 #include <votca/tools/graph_bf_visitor.h>
 #include <votca/tools/graphalgorithm.h>

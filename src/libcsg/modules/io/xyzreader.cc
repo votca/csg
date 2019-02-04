@@ -78,21 +78,22 @@ bool XYZReader::ReadFrame(Topology &top) {
     for (int i = 0; i < natoms; ++i) {
       getline(_fl, line);
       ++_line;
-      if (_fl.eof())
+      if (_fl.eof()) {
         throw std::runtime_error("unexpected end of file in xyz file");
+      }
 
       vector<string> fields;
       Tokenizer tok(line, " ");
       tok.ToVector(fields);
 
-      if (fields.size() != 4)
+      if (fields.size() != 4) {
         throw std::runtime_error("invalide line " +
                                  boost::lexical_cast<string>(_line) +
                                  " in xyz file\n" + line);
+      }
 
       Bead *b;
       if (topology) {
-
         string bead_type = fields[0];
         if (!top.BeadTypeExist(bead_type)) {
           top.RegisterBeadType(bead_type);
@@ -106,12 +107,14 @@ bool XYZReader::ReadFrame(Topology &top) {
       } else {
         b = top.getBead(i);
       }
+
       // convert to nm from A
       b->setPos(vec(boost::lexical_cast<double>(fields[1]) / 10.0,
                     boost::lexical_cast<double>(fields[2]) / 10.0,
                     boost::lexical_cast<double>(fields[3]) / 10.0));
-    }
-  }
+
+    }  // for(int i=0; i<natoms; ++i)
+  }    // if(!_fl.eof())
   return !_fl.eof();
 }
 

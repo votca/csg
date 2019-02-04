@@ -16,16 +16,30 @@
  */
 
 #include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
+
 #include <iostream>
+#include <stddef.h>
+#include <stdexcept>
+#include <string>
+
 #include <votca/csg/bead.h>
 #include <votca/csg/cgmoleculedef.h>
 #include <votca/csg/interaction.h>
+#include <votca/csg/map.h>
 #include <votca/csg/topology.h>
+
+#include <votca/tools/property.h>
 #include <votca/tools/tokenizer.h>
 
 using namespace votca::tools;
 using namespace std;
+
+namespace votca {
+namespace csg {
+class Molecule;
+class Residue;
+}  // namespace csg
+}  // namespace votca
 
 namespace votca {
 namespace csg {
@@ -109,8 +123,6 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     if (!top.BeadTypeExist(type)) {
       top.RegisterBeadType(type);
     }
-    cout << "CGMoleculeDef creating bead with residue number "
-         << (*iter)->residue_number_ << endl;
     bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
                                 (*iter)->residue_number_, _name, _name, 0, 0);
     minfo->AddBead(bead);

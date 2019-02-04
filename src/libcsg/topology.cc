@@ -15,10 +15,15 @@
  *
  */
 
-#include <assert.h>
+#include <boost/lexical_cast.hpp>
+
+#include <cassert>
+#include <regex>
 #include <stddef.h>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>  // IWYU pragma: keep
+
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
