@@ -61,16 +61,50 @@ class BaseMolecule : public BeadStructure<T> {
   // override it
   void AddBead(T *bead);
 
-  // Might be more than one bead with the same name
+  /**
+   * @brief Returns the ids of the beads with the name `name`
+   *
+   * @param[in] name
+   *
+   * @return unordered set of all the ids
+   */
   std::unordered_set<int> getBeadIdsByName(const std::string &name) const;
 
+  /**
+   * @brief Returns the ids of the beads that have the type given by name
+   *
+   * @param[in] name
+   *
+   * @return unordered set with the ids of the beads
+   */
   std::unordered_set<int> getBeadIdsByType(const std::string &name) const;
 
+  /**
+   * @brief Returns the bead type of the bead given by id
+   *
+   * @param[in] id
+   *
+   * @return bead pointer to the bead
+   */
   const std::string &getBeadType(const int &id) const;
 
+  /**
+   * @brief Grabs the position of the bead with id `id`
+   *
+   * @param[in] id
+   *
+   * @return vector describting the position of the bead
+   */
   const TOOLS::vec &getBeadPosition(const int &id) const;
 
-  const std::string getBeadName(int bead) const;
+  /**
+   * @brief Determines the beads name provided the id
+   *
+   * @param[in] id of the bead
+   *
+   * @return string name of the bead
+   */
+  const std::string getBeadName(int id) const;
 
  protected:
   TOOLS::Identity<int> id_;
