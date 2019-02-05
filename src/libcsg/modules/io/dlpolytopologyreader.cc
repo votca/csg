@@ -331,14 +331,12 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
         Molecule *mi_replica = top.CreateMolecule(mol_name);
         vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
-          // for (int i = 0; i < mi->BeadCount(); i++) {
           Bead *bead = mi->getBead(bead_id);
           string type = bead->getType();
           Bead *bead_replica = top.CreateBead<Bead>(
               1, bead->getName(), type,
               bead_constants::residue_number_unassigned, mol_name, mol_name,
               bead->getMass(), bead->getQ());
-          // mi_replica->AddBead(bead_replica, bead->getName());
           mi_replica->AddBead(bead_replica);
         }
         matoms += mi->BeadCount();
