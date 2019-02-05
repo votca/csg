@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/residue.h>
 #include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
