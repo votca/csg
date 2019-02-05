@@ -179,10 +179,11 @@ class Topology {
   /**
    * \brief Returns a pointer to the bead with index i
    *
-   * @param[in] int i is the id of the bead
+   * @param[in] int index is the index of the bead in the internal bead
+   * container
    * @return Bead * is a pointer to the bead
    **/
-  Bead *getBead(const int i) const { return _beads[i]; }
+  Bead *getBead(const int index) const { return _beads[index]; }
   Molecule *getMolecule(const int i) const { return _molecules[i]; }
 
   /**

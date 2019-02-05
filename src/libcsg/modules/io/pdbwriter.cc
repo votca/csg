@@ -33,7 +33,6 @@ void PDBWriter::Open(string file, bool bAppend) {
 void PDBWriter::Close() { fclose(_out); }
 
 void PDBWriter::Write(Topology *conf) {
-  Topology *top = conf;
   fprintf(_out, "MODEL     %4d\n", conf->getStep());
   for (BeadContainer::iterator iter = conf->Beads().begin();
        iter != conf->Beads().end(); ++iter) {
@@ -41,8 +40,6 @@ void PDBWriter::Write(Topology *conf) {
     vec r = bi->getPos();
     // truncate strings if necessary
     string resname = "";
-    // if (top->getResidue(bi->getResidueNumber()))
-    // resname = top->getResidue(bi->getResidueNumber())->getName();
     resname = bi->getResidueName();
     string atomname = bi->getName();
     if (resname.size() > 3) {
