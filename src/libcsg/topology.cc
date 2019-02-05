@@ -82,7 +82,6 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
                                       int nmolecules) {
   Molecule *mol = CreateMolecule(name);
   int beadcount = 0;
-  int res_offset = 0;
 
   BeadContainer::iterator bead;
   for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
@@ -120,9 +119,9 @@ void Topology::CopyTopologyData(Topology *top) {
     Bead *bi = *it_bead;
     string type = bi->getType();
     string molecule_name = top->getMolecule(bi->getMoleculeId())->getName();
-    Bead *bn = CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
-                                bi->getResidueNumber(), bi->getResidueName(),
-                                molecule_name, bi->getMass(), bi->getQ());
+    CreateBead<Bead>(bi->getSymmetry(), bi->getName(), type,
+                     bi->getResidueNumber(), bi->getResidueName(),
+                     molecule_name, bi->getMass(), bi->getQ());
   }
 
   // copy all molecules
@@ -182,7 +181,7 @@ void Topology::CheckMoleculeNaming(void) {
        iter != _molecules.end(); ++iter) {
     map<string, int>::iterator entry = nbeads.find((*iter)->getName());
     if (entry != nbeads.end()) {
-      if (entry->second != (*iter)->BeadCount())
+      if (entry->second != static_cast<int>((*iter)->BeadCount()))
         throw runtime_error(
             "There are molecules which have the same name but different number "
             "of bead please check the section manual topology handling in the "

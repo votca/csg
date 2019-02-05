@@ -148,9 +148,10 @@ bool DLPTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
 
       for (unsigned int imt = 0; imt < MolecularTypes.size(); imt++) {
 
-        for (int ib2 = 0; ib2 < MolecularTypes[imt]->BeadCount(); ib2++) {
+        vector<int> bead_ids2 = MolecularTypes[imt]->getBeadIds();
+        for (int &bead_id2 : bead_ids2) {
 
-          string bead_name2 = MolecularTypes[imt]->getBead(ib2)->getType();
+          string bead_name2 = MolecularTypes[imt]->getBead(bead_id2)->getType();
           bead_name2 = bead_name2.substr(
               0, bead_name2.find_first_of("#"));  // skip #index of atom from
                                                   // its name
