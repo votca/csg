@@ -101,6 +101,7 @@ class BeadStructure {
   std::vector<int> getBeadIds() const;
 
   TOOLS::Graph getGraph();
+
   /**
    * \brief Compare the topology of two bead structures
    *
