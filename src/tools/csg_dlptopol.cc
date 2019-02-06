@@ -223,8 +223,10 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, Molecule &cg) {
   out << "atoms " << cg.BeadCount() << endl;
   out << "# name  mass  charge  nrept  ifrozen (optional: ngroup, index, "
          "name/type, type/residue, index/res-ID) \n";
-  for (int i = 0; i < cg.BeadCount(); ++i) {
-    Bead *b = cg.getBead(i);
+  vector<int> bead_ids = cg.getBeadIds();
+  int index = 0;
+  for (int &bead_id : bead_ids) {
+    Bead *b = cg.getBead(bead_id);
 
     string bname = b->getName();
     string btype = b->getType();
@@ -235,10 +237,9 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, Molecule &cg) {
         0, btype.find_first_of("#"));  // skip #index of atom from its type
 
     out << format("%8s  %10f  %10f     1     0     1 %10d  %8s  %8s %10d \n") %
-               btype % b->getMass() % b->getQ() % (i + 1) % btype % bname %
-               (i + 1);
-    //% b->getType()->getName() % b->getMass() % b->getQ() % (i+1) %
-    // b->getType()->getName() % b->getName() % (i+1);
+               btype % b->getMass() % b->getQ() % (index + 1) % btype % bname %
+               (index + 1);
+    ++index;
   }
 }
 
