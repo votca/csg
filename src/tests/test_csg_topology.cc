@@ -75,6 +75,7 @@ BOOST_AUTO_TEST_CASE(simple_test) {
   top.setStep(1);
   BOOST_CHECK_EQUAL(top.getStep(), 1);
   top.setTime(1.21);
+
   BOOST_CHECK_CLOSE(top.getTime(), 1.21, 1e-5);
 }
 

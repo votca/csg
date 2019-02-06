@@ -15,11 +15,10 @@
  *
  */
 
+#include "pdbwriter.h"
 #include <stdio.h>
 #include <string>
 #include <votca/csg/topology.h>
-
-#include "pdbwriter.h"
 
 namespace votca {
 namespace csg {

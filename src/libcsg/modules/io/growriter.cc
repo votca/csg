@@ -15,14 +15,9 @@
  *
  */
 
+#include "growriter.h"
 #include <stdio.h>
 #include <string>
-#include <votca/csg/bead.h>
-#include <votca/csg/topology.h>
-#include <votca/tools/matrix.h>
-#include <votca/tools/vec.h>
-
-#include "growriter.h"
 
 namespace votca {
 namespace csg {
