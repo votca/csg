@@ -101,9 +101,9 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   BOOST_CHECK_CLOSE(tripleback->bead1()->getMass(), 1.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead2()->getMass(), 2.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead3()->getMass(), 3.0, 1e-5);
-  BOOST_CHECK_EQUAL(tripleback->bead1()->getResnr(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead2()->getResnr(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead3()->getResnr(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueNumber(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
