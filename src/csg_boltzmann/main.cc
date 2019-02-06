@@ -106,16 +106,18 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Molecule &atomistic,
   // exclude all with all
   {
     list<Bead *> excl_list;
-    for (int i = 0; i < atomistic.BeadCount(); ++i) {
-      excl_list.push_back(atomistic.getBead(i));
+    vector<int> bead_ids = atomistic.getBeadIds();
+    for (int &bead_id : bead_ids) {
+      excl_list.push_back(atomistic.getBead(bead_id));
     }
     ex->ExcludeList(excl_list);
   }
 
   // remove exclusions from inside a mapped bead
   Topology *at_top = atomistic.getParent();
-  for (int i = 0; i < cg.BeadCount(); ++i) {
-    const vector<int> &parent_beads = cg.getBead(i)->ParentBeads();
+  vector<int> cg_bead_ids = cg.getBeadIds();
+  for (int &bead_id : cg_bead_ids) {
+    const vector<int> &parent_beads = cg.getBead(bead_id)->ParentBeads();
     list<Bead *> excl_list;
 
     for (const int &parent_bead_id : parent_beads) {
@@ -127,11 +129,17 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Molecule &atomistic,
   // remove exclusion which come from atomistic topology and hence bonds and
   // angles
   Topology *cg_top = cg.getParent();
-  for (int i = 0; i < cg.BeadCount() - 1; ++i) {
-    for (int j = i + 1; j < cg.BeadCount(); ++j) {
-      if (cg_top->getExclusions().IsExcluded(cg.getBead(i), cg.getBead(j))) {
-        const vector<int> &parent_beads_w = cg.getBead(i)->ParentBeads();
-        const vector<int> &parent_beads_v = cg.getBead(j)->ParentBeads();
+  for (size_t index_1 = 0; index_1 < cg_bead_ids.size() - 1; ++index_1) {
+    for (size_t index_2 = index_1 + 1; index_2 < cg_bead_ids.size();
+         ++index_2) {
+      int bead_id_1 = cg_bead_ids.at(index_1);
+      int bead_id_2 = cg_bead_ids.at(index_2);
+      if (cg_top->getExclusions().IsExcluded(cg.getBead(bead_id_1),
+                                             cg.getBead(bead_id_2))) {
+        const vector<int> &parent_beads_w =
+            cg.getBead(bead_id_1)->ParentBeads();
+        const vector<int> &parent_beads_v =
+            cg.getBead(bead_id_2)->ParentBeads();
 
         for (const int parent_bead_id_w : parent_beads_w) {
           for (const int parent_bead_id_v : parent_beads_v) {
