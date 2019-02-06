@@ -422,13 +422,11 @@ bool PDBReader::NextFrame(Topology &top) {
            atm_temp++) {
 
         string residuename = "DUM";
-        // mi->AddBead(bead_vec.at(*atm_temp - 1), residuename);
         mi->AddBead(bead_vec.at(*atm_temp - 1));
       }
       ind++;
     }
 
-    int bond_indx = 0;
     // Cyle through the bonds and add them to the appropriate molecule
     for (auto bond_pair = bond_pairs.begin(); bond_pair != bond_pairs.end();
          bond_pair++) {
@@ -443,13 +441,7 @@ bool PDBReader::NextFrame(Topology &top) {
       // It may be the case that the atom id's and bead id's are different
       int bead_id1 = bead_vec.at(atm_id1 - 1)->getId();
       int bead_id2 = bead_vec.at(atm_id2 - 1)->getId();
-      Interaction *ic = new IBond(bead_id1, bead_id2);
-      ic->setGroup("BONDS");
-      ic->setIndex(bond_indx);
-      bond_indx++;
-      ic->setMolecule(mol_reInd_map[mol_ind]);
-      top.AddBondedInteraction(ic);
-      mi->AddInteraction(ic);
+      mi->ConnectBeads(bead_id1, bead_id2);
     }
 
     // Finally we want to build an exclusion matrix
