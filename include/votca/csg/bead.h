@@ -69,8 +69,9 @@ class Bead : public BaseBead {
    */
   const int &getResidueNumber() const { return residue_number_; }
 
-  std::string getResidueName() const { return residue_name_.getName(); }
+  std::string getResidueName() const { return residue_type_.getName(); }
 
+  std::string getElement() const { return element_.getName(); }
   /**
    * get the mass of the bead
    * \return bead mass
@@ -317,17 +318,19 @@ class Bead : public BaseBead {
    **/
   std::string getLabel() {
     std::stringstream label;
-    label << molecule_type_id_ << ":" << getResidueName() << ":" << getName();
+    label << molecule_type_id_ << ":" << getResidueName() << ":" << getType();
     return label.str();
   };
 
  protected:
   std::vector<int> parent_beads_;
 
-  TOOLS::Name residue_name_;
+  TOOLS::Name residue_type_;
 
   // Bead label is composed of ResidueNumber:ResidueName:bead_name
   TOOLS::Name bead_label_;
+
+  TOOLS::Name element_;
 
   TOOLS::byte_t symmetry_;
   double charge_;
@@ -345,19 +348,19 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(Topology *owner, int id, std::string type, TOOLS::byte_t symmetry,
-       std::string name, int residue_number, std::string residue_name,
-       int molecule_type_id, double m, double q)
+  Bead(int id, std::string bead_type, TOOLS::byte_t symmetry,
+       std::string element, int residue_id, std::string residue_type,
+       int molecule_id, double mass, double charge)
       : symmetry_(symmetry),
-        charge_(q),
-        molecule_type_id_(molecule_type_id),
-        residue_number_(residue_number) {
-    topology_item_._parent = owner;
+        charge_(charge),
+        molecule_type_id_(molecule_id),
+        residue_number_(residue_id) {
+
     setId(id);
-    setType(type);
-    setName(name);
-    residue_name_.setName(residue_name);
-    setMass(m);
+    setType(bead_type);
+    element_.setName(element);
+    residue_type_.setName(residue_type);
+    setMass(mass);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
     bU_ = false;

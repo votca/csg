@@ -28,7 +28,7 @@
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
 #include <votca/csg/openbox.h>
-#include <votca/csg/topology.h>
+//#include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/rangeparser.h>
 #include <votca/tools/vec.h>
@@ -37,11 +37,11 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
+/*
 bool is_digits(const std::string &str) {
   return str.find_first_not_of("0123456789") == std::string::npos;
-}
-
+}*/
+/*
 Topology::~Topology() {
   Cleanup();
   if (_bc) delete (_bc);
@@ -75,10 +75,10 @@ void Topology::Cleanup() {
   // cleanup _bc object
   if (_bc) delete (_bc);
   _bc = new OpenBox();
-}
+}*/
 
 /// \todo implement checking, only used in xml topology reader
-void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
+/*void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
                                       int nmolecules) {
   Molecule *mol = CreateMolecule(name);
   int beadcount = 0;
@@ -97,8 +97,8 @@ void Topology::CreateMoleculesByRange(string name, int first, int nbeads,
       beadcount = 0;
     }
   }
-}
-
+}*/
+/*
 void Topology::CopyTopologyData(Topology *top) {
   BeadContainer::iterator it_bead;
   MoleculeContainer::iterator it_mol;
@@ -134,12 +134,12 @@ void Topology::CopyTopologyData(Topology *top) {
     }
   }
 }
-
-int Topology::getBeadTypeId(string type) const {
+*/
+/*int Topology::getBeadTypeId(string type) const {
   assert(beadtypes_.count(type));
   return beadtypes_.at(type);
-}
-
+}*/
+/*
 void Topology::RenameMolecules(string range, string name) {
   RangeParser rp;
   RangeParser::iterator i;
@@ -152,8 +152,8 @@ void Topology::RenameMolecules(string range, string name) {
     }
     getMolecule(*i - 1)->setName(name);
   }
-}
-
+}*/
+/*
 void Topology::RenameBeadType(string name, string newname) {
   BeadContainer::iterator bead;
   for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
@@ -162,8 +162,8 @@ void Topology::RenameBeadType(string name, string newname) {
       (*bead)->setType(newname);
     }
   }
-}
-
+}*/
+/*
 void Topology::SetBeadTypeMass(string name, double value) {
   BeadContainer::iterator bead;
   for (bead = _beads.begin(); bead != _beads.end(); ++bead) {
@@ -173,8 +173,8 @@ void Topology::SetBeadTypeMass(string name, double value) {
     }
   }
 }
-
-void Topology::CheckMoleculeNaming(void) {
+*/
+/*void Topology::CheckMoleculeNaming(void) {
   map<string, int> nbeads;
 
   for (MoleculeContainer::iterator iter = _molecules.begin();
@@ -190,8 +190,8 @@ void Topology::CheckMoleculeNaming(void) {
     }
     nbeads[(*iter)->getName()] = (*iter)->BeadCount();
   }
-}
-
+}*/
+/*
 void Topology::AddBondedInteraction(Interaction *ic) {
   map<string, int>::iterator iter;
   iter = _interaction_groups.find(ic->getGroup());
@@ -204,16 +204,16 @@ void Topology::AddBondedInteraction(Interaction *ic) {
   }
   _interactions.push_back(ic);
   _interactions_by_group[ic->getGroup()].push_back(ic);
-}
-
+}*/
+/*
 std::list<Interaction *> Topology::InteractionsInGroup(const string &group) {
   map<string, list<Interaction *> >::iterator iter;
   iter = _interactions_by_group.find(group);
   if (iter == _interactions_by_group.end()) return list<Interaction *>();
   return iter->second;
 }
-
-bool Topology::BeadTypeExist(string type) const {
+*/
+/*bool Topology::BeadTypeExist(string type) const {
   return beadtypes_.count(type);
 }
 
@@ -240,8 +240,8 @@ void Topology::RegisterBeadType(string type) {
   }
   beadtypes_[type] = id;
 }
-
-vec Topology::BCShortestConnection(const vec &r_i, const vec &r_j) const {
+*/
+/*vec Topology::BCShortestConnection(const vec &r_i, const vec &r_j) const {
   return _bc->BCShortestConnection(r_i, r_j);
 }
 
@@ -249,8 +249,8 @@ vec Topology::getDist(int bead1, int bead2) const {
   return BCShortestConnection(getBead(bead1)->getPos(),
                               getBead(bead2)->getPos());
 }
-
-double Topology::BoxVolume() { return _bc->BoxVolume(); }
+*/
+/*double Topology::BoxVolume() { return _bc->BoxVolume(); }
 
 void Topology::RebuildExclusions() { _exclusions.CreateExclusions(this); }
 
@@ -272,8 +272,8 @@ BoundaryCondition::eBoxtype Topology::autoDetectBoxType(const matrix &box) {
     return BoundaryCondition::typeTriclinic;
   }
   return BoundaryCondition::typeOpen;
-}
-
+}*/
+/*
 double Topology::ShortestBoxSize() {
   vec _box_a = getBox().getCol(0);
   vec _box_b = getBox().getCol(1);
@@ -293,7 +293,7 @@ double Topology::ShortestBoxSize() {
   double lc = _box_c * _norm_c;
 
   return min(la, min(lb, lc));
-}
+}*/
 
 }  // namespace csg
 }  // namespace votca
