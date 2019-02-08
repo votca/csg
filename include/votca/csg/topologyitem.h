@@ -18,9 +18,9 @@
 #ifndef _VOTCA_CSG_TOPOLOGYITEM_H
 #define _VOTCA_CSG_TOPOLOGYITEM_H
 
-namespace votca {
-namespace csg {
-
+//namespace votca {
+//namespace csg {
+/*
 class Topology;
 
 class TopologyItem {
@@ -37,8 +37,8 @@ class TopologyItem {
   friend class BaseBead;
   friend class Bead;
 };
-
-}  // namespace csg
-}  // namespace votca
+*/
+//}  // namespace csg
+//}  // namespace votca
 
 #endif /* _VOTCA_CSG_TOPOLOGYITEM_H */

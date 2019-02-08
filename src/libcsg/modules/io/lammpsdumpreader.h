@@ -40,22 +40,22 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDumpReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, Topology<Bead,Molecule> &top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(Topology<Bead,Molecule> &top);
   /// read in the next frame
-  bool NextFrame(Topology &top);
+  bool NextFrame(Topology<Bead,Molecule> &top);
 
   void Close();
 
  private:
-  void ReadTimestep(Topology &top, std::string itemline);
-  void ReadBox(Topology &top, std::string itemline);
-  void ReadNumAtoms(Topology &top, std::string itemline);
-  void ReadAtoms(Topology &top, std::string itemline);
+  void ReadTimestep(Topology<Bead,Molecule> &top, std::string itemline);
+  void ReadBox(Topology<Bead,Molecule> &top, std::string itemline);
+  void ReadNumAtoms(Topology<Bead,Molecule> &top, std::string itemline);
+  void ReadAtoms(Topology<Bead,Molecule> &top, std::string itemline);
 
   std::ifstream _fl;
   std::string _fname;

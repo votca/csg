@@ -29,7 +29,7 @@ class TopologyReader {
  public:
   virtual ~TopologyReader() {}
   /// open, read and close topology file
-  virtual bool ReadTopology(std::string file, Topology &top) = 0;
+  virtual bool ReadTopology(std::string file, Topology<Bead,Molecule> &top) = 0;
 
   static void RegisterPlugins(void);
 };

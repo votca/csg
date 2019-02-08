@@ -42,14 +42,14 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDataReader() {}
 
   /// open, read and close topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, Topology<Bead,Molecule> &top);
 
   /// open a trajectory file
   bool Open(const std::string &file);
   /// read in the first frame of trajectory file
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(Topology<Bead,Molecule> &top);
   /// read in the next frame of trajectory file
-  bool NextFrame(Topology &top);
+  bool NextFrame(Topology<Bead,Molecule> &top);
   /// close the topology file
   void Close();
 
@@ -84,28 +84,28 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   // First int is the atom id second the atom index
   std::map<int, int> atomIdToIndex_;
 
-  bool MatchOneFieldLabel_(std::vector<std::string> fields, Topology &top);
-  bool MatchTwoFieldLabels_(std::vector<std::string> fields, Topology &top);
-  bool MatchThreeFieldLabels_(std::vector<std::string> fields, Topology &top);
-  bool MatchFourFieldLabels_(std::vector<std::string> fields, Topology &top);
+  bool MatchOneFieldLabel_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
+  bool MatchTwoFieldLabels_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
+  bool MatchThreeFieldLabels_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
+  bool MatchFourFieldLabels_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
   bool MatchFieldsTimeStepLabel_(std::vector<std::string> fields,
-                                 Topology &top);
+                                 Topology<Bead,Molecule> &top);
 
-  void ReadBox_(std::vector<std::string> fields, Topology &top);
+  void ReadBox_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
   void SortIntoDataGroup_(std::string tag);
   void ReadNumTypes_(std::vector<std::string> fields, std::string type);
 
-  void ReadNumOfAtoms_(std::vector<std::string> fields, Topology &top);
+  void ReadNumOfAtoms_(std::vector<std::string> fields, Topology<Bead,Molecule> &top);
   void ReadNumOfBonds_(std::vector<std::string> fields);
   void ReadNumOfAngles_(std::vector<std::string> fields);
   void ReadNumOfDihedrals_(std::vector<std::string> fields);
   void ReadNumOfImpropers_(std::vector<std::string> fields);
 
-  void ReadAtoms_(Topology &top);
-  void ReadBonds_(Topology &top);
-  void ReadAngles_(Topology &top);
-  void ReadDihedrals_(Topology &top);
-  void ReadImpropers_(Topology &top);
+  void ReadAtoms_(Topology<Bead,Molecule> &top);
+  void ReadBonds_(Topology<Bead,Molecule> &top);
+  void ReadAngles_(Topology<Bead,Molecule> &top);
+  void ReadDihedrals_(Topology<Bead,Molecule> &top);
+  void ReadImpropers_(Topology<Bead,Molecule> &top);
 
   enum lammps_format {
     style_angle_bond_molecule = 0,

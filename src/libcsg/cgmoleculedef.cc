@@ -111,8 +111,9 @@ void CGMoleculeDef::ParseMapping(Property &options) {
   }
 }
 
-Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
-  Molecule *minfo = top.CreateMolecule(_name);
+Molecule *CGMoleculeDef::CreateMolecule(Topology<Bead,Molecule> &top) {
+  int molecule_id = top.MoleculeCount();
+  Molecule *minfo = top.CreateMolecule(_name,molecule_id);
 
   // create the atoms
   vector<beaddef_t *>::iterator iter;
@@ -123,8 +124,11 @@ Molecule *CGMoleculeDef::CreateMolecule(Topology &top) {
     if (!top.BeadTypeExist(type)) {
       top.RegisterBeadType(type);
     }
-    bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
-                                (*iter)->residue_number_, _name, _name, 0, 0);
+    bead = top.CreateBead<Bead>((*iter)->_symmetry, type,(*iter)->id_,molecule_id,
+                                bead_constants::residue_name_unassigned,
+                                (*iter)->residue_number_,topology_constants::unassigned, 0.0, 0.0);
+    //bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
+    //                            (*iter)->residue_number_, _name, _name, 0, 0);
     minfo->AddBead(bead);
   }
 

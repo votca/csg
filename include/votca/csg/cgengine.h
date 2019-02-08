@@ -27,6 +27,7 @@
 #include <map>
 #include <votca/tools/datacollection.h>
 
+#include "bead.h"
 #include "cgengine.h"
 #include "cgmoleculedef.h"
 #include "molecule.h"
@@ -59,7 +60,7 @@ class CGEngine {
   /**
       create a coarse grained topolgy based on a given topology
   */
-  TopologyMap *CreateCGTopology(Topology &in, Topology &out);
+  TopologyMap *CreateCGTopology(Topology<Bead,Molecule> &in, Topology<Bead,Molecule> &out);
 
   /**
       load molecule type from file

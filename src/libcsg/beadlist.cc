@@ -15,6 +15,9 @@
  *
  */
 
+#include <string>
+#include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/molecule.h"
 #include <votca/csg/beadlist.h>
 #include <votca/csg/topology.h>
 #include <votca/tools/tokenizer.h>
@@ -24,8 +27,8 @@ namespace csg {
 
 using namespace std;
 
-int BeadList::Generate(Topology &top, const string &select) {
-  BeadContainer::iterator iter;
+int BeadList::Generate(Topology<Bead,Molecule> &top, const string &select) {
+//  BeadContainer::iterator iter;
   _topology = &top;
   bool selectByName = false;
   string pSelect;  // parsed selection string
@@ -38,24 +41,28 @@ int BeadList::Generate(Topology &top, const string &select) {
     pSelect = select;
   }
 
-  for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
+  vector<int> bead_ids = top.getBeadIds();
+  for( const int & bead_id : bead_ids ){
+//  for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
+    Bead * bead_ptr = top->getBead(bead_id);
     if (!selectByName) {
-      if (wildcmp(pSelect.c_str(), (*iter)->getType().c_str())) {
-        push_back(*iter);
+      if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {
+        push_back(bead_ptr);
       }
     } else {
-      if (wildcmp(pSelect.c_str(), (*iter)->getName().c_str())) {
-        push_back(*iter);
-      }
+      throw runtime_error("Bead name is no longer supported");
+  //    if (wildcmp(pSelect.c_str(), bead_ptr->getName().c_str())) {
+  //      push_back(bead_ptr);
+  //    }
     }
   }
   return size();
 }
 
-int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select,
+int BeadList::GenerateInSphericalSubvolume(Topology<Bead,Molecule> &top, const string &select,
                                            vec ref, double radius) {
-  BeadContainer::iterator iter;
-  _topology = &top;
+  //BeadContainer::iterator iter;
+  _topology = &(top);
   bool selectByName = false;
   string pSelect;  // parsed selection string
 
@@ -67,17 +74,21 @@ int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select,
     pSelect = select;
   }
 
-  for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
-    if (abs(_topology->BCShortestConnection(ref, (*iter)->getPos())) > radius)
+  vector<int> bead_ids = top.getBeadIds();
+  for( const int & bead_id : bead_ids ){
+    Bead * bead_ptr = top.getBead(bead_id);
+    //for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
+    if (abs(_topology->BCShortestConnection(ref, bead_ptr->getPos())) > radius)
       continue;
     if (!selectByName) {
-      if (wildcmp(pSelect.c_str(), (*iter)->getType().c_str())) {
-        push_back(*iter);
+      if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {
+        push_back(bead_ptr);
       }
     } else {
-      if (wildcmp(pSelect.c_str(), (*iter)->getName().c_str())) {
-        push_back(*iter);
-      }
+      throw runtime_error("Bead name is no longer supported");
+      //if (wildcmp(pSelect.c_str(), bead_ptr->getName().c_str())) {
+      //  push_back(bead_ptr);
+      //}
     }
   }
   return size();

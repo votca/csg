@@ -20,7 +20,7 @@
 
 #include "basemolecule.h"
 #include "bead.h"
-#include "topologyitem.h"
+//#include "topologyitem.h"
 #include <assert.h>
 #include <map>
 #include <string>
@@ -45,7 +45,7 @@ const std::string molecule_name_unassigned = "unassigned";
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem, public BaseMolecule<Bead> {
+class Molecule : public BaseMolecule<Bead> {
  public:
   /**
    * @brief Grabs all beads that have the label given by `label`
@@ -65,12 +65,13 @@ class Molecule : public TopologyItem, public BaseMolecule<Bead> {
   std::vector<Interaction *> _interactions;
 
   /// constructor
-  Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+  //Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+  Molecule(int id, std::string name) {
     id_.setId(id);
     name_.setName(name);
   }
 
-  friend class Topology;
+//  friend class Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(

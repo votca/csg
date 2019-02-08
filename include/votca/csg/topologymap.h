@@ -29,21 +29,21 @@ class TopologyMap {
  public:
   ~TopologyMap();
 
-  TopologyMap(Topology *in, Topology *out);
+  TopologyMap(Topology<Bead,Molecule> *in, Topology<Bead,Molecule> *out);
 
   void AddMoleculeMap(Map *map);
 
   void Apply();
 
  private:
-  Topology *_in;
-  Topology *_out;
+  Topology<Bead,Molecule> *_in;
+  Topology<Bead,Molecule> *_out;
 
   typedef std::vector<Map *> MapContainer;
   MapContainer _maps;
 };
 
-inline TopologyMap::TopologyMap(Topology *in, Topology *out)
+inline TopologyMap::TopologyMap(Topology<Bead,Molecule> *in, Topology<Bead,Molecule> *out)
     : _in(in), _out(out) {}
 
 inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }

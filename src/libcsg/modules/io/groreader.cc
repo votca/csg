@@ -30,7 +30,7 @@ namespace csg {
 
 using namespace std;
 
-bool GROReader::ReadTopology(string file, Topology &top) {
+bool GROReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
   _topology = true;
   top.Cleanup();
 
@@ -54,13 +54,13 @@ bool GROReader::Open(const string &file) {
 
 void GROReader::Close() { _fl.close(); }
 
-bool GROReader::FirstFrame(Topology &top) {
+bool GROReader::FirstFrame(Topology<Bead,Molecule> &top) {
   _topology = false;
   NextFrame(top);
   return true;
 }
 
-bool GROReader::NextFrame(Topology &top) {
+bool GROReader::NextFrame(Topology<Bead,Molecule> &top) {
   string tmp;
   getline(_fl, tmp);  // title
   if (_fl.eof()) {

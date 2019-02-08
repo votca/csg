@@ -18,6 +18,8 @@
 #ifndef _VOTCA_CSG_NEMATICORDER_H
 #define _VOTCA_CSG_NEMATICORDER_H
 
+#include "bead.h"
+#include "molecule.h"
 #include "topology.h"
 #include <votca/tools/matrix.h>
 
@@ -30,7 +32,7 @@ class NematicOrder {
   NematicOrder() {}
   ~NematicOrder() {}
 
-  void Process(Topology &top, const std::string &filter = "*");
+  void Process(Topology<Bead,Molecule> &top, const std::string &filter = "*");
 
   matrix::eigensystem_t &NematicU() { return _nemat_u; }
   matrix::eigensystem_t &NematicV() { return _nemat_v; }

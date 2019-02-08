@@ -29,7 +29,7 @@ namespace csg {
 
 using namespace std;
 
-bool XMLTopologyReader::ReadTopology(string filename, Topology &top) {
+bool XMLTopologyReader::ReadTopology(string filename, Topology<Bead,Molecule> &top) {
   _top = &top;
 
   Property options;

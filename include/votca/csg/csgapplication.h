@@ -69,18 +69,18 @@ class CsgApplication : public Application {
 
   /// \brief called after topology was loaded
 
-  virtual bool EvaluateTopology(Topology *top, Topology *top_ref = 0) {
+  virtual bool EvaluateTopology(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_ref = 0) {
     return true;
   }
 
   void AddObserver(CGObserver *observer);
 
   /// \brief called before the first frame
-  virtual void BeginEvaluate(Topology *top, Topology *top_ref = 0);
+  virtual void BeginEvaluate(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_ref = -2);
   /// \brief called after the last frame
   virtual void EndEvaluate();
   // \brief called for each frame which is mapped
-  virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0);
+  virtual void EvalConfiguration(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_ref = 0);
 
   // thread related stuff follows
 
@@ -104,14 +104,14 @@ class CsgApplication : public Application {
     ~Worker();
 
     /// \brief overload with the actual computation
-    virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0) = 0;
+    virtual void EvalConfiguration(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_ref = 0) = 0;
 
     /// \brief returns worker id
     int getId() { return _id; }
 
    protected:
     CsgApplication *_app;
-    Topology _top, _top_cg;
+    Topology<Bead,Molecule> _top, _top_cg;
     TopologyMap *_map;
     int _id;
 

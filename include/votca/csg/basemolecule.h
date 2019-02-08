@@ -27,7 +27,7 @@
 
 #include "basebead.h"
 #include "beadstructure.h"
-#include "topologyitem.h"
+//#include "topologyitem.h"
 
 namespace votca {
 namespace csg {

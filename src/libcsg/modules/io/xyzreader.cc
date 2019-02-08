@@ -25,7 +25,7 @@ namespace csg {
 using namespace boost;
 using namespace std;
 
-bool XYZReader::ReadTopology(string file, Topology &top) {
+bool XYZReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
   top.Cleanup();
 
   _fl.open(file.c_str());
@@ -51,15 +51,15 @@ bool XYZReader::Open(const string &file) {
 
 void XYZReader::Close() { _fl.close(); }
 
-bool XYZReader::FirstFrame(Topology &top) { return NextFrame(top); }
+bool XYZReader::FirstFrame(Topology<Bead,Molecule> &top) { return NextFrame(top); }
 
-bool XYZReader::NextFrame(Topology &top) {
+bool XYZReader::NextFrame(Topology<Bead,Molecule> &top) {
   bool success = ReadFrame<false>(top);
   return success;
 }
 
 template <bool topology>
-bool XYZReader::ReadFrame(Topology &top) {
+bool XYZReader::ReadFrame(Topology<Bead,Molecule> &top) {
   string line;
   getline(_fl, line);
   ++_line;

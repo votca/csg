@@ -39,9 +39,9 @@ class TrajectoryReader {
   virtual void Close(){};
 
   /// read in the first frame
-  virtual bool FirstFrame(Topology &top) = 0;
+  virtual bool FirstFrame(Topology<Bead,Molecule> &top) = 0;
   /// read in the next frame
-  virtual bool NextFrame(Topology &top) = 0;
+  virtual bool NextFrame(Topology<Bead,Molecule> &top) = 0;
 
   static void RegisterPlugins(void);
 };

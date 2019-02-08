@@ -22,7 +22,8 @@
 #include <vector>
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
-
+#include "bead.h"
+#include "molecule.h"
 namespace votca {
 namespace csg {
 
@@ -46,7 +47,7 @@ class NBListGrid_3Body : public NBList_3Body {
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
-  Topology *_top;
+  Topology<Bead,Molecule> *_top;
 
   void InitializeGrid(const matrix &box);
 

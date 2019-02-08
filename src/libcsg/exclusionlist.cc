@@ -31,8 +31,8 @@ void ExclusionList::Clear(void) {
     delete *iter;
   _exclusions.clear();
 }
-
-void ExclusionList::CreateExclusions(Topology *top) {
+/*
+//void ExclusionList::CreateExclusions(Topology *top) {
   InteractionContainer &ic = top->BondedInteractions();
   InteractionContainer::iterator ia;
 
@@ -46,7 +46,7 @@ void ExclusionList::CreateExclusions(Topology *top) {
     }
     ExcludeList(l);
   }
-}
+}*/
 
 bool ExclusionList::IsExcluded(Bead *bead1, Bead *bead2) {
   exclusion_t *excl;

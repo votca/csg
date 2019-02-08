@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <memory>
 
-#include <votca/csg/topologyitem.h>
+//#include <votca/csg/topologyitem.h>
 #include <votca/tools/identity.h>
 #include <votca/tools/name.h>
 #include <votca/tools/vec.h>

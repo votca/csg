@@ -44,7 +44,7 @@ class NBListGrid : public NBList {
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
-  Topology *_top;
+  Topology<Bead,Molecule> *_top;
 
   void InitializeGrid(const TOOLS::matrix &box);
 

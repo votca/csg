@@ -27,7 +27,7 @@ namespace csg {
 using namespace boost;
 using namespace std;
 
-bool PDBReader::ReadTopology(string file, Topology &top) {
+bool PDBReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
   _topology = true;
   top.Cleanup();
 
@@ -54,12 +54,12 @@ bool PDBReader::Open(const string &file) {
 
 void PDBReader::Close() { _fl.close(); }
 
-bool PDBReader::FirstFrame(Topology &top) {
+bool PDBReader::FirstFrame(Topology<Bead,Molecule> &top) {
   _topology = false;
   return NextFrame(top);
 }
 
-bool PDBReader::NextFrame(Topology &top) {
+bool PDBReader::NextFrame(Topology<Bead,Molecule> &top) {
   string line;
   // Two column vector for storing all bonds
   // 1 - id of first atom
