@@ -26,7 +26,7 @@ namespace csg {
 using namespace boost;
 using namespace std;
 
-bool LAMMPSDumpReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
+bool LAMMPSDumpReader::ReadTopology(string file, CSG_Topology &top) {
   _topology = true;
   top.Cleanup();
 
@@ -52,13 +52,13 @@ bool LAMMPSDumpReader::Open(const string &file) {
 
 void LAMMPSDumpReader::Close() { _fl.close(); }
 
-bool LAMMPSDumpReader::FirstFrame(Topology<Bead,Molecule> &top) {
+bool LAMMPSDumpReader::FirstFrame(CSG_Topology &top) {
   _topology = false;
   NextFrame(top);
   return true;
 }
 
-bool LAMMPSDumpReader::NextFrame(Topology<Bead,Molecule> &top) {
+bool LAMMPSDumpReader::NextFrame(CSG_Topology &top) {
   string line;
   getline(_fl, line);
   while (!_fl.eof()) {
@@ -89,14 +89,14 @@ bool LAMMPSDumpReader::NextFrame(Topology<Bead,Molecule> &top) {
   ;
 }
 
-void LAMMPSDumpReader::ReadTimestep(Topology<Bead,Molecule> &top, string itemline) {
+void LAMMPSDumpReader::ReadTimestep(CSG_Topology &top, string itemline) {
   string s;
   getline(_fl, s);
   top.setStep(boost::lexical_cast<int>(s));
   cout << "Reading frame, timestep " << top.getStep() << endl;
 }
 
-void LAMMPSDumpReader::ReadBox(Topology<Bead,Molecule> &top, string itemline) {
+void LAMMPSDumpReader::ReadBox(CSG_Topology &top, string itemline) {
   string s;
 
   matrix m;
@@ -113,7 +113,7 @@ void LAMMPSDumpReader::ReadBox(Topology<Bead,Molecule> &top, string itemline) {
   top.setBox(m);
 }
 
-void LAMMPSDumpReader::ReadNumAtoms(Topology<Bead,Molecule> &top, string itemline) {
+void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top, string itemline) {
   string s;
   getline(_fl, s);
   _natoms = boost::lexical_cast<int>(s);
@@ -121,7 +121,7 @@ void LAMMPSDumpReader::ReadNumAtoms(Topology<Bead,Molecule> &top, string itemlin
     std::runtime_error("number of beads in topology and trajectory differ");
 }
 
-void LAMMPSDumpReader::ReadAtoms(Topology<Bead,Molecule> &top, string itemline) {
+void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
   if (_topology) {
     if (!top.BeadTypeExist(bead_constants::bead_type_unassigned)) {
       top.RegisterBeadType(bead_constants::bead_type_unassigned);

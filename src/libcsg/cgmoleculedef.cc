@@ -111,8 +111,7 @@ void CGMoleculeDef::ParseMapping(Property &options) {
   }
 }
 
-Molecule *CGMoleculeDef::CreateMolecule(
-    Topology<Bead, Molecule, Interaction> &top) {
+Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   int molecule_id = top.MoleculeCount();
   Molecule *minfo = top.CreateMolecule(_name, molecule_id);
 
@@ -205,7 +204,7 @@ Molecule *CGMoleculeDef::CreateMolecule(
   return minfo;
 }
 
-Map *CGMoleculeDef::CreateMap(Molecule &in, Molecule &out) {
+Map *CGMoleculeDef::CreateMap(const Molecule &in, Molecule &out) {
   if ((unsigned int)out.BeadCount() != _beads.size()) {
     throw runtime_error(
         "number of beads for cg molecule and mapping definition do "

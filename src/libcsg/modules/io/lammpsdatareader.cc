@@ -17,7 +17,7 @@
 
 #include "lammpsdatareader.h"
 #include <vector>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
@@ -81,7 +81,7 @@ string getStringGivenDoubleAndMap_(double value, map<string, double> nameValue,
  * Public Facing Methods                                                     *
  *****************************************************************************/
 
-bool LAMMPSDataReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
+bool LAMMPSDataReader::ReadTopology(string file, CSG_Topology &top) {
 
   cout << endl;
   cout << "WARNING: The votca lammps data reader is only able to read ";
@@ -126,13 +126,13 @@ bool LAMMPSDataReader::Open(const string &file) {
 
 void LAMMPSDataReader::Close() { fl_.close(); }
 
-bool LAMMPSDataReader::FirstFrame(Topology<Bead,Molecule> &top) {
+bool LAMMPSDataReader::FirstFrame(CSG_Topology &top) {
   topology_ = false;
   NextFrame(top);
   return true;
 }
 
-bool LAMMPSDataReader::NextFrame(Topology<Bead,Molecule> &top) {
+bool LAMMPSDataReader::NextFrame(CSG_Topology &top) {
 
   string line;
   getline(fl_, line);
@@ -173,7 +173,7 @@ bool LAMMPSDataReader::NextFrame(Topology<Bead,Molecule> &top) {
  *****************************************************************************/
 
 bool LAMMPSDataReader::MatchOneFieldLabel_(vector<string> fields,
-                                           Topology<Bead,Molecule> &top) {
+                                           CSG_Topology &top) {
 
   if (fields.at(0) == "Masses") {
     SortIntoDataGroup_("Masses");
@@ -194,7 +194,7 @@ bool LAMMPSDataReader::MatchOneFieldLabel_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchTwoFieldLabels_(vector<string> fields,
-                                            Topology<Bead,Molecule> &top) {
+                                            CSG_Topology &top) {
 
   string label = fields.at(0) + " " + fields.at(1);
 
@@ -223,7 +223,7 @@ bool LAMMPSDataReader::MatchTwoFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchThreeFieldLabels_(vector<string> fields,
-                                              Topology<Bead,Molecule> &top) {
+                                              CSG_Topology &top) {
   string label = fields.at(1) + " " + fields.at(2);
   if (label == "atom types") {
     ReadNumTypes_(fields, "atom");
@@ -242,7 +242,7 @@ bool LAMMPSDataReader::MatchThreeFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchFourFieldLabels_(vector<string> fields,
-                                             Topology<Bead,Molecule> &top) {
+                                             CSG_Topology &top) {
   string label = fields.at(2) + " " + fields.at(3);
   if (label == "xlo xhi") {
     ReadBox_(fields, top);
@@ -253,7 +253,7 @@ bool LAMMPSDataReader::MatchFourFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchFieldsTimeStepLabel_(vector<string> fields,
-                                                 Topology<Bead,Molecule> &top) {
+                                                 CSG_Topology &top) {
   size_t index = 0;
   for (auto field : fields) {
     if (field == "timestep" && (index + 2) < fields.size()) {
@@ -338,7 +338,7 @@ map<string, int> LAMMPSDataReader::determineAtomAndBeadCountBasedOnMass_(
   return countSameElementOrBead;
 }
 
-void LAMMPSDataReader::ReadBox_(vector<string> fields, Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadBox_(vector<string> fields, CSG_Topology &top) {
   matrix m;
   m.ZeroMatrix();
   m[0][0] = boost::lexical_cast<double>(fields.at(1)) -
@@ -387,7 +387,8 @@ void LAMMPSDataReader::ReadNumTypes_(vector<string> fields, string type) {
   numberOfDifferentTypes_[type] = stoi(fields.at(0));
 }
 
-void LAMMPSDataReader::ReadNumOfAtoms_(vector<string> fields, Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadNumOfAtoms_(vector<string> fields,
+                                       CSG_Topology &top) {
   numberOf_["atoms"] = stoi(fields.at(0));
   if (!topology_ && numberOf_["atoms"] != top.BeadCount())
     std::runtime_error("Number of beads in topology and trajectory differ");
@@ -430,7 +431,7 @@ LAMMPSDataReader::lammps_format LAMMPSDataReader::determineDataFileFormat_(
   return format;
 }
 
-void LAMMPSDataReader::ReadAtoms_(Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
 
   string line;
   getline(fl_, line);
@@ -556,7 +557,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology<Bead,Molecule> &top) {
   }
 }
 
-void LAMMPSDataReader::ReadBonds_(Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadBonds_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -610,7 +611,7 @@ void LAMMPSDataReader::ReadBonds_(Topology<Bead,Molecule> &top) {
   }
 }
 
-void LAMMPSDataReader::ReadAngles_(Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadAngles_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -669,7 +670,7 @@ void LAMMPSDataReader::ReadAngles_(Topology<Bead,Molecule> &top) {
   }
 }
 
-void LAMMPSDataReader::ReadDihedrals_(Topology<Bead,Molecule> &top) {
+void LAMMPSDataReader::ReadDihedrals_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);

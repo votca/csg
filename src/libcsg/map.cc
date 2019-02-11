@@ -20,8 +20,8 @@
 #include <numeric>
 #include <string>
 #include <votca/csg/bead.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/map.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/vec.h>
@@ -138,7 +138,7 @@ void Map_Sphere::Apply() {
   _out->ClearParentBeads();
 
   // the following is needed for pbc treatment
-  Topology<Bead,Molecule> *top = _out->getParent();
+  CSG_Topology *top = _out->getParent();
   double max_dist = 0.5 * top->ShortestBoxSize();
   vec r0 = vec(0, 0, 0);
   string name0;
@@ -196,7 +196,7 @@ void Map_Ellipsoid::Apply() {
   bPos = bVel = bF = false;
 
   // the following is needed for pbc treatment
-  Topology<Bead,Molecule> *top = _out->getParent();
+  CSG_Topology *top = _out->getParent();
   double max_dist = 0.5 * top->ShortestBoxSize();
   vec r0 = vec(0, 0, 0);
   if (_matrix.size() > 0) {

@@ -40,11 +40,12 @@ CGEngine::~CGEngine() {
     \todo melts with different molecules
 */
 TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
-  MoleculeContainer &mols = in.Molecules();
-  MoleculeContainer::iterator iter;
+  const MoleculeContainer &mols = in.Molecules();
+  // MoleculeContainer::iterator iter;
   TopologyMap *m = new TopologyMap(&in, &out);
-  for (iter = mols.begin(); iter != mols.end(); ++iter) {
-    Molecule *mol = *iter;
+  // for (iter = mols.begin(); iter != mols.end(); ++iter) {
+  for (const pair<int, Molecule> &iter : mols) {
+    const Molecule *mol = &(iter.second);
     if (IsIgnored(mol->getName())) continue;
     CGMoleculeDef *def = getMoleculeDef(mol->getName());
     if (!def) {

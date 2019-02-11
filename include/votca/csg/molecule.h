@@ -75,6 +75,7 @@ class Molecule : public BaseMolecule<Bead> {
   }
 
   //  friend class Topology;
+  friend class CSG_Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(

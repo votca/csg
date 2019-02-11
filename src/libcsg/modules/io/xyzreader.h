@@ -30,7 +30,7 @@ namespace csg {
 /**
     \brief class for reading xyz files
 
-    This class provides the TrajectoryReader + Topology reader interface
+    This class provides the TrajectoryReader + CSG_Topology reader interface
     for xyz files
 
 */
@@ -40,20 +40,20 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   ~XYZReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
-  bool NextFrame(Topology &top);
+  bool NextFrame(CSG_Topology &top);
 
   void Close();
 
  private:
   template <bool topology>
-  bool ReadFrame(Topology &top);
+  bool ReadFrame(CSG_Topology &top);
 
   std::ifstream _fl;
 

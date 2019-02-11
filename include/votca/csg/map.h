@@ -33,7 +33,7 @@ class BeadMap;
 *******************************************************/
 class Map {
  public:
-  Map(Molecule &in, Molecule &out) : _in(in), _out(out) {}
+  Map(const Molecule &in, Molecule &out) : _in(in), _out(out) {}
   ~Map();
 
   void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
@@ -41,7 +41,8 @@ class Map {
   void Apply();
 
  protected:
-  Molecule _in, _out;
+  const Molecule _in;
+  Molecule _out;
   std::vector<BeadMap *> _maps;
 };
 
@@ -52,18 +53,18 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply() = 0;
-  virtual void Initialize(Molecule *in, Bead *out, Property *opts_map,
+  virtual void Initialize(const Molecule *in, Bead *out, Property *opts_map,
                           Property *opts_bead);
 
  protected:
-  Molecule *_in;
+  const Molecule *_in;
   Bead *_out;
   Property *_opts_map;
   Property *_opts_bead;
 };
 
-inline void BeadMap::Initialize(Molecule *in, Bead *out, Property *opts_bead,
-                                Property *opts_map) {
+inline void BeadMap::Initialize(const Molecule *in, Bead *out,
+                                Property *opts_bead, Property *opts_map) {
   _in = in;
   _out = out;
   _opts_map = opts_map;

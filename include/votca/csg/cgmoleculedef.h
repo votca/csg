@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "csgtopology.h"
 #include "exclusionlist.h"
 #include "interaction.h"
 #include "map.h"
@@ -48,8 +49,8 @@ class CGMoleculeDef {
   CGMoleculeDef() {}
   ~CGMoleculeDef();
 
-  Molecule *CreateMolecule(Topology<Bead, Molecule, Interaction> &top);
-  Map *CreateMap(Molecule &in, Molecule &out);
+  Molecule *CreateMolecule(CSG_Topology &top);
+  Map *CreateMap(const Molecule &in, Molecule &out);
 
   void Load(std::string filename);
 

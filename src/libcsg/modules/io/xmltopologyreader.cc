@@ -22,14 +22,14 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <votca/csg/bead.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 
 namespace votca {
 namespace csg {
 
 using namespace std;
 
-bool XMLTopologyReader::ReadTopology(string filename, Topology<Bead,Molecule> &top) {
+bool XMLTopologyReader::ReadTopology(string filename, CSG_Topology &top) {
   _top = &top;
 
   Property options;

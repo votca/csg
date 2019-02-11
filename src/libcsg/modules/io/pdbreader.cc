@@ -17,17 +17,17 @@
 
 #include "pdbreader.h"
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <boost/filesystem.hpp>
 #include <stdexcept>
 #include <unordered_map>
-#include <votca/csg/topology.h>
 
 namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
 
-bool PDBReader::ReadTopology(string file, Topology<Bead,Molecule> &top) {
+bool PDBReader::ReadTopology(string file, CSG_Topology &top) {
   _topology = true;
   top.Cleanup();
 
@@ -54,12 +54,12 @@ bool PDBReader::Open(const string &file) {
 
 void PDBReader::Close() { _fl.close(); }
 
-bool PDBReader::FirstFrame(Topology<Bead,Molecule> &top) {
+bool PDBReader::FirstFrame(CSG_Topology &top) {
   _topology = false;
   return NextFrame(top);
 }
 
-bool PDBReader::NextFrame(Topology<Bead,Molecule> &top) {
+bool PDBReader::NextFrame(CSG_Topology &top) {
   string line;
   // Two column vector for storing all bonds
   // 1 - id of first atom
