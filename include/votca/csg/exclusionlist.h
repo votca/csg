@@ -18,25 +18,26 @@
 #ifndef _VOTCA_CSG_EXCLUSIONLIST_H
 #define _VOTCA_CSG_EXCLUSIONLIST_H
 
-#include "interaction.h"
 #include "bead.h"
 //#include "molecule.h"
 //#include "topology.h"
+//#include "interaction.h"
 #include <iostream>
 #include <list>
 #include <map>
 
+// namespace TOOLS = votca::tools;
+
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList
 
-//class Topology;
-//class Bead;
+// class Topology;
+class Bead;
 
-typedef std::vector<Interaction *> InteractionContainer;
+// typedef std::vector<Interaction *> InteractionContainer;
 
 class ExclusionList {
  public:
@@ -56,22 +57,24 @@ class ExclusionList {
     std::list<Bead *> _exclude;
   };
 
-  template<typename T> 
-    void CreateExclusions(T *top){
-      InteractionContainer &ic = top->BondedInteractions();                          
-      InteractionContainer::iterator ia;                                             
+  // Moved to topology class to avoid cross dependence
+  /*  template<typename T>
+      void CreateExclusions(T *top){
+        InteractionContainer &ic = top->BondedInteractions();
+        InteractionContainer::iterator ia;
 
-      for (ia = ic.begin(); ia != ic.end(); ++ia) {                                  
-        int beads_in_int = (*ia)->BeadCount();                                       
-        list<Bead *> l;                                                              
+        for (ia = ic.begin(); ia != ic.end(); ++ia) {
+          int beads_in_int = (*ia)->BeadCount();
+          list<Bead *> l;
 
-        for (int ibead = 0; ibead < beads_in_int; ibead++) {                         
-          int ii = (*ia)->getBeadId(ibead);                                          
-          l.push_back(top->getBead(ii));                                             
-        }                                                                            
-        ExcludeList(l);                                                              
-      }             
-    }
+          for (int ibead = 0; ibead < beads_in_int; ibead++) {
+            int ii = (*ia)->getBeadId(ibead);
+            l.push_back(top->getBead(ii));
+          }
+          ExcludeList(l);
+        }
+      }
+      */
   exclusion_t *GetExclusions(Bead *bead);
 
   typedef std::list<exclusion_t *>::iterator iterator;

@@ -18,7 +18,7 @@
 #ifndef _VOTCA_CSG_CGOBSERVER_H
 #define _VOTCA_CSG_CGOBSERVER_H
 
-#include "topology.h"
+#include "csgtopology.h"
 
 namespace votca {
 namespace csg {
@@ -37,11 +37,12 @@ using namespace votca::tools;
 class CGObserver {
  public:
   /// \brief called before the first frame
-  virtual void BeginCG(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_atom = 0) = 0;
+  virtual void BeginCG(CSG_Topology *top, CSG_Topology *top_atom = 0) = 0;
   /// \brief called after the last frame
   virtual void EndCG() = 0;
   // \brief called for each frame which is mapped
-  virtual void EvalConfiguration(Topology<Bead,Molecule> *top, Topology<Bead,Molecule> *top_atom = 0) = 0;
+  virtual void EvalConfiguration(CSG_Topology *top,
+                                 CSG_Topology *top_atom = 0) = 0;
 };
 
 }  // namespace csg

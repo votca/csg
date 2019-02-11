@@ -21,15 +21,17 @@
 #include "basemolecule.h"
 #include "bead.h"
 //#include "topologyitem.h"
-#include <assert.h>
+#include <cassert>
+#include <iostream>
 #include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
+// namespace TOOLS = votca::tools;
 
 class Interaction;
 
@@ -65,13 +67,14 @@ class Molecule : public BaseMolecule<Bead> {
   std::vector<Interaction *> _interactions;
 
   /// constructor
-  //Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+  // Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent)
+  // {
   Molecule(int id, std::string name) {
     id_.setId(id);
     name_.setName(name);
   }
 
-//  friend class Topology;
+  //  friend class Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(

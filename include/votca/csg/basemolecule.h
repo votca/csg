@@ -25,8 +25,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "basebead.h"
 #include "beadstructure.h"
+#include <votca/tools/identity.h>
+#include <votca/tools/name.h>
+#include <votca/tools/vec.h>
 //#include "topologyitem.h"
 
 namespace votca {

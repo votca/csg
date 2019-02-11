@@ -22,6 +22,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "basebead.h"
+
 #include <votca/tools/graph.h>
 #include <votca/tools/graph_bf_visitor.h>
 #include <votca/tools/graphalgorithm.h>
@@ -169,7 +171,7 @@ TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   std::unordered_map<std::string, std::string> attributes2;
 
   attributes1["Mass"] = basebead->getMass();
-  attributes2["Name"] = basebead->getName();
+  attributes2["Name"] = basebead->getType();
 
   /// Add graphnodes
   TOOLS::GraphNode graphnode;

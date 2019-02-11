@@ -39,7 +39,7 @@ CGEngine::~CGEngine() {
 /**
     \todo melts with different molecules
 */
-TopologyMap *CGEngine::CreateCGTopology(Topology &in, Topology &out) {
+TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
   MoleculeContainer &mols = in.Molecules();
   MoleculeContainer::iterator iter;
   TopologyMap *m = new TopologyMap(&in, &out);

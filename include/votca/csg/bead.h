@@ -18,7 +18,6 @@
 #ifndef _VOTCA_CSG_BEAD_H
 #define _VOTCA_CSG_BEAD_H
 
-#include <assert.h>
 #include <cassert>
 #include <sstream>
 #include <string>
@@ -26,7 +25,6 @@
 #include <votca/tools/types.h>
 #include <votca/tools/vec.h>
 
-#include "molecule.h"
 #include "basebead.h"
 
 namespace TOOLS = votca::tools;
@@ -34,8 +32,8 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
-//class Topology;
-//class Molecule;
+// class Topology;
+// class Molecule;
 
 namespace bead_constants {
 const std::string bead_name_unassigned = "unassigned";
@@ -372,8 +370,8 @@ class Bead : public BaseBead {
 
   // void *_userdata;
 
-  friend class Molecule;
-//  friend class Topology<Bead,Molecule>;
+  //  friend class Molecule;
+  //  friend class Topology<Bead,Molecule>;
 };
 
 inline void Bead::setVel(const TOOLS::vec &r) {
@@ -440,4 +438,6 @@ inline void Bead::HasW(bool b) { bW_ = b; }
 }  // namespace csg
 }  // namespace votca
 
+//#include "molecule.h"
+//#include "topology.h"
 #endif  // _VOTCA_CSG_BEAD_H

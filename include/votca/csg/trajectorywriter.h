@@ -18,10 +18,10 @@
 #ifndef _VOTCA_CSG_TRAJECTORYWRITER_H
 #define _VOTCA_CSG_TRAJECTORYWRITER_H
 
-#include "fileformatfactory.h"
 #include "bead.h"
+#include "csgtopology.h"
+#include "fileformatfactory.h"
 #include "molecule.h"
-#include "topology.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -40,7 +40,7 @@ class TrajectoryWriter {
   virtual void Open(string file, bool bAppend = false) {}
   virtual void Close(){};
 
-  virtual void Write(Topology<Bead,Molecule> *top) {}
+  virtual void Write(CSG_Topology *top) {}
 
   static void RegisterPlugins(void);
 };

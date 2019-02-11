@@ -18,8 +18,8 @@
 #ifndef _VOTCA_CSG_TOPOLOGYMAP_H
 #define _VOTCA_CSG_TOPOLOGYMAP_H
 
+#include "csgtopology.h"
 #include "map.h"
-#include "topology.h"
 #include <vector>
 
 namespace votca {
@@ -29,21 +29,21 @@ class TopologyMap {
  public:
   ~TopologyMap();
 
-  TopologyMap(Topology<Bead,Molecule> *in, Topology<Bead,Molecule> *out);
+  TopologyMap(CSG_Topology *in, CSG_Topology *out);
 
   void AddMoleculeMap(Map *map);
 
   void Apply();
 
  private:
-  Topology<Bead,Molecule> *_in;
-  Topology<Bead,Molecule> *_out;
+  CSG_Topology *_in;
+  CSG_Topology *_out;
 
   typedef std::vector<Map *> MapContainer;
   MapContainer _maps;
 };
 
-inline TopologyMap::TopologyMap(Topology<Bead,Molecule> *in, Topology<Bead,Molecule> *out)
+inline TopologyMap::TopologyMap(CSG_Topology *in, CSG_Topology *out)
     : _in(in), _out(out) {}
 
 inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
