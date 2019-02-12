@@ -52,6 +52,7 @@ const std::string bead_type_unassigned = "unassigned";
  **/
 class Bead : public BaseBead {
  public:
+  Bead(){};
   /**
    * destructor
    */
@@ -371,6 +372,7 @@ class Bead : public BaseBead {
   // void *_userdata;
 
   //  friend class Molecule;
+  friend class CSG_Topology;
   //  friend class Topology<Bead,Molecule>;
 };
 

@@ -197,7 +197,7 @@ void CsgApplication::Run(void) {
 
   class DummyWorker : public Worker {
    public:
-    void EvalConfiguration(Topology *top, Topology *top_ref) {
+    void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
       _app->EvalConfiguration(top, top_ref);
     }
   };
@@ -396,7 +396,7 @@ CsgApplication::Worker::~Worker() {
   if (_map) delete _map;
 }
 
-void CsgApplication::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgApplication::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   list<CGObserver *>::iterator iter;
   for (iter = _observers.begin(); iter != _observers.end(); ++iter)
     (*iter)->BeginCG(top, top_ref);
@@ -408,7 +408,8 @@ void CsgApplication::EndEvaluate() {
     (*iter)->EndCG();
 }
 
-void CsgApplication::EvalConfiguration(Topology *top, Topology *top_ref) {
+void CsgApplication::EvalConfiguration(CSG_Topology *top,
+                                       CSG_Topology *top_ref) {
   list<CGObserver *>::iterator iter;
   for (iter = _observers.begin(); iter != _observers.end(); ++iter)
     (*iter)->EvalConfiguration(top, top_ref);

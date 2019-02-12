@@ -122,7 +122,8 @@ void BaseMolecule<T>::AddBead(T *bead) {
          " when it has been previously added.");
 
   BeadStructure<T>::AddBead(bead);
-  bead_name_and_ids_[bead->getName()].insert(bead->getId());
+  // bead_name_and_ids_[bead->getName()].insert(bead->getId());
+  bead_name_and_ids_[bead->getType()].insert(bead->getId());
   bead->setMoleculeId(getId());
 }
 

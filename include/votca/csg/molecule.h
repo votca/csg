@@ -27,13 +27,13 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
-
 namespace votca {
 namespace csg {
 
 // namespace TOOLS = votca::tools;
 
 class Interaction;
+class CSG_Topology;
 
 namespace molecule_constants {
 const std::string molecule_name_unassigned = "unassigned";
@@ -49,6 +49,7 @@ const std::string molecule_name_unassigned = "unassigned";
 */
 class Molecule : public BaseMolecule<Bead> {
  public:
+  Molecule(){};
   /**
    * @brief Grabs all beads that have the label given by `label`
    *
@@ -65,16 +66,17 @@ class Molecule : public BaseMolecule<Bead> {
 
  private:
   std::vector<Interaction *> _interactions;
-
-  /// constructor
-  // Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent)
-  // {
   Molecule(int id, std::string name) {
     id_.setId(id);
     name_.setName(name);
   }
 
-  //  friend class Topology;
+  /// constructor
+  // Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent)
+  // {
+
+  //  static friend Molecule * CSG_Topology::CreateMolecule(CSG_Topology & top,
+  //  std::string name, int id); friend class Topology;
   friend class CSG_Topology;
 };
 
