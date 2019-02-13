@@ -46,11 +46,11 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
   // for (iter = mols.begin(); iter != mols.end(); ++iter) {
   for (const pair<int, Molecule> &iter : mols) {
     const Molecule *mol = &(iter.second);
-    if (IsIgnored(mol->getName())) continue;
-    CGMoleculeDef *def = getMoleculeDef(mol->getName());
+    if (IsIgnored(mol->getType())) continue;
+    CGMoleculeDef *def = getMoleculeDef(mol->getType());
     if (!def) {
       cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << mol->getName() << "\" with id "
+           << "WARNING: unknown molecule \"" << mol->getType() << "\" with id "
            << mol->getId() << " in topology" << endl
            << "molecule will not be mapped to CG representation\n"
            << "Check weather a mapping file for all molecule exists, was "
@@ -61,7 +61,7 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
       continue;
     }
     Molecule *mcg = def->CreateMolecule(out);
-    Map *map = def->CreateMap(*mol, *mcg);
+    Map *map = def->CreateMap(&in, *mol, *mcg);
     m->AddMoleculeMap(map);
   }
   out.RebuildExclusions();

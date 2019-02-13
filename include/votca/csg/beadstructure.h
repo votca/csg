@@ -73,7 +73,7 @@ class BeadStructure {
   /**
    * \brief returns the number of beads in the bead structure
    **/
-  size_t BeadCount() { return beads_.size(); }
+  size_t BeadCount() const { return beads_.size(); }
 
   /**
    * \brief add a bead to the bead structure
@@ -85,7 +85,7 @@ class BeadStructure {
   /**
    * \brief Get the bead with the specified id
    **/
-  T *getBead(int id);
+  T *getBead(int id) const;
 
   /**
    * \brief Create a connection between two beads in the structure
@@ -286,9 +286,9 @@ std::vector<T *> BeadStructure<T>::getNeighBeads(int index) {
 }
 
 template <class T>
-T *BeadStructure<T>::getBead(int index) {
+T *BeadStructure<T>::getBead(int index) const {
   assert(beads_.count(index));
-  return beads_[index];
+  return beads_.at(index);
 }
 
 template <class T>

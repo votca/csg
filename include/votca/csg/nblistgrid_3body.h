@@ -18,12 +18,12 @@
 #ifndef _VOTCA_CSG_NBLISTGRID_3BODY_H
 #define _VOTCA_CSG_NBLISTGRID_3BODY_H
 
+#include "bead.h"
+#include "molecule.h"
 #include "nblist_3body.h"
 #include <vector>
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
-#include "bead.h"
-#include "molecule.h"
 namespace votca {
 namespace csg {
 
@@ -47,7 +47,7 @@ class NBListGrid_3Body : public NBList_3Body {
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
-  Topology<Bead,Molecule> *_top;
+  CSG_Topology *_top;
 
   void InitializeGrid(const matrix &box);
 

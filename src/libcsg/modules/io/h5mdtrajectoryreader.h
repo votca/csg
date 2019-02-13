@@ -49,13 +49,13 @@ class H5MDTrajectoryReader : public TrajectoryReader {
   bool Open(const std::string &file);
 
   /// Initialize data structures.
-  void Initialize(Topology &top);
+  void Initialize(CSG_Topology &top);
 
   /// Reads in the first frame.
-  bool FirstFrame(Topology &conf);  // NOLINT
+  bool FirstFrame(CSG_Topology &conf);  // NOLINT
 
   /// Reads in the next frame.
-  bool NextFrame(Topology &conf);  // NOLINT
+  bool NextFrame(CSG_Topology &conf);  // NOLINT
 
   /// Closes original trajectory file.
   void Close();

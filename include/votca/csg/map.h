@@ -33,7 +33,7 @@ class BeadMap;
 *******************************************************/
 class Map {
  public:
-  Map(const Molecule &in, Molecule &out) : _in(in), _out(out) {}
+  Map(const Molecule &in, Molecule &out) : molecule_in_(in), bead_out_(out) {}
   ~Map();
 
   void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
@@ -41,8 +41,8 @@ class Map {
   void Apply();
 
  protected:
-  const Molecule _in;
-  Molecule _out;
+  const Molecule molecule_in_;
+  Molecule bead_out_;
   std::vector<BeadMap *> _maps;
 };
 
@@ -53,20 +53,24 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply() = 0;
-  virtual void Initialize(const Molecule *in, Bead *out, Property *opts_map,
+  virtual void Initialize(const CSG_Topology *topology_parent,
+                          const Molecule *in, Bead *out, Property *opts_map,
                           Property *opts_bead);
 
  protected:
-  const Molecule *_in;
-  Bead *_out;
+  const CSG_Topology *topology_parent_;
+  const Molecule *molecule_in_;
+  Bead *bead_out_;
   Property *_opts_map;
   Property *_opts_bead;
 };
 
-inline void BeadMap::Initialize(const Molecule *in, Bead *out,
+inline void BeadMap::Initialize(const CSG_Topology *topology_parent,
+                                const Molecule *in, Bead *out,
                                 Property *opts_bead, Property *opts_map) {
-  _in = in;
-  _out = out;
+  topology_parent_ = topology_parent;
+  molecule_in_ = in;
+  bead_out_ = out;
   _opts_map = opts_map;
   _opts_bead = opts_bead;
 }
@@ -79,14 +83,14 @@ class Map_Sphere : public BeadMap {
   Map_Sphere() {}
   void Apply();
 
-  void Initialize(Molecule *in, Bead *out, Property *opts_bead,
-                  Property *opts_map);
+  void Initialize(const CSG_Topology *topology_parent, const Molecule *in,
+                  Bead *out, Property *opts_bead, Property *opts_map);
 
  protected:
   void AddElem(Bead *in, double weight, double force_weight);
 
   struct element_t {
-    Bead *_in;
+    Bead *bead_in;
     double _weight;
     double _force_weight;
   };
@@ -95,7 +99,7 @@ class Map_Sphere : public BeadMap {
 
 inline void Map_Sphere::AddElem(Bead *in, double weight, double force_weight) {
   element_t el;
-  el._in = in;
+  el.bead_in = in;
   el._weight = weight;
   el._force_weight = force_weight;
   _matrix.push_back(el);

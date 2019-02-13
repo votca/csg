@@ -39,9 +39,9 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   /// open original trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &conf);
+  bool FirstFrame(CSG_Topology &conf);
   /// read in the next frame
-  bool NextFrame(Topology &conf);
+  bool NextFrame(CSG_Topology &conf);
   /// close original trajectory file
   void Close();
 

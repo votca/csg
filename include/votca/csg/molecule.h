@@ -37,7 +37,8 @@ class CSG_Topology;
 
 namespace molecule_constants {
 const std::string molecule_name_unassigned = "unassigned";
-}
+const int molecule_id_unassigned = -1;
+}  // namespace molecule_constants
 /**
     \brief Information about molecules.
 
@@ -57,7 +58,7 @@ class Molecule : public BaseMolecule<Bead> {
    *
    * @return an unordered set with the ids of the beads that match the label
    */
-  std::unordered_set<int> getBeadIdsByLabel(const std::string &label);
+  std::unordered_set<int> getBeadIdsByLabel(const std::string &label) const;
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
@@ -68,7 +69,7 @@ class Molecule : public BaseMolecule<Bead> {
   std::vector<Interaction *> _interactions;
   Molecule(int id, std::string name) {
     id_.setId(id);
-    name_.setName(name);
+    type_.setName(name);
   }
 
   /// constructor
@@ -81,7 +82,7 @@ class Molecule : public BaseMolecule<Bead> {
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
-    const std::string &label) {
+    const std::string &label) const {
   std::unordered_set<int> bead_ids;
   for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
     std::cout << "Label of bead " << id_and_bead.second->getLabel()

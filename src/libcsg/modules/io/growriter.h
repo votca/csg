@@ -18,8 +18,8 @@
 #ifndef _GROWRITER_H
 #define _GROWRITER_H
 
+#include "../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
-#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
@@ -30,7 +30,7 @@ class GROWriter : public TrajectoryWriter {
   void Open(string file, bool bAppend = false);
   void Close();
 
-  void Write(Topology *conf);
+  void Write(CSG_Topology *conf);
 
  private:
   FILE *_out;

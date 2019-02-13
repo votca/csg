@@ -18,8 +18,8 @@
 #ifndef _PDBWRITER_H
 #define _PDBWRITER_H
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
-#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
@@ -32,7 +32,7 @@ class PDBWriter : public TrajectoryWriter {
 
   void RegisteredAt(ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(Topology *conf);
+  void Write(CSG_Topology *conf);
 
  private:
   FILE *_out;

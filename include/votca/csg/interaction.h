@@ -19,7 +19,7 @@
 #define _VOTCA_CSG_INTERACTION_H
 
 #include "bead.h"
-#include "csgtopology.h"
+#include "boundarycondition.h"
 #include "molecule.h"
 #include <sstream>
 #include <string>
@@ -42,7 +42,7 @@ class Interaction {
   Interaction() : _index(-1), _group(""), _group_id(-1), _name(""), _mol(-1){};
 
   virtual ~Interaction() {}
-  virtual double EvaluateVar(const CSG_Topology &top) = 0;
+  virtual double EvaluateVar(const BoundaryCondition &bc) = 0;
 
   std::string getName() const { return _name; }
 
@@ -82,7 +82,8 @@ class Interaction {
     return _mol;
   }
 
-  virtual TOOLS::vec Grad(const CSG_Topology &top, int bead) = 0;
+  // virtual TOOLS::vec Grad(const CSG_Topology &bc, int bead) = 0;
+  virtual TOOLS::vec Grad(const BoundaryCondition &bc, int bead) = 0;
   int BeadCount() { return _beads.size(); }
 
   /**
@@ -141,8 +142,8 @@ class IBond : public Interaction {
       beads.pop_front();
     }
   }
-  double EvaluateVar(const CSG_Topology &top);
-  TOOLS::vec Grad(const CSG_Topology &top, int bead);
+  double EvaluateVar(const BoundaryCondition &bc);
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
 };
@@ -167,8 +168,8 @@ class IAngle : public Interaction {
     }
   }
 
-  double EvaluateVar(const CSG_Topology &top);
-  TOOLS::vec Grad(const CSG_Topology &top, int bead);
+  double EvaluateVar(const BoundaryCondition &bc);
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
 };
@@ -194,31 +195,31 @@ class IDihedral : public Interaction {
     }
   }
 
-  double EvaluateVar(const CSG_Topology &top);
-  TOOLS::vec Grad(const CSG_Topology &top, int bead);
+  double EvaluateVar(const BoundaryCondition &bc);
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
 };
 
-inline double IBond::EvaluateVar(const CSG_Topology &top) {
-  return abs(top.getDist(_beads[0], _beads[1]));
+inline double IBond::EvaluateVar(const BoundaryCondition &bc) {
+  return abs(bc.BCShortestConnection(_beads[0], _beads[1]));
 }
 
-inline TOOLS::vec IBond::Grad(const CSG_Topology &top, int bead) {
-  TOOLS::vec r = top.getDist(_beads[0], _beads[1]);
+inline TOOLS::vec IBond::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec r = bc.BCShortestConnection(_beads[0], _beads[1]);
   r.normalize();
   return (bead == 0) ? -r : r;
 }
 
-inline double IAngle::EvaluateVar(const CSG_Topology &top) {
-  TOOLS::vec v1(top.getDist(_beads[1], _beads[0]));
-  TOOLS::vec v2(top.getDist(_beads[1], _beads[2]));
+inline double IAngle::EvaluateVar(const BoundaryCondition &bc) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
   return acos(v1 * v2 / sqrt((v1 * v1) * (v2 * v2)));
 }
 
-inline TOOLS::vec IAngle::Grad(const CSG_Topology &top, int bead) {
-  TOOLS::vec v1(top.getDist(_beads[1], _beads[0]));
-  TOOLS::vec v2(top.getDist(_beads[1], _beads[2]));
+inline TOOLS::vec IAngle::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
 
   double acos_prime =
       1.0 / (sqrt(1 - (v1 * v2) * (v1 * v2) /
@@ -246,10 +247,10 @@ inline TOOLS::vec IAngle::Grad(const CSG_Topology &top, int bead) {
   return TOOLS::vec(0, 0, 0);
 }
 
-inline double IDihedral::EvaluateVar(const CSG_Topology &top) {
-  TOOLS::vec v1(top.getDist(_beads[0], _beads[1]));
-  TOOLS::vec v2(top.getDist(_beads[1], _beads[2]));
-  TOOLS::vec v3(top.getDist(_beads[2], _beads[3]));
+inline double IDihedral::EvaluateVar(const BoundaryCondition &bc) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
@@ -257,10 +258,10 @@ inline double IDihedral::EvaluateVar(const CSG_Topology &top) {
   return sign * acos(n1 * n2 / sqrt((n1 * n1) * (n2 * n2)));
 }
 
-inline TOOLS::vec IDihedral::Grad(const CSG_Topology &top, int bead) {
-  TOOLS::vec v1(top.getDist(_beads[0], _beads[1]));
-  TOOLS::vec v2(top.getDist(_beads[1], _beads[2]));
-  TOOLS::vec v3(top.getDist(_beads[2], _beads[3]));
+inline TOOLS::vec IDihedral::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector

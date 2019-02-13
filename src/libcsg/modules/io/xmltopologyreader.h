@@ -87,7 +87,7 @@ class XMLMolecule {
 class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
   ~XMLTopologyReader();
 
  private:
@@ -108,7 +108,7 @@ class XMLTopologyReader : public TopologyReader {
  private:
   ParseXML _parser;
 
-  Topology *_top;
+  CSG_Topology *_top;
   MoleculesMap _molecules;
   int _mol_index;
   int _bead_index;

@@ -30,10 +30,10 @@ void GROWriter::Open(string file, bool bAppend) {
 
 void GROWriter::Close() { fclose(_out); }
 
-void GROWriter::Write(Topology *conf) {
+void GROWriter::Write(CSG_Topology *conf) {
   char format[100];
   int i, resnr, l, vpr;
-  Topology *top = conf;
+  CSG_Topology *top = conf;
 
   fprintf(_out, "%s\n", "what a nice title");
   fprintf(_out, "%5d\n", top->BeadCount());
@@ -60,7 +60,7 @@ void GROWriter::Write(Topology *conf) {
     string resname =
         top->getBead(i)
             ->getResidueName();  // top->getResidue(resnr)->getName();
-    string atomname = top->getBead(i)->getName();
+    string atomname = top->getBead(i)->getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
             atomname.c_str(), (i + 1) % 100000);

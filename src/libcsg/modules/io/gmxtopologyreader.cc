@@ -23,6 +23,10 @@
 #include <iostream>
 #include <string>
 
+#include <votca/tools/elements.h>
+
+#include <boost/algorithm/string.hpp>
+
 #include <gromacs/fileio/tpxio.h>
 #include <gromacs/mdtypes/inputrec.h>
 #include <gromacs/topology/atoms.h>
@@ -32,12 +36,15 @@
 #undef bool
 
 using namespace std;
+using namespace votca::tools;
 
 namespace votca {
 namespace csg {
 
-bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
+bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
   gmx_mtop_t mtop;
+
+  Elements elements;
 
   int natoms;
   // cleanup topology to store new data
@@ -68,7 +75,7 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
     t_atoms *atoms = &(mol->atoms);
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      Molecule *mi = top.CreateMolecule(molname);
+      Molecule *mi = top.CreateMolecule(molname, top.MoleculeCount());
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -85,9 +92,23 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
           top.RegisterBeadType(bead_type);
         }
 
+        string element = topology_constants::unassigned_element;
+        if (elements.isEleShort(bead_type)) {
+          element = bead_type;
+        }
+        string name_all_caps = boost::to_upper_copy<std::string>(bead_type);
+        if (elements.isEleFull(name_all_caps)) {
+          element = elements.getEleShort(name_all_caps);
+        }
+
+        byte_t symmetry = 1;
         Bead *bead =
-            top.CreateBead<Bead>(1, *(atoms->atomname[iatom]), bead_type,
-                                 a->resind, residue_name, molname, a->m, a->q);
+            top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
+                           residue_name, a->resind, element, a->m, a->q);
+        // Bead *bead =
+        //    top.CreateBead(symmetry, *(atoms->atomname[iatom]), bead_type,
+        //                         a->resind, residue_name, molname, a->m,
+        //                         a->q);
         mi->AddBead(bead);
       }
 

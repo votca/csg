@@ -16,10 +16,10 @@
  */
 
 #include "gmxtrajectoryreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <cstdlib>
 #include <gromacs/utility/programcontext.h>
 #include <iostream>
-#include <votca/csg/topology.h>
 
 namespace votca {
 namespace csg {
@@ -33,7 +33,7 @@ bool GMXTrajectoryReader::Open(const string &file) {
 
 void GMXTrajectoryReader::Close() { close_trx(_gmx_status); }
 
-bool GMXTrajectoryReader::FirstFrame(Topology &conf) {
+bool GMXTrajectoryReader::FirstFrame(CSG_Topology &conf) {
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_first_frame(oenv, &_gmx_status, (char *)_filename.c_str(),
@@ -74,7 +74,7 @@ bool GMXTrajectoryReader::FirstFrame(Topology &conf) {
   return true;
 }
 
-bool GMXTrajectoryReader::NextFrame(Topology &conf) {
+bool GMXTrajectoryReader::NextFrame(CSG_Topology &conf) {
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_next_frame(oenv, _gmx_status, &_gmx_frame)) return false;

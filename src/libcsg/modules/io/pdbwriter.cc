@@ -18,7 +18,6 @@
 #include "pdbwriter.h"
 #include <stdio.h>
 #include <string>
-#include <votca/csg/topology.h>
 
 namespace votca {
 namespace csg {
@@ -31,7 +30,7 @@ void PDBWriter::Open(string file, bool bAppend) {
 
 void PDBWriter::Close() { fclose(_out); }
 
-void PDBWriter::Write(Topology *conf) {
+void PDBWriter::Write(CSG_Topology *conf) {
   fprintf(_out, "MODEL     %4d\n", conf->getStep());
   for (BeadContainer::iterator iter = conf->Beads().begin();
        iter != conf->Beads().end(); ++iter) {

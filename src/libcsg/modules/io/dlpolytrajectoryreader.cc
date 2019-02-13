@@ -76,14 +76,14 @@ bool DLPOLYTrajectoryReader::Open(const string &file)
 
 void DLPOLYTrajectoryReader::Close() { _fl.close(); }
 
-bool DLPOLYTrajectoryReader::FirstFrame(Topology &conf) {
+bool DLPOLYTrajectoryReader::FirstFrame(CSG_Topology &conf) {
   _first_frame = true;
   bool res = NextFrame(conf);
   _first_frame = false;
   return res;
 }
 
-bool DLPOLYTrajectoryReader::NextFrame(Topology &conf) {
+bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
   static bool hasVs = false;
   static bool hasFs = false;
   static int mavecs =

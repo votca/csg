@@ -74,7 +74,7 @@ void DLPOLYTrajectoryWriter::Open(string file, bool bAppend)
 
 void DLPOLYTrajectoryWriter::Close() { _fl.close(); }
 
-void DLPOLYTrajectoryWriter::Write(Topology *conf) {
+void DLPOLYTrajectoryWriter::Write(CSG_Topology *conf) {
   static int nstep = 1;
   static double dstep = 0.0;
   const double scale = 10.0;  // nm -> A factor

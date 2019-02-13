@@ -30,7 +30,7 @@ void GMXTrajectoryWriter::Open(string file, bool bAppend) {
 
 void GMXTrajectoryWriter::Close() { close_trx(_file); }
 
-void GMXTrajectoryWriter::Write(Topology *conf) {
+void GMXTrajectoryWriter::Write(CSG_Topology *conf) {
   static int step = 0;
   int N = conf->BeadCount();
   t_trxframe frame;

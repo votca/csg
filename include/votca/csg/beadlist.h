@@ -26,7 +26,6 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 /**
     \brief Generate lists of beads

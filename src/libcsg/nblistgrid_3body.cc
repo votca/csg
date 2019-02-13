@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-
+#include "../../include/votca/csg/csgtopology.h"
 #include <votca/csg/nblistgrid_3body.h>
 
 namespace votca {
@@ -34,7 +34,7 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
   assert(list1.getTopology() == list2.getTopology());
   assert(list1.getTopology() == list3.getTopology());
   assert(list2.getTopology() == list3.getTopology());
-  Topology *top = _top = list1.getTopology();
+  CSG_Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());
 
@@ -66,7 +66,7 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
 
   // check if both bead lists "have" the same topology
   assert(list1.getTopology() == list2.getTopology());
-  Topology *top = _top = list1.getTopology();
+  CSG_Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());
 
@@ -96,7 +96,7 @@ void NBListGrid_3Body::Generate(BeadList &list, bool do_exclusions) {
   _do_exclusions = do_exclusions;
   if (list.empty()) return;
 
-  Topology *top = _top = list.getTopology();
+  CSG_Topology *top = _top = list.getTopology();
 
   InitializeGrid(top->getBox());
 

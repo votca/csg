@@ -90,7 +90,7 @@ void H5MDTrajectoryReader::Close() {
   }
 }
 
-void H5MDTrajectoryReader::Initialize(Topology &top) {
+void H5MDTrajectoryReader::Initialize(CSG_Topology &top) {
   string *particle_group_name_ = new string(top.getParticleGroup());
   if (*particle_group_name_ == "")
     throw ios_base::failure(
@@ -208,8 +208,8 @@ void H5MDTrajectoryReader::Initialize(Topology &top) {
   delete particle_group_name_;
 }
 
-bool H5MDTrajectoryReader::FirstFrame(Topology &top) {  // NOLINT const
-                                                        // reference
+bool H5MDTrajectoryReader::FirstFrame(CSG_Topology &top) {  // NOLINT const
+                                                            // reference
   if (first_frame_) {
     first_frame_ = false;
     Initialize(top);
@@ -219,7 +219,8 @@ bool H5MDTrajectoryReader::FirstFrame(Topology &top) {  // NOLINT const
 }
 
 /// Reading the data.
-bool H5MDTrajectoryReader::NextFrame(Topology &top) {  // NOLINT const reference
+bool H5MDTrajectoryReader::NextFrame(CSG_Topology &top) {  // NOLINT const
+                                                           // reference
   // Reads the position row.
   idx_frame_++;
   if (idx_frame_ > max_idx_frame_) return false;

@@ -30,8 +30,8 @@ void XYZWriter::Open(string file, bool bAppend) {
 
 void XYZWriter::Close() { fclose(_out); }
 
-void XYZWriter::Write(Topology *conf) {
-  Topology *top = conf;
+void XYZWriter::Write(CSG_Topology *conf) {
+  CSG_Topology *top = conf;
   fprintf(_out, "%d\n", (int)top->Beads().size());
   fprintf(_out, "frame: %d time: %f\n", top->getStep() + 1, top->getTime());
 

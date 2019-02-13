@@ -47,10 +47,11 @@ void Map::Apply() {
   }
 }
 
-void Map_Sphere::Initialize(Molecule *in, Bead *out, Property *opts_bead,
+void Map_Sphere::Initialize(const CSG_Topology *topology_parent_,
+                            const Molecule *in, Bead *out, Property *opts_bead,
                             Property *opts_map) {
 
-  BeadMap::Initialize(in, out, opts_bead, opts_map);
+  BeadMap::Initialize(topology_parent_, in, out, opts_bead, opts_map);
 
   vector<string> beads;
   vector<double> weights;
@@ -135,36 +136,36 @@ void Map_Sphere::Apply() {
   vec cg(0., 0., 0.), f(0., 0., 0.), vel(0., 0., 0.);
   bool bPos, bVel, bF;
   bPos = bVel = bF = false;
-  _out->ClearParentBeads();
+  bead_out_->ClearParentBeads();
 
   // the following is needed for pbc treatment
-  CSG_Topology *top = _out->getParent();
-  double max_dist = 0.5 * top->ShortestBoxSize();
+  // CSG_Topology *top = bead_out_->getParent();
+  double max_dist = 0.5 * topology_parent_->ShortestBoxSize();
   vec r0 = vec(0, 0, 0);
   string name0;
   int id0 = 0;
   if (_matrix.size() > 0) {
-    if (_matrix.front()._in->HasPos()) {
-      r0 = _matrix.front()._in->getPos();
-      name0 = _matrix.front()._in->getName();
-      id0 = _matrix.front()._in->getId();
+    if (_matrix.front().bead_in->HasPos()) {
+      r0 = _matrix.front().bead_in->getPos();
+      name0 = _matrix.front().bead_in->getType();
+      id0 = _matrix.front().bead_in->getId();
     }
   }
 
   double M = 0;
 
   for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-    Bead *bead = iter->_in;
-    _out->AddParentBead(bead->getId());
+    Bead *bead = iter->bead_in;
+    bead_out_->AddParentBead(bead->getId());
     M += bead->getMass();
     if (bead->HasPos()) {
-      vec r = top->BCShortestConnection(r0, bead->getPos());
+      vec r = topology_parent_->BCShortestConnection(r0, bead->getPos());
       if (abs(r) > max_dist) {
         cout << r0 << " " << bead->getPos() << endl;
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box \n (atoms " +
             name0 + " (id " + boost::lexical_cast<string>(id0 + 1) + ")" +
-            ", " + bead->getName() + " (id " +
+            ", " + bead->getType() + " (id " +
             boost::lexical_cast<string>(bead->getId() + 1) + ")" +
             +" , molecule " +
             boost::lexical_cast<string>(bead->getMoleculeId() + 1) + ")");
@@ -181,10 +182,10 @@ void Map_Sphere::Apply() {
       bF = true;
     }
   }
-  _out->setMass(M);
-  if (bPos) _out->setPos(cg);
-  if (bVel) _out->setVel(vel);
-  if (bF) _out->setF(f);
+  bead_out_->setMass(M);
+  if (bPos) bead_out_->setPos(cg);
+  if (bVel) bead_out_->setVel(vel);
+  if (bF) bead_out_->setF(f);
 }
 
 /// \todo implement this function
@@ -196,23 +197,23 @@ void Map_Ellipsoid::Apply() {
   bPos = bVel = bF = false;
 
   // the following is needed for pbc treatment
-  CSG_Topology *top = _out->getParent();
-  double max_dist = 0.5 * top->ShortestBoxSize();
+  // CSG_Topology *top = bead_out_->getParent();
+  double max_dist = 0.5 * topology_parent_->ShortestBoxSize();
   vec r0 = vec(0, 0, 0);
   if (_matrix.size() > 0) {
-    if (_matrix.front()._in->HasPos()) {
-      r0 = _matrix.front()._in->getPos();
+    if (_matrix.front().bead_in->HasPos()) {
+      r0 = _matrix.front().bead_in->getPos();
     }
   }
 
   int n;
   n = 0;
-  _out->ClearParentBeads();
+  bead_out_->ClearParentBeads();
   for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-    Bead *bead = iter->_in;
-    _out->AddParentBead(bead->getId());
+    Bead *bead = iter->bead_in;
+    bead_out_->AddParentBead(bead->getId());
     if (bead->HasPos()) {
-      vec r = top->BCShortestConnection(r0, bead->getPos());
+      vec r = topology_parent_->BCShortestConnection(r0, bead->getPos());
       if (abs(r) > max_dist) {
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box");
@@ -235,14 +236,14 @@ void Map_Ellipsoid::Apply() {
     }
   }
 
-  if (bPos) _out->setPos(cg);
-  if (bVel) _out->setVel(vel);
-  if (bF) _out->setF(f);
+  if (bPos) bead_out_->setPos(cg);
+  if (bVel) bead_out_->setVel(vel);
+  if (bF) bead_out_->setF(f);
 
-  if (!_matrix[0]._in->HasPos()) {
-    _out->setU(vec(1.0, 0, 0));
-    _out->setV(vec(.0, 1, 0));
-    _out->setW(vec(.0, 0, 1));
+  if (!_matrix[0].bead_in->HasPos()) {
+    bead_out_->setU(vec(1.0, 0, 0));
+    bead_out_->setV(vec(.0, 1, 0));
+    bead_out_->setW(vec(.0, 0, 1));
     return;
   }
 
@@ -250,7 +251,7 @@ void Map_Ellipsoid::Apply() {
   c = c / (double)n;
   for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
     if ((*iter)._weight == 0) continue;
-    Bead *bead = iter->_in;
+    Bead *bead = iter->bead_in;
     vec v = bead->getPos() - c;
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
@@ -270,21 +271,21 @@ void Map_Ellipsoid::Apply() {
   m.SolveEigensystem(es);
 
   vec u = es.eigenvecs[0];
-  vec v = _matrix[1]._in->getPos() - _matrix[0]._in->getPos();
+  vec v = _matrix[1].bead_in->getPos() - _matrix[0].bead_in->getPos();
   v.normalize();
 
-  _out->setV(v);
+  bead_out_->setV(v);
 
-  vec w = _matrix[2]._in->getPos() - _matrix[0]._in->getPos();
+  vec w = _matrix[2].bead_in->getPos() - _matrix[0].bead_in->getPos();
   w.normalize();
 
   if ((v ^ w) * u < 0) u = vec(0., 0., 0.) - u;
-  _out->setU(u);
+  bead_out_->setU(u);
 
   // write out w
   w = u ^ v;
   w.normalize();
-  _out->setW(w);
+  bead_out_->setW(w);
 }
 
 }  // namespace csg

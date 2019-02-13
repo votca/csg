@@ -69,18 +69,21 @@ class CsgApplication : public Application {
 
   /// \brief called after topology was loaded
 
-  virtual bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref = 0) {
+  virtual bool EvaluateTopology(CSG_Topology *top,
+                                CSG_Topology *top_ref = nullptr) {
     return true;
   }
 
   void AddObserver(CGObserver *observer);
 
   /// \brief called before the first frame
-  virtual void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref = -2);
+  virtual void BeginEvaluate(CSG_Topology *top,
+                             CSG_Topology *top_ref = nullptr);
   /// \brief called after the last frame
   virtual void EndEvaluate();
   // \brief called for each frame which is mapped
-  virtual void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref = 0);
+  virtual void EvalConfiguration(CSG_Topology *top,
+                                 CSG_Topology *top_ref = nullptr);
 
   // thread related stuff follows
 
@@ -105,7 +108,7 @@ class CsgApplication : public Application {
 
     /// \brief overload with the actual computation
     virtual void EvalConfiguration(CSG_Topology *top,
-                                   CSG_Topology *top_ref = 0) = 0;
+                                   CSG_Topology *top_ref = nullptr) = 0;
 
     /// \brief returns worker id
     int getId() { return _id; }

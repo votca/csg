@@ -15,14 +15,17 @@
  *
  */
 
+#include "../../../../include/votca/csg/csgtopology.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp>  // IWYU pragma: keep
 #include <boost/filesystem/convenience.hpp>      // IWYU pragma: keep
 #include <boost/filesystem/path.hpp>             // IWYU pragma: keep
 #include <fstream>
 #include <stddef.h>
 #include <votca/csg/molecule.h>
-#include <votca/csg/topology.h>
+#include <votca/tools/elements.h>
 #include <votca/tools/tokenizer.h>
+#include <votca/tools/types.h>
 
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
@@ -134,7 +137,7 @@ bool DLPOLYTopologyReader::_isKeyInt(const string &line, const char *wspace,
   return true;
 }
 
-bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
+bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
   const char *WhiteSpace = " \t";
 
   int matoms = 0;
@@ -193,7 +196,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      Molecule *mi = top.CreateMolecule(mol_name);
+      Molecule *mi = top.CreateMolecule(mol_name, top.MoleculeCount());
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -224,6 +227,17 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
         if (!top.BeadTypeExist(beadtype)) {
           top.RegisterBeadType(beadtype);
         }
+
+        Elements elements;
+        string element;
+        if (elements.isEleShort(beadtype)) {
+          element = beadtype;
+        }
+        string full_name = boost::to_upper_copy<string>(beadtype);
+        if (elements.isEleFull(full_name)) {
+          element = full_name;
+        }
+
         double mass;
         sl >> mass;
         double charge;
@@ -246,10 +260,14 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
         for (int j = 0; j < repeater; j++) {
 
-          string beadname = beadtype + "#" + boost::lexical_cast<string>(i + 1);
-          Bead *bead = top.CreateBead<Bead>(
-              1, beadname, beadtype, bead_constants::residue_number_unassigned,
-              bead_constants::residue_name_unassigned, mol_name, mass, charge);
+          // string beadname = beadtype + "#" + boost::lexical_cast<string>(i +
+          // 1);
+          byte_t symmetry = 1;
+
+          Bead *bead = top.CreateBead(
+              symmetry, beadtype, top.BeadCount(), mi->getId(),
+              bead_constants::residue_name_unassigned,
+              bead_constants::residue_number_unassigned, element, mass, charge);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();
@@ -328,19 +346,20 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
-        Molecule *mi_replica = top.CreateMolecule(mol_name);
+        Molecule *mi_replica =
+            top.CreateMolecule(mol_name, top.MoleculeCount());
         vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
           Bead *bead = mi->getBead(bead_id);
-          string type = bead->getType();
-          Bead *bead_replica = top.CreateBead<Bead>(
-              1, bead->getName(), type,
-              bead_constants::residue_number_unassigned, mol_name, mol_name,
-              bead->getMass(), bead->getQ());
+          byte_t symmetry = 1;
+          Bead *bead_replica = top.CreateBead(
+              symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
+              bead->getResidueName(), bead->getResidueNumber(),
+              bead->getElement(), bead->getMass(), bead->getQ());
           mi_replica->AddBead(bead_replica);
         }
         matoms += mi->BeadCount();
-        InteractionContainer ics = mi->Interactions();
+        vector<Interaction *> ics = mi->Interactions();
         for (vector<Interaction *>::iterator ic = ics.begin(); ic != ics.end();
              ++ic) {
           Interaction *ic_replica = NULL;

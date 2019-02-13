@@ -50,7 +50,8 @@ class CGMoleculeDef {
   ~CGMoleculeDef();
 
   Molecule *CreateMolecule(CSG_Topology &top);
-  Map *CreateMap(const Molecule &in, Molecule &out);
+  Map *CreateMap(const CSG_Topology *topology, const Molecule &in,
+                 Molecule &out);
 
   void Load(std::string filename);
 

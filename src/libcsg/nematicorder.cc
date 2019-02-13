@@ -25,8 +25,7 @@ namespace csg {
 
 using namespace std;
 
-void NematicOrder::Process(Topology<Bead, Molecule, Interaction> &top,
-                           const string &filter) {
+void NematicOrder::Process(CSG_Topology &top, const string &filter) {
   _mu.ZeroMatrix();
   _mv.ZeroMatrix();
   _mw.ZeroMatrix();
