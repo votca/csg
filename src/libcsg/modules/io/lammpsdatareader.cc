@@ -16,6 +16,7 @@
  */
 
 #include "lammpsdatareader.h"
+#include <boost/algorithm/string.hpp>
 #include <vector>
 #include <votca/csg/csgtopology.h>
 #include <votca/tools/elements.h>
@@ -274,6 +275,7 @@ void LAMMPSDataReader::InitializeAtomAndBeadTypes_() {
   auto baseNamesMasses = determineBaseNameAssociatedWithMass_();
   auto baseNamesCount = determineAtomAndBeadCountBasedOnMass_(baseNamesMasses);
 
+  Elements elements;
   // If there is more than one atom type of the same element append a number
   // to the atom type name
   map<string, int> baseNameIndices;
@@ -296,8 +298,17 @@ void LAMMPSDataReader::InitializeAtomAndBeadTypes_() {
         label += label + " Type " + to_string(baseNameIndices[baseName]);
       }
     }
+
+    string name_all_caps = boost::to_upper_copy<string>(baseName);
+    string element = topology_constants::unassigned_element;
+    if (elements.isEleShort(baseName)) {
+      element = baseName;
+    } else if (elements.isEleFull(name_all_caps)) {
+      element = elements.getEleShort(name_all_caps);
+    }
     atomtypes_[index].push_back(baseName);
     atomtypes_[index].push_back(label);
+    atomtypes_[index].push_back(element);
     ++index;
   }
 }
@@ -459,7 +470,7 @@ void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
   trim_(line);
 
   int atomId = 0;
-  int moleculeId = 0;
+  int moleculeId = molecule_constants::molecule_id_unassigned;
   while (!line.empty()) {
     istringstream iss(line);
     iss >> atomId;
@@ -485,8 +496,6 @@ void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
     iss >> atomId;
     if (moleculeRead) {
       iss >> moleculeId;
-    } else {
-      moleculeId = atomId;
     }
     iss >> atomTypeId;
     if (chargeRead) iss >> charge;
@@ -508,31 +517,33 @@ void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
       atomIdToMoleculeId_[atomId] = moleculeId;
       Molecule *mol;
       if (!molecules_.count(moleculeId)) {
-        mol = top.CreateMolecule(molecule_constants::molecule_name_unassigned);
+        mol = top.CreateMolecule(molecule_constants::molecule_name_unassigned,
+                                 moleculeId);
         molecules_[moleculeId] = mol;
       } else {
         mol = molecules_[moleculeId];
       }
-      int symmetry = 1;  // spherical
+      byte_t symmetry = 1;  // spherical
       double mass =
           boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
 
-      string bead_type_name = to_string(atomTypeId + 1);
+      /*string bead_type_name = to_string(atomTypeId + 1);
       if (!top.BeadTypeExist(bead_type_name)) {
         top.RegisterBeadType(bead_type_name);
-      }
+      }*/
       if (atomtypes_.count(atomTypeId) == 0) {
         string err =
             "Unrecognized atomTypeId, the atomtypes map "
             "may be uninitialized";
         throw runtime_error(err);
       }
-
+      string atom_type = atomtypes_.at(atomTypeId).at(0);
+      string element = atomtypes_[atomTypeId].at(2);
       cout << "Reading data from lammps data reader " << endl;
-      b = top.CreateBead<Bead>(symmetry, bead_type_name, bead_type_name,
-                               bead_constants::residue_number_unassigned,
-                               bead_constants::residue_name_unassigned,
-                               mol->getName(), mass, charge);
+      b = top.CreateBead(symmetry, atom_type, atomId, mol->getId(),
+                         bead_constants::residue_name_unassigned,
+                         bead_constants::residue_number_unassigned, element,
+                         mass, charge);
       // mol->AddBead(b, bead_type_name);
       mol->AddBead(b);
       // b->setMolecule(mol);

@@ -122,20 +122,21 @@ void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top, string itemline) {
 }
 
 void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
-  if (_topology) {
-    if (!top.BeadTypeExist(bead_constants::bead_type_unassigned)) {
-      top.RegisterBeadType(bead_constants::bead_type_unassigned);
-    }
-    for (int i = 0; i < _natoms; ++i) {
-      cout << "Reading atoms in dump reader " << endl;
-      (void)top.CreateBead<Bead>(1, bead_constants::bead_name_unassigned,
-                                 bead_constants::bead_type_unassigned,
-                                 bead_constants::residue_number_unassigned,
-                                 bead_constants::residue_name_unassigned,
-                                 molecule_constants::molecule_name_unassigned,
-                                 0, 0);
-    }
-  }
+  /*  if (_topology) {
+      if (!top.BeadTypeExist(bead_constants::bead_type_unassigned)) {
+        top.RegisterBeadType(bead_constants::bead_type_unassigned);
+      }
+      for (int i = 0; i < _natoms; ++i) {
+        cout << "Reading atoms in dump reader " << endl;
+        byte_t symmetry = 1;
+        (void)top.CreateBead(symmetry, bead_constants::bead_name_unassigned,
+                                   bead_constants::bead_type_unassigned,
+                                   bead_constants::residue_number_unassigned,
+                                   bead_constants::residue_name_unassigned,
+                                   molecule_constants::molecule_name_unassigned,
+                                   0, 0);
+      }
+    }*/
 
   bool pos = false;
   bool force = false;
@@ -188,54 +189,132 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
           "Error: found atom with id " + boost::lexical_cast<string>(atom_id) +
           " but only " + boost::lexical_cast<string>(_natoms) +
           " atoms defined in header of file '" + _fname + "'");
-    Bead *b = top.getBead(atom_id - 1);
+    /*  Bead *b = top.getBead(atom_id - 1);
+      b->HasPos(pos);
+      b->HasF(force);
+      b->HasVel(vel);
+     */
+    matrix m = top.getBox();
+
+    unordered_map<string, double> atom_attributes_double;
+    unordered_map<string, int> atom_attributes_int;
+    unordered_map<string, string> atom_attributes_string;
+
+    for (size_t j = 0; itok != tok.end(); ++itok, ++j) {
+      if (j == fields.size()) {
+        throw std::runtime_error(
+            "error, wrong number of columns in atoms section");
+      } else if (fields[j] == "x") {
+        // b->Pos().x() = boost::lexical_cast<double>(*itok);
+        atom_attributes_double["x"] = stod(*itok);
+      } else if (fields[j] == "y") {
+        // b->Pos().y() = stod(*itok);
+        atom_attributes_double["y"] = stod(*itok);
+      } else if (fields[j] == "z") {
+        // b->Pos().z() = stod(*itok);
+        atom_attributes_double["z"] = stod(*itok);
+      } else if (fields[j] == "xu") {
+        atom_attributes_double["xu"] = stod(*itok);
+        // b->Pos().x() = stod(*itok);
+      } else if (fields[j] == "yu") {
+        // b->Pos().y() = stod(*itok);
+        atom_attributes_double["yu"] = stod(*itok);
+      } else if (fields[j] == "zu") {
+        // b->Pos().z() = stod(*itok);
+        atom_attributes_double["zu"] = stod(*itok);
+      } else if (fields[j] == "xs") {
+        // b->Pos().x() = stod(*itok) * m[0][0];
+        atom_attributes_double["xs"] = stod(*itok) * m[0][0];
+      } else if (fields[j] == "ys") {
+        // b->Pos().y() = stod(*itok) * m[1][1];
+        atom_attributes_double["ys"] = stod(*itok) * m[1][1];
+      } else if (fields[j] == "zs") {
+        // b->Pos().z() = stod(*itok) * m[2][2];
+        atom_attributes_double["zs"] = stod(*itok) * m[2][2];
+      } else if (fields[j] == "vx") {
+        atom_attributes_double["vx"] = stod(*itok);
+        // b->Vel().x() = stod(*itok);
+      } else if (fields[j] == "vy") {
+        // b->Vel().y() = stod(*itok);
+        atom_attributes_double["vy"] = stod(*itok);
+      } else if (fields[j] == "vz") {
+        // b->Vel().z() = stod(*itok);
+        atom_attributes_double["vz"] = stod(*itok);
+      } else if (fields[j] == "fx") {
+        // b->F().x() = stod(*itok);
+        atom_attributes_double["fx"] = stod(*itok);
+      } else if (fields[j] == "fy") {
+        // b->F().y() = stod(*itok);
+        atom_attributes_double["fy"] = stod(*itok);
+      } else if (fields[j] == "fz") {
+        atom_attributes_double["fz"] = stod(*itok);
+        // b->F().z() = stod(*itok);
+      }
+      if (_topology) {
+
+        if (fields[j] == "q") {
+          atom_attributes_double["q"] = stod(*itok);
+        } else if (fields[j] == "id") {
+          atom_attributes_int["id"] = boost::lexical_cast<int>(*itok);
+        } else if (fields[j] == "mol") {
+          atom_attributes_int["mol"] = boost::lexical_cast<int>(*itok);
+        } else if (fields[j] == "mass") {
+          atom_attributes_double["mass"] = stod(*itok);
+        } else if (fields[j] == "element") {
+          atom_attributes_string["element"] = *itok;
+        } else if ((fields[j] == "type") && _topology) {
+          atom_attributes_string["type"] = *itok;
+          if (!top.BeadTypeExist(*itok)) {
+            top.RegisterBeadType(*itok);
+          }
+          //      b->setType(*itok);
+        }
+      }
+
+    }  // for (size_t j = 0; itok != tok.end(); ++itok, ++j)
+
+    if (_topology) {
+      byte_t symmetry = 1;
+      string residue_type = bead_constants::residue_name_unassigned;
+      int residue_id = bead_constants::residue_number_unassigned;
+      Bead *b = top.CreateBead(
+          symmetry, atom_attributes_string["type"], atom_attributes_int["id"],
+          atom_attributes_int["mol"], residue_type, residue_id,
+          atom_attributes_string["element"], atom_attributes_double["mass"],
+          atom_attributes_double["q"]);
+    }
+    Bead *b = top.getBead(atom_attributes_int["id"]);
     b->HasPos(pos);
     b->HasF(force);
     b->HasVel(vel);
-    matrix m = top.getBox();
 
-    for (size_t j = 0; itok != tok.end(); ++itok, ++j) {
-      if (j == fields.size())
-        throw std::runtime_error(
-            "error, wrong number of columns in atoms section");
-      else if (fields[j] == "x")
-        b->Pos().x() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "y")
-        b->Pos().y() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "z")
-        b->Pos().z() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "xu")
-        b->Pos().x() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "yu")
-        b->Pos().y() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "zu")
-        b->Pos().z() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "xs")
-        b->Pos().x() = boost::lexical_cast<double>(*itok) * m[0][0];
-      else if (fields[j] == "ys")
-        b->Pos().y() = boost::lexical_cast<double>(*itok) * m[1][1];
-      else if (fields[j] == "zs")
-        b->Pos().z() = boost::lexical_cast<double>(*itok) * m[2][2];
-      else if (fields[j] == "vx")
-        b->Vel().x() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "vy")
-        b->Vel().y() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "vz")
-        b->Vel().z() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "fx")
-        b->F().x() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "fy")
-        b->F().y() = boost::lexical_cast<double>(*itok);
-      else if (fields[j] == "fz")
-        b->F().z() = boost::lexical_cast<double>(*itok);
-      else if ((fields[j] == "type") && _topology) {
-        if (!top.BeadTypeExist(*itok)) {
-          top.RegisterBeadType(*itok);
-        }
-        b->setType(*itok);
+    if (pos) {
+      if (atom_attributes_double.count("x")) {
+        b->Pos().x() = atom_attributes_double["x"];
+        b->Pos().y() = atom_attributes_double["y"];
+        b->Pos().z() = atom_attributes_double["z"];
+      } else if (atom_attributes_double.count("xs")) {
+        b->Pos().x() = atom_attributes_double["xs"];
+        b->Pos().y() = atom_attributes_double["ys"];
+        b->Pos().z() = atom_attributes_double["zs"];
+      } else if (atom_attributes_double.count("xu")) {
+        b->Pos().x() = atom_attributes_double["xu"];
+        b->Pos().y() = atom_attributes_double["yu"];
+        b->Pos().z() = atom_attributes_double["zu"];
       }
     }
-  }
+    if (force) {
+      b->F().x() = atom_attributes_double["fx"];
+      b->F().y() = atom_attributes_double["fy"];
+      b->F().z() = atom_attributes_double["fz"];
+    }
+    if (vel) {
+      b->Vel().x() = atom_attributes_double["vx"];
+      b->Vel().y() = atom_attributes_double["vy"];
+      b->Vel().z() = atom_attributes_double["vz"];
+    }
+
+  }  // for (int i = 0; i < _natoms; ++i)
 }
 
 }  // namespace csg
