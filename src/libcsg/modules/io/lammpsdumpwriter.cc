@@ -16,6 +16,7 @@
  */
 
 #include "lammpsdumpwriter.h"
+#include "../../../../include/votca/csg/bead.h"
 #include <stdio.h>
 #include <string>
 
@@ -30,8 +31,8 @@ void LAMMPSDumpWriter::Open(std::string file, bool bAppend) {
 
 void LAMMPSDumpWriter::Close() { fclose(_out); }
 
-void LAMMPSDumpWriter::Write(Topology *conf) {
-  Topology *top = conf;
+void LAMMPSDumpWriter::Write(CSG_Topology *conf) {
+  CSG_Topology *top = conf;
   votca::tools::matrix box = conf->getBox();
   fprintf(_out, "ITEM: TIMESTEP\n%i\n", top->getStep());
   fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top->Beads().size());
@@ -49,22 +50,26 @@ void LAMMPSDumpWriter::Write(Topology *conf) {
   }
   fprintf(_out, "\n");
 
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bi = *iter;
+  vector<int> bead_ids = conf->getBeadIds();
+  for (const int bead_id : bead_ids) {
+    // for (BeadContainer::iterator iter = conf->Beads().begin();
+    //     iter != conf->Beads().end(); ++iter) {
 
-    int type_id = conf->getBeadTypeId(bi->getType());
+    // Bead * bead = conf->getBead(bead_id);
+    //*iter;
+    Bead *bead = conf->getBead(bead_id);
+    string type = bead->getType();
 
-    fprintf(_out, "%i %i", bi->getId() + 1, type_id);
-    fprintf(_out, " %f %f %f", bi->getPos().getX(), bi->getPos().getY(),
-            bi->getPos().getZ());
+    fprintf(_out, "%i %s", bead->getId() + 1, type.c_str());
+    fprintf(_out, " %f %f %f", bead->getPos().getX(), bead->getPos().getY(),
+            bead->getPos().getZ());
     if (v) {
-      fprintf(_out, " %f %f %f", bi->getVel().getX(), bi->getVel().getY(),
-              bi->getVel().getZ());
+      fprintf(_out, " %f %f %f", bead->getVel().getX(), bead->getVel().getY(),
+              bead->getVel().getZ());
     }
     if (f) {
-      fprintf(_out, " %f %f %f", bi->getF().getX(), bi->getF().getY(),
-              bi->getF().getZ());
+      fprintf(_out, " %f %f %f", bead->getF().getX(), bead->getF().getY(),
+              bead->getF().getZ());
     }
     fprintf(_out, "\n");
   }

@@ -21,6 +21,9 @@
 #include <boost/filesystem.hpp>
 #include <stdexcept>
 #include <unordered_map>
+#include <votca/tools/elements.h>
+
+using namespace votca::tools;
 
 namespace votca {
 namespace csg {
@@ -61,6 +64,7 @@ bool PDBReader::FirstFrame(CSG_Topology &top) {
 
 bool PDBReader::NextFrame(CSG_Topology &top) {
   string line;
+  Elements elements;
   // Two column vector for storing all bonds
   // 1 - id of first atom
   // 2 - id of second atom
@@ -69,7 +73,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
   // WARNING we are assuming in the bead_vec that the indices of the beads
   //         correspond to the order in which they are read in. As in the first
   //         bead read in will be at index 0, etc...
-  vector<Bead *> bead_vec;
+  // vector<Bead *> bead_vec;
   ////////////////////////////////////////////////////////////////////////////////
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
@@ -167,8 +171,8 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
     if (wildcmp("ATOM*", line.c_str()) || wildcmp("HETATM*", line.c_str())) {
 
       // according to PDB format
-      string x, y, z, resNum, resName, atName;
-      string charge;
+      string atNum, x, y, z, resNum, resName, atName;
+      string charge, element_symbol;
       // string atNum;
       try {
         /* Some pdb don't include all this, read only what we really need*/
@@ -177,7 +181,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // str       ,  "ATOM", "HETATM"
         // string recType    (line,( 1-1),6);
         // int       , Atom serial number
-        // atNum    =    string(line,( 7-1),6);
+        atNum = boost::lexical_cast<int>(string(line, (7 - 1), 6));
         // str       , Atom name
         atName = string(line, (13 - 1), 4);
         // char      , Alternate location indicator
@@ -203,7 +207,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // str       , Segment identifier
         // string segID      (line,(73-1),4);
         // str       , Element symbol
-        // elem_sym =  string(line,(77-1),2);
+        element_symbol = string(line, (77 - 1), 2);
         // str       , Charge on the atom
         charge = string(line, (79 - 1), 2);
       } catch (std::out_of_range &err) {
@@ -219,6 +223,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
                          "charge (optional)     \n";
         throw std::runtime_error(err_msg);
       }
+      boost::algorithm::trim(atNum);
       boost::algorithm::trim(atName);
       boost::algorithm::trim(resName);
       boost::algorithm::trim(resNum);
@@ -226,7 +231,17 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       boost::algorithm::trim(y);
       boost::algorithm::trim(z);
       boost::algorithm::trim(charge);
+      boost::algorithm::trim(element_symbol);
 
+      if (!elements.isEleShort(element_symbol)) {
+        if (elements.isEleShort(atName)) {
+          element_symbol = atName;
+        } else {
+          element_symbol = topology_constants::unassigned_element;
+        }
+      }
+
+      int atom_number = boost::lexical_cast<int>(atNum);
       bead_count++;
 
       Bead *b;
@@ -265,17 +280,20 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // 6 - charge               (double)
         //
         // res -1 as internal number starts with 0
-        b = top.CreateBead<Bead>(1, atName, atName, residue_number - 1, resName,
-                                 resName, _elements.getMass(atName), ch);
+        byte_t symmetry = 1;
+        b = top.CreateBead(symmetry, atName, atom_number,
+                           molecule_constants::molecule_id_unassigned, resName,
+                           residue_number - 1, element_symbol,
+                           _elements.getMass(atName), ch);
       } else {
-        b = top.getBead(bead_count - 1);
+        b = top.getBead(atom_number);
       }
       // convert to nm from A
       b->setPos(vec(boost::lexical_cast<double>(x) / 10.0,
                     boost::lexical_cast<double>(y) / 10.0,
                     boost::lexical_cast<double>(z) / 10.0));
 
-      bead_vec.push_back(b);
+      // bead_vec.push_back(b);
     }
 
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {
@@ -408,21 +426,22 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
     map<int, int> mol_reInd_map;
 
     int ind = 0;
-    for (auto mol = molecule_atms.begin(); mol != molecule_atms.end(); mol++) {
+    for (const pair<const int, list<int>> &mol_and_atom_ids : molecule_atms) {
 
-      string mol_name = "PDB Molecule " + boost::lexical_cast<string>(ind);
-
-      Molecule *mi = top.CreateMolecule(mol_name);
-      mol_map[mol->first] = mi;
-      mol_reInd_map[mol->first] = ind;
+      //      string mol_name = "PDB Molecule " +
+      //      boost::lexical_cast<string>(ind);
+      int molecule_id = mol_and_atom_ids.first;
+      Molecule *mi = top.CreateMolecule(
+          molecule_constants::molecule_name_unassigned, molecule_id);
+      mol_map[molecule_id] = mi;
+      mol_reInd_map[molecule_id] = ind;
 
       // Add all the atoms to the appropriate molecule object
-      list<int> atm_list = molecule_atms[mol->first];
-      for (auto atm_temp = atm_list.begin(); atm_temp != atm_list.end();
-           atm_temp++) {
+      for (const int &atm_temp : mol_and_atom_ids.second) {
 
-        string residuename = "DUM";
-        mi->AddBead(bead_vec.at(*atm_temp - 1));
+        // string residuename = "DUM";
+        // mi->AddBead(bead_vec.at(atm_temp - 1));
+        mi->AddBead(top.getBead(atm_temp));
       }
       ind++;
     }
@@ -439,8 +458,10 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       Molecule *mi = mol_map[mol_ind];
       // Grab the id of the bead associated with the atom
       // It may be the case that the atom id's and bead id's are different
-      int bead_id1 = bead_vec.at(atm_id1 - 1)->getId();
-      int bead_id2 = bead_vec.at(atm_id2 - 1)->getId();
+      int bead_id1 = atm_id1;
+      int bead_id2 = atm_id2;
+      // int bead_id1 = bead_vec.at(atm_id1 - 1)->getId();
+      // int bead_id2 = bead_vec.at(atm_id2 - 1)->getId();
       mi->ConnectBeads(bead_id1, bead_id2);
     }
 

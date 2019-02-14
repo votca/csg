@@ -16,10 +16,13 @@
  */
 
 #include "xyzreader.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
+#include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
+using namespace votca::tools;
 namespace votca {
 namespace csg {
 using namespace boost;
@@ -75,6 +78,7 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
     ++_line;
 
     // read atoms
+    Elements elements;
     for (int i = 0; i < natoms; ++i) {
       getline(_fl, line);
       ++_line;
@@ -99,10 +103,18 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
           top.RegisterBeadType(bead_type);
         }
 
-        b = top.CreateBead<Bead>(
-            1, fields[0] + boost::lexical_cast<string>(i), bead_type, 0,
+        string element = topology_constants::unassigned_element;
+        string name_upper_case = boost::to_upper_copy<string>(bead_type);
+        if (elements.isEleFull(name_upper_case)) {
+          element = elements.getEleShort(name_upper_case);
+        } else if (elements.isEleShort(bead_type)) {
+          element = bead_type;
+        }
+        byte_t symmetry = 1;
+        b = top.CreateBead(
+            symmetry, bead_type, i, molecule_constants::molecule_id_unassigned,
             bead_constants::residue_name_unassigned,
-            molecule_constants::molecule_name_unassigned, 0, 0);
+            bead_constants::residue_number_unassigned, element, 0.0, 0.0);
 
       } else {
         b = top.getBead(i);

@@ -249,9 +249,7 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
       } else if (fields[j] == "fz") {
         atom_attributes_double["fz"] = stod(*itok);
         // b->F().z() = stod(*itok);
-      }
-      if (_topology) {
-
+      } else if (_topology) {
         if (fields[j] == "q") {
           atom_attributes_double["q"] = stod(*itok);
         } else if (fields[j] == "id") {

@@ -32,14 +32,16 @@ void PDBWriter::Close() { fclose(_out); }
 
 void PDBWriter::Write(CSG_Topology *conf) {
   fprintf(_out, "MODEL     %4d\n", conf->getStep());
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bi = *iter;
+  vector<int> bead_ids = conf->getBeadIds();
+  // for (BeadContainer::iterator iter = conf->Beads().begin();
+  //      iter != conf->Beads().end(); ++iter)
+  for (const int &bead_id : bead_ids) {
+    Bead *bi = conf->getBead(bead_id);
     vec r = bi->getPos();
     // truncate strings if necessary
     string resname = "";
     resname = bi->getResidueName();
-    string atomname = bi->getName();
+    string atomname = bi->getType();
     if (resname.size() > 3) {
       resname = resname.substr(0, 3);
     }
@@ -61,7 +63,7 @@ void PDBWriter::Write(CSG_Topology *conf) {
 
       fprintf(_out, "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
               bi->getId() + 1,             // atom serial number
-              bi->getName().c_str(),       // atom name
+              bi->getType().c_str(),       // atom name
               "REU",                       // residue name
               " ",                         // chain identifier 1 char
               bi->getResidueNumber() + 1,  // residue sequence number
@@ -71,7 +73,7 @@ void PDBWriter::Write(CSG_Topology *conf) {
       vec rv = 0.1 * bi->getV() + r;
       fprintf(_out, "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
               bi->getId() + 1,             // atom serial number
-              bi->getName().c_str(),       // atom name
+              bi->getType().c_str(),       // atom name
               "REV",                       // residue name
               " ",                         // chain identifier 1 char
               bi->getResidueNumber() + 1,  // residue sequence number

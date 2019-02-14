@@ -39,7 +39,7 @@ class CsgDumpApp : public CsgApplication {
         "excl", "  display exclusion list instead of molecule list");
   }
 
-  bool EvaluateTopology(Topology *top, Topology *top_ref);
+  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
 
   bool DoMapping() { return true; }
   bool DoMappingDefault(void) { return false; }
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
+bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   if (!OptionsMap().count("excl")) {
     cout << "Boundary Condition: ";
     if (top->getBoxType() == BoundaryCondition::typeAuto) {

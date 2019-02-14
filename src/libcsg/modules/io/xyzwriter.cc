@@ -35,12 +35,14 @@ void XYZWriter::Write(CSG_Topology *conf) {
   fprintf(_out, "%d\n", (int)top->Beads().size());
   fprintf(_out, "frame: %d time: %f\n", top->getStep() + 1, top->getTime());
 
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bi = *iter;
+  vector<int> bead_ids = conf->getBeadIds();
+  for (const int bead_id : bead_ids) {
+    // for (BeadContainer::iterator iter = conf->Beads().begin();
+    //     iter != conf->Beads().end(); ++iter) {
+    Bead *bi = conf->getBead(bead_id);
     vec r = bi->getPos();
     // truncate strings if necessary
-    string atomname = bi->getName();
+    string atomname = bi->getType();
     if (atomname.size() > 3) {
       atomname = atomname.substr(0, 3);
     }

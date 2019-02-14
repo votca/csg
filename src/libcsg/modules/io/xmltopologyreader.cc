@@ -16,6 +16,7 @@
  */
 
 #include "xmltopologyreader.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <iostream>
@@ -23,6 +24,9 @@
 #include <stdio.h>
 #include <votca/csg/bead.h>
 #include <votca/csg/csgtopology.h>
+#include <votca/tools/elements.h>
+
+using namespace votca::tools;
 
 namespace votca {
 namespace csg {
@@ -191,17 +195,19 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       }
     }*/
 
+  Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
-    Molecule *mi = _top->CreateMolecule(molname);
+    Molecule *mi = _top->CreateMolecule(molname, _top->MoleculeCount());
     XMLMolecule *xmlMolecule = new XMLMolecule(molname, nmols);
     xmlMolecule->pid = mi->getId();
     xmlMolecule->mi = mi;
     _molecules.insert(make_pair(molname, xmlMolecule));
     vector<int>::iterator resit = xmlResidues.begin();
     unordered_map<string, int> residuename_residuenumber;
-    for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
-         itb != xmlBeads.end(); ++itb, ++resit) {
-      XMLBead &b = **itb;
+    //    for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
+    //         itb != xmlBeads.end(); ++itb, ++resit) {
+    for (XMLBead *xml_bead : xmlBeads) {
+      XMLBead &b = *xml_bead;
 
       if (residuename_residuenumber.count(molname) == 0) {
         residuename_residuenumber[molname] = 1;
@@ -211,9 +217,22 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       if (!_top->BeadTypeExist(b.type)) {
         _top->RegisterBeadType(b.type);
       }
-      Bead *bead = _top->CreateBead<Bead>(1, b.name, b.type,
-                                          residuename_residuenumber[molname],
-                                          molname, molname, b.mass, b.q);
+      // Bead *bead = _top->CreateBead(1, b.name, b.type,
+      //                                    residuename_residuenumber[molname],
+      //                                    molname, molname, b.mass, b.q);
+      byte_t symmetry = 1;
+
+      string element = topology_constants::unassigned_element;
+      string name_all_caps = boost::algorithm::to_upper_copy<string>(b.name);
+      if (elements.isEleShort(b.name)) {
+        element = b.name;
+      } else if (elements.isEleFull(name_all_caps)) {
+        element = elements.getEleShort(name_all_caps);
+      }
+      Bead *bead = _top->CreateBead(symmetry, b.type, _bead_index, _mol_index,
+                                    bead_constants::residue_name_unassigned,
+                                    b.residue_number, element, b.mass, b.q);
+
       bead->setMoleculeId(_mol_index);
       mi->AddBead(bead);
 
@@ -242,8 +261,9 @@ void XMLTopologyReader::ParseBeadTypes(Property &el) {
     if (it->name() == "rename") {
       string name = it->getAttribute<string>("name");
       string newname = it->getAttribute<string>("newname");
-      if (name == "" || newname == "")
+      if (name == "" || newname == "") {
         throw runtime_error("invalid rename tag, name or newname are empty.");
+      }
       _top->RenameBeadType(name, newname);
     } else if (it->name() == "mass") {
       string name = it->getAttribute<string>("name");
