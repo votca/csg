@@ -15,13 +15,13 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <iostream>
 #include <map>
 #include <string>
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/exclusionlist.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 
 using namespace std;
@@ -74,7 +74,7 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
         cout << endl << "           ";
       }
     }
-
+/*
     cout << "\nList of residues:\n";
     map<int, set<pair<int, string>>> molecule_id_residue_ids_and_names =
         top->getResidueIdsAndNames();
@@ -114,7 +114,7 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
     }
   } else {
     cout << "\nList of exclusions:\n" << top->getExclusions();
-  }
+ */ }
 
-  return true;
+return true;
 }

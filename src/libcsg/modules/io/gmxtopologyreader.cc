@@ -88,9 +88,6 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
         string residue_name = *(atoms->resinfo[iatom].name);
 
         string bead_type = *(atoms->atomtype[iatom]);
-        if (!top.BeadTypeExist(bead_type)) {
-          top.RegisterBeadType(bead_type);
-        }
 
         string element = topology_constants::unassigned_element;
         if (elements.isEleShort(bead_type)) {

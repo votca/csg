@@ -99,9 +99,6 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
       Bead *b;
       if (topology) {
         string bead_type = fields[0];
-        if (!top.BeadTypeExist(bead_type)) {
-          top.RegisterBeadType(bead_type);
-        }
 
         string element = topology_constants::unassigned_element;
         string name_upper_case = boost::to_upper_copy<string>(bead_type);

@@ -22,11 +22,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <votca/csg/bead.h>
 #include <votca/csg/cgmoleculedef.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/map.h>
-#include <votca/csg/topology.h>
 
 #include <votca/tools/property.h>
 #include <votca/tools/tokenizer.h>
@@ -121,9 +121,6 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
     Bead *bead;
 
     string type = (*iter)->_type;
-    if (!top.BeadTypeExist(type)) {
-      top.RegisterBeadType(type);
-    }
     bead = top.CreateBead((*iter)->_symmetry, type, (*iter)->id_, molecule_id,
                           bead_constants::residue_name_unassigned,
                           (*iter)->residue_number_,

@@ -15,8 +15,8 @@
  *
  */
 #include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/csgtopology.h"
 #include <votca/csg/nematicorder.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
 

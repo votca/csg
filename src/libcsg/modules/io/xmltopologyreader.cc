@@ -214,9 +214,6 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       } else {
         ++residuename_residuenumber[molname];
       }
-      if (!_top->BeadTypeExist(b.type)) {
-        _top->RegisterBeadType(b.type);
-      }
       // Bead *bead = _top->CreateBead(1, b.name, b.type,
       //                                    residuename_residuenumber[molname],
       //                                    molname, molname, b.mass, b.q);

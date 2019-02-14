@@ -114,9 +114,6 @@ bool GROReader::NextFrame(CSG_Topology &top) {
             "Misformated gro file, residue_number has to be > 0");
 
       // this is not correct, but still better than no type at all!
-      if (!top.BeadTypeExist(atName)) {
-        top.RegisterBeadType(atName);
-      }
 
       // res -1 as internal number starts with 0
       byte_t symmetry = 1;

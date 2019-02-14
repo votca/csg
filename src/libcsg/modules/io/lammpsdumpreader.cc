@@ -262,9 +262,6 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
           atom_attributes_string["element"] = *itok;
         } else if ((fields[j] == "type") && _topology) {
           atom_attributes_string["type"] = *itok;
-          if (!top.BeadTypeExist(*itok)) {
-            top.RegisterBeadType(*itok);
-          }
           //      b->setType(*itok);
         }
       }

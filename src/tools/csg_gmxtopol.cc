@@ -15,11 +15,11 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <iostream>
 #include <votca/csg/csgapplication.h>
-
 using namespace votca::csg;
 using namespace std;
 using boost::format;
@@ -61,7 +61,8 @@ bool GmxTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
             "multiple molecules, using only first molecule\n";
   ofstream fl;
   fl.open((OptionsMap()["out"].as<string>() + ".top").c_str());
-  WriteMolecule(fl, *top, *(top->MoleculeByIndex(0)));
+  vector<int> molecule_ids = top->getMoleculeIds();
+  WriteMolecule(fl, *top, *(top->getMolecule(molecule_ids.at(0))));
   fl.close();
   return true;
 }

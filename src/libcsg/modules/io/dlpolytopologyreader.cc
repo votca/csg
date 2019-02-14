@@ -224,9 +224,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 #endif
         string beadtype;
         sl >> beadtype;
-        if (!top.BeadTypeExist(beadtype)) {
-          top.RegisterBeadType(beadtype);
-        }
 
         Elements elements;
         string element;

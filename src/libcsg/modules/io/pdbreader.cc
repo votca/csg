@@ -259,11 +259,6 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
           throw std::runtime_error(
               "Misformated pdb file, residue_number has to be > 0");
 
-        // This is not correct, but still better than no type at all!
-        if (!top.BeadTypeExist(atName)) {
-          top.RegisterBeadType(atName);
-        }
-
         // Determine if the charge has been provided in the .pdb file or if we
         // will be assuming it is 0
         double ch = 0;

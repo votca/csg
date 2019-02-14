@@ -15,6 +15,7 @@
  *
  */
 
+/*
 #include <boost/lexical_cast.hpp>
 
 #include <cassert>
@@ -37,7 +38,6 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-/*
 bool is_digits(const std::string &str) {
   return str.find_first_not_of("0123456789") == std::string::npos;
 }*/
@@ -293,7 +293,7 @@ double Topology::ShortestBoxSize() {
   double lc = _box_c * _norm_c;
 
   return min(la, min(lb, lc));
-}*/
+}
 
 }  // namespace csg
-}  // namespace votca
+} */ // namespace votca
