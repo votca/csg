@@ -22,8 +22,6 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "basebead.h"
-
 #include <votca/tools/graph.h>
 #include <votca/tools/graph_bf_visitor.h>
 #include <votca/tools/graphalgorithm.h>
@@ -73,7 +71,7 @@ class BeadStructure {
   /**
    * \brief returns the number of beads in the bead structure
    **/
-  size_t BeadCount() const { return beads_.size(); }
+  size_t BeadCount() { return beads_.size(); }
 
   /**
    * \brief add a bead to the bead structure
@@ -85,7 +83,7 @@ class BeadStructure {
   /**
    * \brief Get the bead with the specified id
    **/
-  T *getBead(int id) const;
+  T *getBead(int id);
 
   /**
    * \brief Create a connection between two beads in the structure
@@ -171,7 +169,7 @@ TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   std::unordered_map<std::string, std::string> attributes2;
 
   attributes1["Mass"] = basebead->getMass();
-  attributes2["Name"] = basebead->getType();
+  attributes2["Name"] = basebead->getName();
 
   /// Add graphnodes
   TOOLS::GraphNode graphnode;
@@ -286,9 +284,9 @@ std::vector<T *> BeadStructure<T>::getNeighBeads(int index) {
 }
 
 template <class T>
-T *BeadStructure<T>::getBead(int index) const {
+T *BeadStructure<T>::getBead(int index) {
   assert(beads_.count(index));
-  return beads_.at(index);
+  return beads_[index];
 }
 
 template <class T>

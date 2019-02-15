@@ -18,14 +18,13 @@
 #ifndef _VOTCA_CSG_BEADLIST_H
 #define _VOTCA_CSG_BEADLIST_H
 
-#include "bead.h"
-#include "csgtopology.h"
-#include "molecule.h"
+#include "topology.h"
 #include <list>
 #include <string>
 
 namespace votca {
 namespace csg {
+using namespace votca::tools;
 
 /**
     \brief Generate lists of beads
@@ -41,16 +40,16 @@ class BeadList : public std::list<Bead *> {
   ~BeadList() {}
 
   /// \brief Select all beads of type <select>
-  int Generate(CSG_Topology &top, const std::string &select);
+  int Generate(Topology &top, const std::string &select);
   /// \brief Select all beads of type <select> withn a radius <radius> of
   /// reference vector <ref>
-  int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
+  int GenerateInSphericalSubvolume(Topology &top, const std::string &select,
                                    vec ref, double radius);
 
-  CSG_Topology *getTopology() { return _topology; }
+  Topology *getTopology() { return _topology; }
 
  private:
-  CSG_Topology *_topology;
+  Topology *_topology;
 };
 
 }  // namespace csg

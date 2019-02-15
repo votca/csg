@@ -25,11 +25,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include "basebead.h"
 #include "beadstructure.h"
-#include <votca/tools/identity.h>
-#include <votca/tools/name.h>
-#include <votca/tools/vec.h>
-//#include "topologyitem.h"
+#include "topologyitem.h"
 
 namespace votca {
 namespace csg {
@@ -54,10 +52,10 @@ class BaseMolecule : public BeadStructure<T> {
   int getId() const { return id_.getId(); }
 
   /// get the name of the molecule
-  const std::string &getType() const { return type_.getName(); }
+  const std::string &getName() const { return name_.getName(); }
 
   /// set the name of the molecule
-  void setType(const std::string &name) { type_.setName(name); }
+  void setName(const std::string &name) { name_.setName(name); }
 
   // The bead already has a name handled by beadstructure, but we need to
   // override it
@@ -110,7 +108,7 @@ class BaseMolecule : public BeadStructure<T> {
 
  protected:
   TOOLS::Identity<int> id_;
-  TOOLS::Name type_;
+  TOOLS::Name name_;
 
   std::unordered_map<std::string, std::unordered_set<int>> bead_name_and_ids_;
 };
@@ -122,8 +120,7 @@ void BaseMolecule<T>::AddBead(T *bead) {
          " when it has been previously added.");
 
   BeadStructure<T>::AddBead(bead);
-  // bead_name_and_ids_[bead->getName()].insert(bead->getId());
-  bead_name_and_ids_[bead->getType()].insert(bead->getId());
+  bead_name_and_ids_[bead->getName()].insert(bead->getId());
   bead->setMoleculeId(getId());
 }
 
@@ -132,7 +129,7 @@ const std::string BaseMolecule<T>::getBeadName(int id) const {
   assert(BeadStructure<T>::beads_.count(id) &&
          "Cannot get bead name for bead id because "
          "is is not stored in the base molecule.");
-  return BeadStructure<T>::beads_.at(id)->getType();
+  return BeadStructure<T>::beads_.at(id)->getName();
 }
 
 template <class T>

@@ -28,12 +28,39 @@ vamespace TOOLS = votca::tools;
 class CSG_Topology : public Topology<Bead,Molecule> {
  public:
 
-  T *CreateBead(TOOLS::byte_t symmetry, std::string name, std::string type,
-                int residue_number, std::string residue_name,
-                std::string molecule_name, double m, double q);
 
-   Molecule *CreateMolecule(std::string name);
-	 
+	 Molecule *Topology::CreateMolecule(std::string name) {
+		 Molecule *mol = new Molecule(this, molecules_.size(), name);
+		 molecules_.push_back(mol);
+		 return mol;
+	 }
+  
+	Bead * Topology::CreateBead(byte_t symmetry, std::string name,
+			 std::string type, int residue_number,
+			 std::string residue_name,
+			 std::string molecule_name, double m, double q) {
+
+		 int molecule_type_id;
+
+		 if (molecule_name_and_type_id_.count(molecule_name) == 0) {
+			 molecule_type_id = static_cast<int>(molecule_name_and_type_id_.size()) + 1;
+			 molecule_name_and_type_id_[molecule_name] = molecule_type_id;
+		 } else {
+			 molecule_type_id = molecule_name_and_type_id_[molecule_name];
+		 }
+
+		 std::pair<int, std::string> element{residue_number, residue_name};
+		 molecule_id_and_residue_id_and_name_[molecule_type_id].insert(element);
+
+		    Bead *bead = new Bead(this, beads_.size(), type, symmetry, name, residue_number,
+				 residue_name, molecule_type_id, m, q);
+
+		    beads_.push_back(bead);
+		 return bead;
+	 }
+
+
+
 }  // namespace csg
 }  // namespace votca
 

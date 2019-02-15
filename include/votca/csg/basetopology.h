@@ -30,6 +30,7 @@
 #include "openbox.h"
 #include "orthorhombicbox.h"
 #include "triclinicbox.h"
+#include "topologytypecontainer.h"
 
 #include <votca/tools/matrix.h>
 #include <votca/tools/types.h>
@@ -40,61 +41,23 @@ namespace csg {
 
 namespace TOOLS = votca::tools;
 
-class Interaction;
-class ExclusionList;
-
-typedef std::vector<Molecule *> MoleculeContainer;
-typedef std::vector<Bead *> BeadContainer;
-typedef std::vector<Interaction *> InteractionContainer;
-
-/**
- * \brief topology of the whole system
- *
- * The Topology class stores the topology of the system like the beads, bonds,
- * molecules and residues.
- *
- **/
+template<class Bead_T, class Molecule_T>
 class Topology {
  public:
   /// constructor
   Topology()
-      : _time(0.0),
-        _has_vel(false),
-        _has_force(false),
-        max_residue_id_(bead_constants::residue_number_unassigned) {
-    _bc = new OpenBox();
+      : time_(0.0),
+        has_vel_(false),
+        has_force_(false),
+         {
+    bc_ = OpenBox();
   }
-  virtual ~Topology();
+  ~Topology();
 
   /**
    * \brief Cleans up all the stored data
    */
-  virtual void Cleanup();
-
-  /**
-   * \brief Creates a new Bead
-   *
-   * \param[in] symmetry symmetry of the bead, 1: spherical 3: ellipsoidal
-   * \param[in] name name of the bead
-   * \param[in] type bead type
-   * \param[in] resnr residue number
-   * \param[in] m mass
-   * \param[in] q charge
-   * \return pointer to created bead
-   *
-   * The function creates a new bead and adds it to the list of beads.
-   */
-  template <class T>
-  T *CreateBead(TOOLS::byte_t symmetry, std::string name, std::string type,
-                int residue_number, std::string residue_name,
-                std::string molecule_name, double m, double q);
-
-  /**
-   * \brief creates a new molecule
-   * \param name name of the molecule
-   * \return pointer to created molecule
-   */
-  virtual Molecule *CreateMolecule(std::string name);
+  void Cleanup();
 
   /**
    *  \brief checks weather molecules with the same name really contain the same
@@ -102,52 +65,36 @@ class Topology {
    */
   void CheckMoleculeNaming(void);
 
-  /**
-   * \brief create molecules based on blocks of atoms
-   * \param[in] name molecule name
-   * \param[in] first first bead
-   * \param[in] nbeads number of beads per molecule
-   * \param[in] nmolecules number of molecules
-   */
-  void CreateMoleculesByRange(std::string name, int first, int nbeads,
-                              int nmolecules);
-
-  /**
+	/**
    * \brief number of molecules in the system
    * @return number of molecule in topology
    */
-  int MoleculeCount() { return _molecules.size(); }
+  size_t MoleculeCount() { return molecules_.size(); }
 
   /**
    * number of beads in the system
    * @return number of beads in the system
    */
-  int BeadCount() { return _beads.size(); }
+  size_t BeadCount() { return beads_.size(); }
 
-  /**
-   * get molecule by index
-   * @param index molecule number
-   * @return pointer to molecule
-   */
-  Molecule *MoleculeByIndex(int index);
 
   /**
    * access containter with all beads
    * @return bead container
    */
-  BeadContainer &Beads() { return _beads; }
+  //BeadContainer &Beads() { return beads_; }
 
   /**
    * access  containter with all molecules
    * @return molecule container
    */
-  MoleculeContainer &Molecules() { return _molecules; }
+  //MoleculeContainer &Molecules() { return molecules_; }
 
   /**
    * access containter with all bonded interactions
    * @return bonded interaction container
    */
-  InteractionContainer &BondedInteractions() { return _interactions; }
+  InteractionContainer &BondedInteractions() { return interactions_; }
 
   void AddBondedInteraction(Interaction *ic);
   std::list<Interaction *> InteractionsInGroup(const std::string &group);
@@ -157,7 +104,7 @@ class Topology {
    *
    * @return bool true if it has been registered
    **/
-  bool BeadTypeExist(std::string type) const;
+  //bool BeadTypeExist(std::string type) const;
 
   /**
    * \brief Register the bead type with the topology object.
@@ -165,7 +112,7 @@ class Topology {
    * Records are kept of the different bead types in the topology object. This
    * method stores the bead type.
    **/
-  void RegisterBeadType(std::string name);
+  //void RegisterBeadType(std::string name);
 
   /**
    * \brief Given a bead type this method returns the id associated with the
@@ -174,7 +121,7 @@ class Topology {
    * @param[in] string name of the type
    * @return int the id of the type
    **/
-  int getBeadTypeId(std::string type) const;
+  //int getBeadTypeId(std::string type) const;
 
   /**
    * \brief Returns a pointer to the bead with index i
@@ -183,17 +130,19 @@ class Topology {
    * container
    * @return Bead * is a pointer to the bead
    **/
-  Bead *getBead(const int index) const { return _beads[index]; }
-  Molecule *getMolecule(const int i) const { return _molecules[i]; }
+  Bead *getBead(const int id) const { return beads_.at(id); }
+  Molecule *getMolecule(const int id) const { return molecules_.at(id); }
 
   /**
    * delete all molecule information
    */
-  void ClearMoleculeList() { _molecules.clear(); }
+  void ClearMoleculeList() { molecules_.clear(); }
 
   /**
    * \brief copy topology data of different topology
-   * \param top topology to copy from
+   * 
+	 * Copies everything but the interactions
+	 * \param top topology to copy from
    */
   void CopyTopologyData(Topology *top);
 
@@ -203,95 +152,71 @@ class Topology {
    * \param name new name of molecule
    * range is a string which is parsed by RangeParser,
    */
-  void RenameMolecules(std::string range, std::string name);
+  void RenameMoleculesType(std::string range, std::string name);
 
   /**
    *  \brief rename all the bead types
    * \param name current rame of the bead type
    * \param newname new name of bead type
    */
-  void RenameBeadType(std::string name, std::string newname);
+  void RenameBeadsType(std::string name, std::string newname);
 
   /**
    *  \brief set the mass of all the beads of a certain type
    * \param name the bead type
    * \param value mass value
    */
-  void SetBeadTypeMass(std::string name, double value);
+  void setBeadOfGivenTypeToNewMass(const std::string type, const double mass);
 
   /**
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const matrix &box, BoundaryCondition::eBoxtype boxtype =
-                                     BoundaryCondition::typeAuto) {
-    // determine box type automatically in case boxtype==typeAuto
-    if (boxtype == BoundaryCondition::typeAuto) {
-      boxtype = autoDetectBoxType(box);
-    }
-
-    if (_bc) {
-      delete (_bc);
-    }
-
-    switch (boxtype) {
-      case BoundaryCondition::typeTriclinic:
-        _bc = new TriclinicBox();
-        break;
-      case BoundaryCondition::typeOrthorhombic:
-        _bc = new OrthorhombicBox();
-        break;
-      default:
-        _bc = new OpenBox();
-        break;
-    }
-
-    _bc->setBox(box);
-  };
+  void setBox(const matrix &box, BoundaryCondition::eBoxtype boxtype);
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const matrix &getBox() { return _bc->getBox(); };
+  const matrix &getBox() { return bc_->getBox(); }
 
   /**
    * set the time of current frame
    * \param t simulation time in ns
    */
-  void setTime(double t) { _time = t; };
+  void setTime(double t) { time_ = t; }
 
   /**
    * get the time of current frame
    * \return simulation time in ns
    */
-  double getTime() { return _time; };
+  double getTime() { return time_; }
 
   /**
    * set the step number of current frame
    * \param s step number
    */
-  void setStep(int s) { _step = s; };
+  void setStep(int s) { step_ = s; }
 
   /**
    * get the step number of current frame
    * \return step number
    */
-  int getStep() { return _step; };
+  int getStep() { return step_; };
 
   /**
    * Sets the particle group. (For the H5MD file format)
    * \param particle_group The name of a particle group.
    */
   void setParticleGroup(std::string particle_group) {
-    _particle_group = particle_group;
-  };
+    particle_group_ = particle_group;
+  }
 
   /**
    * Gets the particle group.
    * \return The name of a particle group.
    */
-  std::string getParticleGroup() { return _particle_group; };
+  std::string getParticleGroup() { return particle_group_; }
 
   /**
    * \brief pbc correct distance of two beads
@@ -340,127 +265,174 @@ class Topology {
    */
   ExclusionList &getExclusions() { return _exclusions; }
 
-  BoundaryCondition::eBoxtype getBoxType() { return _bc->getBoxType(); }
+  BoundaryCondition::eBoxtype getBoxType() { return bc_.getBoxType(); }
 
   template <typename iteratable>
   void InsertExclusion(Bead *bead1, iteratable &l);
 
-  bool HasVel() { return _has_vel; }
-  void SetHasVel(const bool v) { _has_vel = v; }
+  bool HasVel() { return has_vel_; }
+  void SetHasVel(const bool v) { has_vel_ = v; }
 
-  bool HasForce() { return _has_force; }
-  void SetHasForce(const bool v) { _has_force = v; }
+  bool HasForce() { return has_force_; }
+  void SetHasForce(const bool v) { has_force_ = v; }
 
-  void setMoleculeNamesAndIds(
-      std::map<std::string, int> molecule_name_and_ids) {
-    assert(
-        molecule_name_and_type_id_.size() == 0 &&
-        "Cannot set the molecule "
-        "names and ids in the topology object because the molecule names and "
-        "ids are not empty");
-    molecule_name_and_type_id_ = molecule_name_and_ids;
-  }
-
-  void setResidueIdsAndNames(
-      std::map<int, std::set<std::pair<int, std::string>>>
-          molecule_id_residue_name_and_ids) {
-    assert(molecule_id_and_residue_id_and_name_.size() == 0 &&
-           "Cannot set the "
-           "molecules residue names and ids as it is not empty.");
-    molecule_id_and_residue_id_and_name_ = molecule_id_residue_name_and_ids;
-  }
-
-  std::map<std::string, int> getMoleculeNamesAndIds() const {
-    return molecule_name_and_type_id_;
-  }
-
-  std::map<int, std::set<std::pair<int, std::string>>> getResidueIdsAndNames()
-      const {
-    return molecule_id_and_residue_id_and_name_;
-  }
-
- protected:
-  BoundaryCondition *_bc;
+ 	protected:
+  BoundaryCondition bc_;
 
   BoundaryCondition::eBoxtype autoDetectBoxType(const matrix &box);
 
   /// bead types in the topology
-  std::map<std::string, int> beadtypes_;
+  //std::map<std::string, int> beadtypes_;
 
   /// beads in the topology
-  BeadContainer _beads;
+	std::unordered_map<int,Bead_T> beads_;
 
   /// molecules in the topology
-  MoleculeContainer _molecules;
+	std::unordered_map<int,Molecule_T> molecules_;
 
   /// bonded interactions in the topology
-  InteractionContainer _interactions;
+  InteractionContainer interactions_;
 
   ExclusionList _exclusions;
 
   std::map<std::string, int> _interaction_groups;
 
-  std::map<std::string, std::list<Interaction *>> _interactions_by_group;
+  std::map<std::string, std::list<Interaction *>> interactions__by_group;
 
-  // Need some way to keep track of the unique residue ids , id of the molecule
-  // type
-  std::map<std::string, int> molecule_name_and_type_id_;
-  std::map<int, std::set<std::pair<int, std::string>>>
-      molecule_id_and_residue_id_and_name_;
-
-  double _time;
-  int _step;
-  bool _has_vel;
-  bool _has_force;
-  int max_residue_id_;
+  double time_;
+  int step_;
+  bool has_vel_;
+  bool has_force_;
 
   /// The particle group (For H5MD file format)
-  std::string _particle_group;
+  std::string particle_group_;
+
+	TopologyTypeContainer type_container_;
 };
 
-template <class T>
-inline T *Topology::CreateBead(byte_t symmetry, std::string name,
-                               std::string type, int residue_number,
-                               std::string residue_name,
-                               std::string molecule_name, double m, double q) {
-
-  int molecule_type_id;
-
-  if (molecule_name_and_type_id_.count(molecule_name) == 0) {
-    molecule_type_id = static_cast<int>(molecule_name_and_type_id_.size()) + 1;
-    molecule_name_and_type_id_[molecule_name] = molecule_type_id;
-  } else {
-    molecule_type_id = molecule_name_and_type_id_[molecule_name];
-  }
-
-  std::pair<int, std::string> element{residue_number, residue_name};
-  molecule_id_and_residue_id_and_name_[molecule_type_id].insert(element);
-
-  T *bead = new T(this, _beads.size(), type, symmetry, name, residue_number,
-                  residue_name, molecule_type_id, m, q);
-
-  _beads.push_back(bead);
-  return bead;
-}
-
-inline Molecule *Topology::CreateMolecule(std::string name) {
-  Molecule *mol = new Molecule(this, _molecules.size(), name);
-  _molecules.push_back(mol);
-  return mol;
-}
-
-inline Molecule *Topology::MoleculeByIndex(int index) {
-  return _molecules[index];
-}
-
+template <class Bead_T, class Molecule_T>
 template <typename iteratable>
-inline void Topology::InsertExclusion(Bead *bead1, iteratable &l) {
+void Topology<Bead_T,Molecule_T>::InsertExclusion(Bead_T *bead1, iteratable &l) {
   _exclusions.InsertExclusion(bead1, l);
 }
 
-}  // namespace csg
+template <class Bead_T, class Molecule_T>
+void Topology<Bead_T,Molecule_T>::Cleanup() {
+		
+		bead_.clear();
+		molecule_.clear();	
+   
+	 	type_container.Clear();	
+       
+		// cleanup interactions
+    {
+      InteractionContainer::iterator i;
+      for (i = interactions_.begin(); i < interactions_.end(); ++i) delete (*i);
+      interactions_.clear();
+    }
+    // cleanup bc_ object
+    bc_ = OpenBox();
+  }
+
+template<class Bead_T, class Molecule_T>
+void Topology<Bead_T,Molecule_T>::CopyTopologyData(const Topology & top) {
+	step_ = top.step_;
+	time_ = top.time_;
+ 	has_vel_ = top.has_vel_;
+	has_force_ = top.has_force_;	
+	beads_ = top.beads_;
+	molecules_ = top.molecules_;
+	bc_ = top.bc_;
+	type_container_ = top.type_container_;
+
+}
+
+template<class Bead_T, class Molecule_T>
+void Topology<Bead_T,Molecule_T>::setBox(const matrix &box, BoundaryCondition::eBoxtype boxtype =
+                                     BoundaryCondition::typeAuto) {
+    // determine box type automatically in case boxtype==typeAuto
+    if (boxtype == BoundaryCondition::typeAuto) {
+      boxtype = autoDetectBoxType(box);
+    }
+
+    switch (boxtype) {
+      case BoundaryCondition::typeTriclinic:
+        bc_ = TriclinicBox();
+        break;
+      case BoundaryCondition::typeOrthorhombic:
+        bc_ = OrthorhombicBox();
+        break;
+      default:
+        bc_ = OpenBox();
+        break;
+    }
+
+    bc_->setBox(box);
+  }
+
+template<class Bead_T, class Molecule_T>
+  void Topology<Bead_T,Molecule_T>::RenameMoleculesType(string range_molecule_ids, string type) {
+    RangeParser rp;
+    RangeParser::iterator molecule_id_ptr;
+  
+    rp.Parse(range_molecule_ids);
+    for (molecule_id_ptr = rp.begin(); molecule_id_ptr != rp.end(); ++molecule_id_ptr) {
+      if ((unsigned int)*molecule_id_ptr > _molecules.size()) {
+        throw runtime_error(
+            string("RenameMoleculesType: num molecules smaller than"));
+      }
+      getMolecule(*molecule_id_ptr)->setType(type);
+    }
+  }
+
+template<class Bead_T, class Molecule_T>
+  void Topology<Bead_T,Molecule_T>::RenameBeadsType(string old_type, string new_type) {
+ 		for( pair<const int, Bead_T> & id_and_bead : beads_){
+			string bead_type = id_and_bead.second.getType();
+			if (wildcmp(bead_type.c_str(), old_type.c_str())) {
+				id_and_bead.second.setType(new_type);
+			}
+		}	
+  }
+
+template<class Bead_T, class Molecule_T>
+  void Topology<Bead_T,Molecule_T>::setBeadOfGivenTypeToNewMass(string type, double mass) {
+
+		for( pair<const int, Bead_T> & id_and_bead : beads_ ){
+			string bead_type = id_and_bead.second.getType();
+			if( wildcmp(bead_type.c_str(), type.c_str())){
+				id_and_bead.second.setMass(mass);
+			}
+		}	
+  }
+
+template<class Bead_T,class Molecule_T>
+void Topology<Bead_T,Molecule_T>::CheckMoleculeNaming(void) {
+	std::unordered_map<std::string, size_t> number_of_beads_in_each_molecular_type;
+
+	for ( const std::pair<int,Molecule_T> & id_and_molecule : molecules_){
+		std::string type = id_and_molecule.second.getType();
+	
+	}
+	for (MoleculeContainer::iterator iter = _molecules.begin();
+			iter != _molecules.end(); ++iter) {
+		map<string, int>::iterator entry = nbeads.find((*iter)->getName());
+		if (entry != nbeads.end()) {
+			if (entry->second != static_cast<int>((*iter)->BeadCount()))
+				throw runtime_error(
+						"There are molecules which have the same name but different number "
+						"of bead please check the section manual topology handling in the "
+						"votca manual");
+			continue;
+		}
+		nbeads[(*iter)->getName()] = (*iter)->BeadCount();
+	}
+}
+
+
+
+} // namespace csg
 }  // namespace votca
 
-#include "interaction.h"
-
+A
 #endif /* _VOTCA_CSG_TOPOLOGY_H */

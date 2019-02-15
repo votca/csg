@@ -15,40 +15,41 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TOPOLOGYMAP_H
-#define _VOTCA_CSG_TOPOLOGYMAP_H
+#ifndef _VOTCA_CSG_MOLECULEITEM_H
+#define _VOTCA_CSG_MOLECULEITEM_H
 
-#include "map.h"
-#include "topology.h"
-#include <vector>
+#include <cassert>
 
 namespace votca {
 namespace csg {
 
-class TopologyMap {
+class Molecule;
+
+class MoleculeItem {
  public:
-  ~TopologyMap();
+  virtual ~MoleculeItem() {}
 
-  TopologyMap(Topology *in, Topology *out);
+  /**
+   * Returns the molecule the pointer points at
+   */
+  Molecule *getMolecule() const {
+    assert(_mol != nullptr);
+    return _mol;
+  }
 
-  void AddMoleculeMap(Map *map);
+  /**
+   * stores a pointer to a molecule
+   */
+  void setMolecule(Molecule *mol) { _mol = mol; }
 
-  void Apply();
+ protected:
+  MoleculeItem(Molecule *mol) : _mol(mol) {}
 
- private:
-  Topology *_in;
-  Topology *_out;
+  Molecule *_mol = nullptr;
 
-  typedef std::vector<Map *> MapContainer;
-  MapContainer _maps;
+  friend class BaseBead;
 };
-
-inline TopologyMap::TopologyMap(Topology *in, Topology *out)
-    : _in(in), _out(out) {}
-
-inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
-
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TOPOLOGYMAP_H */
+#endif  // _VOTCA_CSG_MOLECULEITEM_H

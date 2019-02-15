@@ -18,6 +18,7 @@
 #ifndef _VOTCA_CSG_BEAD_H
 #define _VOTCA_CSG_BEAD_H
 
+#include <assert.h>
 #include <cassert>
 #include <sstream>
 #include <string>
@@ -32,8 +33,8 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
-// class Topology;
-// class Molecule;
+class Topology;
+class Molecule;
 
 namespace bead_constants {
 const std::string bead_name_unassigned = "unassigned";
@@ -52,7 +53,6 @@ const std::string bead_type_unassigned = "unassigned";
  **/
 class Bead : public BaseBead {
  public:
-  Bead(){};
   /**
    * destructor
    */
@@ -69,9 +69,8 @@ class Bead : public BaseBead {
    */
   const int &getResidueNumber() const { return residue_number_; }
 
-  std::string getResidueName() const { return residue_type_.getName(); }
+  std::string getResidueName() const { return residue_name_.getName(); }
 
-  std::string getElement() const { return element_.getName(); }
   /**
    * get the mass of the bead
    * \return bead mass
@@ -318,19 +317,17 @@ class Bead : public BaseBead {
    **/
   std::string getLabel() {
     std::stringstream label;
-    label << molecule_type_id_ << ":" << getResidueName() << ":" << getType();
+    label << molecule_type_id_ << ":" << getResidueName() << ":" << getName();
     return label.str();
   };
 
  protected:
   std::vector<int> parent_beads_;
 
-  TOOLS::Name residue_type_;
+  TOOLS::Name residue_name_;
 
   // Bead label is composed of ResidueNumber:ResidueName:bead_name
   TOOLS::Name bead_label_;
-
-  TOOLS::Name element_;
 
   TOOLS::byte_t symmetry_;
   double charge_;
@@ -348,19 +345,19 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(int id, std::string bead_type, TOOLS::byte_t symmetry,
-       std::string element, int residue_id, std::string residue_type,
-       int molecule_id, double mass, double charge)
+  Bead(Topology *owner, int id, std::string type, TOOLS::byte_t symmetry,
+       std::string name, int residue_number, std::string residue_name,
+       int molecule_type_id, double m, double q)
       : symmetry_(symmetry),
-        charge_(charge),
-        molecule_type_id_(molecule_id),
-        residue_number_(residue_id) {
-
+        charge_(q),
+        molecule_type_id_(molecule_type_id),
+        residue_number_(residue_number) {
+    topology_item_._parent = owner;
     setId(id);
-    setType(bead_type);
-    element_.setName(element);
-    residue_type_.setName(residue_type);
-    setMass(mass);
+    setType(type);
+    setName(name);
+    residue_name_.setName(residue_name);
+    setMass(m);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
     bU_ = false;
@@ -371,9 +368,8 @@ class Bead : public BaseBead {
 
   // void *_userdata;
 
-  //  friend class Molecule;
-  friend class CSG_Topology;
-  //  friend class Topology<Bead,Molecule>;
+  friend class Topology;
+  friend class Molecule;
 };
 
 inline void Bead::setVel(const TOOLS::vec &r) {
@@ -440,6 +436,4 @@ inline void Bead::HasW(bool b) { bW_ = b; }
 }  // namespace csg
 }  // namespace votca
 
-//#include "molecule.h"
-//#include "topology.h"
 #endif  // _VOTCA_CSG_BEAD_H

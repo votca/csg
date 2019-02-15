@@ -22,7 +22,6 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 class BoundaryCondition {
 
@@ -33,13 +32,13 @@ class BoundaryCondition {
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const matrix &box) { _box = box; };
+  void setBox(const matrix &box) { box_ = box; };
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const matrix &getBox() { return _box; };
+  const matrix &getBox() { return box_; };
 
   /**
    * get the volume of the box
@@ -57,7 +56,7 @@ class BoundaryCondition {
   virtual eBoxtype getBoxType() = 0;
 
  protected:
-  matrix _box;
+	matrix box_;
 };
 
 }  // namespace csg

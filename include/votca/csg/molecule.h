@@ -20,25 +20,22 @@
 
 #include "basemolecule.h"
 #include "bead.h"
-//#include "topologyitem.h"
-#include <cassert>
-#include <iostream>
+#include "topologyitem.h"
+#include <assert.h>
 #include <map>
 #include <string>
-#include <unordered_set>
 #include <vector>
+
 namespace votca {
 namespace csg {
 
-// namespace TOOLS = votca::tools;
+namespace TOOLS = votca::tools;
 
 class Interaction;
-class CSG_Topology;
 
 namespace molecule_constants {
 const std::string molecule_name_unassigned = "unassigned";
-const int molecule_id_unassigned = -1;
-}  // namespace molecule_constants
+}
 /**
     \brief Information about molecules.
 
@@ -48,9 +45,8 @@ const int molecule_id_unassigned = -1;
     \todo sort atoms in molecule
 
 */
-class Molecule : public BaseMolecule<Bead> {
+class Molecule : public TopologyItem, public BaseMolecule<Bead> {
  public:
-  Molecule(){};
   /**
    * @brief Grabs all beads that have the label given by `label`
    *
@@ -58,7 +54,7 @@ class Molecule : public BaseMolecule<Bead> {
    *
    * @return an unordered set with the ids of the beads that match the label
    */
-  std::unordered_set<int> getBeadIdsByLabel(const std::string &label) const;
+  std::unordered_set<int> getBeadIdsByLabel(const std::string &label);
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
@@ -67,22 +63,18 @@ class Molecule : public BaseMolecule<Bead> {
 
  private:
   std::vector<Interaction *> _interactions;
-  Molecule(int id, std::string name) {
-    id_.setId(id);
-    type_.setName(name);
-  }
 
   /// constructor
-  // Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent)
-  // {
+  Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+    id_.setId(id);
+    name_.setName(name);
+  }
 
-  //  static friend Molecule * CSG_Topology::CreateMolecule(CSG_Topology & top,
-  //  std::string name, int id); friend class Topology;
-  friend class CSG_Topology;
+  friend class Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
-    const std::string &label) const {
+    const std::string &label) {
   std::unordered_set<int> bead_ids;
   for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
     std::cout << "Label of bead " << id_and_bead.second->getLabel()

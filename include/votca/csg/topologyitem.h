@@ -15,40 +15,30 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TOPOLOGYMAP_H
-#define _VOTCA_CSG_TOPOLOGYMAP_H
-
-#include "map.h"
-#include "topology.h"
-#include <vector>
+#ifndef _VOTCA_CSG_TOPOLOGYITEM_H
+#define _VOTCA_CSG_TOPOLOGYITEM_H
 
 namespace votca {
 namespace csg {
 
-class TopologyMap {
+class Topology;
+
+class TopologyItem {
  public:
-  ~TopologyMap();
+  virtual ~TopologyItem() {}
+  Topology *getParent() const { return _parent; }
 
-  TopologyMap(Topology *in, Topology *out);
+ protected:
+  TopologyItem(Topology *parent) : _parent(parent) {}
 
-  void AddMoleculeMap(Map *map);
+  Topology *_parent;
 
-  void Apply();
-
- private:
-  Topology *_in;
-  Topology *_out;
-
-  typedef std::vector<Map *> MapContainer;
-  MapContainer _maps;
+  friend class Topology;
+  friend class BaseBead;
+  friend class Bead;
 };
-
-inline TopologyMap::TopologyMap(Topology *in, Topology *out)
-    : _in(in), _out(out) {}
-
-inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TOPOLOGYMAP_H */
+#endif /* _VOTCA_CSG_TOPOLOGYITEM_H */

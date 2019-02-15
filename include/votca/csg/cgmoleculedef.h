@@ -23,9 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "csgtopology.h"
 #include "exclusionlist.h"
-#include "interaction.h"
 #include "map.h"
 #include "molecule.h"
 #include <votca/tools/property.h>
@@ -49,9 +47,8 @@ class CGMoleculeDef {
   CGMoleculeDef() {}
   ~CGMoleculeDef();
 
-  Molecule *CreateMolecule(CSG_Topology &top);
-  Map *CreateMap(const CSG_Topology *topology, const Molecule &in,
-                 Molecule &out);
+  Molecule *CreateMolecule(Topology &top);
+  Map *CreateMap(Molecule &in, Molecule &out);
 
   void Load(std::string filename);
 
@@ -62,7 +59,6 @@ class CGMoleculeDef {
   Property _options;
 
   struct beaddef_t {
-    int id_;
     std::string _name;
     std::string _type;
     byte_t _symmetry;

@@ -18,8 +18,8 @@
 #ifndef _VOTCA_CSG_TOPOLOGYREADER_H
 #define _VOTCA_CSG_TOPOLOGYREADER_H
 
-#include "csgtopology.h"
 #include "fileformatfactory.h"
+#include "topology.h"
 #include <string>
 
 namespace votca {
@@ -29,7 +29,7 @@ class TopologyReader {
  public:
   virtual ~TopologyReader() {}
   /// open, read and close topology file
-  virtual bool ReadTopology(std::string file, CSG_Topology &top) = 0;
+  virtual bool ReadTopology(std::string file, Topology &top) = 0;
 
   static void RegisterPlugins(void);
 };
