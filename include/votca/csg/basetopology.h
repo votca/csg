@@ -245,13 +245,13 @@ class Topology {
   /**
    *  rebuild exclusion list
    */
-  void RebuildExclusions() { _exclusions.CreateExclusions(this); }
+  void RebuildExclusions() { exclustions_.CreateExclusions(this); }
 
   /**
    * access exclusion list
    * \return exclusion list
    */
-  ExclusionList &getExclusions() { return _exclusions; }
+  ExclusionList &getExclusions() { return exclustions_; }
 
   BoundaryCondition::eBoxtype getBoxType() { return bc_.getBoxType(); }
 
@@ -281,7 +281,7 @@ class Topology {
   /// bonded interactions in the topology
   InteractionContainer interactions_;
 
-  ExclusionList _exclusions;
+  ExclusionList exclustions_;
 
   std::map<std::string, int> interaction_groups_;
 
@@ -302,7 +302,7 @@ template <class Bead_T, class Molecule_T>
 template <typename iteratable>
 void Topology<Bead_T, Molecule_T>::InsertExclusion(Bead_T *bead1,
                                                    iteratable &l) {
-  _exclusions.InsertExclusion(bead1, l);
+  exclustions_.InsertExclusion(bead1, l);
 }
 
 template <class Bead_T, class Molecule_T>
