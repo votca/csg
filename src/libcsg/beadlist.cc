@@ -19,8 +19,6 @@
 #include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/molecule.h"
 #include <string>
-//#include "../../include/votca/csg/interaction.h"
-//#include <votca/csg/beadlist.h>
 #include <votca/tools/tokenizer.h>
 
 namespace votca {
