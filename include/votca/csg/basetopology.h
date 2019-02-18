@@ -26,10 +26,15 @@
 #include <vector>
 
 #include "boundarycondition.h"
+#include "exclusionlist.h"
 #include "interaction.h"
+#include "openbox.h"
+#include "orthorhombicbox.h"
 #include "topologytypecontainer.h"
+#include "triclinicbox.h"
 
 #include <votca/tools/matrix.h>
+#include <votca/tools/rangeparser.h>
 #include <votca/tools/vec.h>
 
 namespace votca {
@@ -41,7 +46,7 @@ template <class Bead_T, class Molecule_T>
 class Topology {
  public:
   /// constructor
-  Topology() : time_(0.0), has_vel_(false), has_force_(false), {
+  Topology() : time_(0.0), has_vel_(false), has_force_(false) {
     bc_ = OpenBox();
   }
   ~Topology();
@@ -79,7 +84,7 @@ class Topology {
    * access  containter with all molecules
    * @return molecule container
    */
-  // MoleculeContainer &Molecules() { return molecules_; }
+  const std::unordered_map<int, Molecule_T> &Molecules() { return molecules_; }
 
   /**
    * access containter with all bonded interactions
@@ -123,8 +128,8 @@ class Topology {
    * container
    * @return Bead * is a pointer to the bead
    **/
-  Bead_T *getBead(const int id) const { return beads_.at(id); }
-  Molecule_T *getMolecule(const int id) const { return molecules_.at(id); }
+  Bead_T *getBead(const int id) { return &beads_.at(id); }
+  Molecule_T *getMolecule(const int id) const { return &molecules_.at(id); }
 
   /**
    * delete all molecule information
@@ -137,7 +142,7 @@ class Topology {
    * Copies everything but the interactions
    * \param top topology to copy from
    */
-  void CopyTopologyData(const Topology &top);
+  void CopyTopologyData(const Topology<Bead_T, Molecule_T> &top);
 
   /**
    *  \brief rename all the molecules in range
@@ -165,13 +170,14 @@ class Topology {
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const TOOLS::matrix &box, BoundaryCondition::eBoxtype boxtype);
+  void setBox(const TOOLS::matrix &box, BoundaryCondition::eBoxtype boxtype =
+                                            BoundaryCondition::typeAuto);
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const TOOLS::matrix &getBox() const { return bc_->getBox(); }
+  const TOOLS::matrix &getBox() const { return bc_.getBox(); }
 
   /**
    * set the time of current frame
@@ -246,7 +252,7 @@ class Topology {
    *  calculates the box volume
    *  \return box volume
    */
-  double BoxVolume() const { return _bc->BoxVolume(); }
+  double BoxVolume() const { return bc_.BoxVolume(); }
 
   /**
    *  rebuild exclusion list
@@ -259,10 +265,12 @@ class Topology {
    */
   ExclusionList &getExclusions() { return exclusions_; }
 
+  std::vector<int> getBeadIds() const;
+
   BoundaryCondition::eBoxtype getBoxType() { return bc_.getBoxType(); }
 
   template <typename iteratable>
-  void InsertExclusion(Bead *bead1, iteratable &l);
+  void InsertExclusion(Bead_T *bead1, iteratable &l);
 
   bool HasVel() { return has_vel_; }
   void SetHasVel(const bool v) { has_vel_ = v; }
@@ -291,7 +299,7 @@ class Topology {
 
   std::map<std::string, int> interaction_groups_;
 
-  std::map<std::string, std::list<Interaction *>> interactions__by_group;
+  std::map<std::string, std::list<Interaction *>> interactions_by_group_;
 
   double time_;
   int step_;
@@ -330,7 +338,8 @@ void Topology<Bead_T, Molecule_T>::Cleanup() {
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::CopyTopologyData(const Topology &top) {
+void Topology<Bead_T, Molecule_T>::CopyTopologyData(
+    const Topology<Bead_T, Molecule_T> &top) {
   step_ = top.step_;
   time_ = top.time_;
   has_vel_ = top.has_vel_;
@@ -342,9 +351,8 @@ void Topology<Bead_T, Molecule_T>::CopyTopologyData(const Topology &top) {
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::setBox(
-    const TOOLS::matrix &box,
-    BoundaryCondition::eBoxtype boxtype = BoundaryCondition::typeAuto) {
+void Topology<Bead_T, Molecule_T>::setBox(const TOOLS::matrix &box,
+                                          BoundaryCondition::eBoxtype boxtype) {
   // determine box type automatically in case boxtype==typeAuto
   if (boxtype == BoundaryCondition::typeAuto) {
     boxtype = autoDetectBoxType(box);
@@ -362,19 +370,19 @@ void Topology<Bead_T, Molecule_T>::setBox(
       break;
   }
 
-  bc_->setBox(box);
+  bc_.setBox(box);
 }
 
 template <class Bead_T, class Molecule_T>
 void Topology<Bead_T, Molecule_T>::RenameMoleculesType(
     std::string range_molecule_ids, const std::string type) {
-  RangeParser rp;
-  RangeParser::iterator molecule_id_ptr;
+  TOOLS::RangeParser rp;
+  TOOLS::RangeParser::iterator molecule_id_ptr;
 
   rp.Parse(range_molecule_ids);
   for (molecule_id_ptr = rp.begin(); molecule_id_ptr != rp.end();
        ++molecule_id_ptr) {
-    if ((unsigned int)*molecule_id_ptr > _molecules.size()) {
+    if ((unsigned int)*molecule_id_ptr > molecules_.size()) {
       throw std::runtime_error(
           std::string("RenameMoleculesType: num molecules smaller than"));
     }
@@ -437,27 +445,27 @@ void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
     interaction_groups_[ic->getGroup()] = group_size;
     ic->setGroupId(group_size);
   }
-  _interactions.push_back(ic);
-  _interactions_by_group[ic->getGroup()].push_back(ic);
+  interactions_.push_back(ic);
+  interactions_by_group_[ic->getGroup()].push_back(ic);
 }
 
 template <class Bead_T, class Molecule_T>
 std::list<Interaction *> Topology<Bead_T, Molecule_T>::InteractionsInGroup(
     const string &group) const {
   std::map<std::string, std::list<Interaction *>>::iterator iter;
-  iter = _interactions_by_group.find(group);
-  if (iter == _interactions_by_group.end()) return std::list<Interaction *>();
+  iter = interactions_by_group_.find(group);
+  if (iter == interactions_by_group_.end()) return std::list<Interaction *>();
   return iter->second;
 }
 
 template <class Bead_T, class Molecule_T>
 TOOLS::vec Topology<Bead_T, Molecule_T>::BCShortestConnection(
     const TOOLS::vec &r_i, const TOOLS::vec &r_j) const {
-  return _bc->BCShortestConnection(r_i, r_j);
+  return bc_.BCShortestConnection(r_i, r_j);
 }
 
 template <class Bead_T, class Molecule_T>
-TOOLS::vec Topology::getDist<Bead_T, Molecule_T>(const int bead1,
+TOOLS::vec Topology<Bead_T, Molecule_T>::getDist(const int bead1,
                                                  const int bead2) const {
   return BCShortestConnection(getBead(bead1)->getPos(),
                               getBead(bead2)->getPos());
@@ -502,6 +510,15 @@ double Topology<Bead_T, Molecule_T>::ShortestBoxSize() {
   double lc = _box_c * _norm_c;
 
   return std::min(la, std::min(lb, lc));
+}
+
+template <class Bead_T, class Molecule_T>
+std::vector<int> Topology<Bead_T, Molecule_T>::getBeadIds() const {
+  vector<int> bead_ids;
+  for (const std::pair<const int, Bead_T> id_and_bead : beads_) {
+    bead_ids.push_back(id_and_bead.first);
+  }
+  return bead_ids;
 }
 
 }  // namespace csg

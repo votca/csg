@@ -17,6 +17,7 @@
 
 #include "../../include/votca/csg/beadlist.h"
 #include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/molecule.h"
 #include <string>
 #include <votca/tools/tokenizer.h>
@@ -24,11 +25,12 @@
 namespace votca {
 namespace csg {
 
+using namespace votca::tools;
 using namespace std;
 
 int BeadList::Generate(CSG_Topology &top, const string &select) {
   //  BeadContainer::iterator iter;
-  _topology = &top;
+  topology_ = &top;
   bool selectByName = false;
   string pSelect;  // parsed selection string
 
@@ -62,7 +64,7 @@ int BeadList::GenerateInSphericalSubvolume(CSG_Topology &top,
                                            const string &select, vec ref,
                                            double radius) {
   // BeadContainer::iterator iter;
-  _topology = &(top);
+  topology_ = &(top);
   bool selectByName = false;
   string pSelect;  // parsed selection string
 
@@ -78,7 +80,7 @@ int BeadList::GenerateInSphericalSubvolume(CSG_Topology &top,
   for (const int &bead_id : bead_ids) {
     Bead *bead_ptr = top.getBead(bead_id);
     // for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
-    if (abs(_topology->BCShortestConnection(ref, bead_ptr->getPos())) > radius)
+    if (abs(topology_->BCShortestConnection(ref, bead_ptr->getPos())) > radius)
       continue;
     if (!selectByName) {
       if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {

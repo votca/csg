@@ -21,10 +21,12 @@
 namespace votca {
 namespace csg {
 
-double BoundaryCondition::BoxVolume() {
-  vec a = _box.getCol(0);
-  vec b = _box.getCol(1);
-  vec c = _box.getCol(2);
+using namespace votca::tools;
+
+double BoundaryCondition::BoxVolume() const {
+  vec a = box_.getCol(0);
+  vec b = box_.getCol(1);
+  vec c = box_.getCol(2);
   return (a ^ b) * c;
 }
 

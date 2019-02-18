@@ -33,14 +33,12 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
-class Topology;
 class Molecule;
 
 namespace bead_constants {
-const std::string bead_name_unassigned = "unassigned";
-const int residue_number_unassigned = -1;
-const std::string residue_name_unassigned = "unassigned";
 const std::string bead_type_unassigned = "unassigned";
+const int residue_id_unassigned = -1;
+const std::string residue_type_unassigned = "unassigned";
 }  // namespace bead_constants
 /**
  * \brief information about a bead
@@ -53,6 +51,7 @@ const std::string bead_type_unassigned = "unassigned";
  **/
 class Bead : public BaseBead {
  public:
+  Bead(){};
   /**
    * destructor
    */
@@ -67,9 +66,9 @@ class Bead : public BaseBead {
    * as the molecule number. Residues are components of molecules.
    * \return residue id
    */
-  const int &getResidueNumber() const { return residue_number_; }
+  const int &getResidueNumber() const { return residue_id_; }
 
-  std::string getResidueName() const { return residue_name_.getName(); }
+  std::string getResidueType() const { return residue_type_.getName(); }
 
   /**
    * get the mass of the bead
@@ -313,20 +312,20 @@ class Bead : public BaseBead {
    *
    * It is returned in the following format:
    *
-   * ResidueNumber:ResidueName:BeadName
+   * ResidueNumber:ResidueType:BeadType
    **/
   std::string getLabel() {
     std::stringstream label;
-    label << molecule_type_id_ << ":" << getResidueName() << ":" << getName();
+    label << molecule_type_id_ << ":" << getResidueType() << ":" << getType();
     return label.str();
   };
 
  protected:
   std::vector<int> parent_beads_;
 
-  TOOLS::Name residue_name_;
+  TOOLS::Name residue_type_;
 
-  // Bead label is composed of ResidueNumber:ResidueName:bead_name
+  // Bead label is composed of ResidueNumber:ResidueType:bead_type
   TOOLS::Name bead_label_;
 
   TOOLS::byte_t symmetry_;
@@ -334,7 +333,7 @@ class Bead : public BaseBead {
 
   int molecule_type_id_ = -1;
 
-  int residue_number_ = -1;
+  int residue_id_ = -1;
 
   TOOLS::vec velocity_, bead_force_, u_, v_, w_;
 
@@ -345,18 +344,17 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(Topology *owner, int id, std::string type, TOOLS::byte_t symmetry,
-       std::string name, int residue_number, std::string residue_name,
-       int molecule_type_id, double m, double q)
+  Bead(TOOLS::byte_t symmetry, int id, std::string type, int residue_id,
+       std::string residue_type, int molecule_type_id,
+       std::string element_symbol, double m, double q)
       : symmetry_(symmetry),
         charge_(q),
         molecule_type_id_(molecule_type_id),
-        residue_number_(residue_number) {
-    topology_item_._parent = owner;
+        residue_id_(residue_id) {
     setId(id);
     setType(type);
-    setName(name);
-    residue_name_.setName(residue_name);
+    residue_type_.setName(residue_type);
+    element_symbol_.setName(element_symbol);
     setMass(m);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
@@ -368,7 +366,7 @@ class Bead : public BaseBead {
 
   // void *_userdata;
 
-  friend class Topology;
+  friend class CSG_Topology;
   friend class Molecule;
 };
 

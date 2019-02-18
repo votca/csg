@@ -20,7 +20,6 @@
 
 #include "basemolecule.h"
 #include "bead.h"
-#include "topologyitem.h"
 #include <assert.h>
 #include <map>
 #include <string>
@@ -34,7 +33,7 @@ namespace TOOLS = votca::tools;
 class Interaction;
 
 namespace molecule_constants {
-const std::string molecule_name_unassigned = "unassigned";
+const std::string molecule_type_unassigned = "unassigned";
 }
 /**
     \brief Information about molecules.
@@ -45,8 +44,9 @@ const std::string molecule_name_unassigned = "unassigned";
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem, public BaseMolecule<Bead> {
+class Molecule : public BaseMolecule<Bead> {
  public:
+  Molecule(){};
   /**
    * @brief Grabs all beads that have the label given by `label`
    *
@@ -65,12 +65,12 @@ class Molecule : public TopologyItem, public BaseMolecule<Bead> {
   std::vector<Interaction *> _interactions;
 
   /// constructor
-  Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+  Molecule(int id, std::string molecule_type) {
     id_.setId(id);
-    name_.setName(name);
+    type_.setName(molecule_type);
   }
 
-  friend class Topology;
+  friend class CSG_Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(

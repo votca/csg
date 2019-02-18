@@ -164,8 +164,8 @@ class IAngle : public Interaction {
     }
   }
 
-  double EvaluateVar(const BondaryCondition &bc);
-  TOOLS::vec Grad(const BondaryCondition &bc, int bead);
+  double EvaluateVar(const BoundaryCondition &bc);
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
 };
@@ -191,31 +191,31 @@ class IDihedral : public Interaction {
     }
   }
 
-  double EvaluateVar(const BondaryCondition &bc);
-  TOOLS::vec Grad(const BondaryCondition &bc, int bead);
+  double EvaluateVar(const BoundaryCondition &bc);
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
 };
 
-inline double IBond::EvaluateVar(const BondaryCondition &bc) {
-  return abs(bc.BCShortestConncto(_beads[0], _beads[1]));
+inline double IBond::EvaluateVar(const BoundaryCondition &bc) {
+  return abs(bc.BCShortestConnection(_beads[0], _beads[1]));
 }
 
-inline TOOLS::vec IBond::Grad(const BondaryCondition &bc, int bead) {
-  TOOLS::vec r = bc.BCShortestConncto(_beads[0], _beads[1]);
+inline TOOLS::vec IBond::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec r = bc.BCShortestConnection(_beads[0], _beads[1]);
   r.normalize();
   return (bead == 0) ? -r : r;
 }
 
-inline double IAngle::EvaluateVar(const BondaryCondition &bc) {
-  TOOLS::vec v1(bc.BCShortestConncto(_beads[1], _beads[0]));
-  TOOLS::vec v2(bc.BCShortestConncto(_beads[1], _beads[2]));
+inline double IAngle::EvaluateVar(const BoundaryCondition &bc) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
   return acos(v1 * v2 / sqrt((v1 * v1) * (v2 * v2)));
 }
 
-inline TOOLS::vec IAngle::Grad(const BondaryCondition &bc, int bead) {
-  TOOLS::vec v1(bc.BCShortestConncto(_beads[1], _beads[0]));
-  TOOLS::vec v2(bc.BCShortestConncto(_beads[1], _beads[2]));
+inline TOOLS::vec IAngle::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
 
   double acos_prime =
       1.0 / (sqrt(1 - (v1 * v2) * (v1 * v2) /
@@ -240,13 +240,13 @@ inline TOOLS::vec IAngle::Grad(const BondaryCondition &bc, int bead) {
   }
   // should never reach this
   assert(false);
-  return vec(0, 0, 0);
+  return TOOLS::vec(0, 0, 0);
 }
 
-inline double IDihedral::EvaluateVar(const BondaryCondition &bc) {
-  TOOLS::vec v1(bc.BCShortestConncto(_beads[0], _beads[1]));
-  TOOLS::vec v2(bc.BCShortestConncto(_beads[1], _beads[2]));
-  TOOLS::vec v3(bc.BCShortestConncto(_beads[2], _beads[3]));
+inline double IDihedral::EvaluateVar(const BoundaryCondition &bc) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
@@ -254,10 +254,10 @@ inline double IDihedral::EvaluateVar(const BondaryCondition &bc) {
   return sign * acos(n1 * n2 / sqrt((n1 * n1) * (n2 * n2)));
 }
 
-inline TOOLS::vec IDihedral::Grad(const BondaryCondition &bc, int bead) {
-  TOOLS::vec v1(bc.BCShortestConncto(_beads[0], _beads[1]));
-  TOOLS::vec v2(bc.BCShortestConncto(_beads[1], _beads[2]));
-  TOOLS::vec v3(bc.BCShortestConncto(_beads[2], _beads[3]));
+inline TOOLS::vec IDihedral::Grad(const BoundaryCondition &bc, int bead) {
+  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
+  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
@@ -370,7 +370,7 @@ inline TOOLS::vec IDihedral::Grad(const BondaryCondition &bc, int bead) {
   }
   // should never reach this
   assert(false);
-  return vec(0, 0, 0);
+  return TOOLS::vec(0, 0, 0);
 }
 }  // namespace csg
 }  // namespace votca

@@ -169,7 +169,7 @@ TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   std::unordered_map<std::string, std::string> attributes2;
 
   attributes1["Mass"] = basebead->getMass();
-  attributes2["Name"] = basebead->getName();
+  attributes2["Type"] = basebead->getType();
 
   /// Add graphnodes
   TOOLS::GraphNode graphnode;

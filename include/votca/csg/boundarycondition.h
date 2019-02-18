@@ -18,6 +18,7 @@
 #ifndef _VOTCA_CSG_BOUNDARYCONDITION_H
 #define _VOTCA_CSG_BOUNDARYCONDITION_H
 
+#include <stdexcept>
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
 
@@ -41,23 +42,27 @@ class BoundaryCondition {
    * get the simulation box
    * \return triclinic box matrix
    */
-  const TOOLS::matrix &getBox() { return box_; };
+  const TOOLS::matrix &getBox() const { return box_; };
 
   /**
    * get the volume of the box
    * \return box volume as double
    */
-  virtual double BoxVolume();
+  virtual double BoxVolume() const;
 
   /**
    * get shortest connection vector between r_i and r_j with respect to the
    * (periodic) box \return shortest distance vector
    */
   virtual TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                          const TOOLS::vec &r_j) const = 0;
+                                          const TOOLS::vec &r_j) const {
+    throw std::runtime_error("BCShortestConnection is not implemented.");
+  }
 
   enum eBoxtype { typeAuto = 0, typeTriclinic, typeOrthorhombic, typeOpen };
-  virtual eBoxtype getBoxType() = 0;
+  virtual eBoxtype getBoxType() {
+    throw std::runtime_error("getBoxType is not implemented.");
+  }
 
  protected:
   TOOLS::matrix box_;

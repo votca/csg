@@ -20,7 +20,7 @@
 
 #include "cgmoleculedef.h"
 #include "cgobserver.h"
-#include "topology.h"
+#include "csgtopology.h"
 #include "topologymap.h"
 #include <boost/program_options.hpp>
 #include <list>
@@ -59,7 +59,7 @@ class CGEngine {
   /**
       create a coarse grained topolgy based on a given topology
   */
-  TopologyMap *CreateCGTopology(Topology &in, Topology &out);
+  TopologyMap *CreateCGTopology(CSG_Topology &in, CSG_Topology &out);
 
   /**
       load molecule type from file

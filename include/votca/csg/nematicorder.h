@@ -18,7 +18,7 @@
 #ifndef _VOTCA_CSG_NEMATICORDER_H
 #define _VOTCA_CSG_NEMATICORDER_H
 
-#include "topology.h"
+#include "csgtopology.h"
 #include <votca/tools/matrix.h>
 
 namespace votca {
@@ -30,7 +30,7 @@ class NematicOrder {
   NematicOrder() {}
   ~NematicOrder() {}
 
-  void Process(Topology &top, const std::string &filter = "*");
+  void Process(CSG_Topology &top, const std::string &filter = "*");
 
   matrix::eigensystem_t &NematicU() { return _nemat_u; }
   matrix::eigensystem_t &NematicV() { return _nemat_v; }

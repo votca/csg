@@ -30,7 +30,7 @@ using namespace votca::tools;
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList
 
-class Topology;
+class CSG_Topology;
 class Bead;
 
 class ExclusionList {
@@ -51,7 +51,7 @@ class ExclusionList {
     std::list<Bead *> _exclude;
   };
 
-  void CreateExclusions(Topology *top);
+  void CreateExclusions(CSG_Topology *top);
   exclusion_t *GetExclusions(Bead *bead);
 
   typedef std::list<exclusion_t *>::iterator iterator;

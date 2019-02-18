@@ -2,7 +2,7 @@
  * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this file except top_in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -39,10 +39,11 @@ CGEngine::~CGEngine() {
 /**
     \todo melts with different molecules
 */
-TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
-  const MoleculeContainer &mols = in.Molecules();
+TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
+                                        CSG_Topology &top_out) {
+  const unordered_map<int, Molecule> &mols = top_in.Molecules();
   // MoleculeContainer::iterator iter;
-  TopologyMap *m = new TopologyMap(&in, &out);
+  TopologyMap *m = new TopologyMap(&top_in, &top_out);
   // for (iter = mols.begin(); iter != mols.end(); ++iter) {
   for (const pair<int, Molecule> &iter : mols) {
     const Molecule *mol = &(iter.second);
@@ -60,11 +61,11 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &in, CSG_Topology &out) {
            << "--------------------------------------\n";
       continue;
     }
-    Molecule *mcg = def->CreateMolecule(out);
-    Map *map = def->CreateMap(&in, *mol, *mcg);
+    Molecule *mcg = def->CreateMolecule(top_out);
+    Map *map = def->CreateMap(&top_in, *mol, *mcg);
     m->AddMoleculeMap(map);
   }
-  out.RebuildExclusions();
+  top_out.RebuildExclusions();
   return m;
 }
 

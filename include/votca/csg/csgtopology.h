@@ -18,6 +18,8 @@
 #ifndef _VOTCA_CSG_CSGTOPOLOGY_H
 #define _VOTCA_CSG_CSGTOPOLOGY_H
 
+#include <votca/tools/types.h>
+
 #include "basetopology.h"
 #include "bead.h"
 #include "molecule.h"
@@ -29,35 +31,30 @@ namespace TOOLS = votca::tools;
 
 class CSG_Topology : public Topology<Bead, Molecule> {
  public:
-  Molecule *Topology::CreateMolecule(std::string name) {
-    Molecule *mol = new Molecule(this, molecules_.size(), name);
-    molecules_.push_back(mol);
-    return mol;
+  Molecule* CreateMolecule(int id, std::string molecule_type) {
+    if (!type_container_.MoleculeTypeExist(molecule_type)) {
+      type_container_.AddMoleculeType(molecule_type);
+    }
+    Molecule molecule = Molecule(id, molecule_type);
+    molecules_[id] = molecule;
+    return &molecules_[id];
   }
 
-  Bead *Topology::CreateBead(byte_t symmetry, std::string name,
-                             std::string type, int residue_number,
-                             std::string residue_name,
-                             std::string molecule_name, double m, double q) {
+  Bead* CreateBead(byte_t symmetry, std::string bead_type, int bead_id,
+                   int molecule_id, int residue_id, std::string residue_type,
+                   std::string element_symbol, double mass, double charge) {
 
-    int molecule_type_id;
-
-    if (molecule_name_and_type_id_.count(molecule_name) == 0) {
-      molecule_type_id =
-          static_cast<int>(molecule_name_and_type_id_.size()) + 1;
-      molecule_name_and_type_id_[molecule_name] = molecule_type_id;
-    } else {
-      molecule_type_id = molecule_name_and_type_id_[molecule_name];
+    if (!type_container_.ResidueTypeExist(residue_type)) {
+      type_container_.AddResidueType(residue_type);
     }
+    if (!type_container_.BeadTypeExist(bead_type)) {
+      type_container_.AddBeadType(bead_type);
+    }
+    Bead bead = Bead(symmetry, bead_id, bead_type, residue_id, residue_type,
+                     molecule_id, element_symbol, mass, charge);
 
-    std::pair<int, std::string> element{residue_number, residue_name};
-    molecule_id_and_residue_id_and_name_[molecule_type_id].insert(element);
-
-    Bead *bead = new Bead(this, beads_.size(), type, symmetry, name,
-                          residue_number, residue_name, molecule_type_id, m, q);
-
-    beads_.push_back(bead);
-    return bead;
+    beads_[bead_id] = bead;
+    return &beads_.at(bead_id);
   }
 };
 

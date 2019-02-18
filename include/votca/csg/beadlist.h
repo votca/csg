@@ -50,10 +50,10 @@ class BeadList : public std::list<Bead *> {
   int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
                                    TOOLS::vec ref, double radius);
 
-  CSG_Topology *getCSG_Topology() { return _topology; }
+  CSG_Topology *getCSG_Topology() { return topology_; }
 
  private:
-  CSG_Topology *_topology;
+  CSG_Topology *topology_;
 };
 
 }  // namespace csg
