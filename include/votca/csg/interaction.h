@@ -95,6 +95,8 @@ class Interaction {
     return _beads[bead_index];
   }
 
+  std::vector<int> getBeadIds() const { return _beads; }
+
  protected:
   int _index;
   std::string _group;

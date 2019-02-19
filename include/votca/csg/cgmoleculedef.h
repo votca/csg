@@ -48,47 +48,48 @@ class CGMoleculeDef {
   ~CGMoleculeDef();
 
   Molecule *CreateMolecule(CSG_Topology &top);
-  Map *CreateMap(Molecule &in, Molecule &out);
+  Map *CreateMap(const CSG_Topology *topology, const Molecule &in,
+                 Molecule &out);
 
   void Load(std::string filename);
 
-  const std::string &getName() { return _name; }
-  const std::string &getIdent() { return _ident; }
+  const std::string &getType() { return type_; }
+  const std::string &getIdent() { return ident_; }
 
  private:
-  Property _options;
+  Property options_;
 
   struct beaddef_t {
-    std::string _name;
-    std::string _type;
-    byte_t _symmetry;
-    int residue_number_;
-    std::string _mapping;
-    std::vector<std::string> _subbeads;
-    Property *_options;
+    int id_;
+    std::string type_;
+    byte_t symmetry_;
+    int residue_id_;
+    std::string mapping_;
+    std::vector<std::string> subbeads_;
+    Property *options_;
   };
 
   // name of the coarse grained molecule
-  std::string _name;
+  std::string type_;
   // name of the molecule to coarse grain
-  std::string _ident;
+  std::string ident_;
 
   // beads of the cg molecule
-  std::vector<beaddef_t *> _beads;
-  std::map<std::string, beaddef_t *> _beads_by_name;
+  std::vector<beaddef_t *> beads_;
+  std::map<std::string, beaddef_t *> beads_by_type_;
 
   // mapping schemes
-  std::map<std::string, Property *> _maps;
+  std::map<std::string, Property *> maps_;
 
-  std::list<Property *> _bonded;
+  std::list<Property *> bonded_;
 
   void ParseTopology(Property &options);
   void ParseBeads(Property &options);
   void ParseBonded(Property &options);
   void ParseMapping(Property &options);
 
-  beaddef_t *getBeadByName(const std::string &name);
-  Property *getMapByName(const std::string &name);
+  beaddef_t *getBeadByType(const std::string &type);
+  Property *getMapByType(const std::string &type);
 };
 
 }  // namespace csg

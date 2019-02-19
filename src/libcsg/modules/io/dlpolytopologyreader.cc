@@ -196,7 +196,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      Molecule *mi = top.CreateMolecule(mol_name, top.MoleculeCount());
+      Molecule *mi = top.CreateMolecule(top.MoleculeCount(), mol_name);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -263,8 +263,8 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 
           Bead *bead = top.CreateBead(
               symmetry, beadtype, top.BeadCount(), mi->getId(),
-              bead_constants::residue_name_unassigned,
-              bead_constants::residue_number_unassigned, element, mass, charge);
+              bead_constants::residue_id_unassigned,
+              bead_constants::residue_type_unassigned, element, mass, charge);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();
@@ -344,15 +344,15 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
         Molecule *mi_replica =
-            top.CreateMolecule(mol_name, top.MoleculeCount());
+            top.CreateMolecule(top.MoleculeCount(), mol_name);
         vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
           Bead *bead = mi->getBead(bead_id);
           byte_t symmetry = 1;
           Bead *bead_replica = top.CreateBead(
               symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
-              bead->getResidueName(), bead->getResidueNumber(),
-              bead->getElement(), bead->getMass(), bead->getQ());
+              bead->getResidueId(), bead->getResidueType(), bead->getElement(),
+              bead->getMass(), bead->getQ());
           mi_replica->AddBead(bead_replica);
         }
         matoms += mi->BeadCount();

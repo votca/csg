@@ -117,7 +117,7 @@ bool GROReader::NextFrame(CSG_Topology &top) {
 
       // res -1 as internal number starts with 0
       byte_t symmetry = 1;
-      string element = topology_constants::unassigned_element;
+      string element = basebead_constants::unassigned_element;
       string atom_all_caps = boost::to_upper_copy<string>(atName);
       double atom_weight = 1.0;
       double atom_charge = 0.0;
@@ -130,8 +130,9 @@ bool GROReader::NextFrame(CSG_Topology &top) {
         atom_weight = elements.getMass(element);
       }
       b = top.CreateBead(symmetry, atName, atom_number,
-                         molecule_constants::molecule_id_unassigned, resName,
-                         residue_number - 1, element, atom_weight, atom_charge);
+                         molecule_constants::molecule_id_unassigned,
+                         residue_number - 1, resName, element, atom_weight,
+                         atom_charge);
     } else {
       b = top.getBead(i);
     }

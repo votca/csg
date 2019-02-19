@@ -49,7 +49,7 @@ bool GMXTrajectoryReader::FirstFrame(CSG_Topology &conf) {
   conf.setStep(_gmx_frame.step);
   cout << endl;
 
-  if (_gmx_frame.natoms != (int)conf.Beads().size())
+  if (_gmx_frame.natoms != (int)conf.BeadCount())
     throw std::runtime_error(
         "number of beads in trajectory do not match topology");
 

@@ -270,11 +270,11 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
 
     if (_topology) {
       byte_t symmetry = 1;
-      string residue_type = bead_constants::residue_name_unassigned;
-      int residue_id = bead_constants::residue_number_unassigned;
+      string residue_type = bead_constants::residue_type_unassigned;
+      int residue_id = bead_constants::residue_id_unassigned;
       Bead *b = top.CreateBead(
           symmetry, atom_attributes_string["type"], atom_attributes_int["id"],
-          atom_attributes_int["mol"], residue_type, residue_id,
+          atom_attributes_int["mol"], residue_id, residue_type,
           atom_attributes_string["element"], atom_attributes_double["mass"],
           atom_attributes_double["q"]);
     }

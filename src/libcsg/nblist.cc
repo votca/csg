@@ -39,8 +39,8 @@ void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
   if (list1.empty()) return;
   if (list2.empty()) return;
 
-  assert(list1.getTopology() == list2.getTopology());
-  CSG_Topology *top = list1.getTopology();
+  assert(list1.getCSGTopology() == list2.getCSGTopology());
+  CSG_Topology *top = list1.getCSGTopology();
 
   for (iter1 = list1.begin(); iter1 != list1.end(); ++iter1) {
     if (&list1 == &list2) {

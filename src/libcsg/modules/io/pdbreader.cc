@@ -237,7 +237,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         if (elements.isEleShort(atName)) {
           element_symbol = atName;
         } else {
-          element_symbol = topology_constants::unassigned_element;
+          element_symbol = basebead_constants::unassigned_element;
         }
       }
 
@@ -277,8 +277,8 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // res -1 as internal number starts with 0
         byte_t symmetry = 1;
         b = top.CreateBead(symmetry, atName, atom_number,
-                           molecule_constants::molecule_id_unassigned, resName,
-                           residue_number - 1, element_symbol,
+                           molecule_constants::molecule_id_unassigned,
+                           residue_number - 1, resName, element_symbol,
                            _elements.getMass(atName), ch);
       } else {
         b = top.getBead(atom_number);
@@ -427,7 +427,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       //      boost::lexical_cast<string>(ind);
       int molecule_id = mol_and_atom_ids.first;
       Molecule *mi = top.CreateMolecule(
-          molecule_constants::molecule_name_unassigned, molecule_id);
+          molecule_id, molecule_constants::molecule_name_unassigned);
       mol_map[molecule_id] = mi;
       mol_reInd_map[molecule_id] = ind;
 

@@ -40,7 +40,7 @@ void PDBWriter::Write(CSG_Topology *conf) {
     vec r = bi->getPos();
     // truncate strings if necessary
     string resname = "";
-    resname = bi->getResidueName();
+    resname = bi->getResidueType();
     string atomname = bi->getType();
     if (resname.size() > 3) {
       resname = resname.substr(0, 3);
@@ -54,7 +54,7 @@ void PDBWriter::Write(CSG_Topology *conf) {
             atomname.c_str(),                     // atom name
             resname.c_str(),                      // residue name
             " ",                                  // chain identifier 1 char
-            bi->getResidueNumber() + 1,           // residue sequence number
+            bi->getResidueId() + 1,               // residue sequence number
             10 * r.x(), 10 * r.y(), 10 * r.z());  // nm -> Angs
     // we skip the charge
 
@@ -62,22 +62,22 @@ void PDBWriter::Write(CSG_Topology *conf) {
       vec ru = 0.1 * bi->getU() + r;
 
       fprintf(_out, "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
-              bi->getId() + 1,             // atom serial number
-              bi->getType().c_str(),       // atom name
-              "REU",                       // residue name
-              " ",                         // chain identifier 1 char
-              bi->getResidueNumber() + 1,  // residue sequence number
-              ru.x(), ru.y(), ru.z());     // we skip the charge
+              bi->getId() + 1,          // atom serial number
+              bi->getType().c_str(),    // atom name
+              "REU",                    // residue name
+              " ",                      // chain identifier 1 char
+              bi->getResidueId() + 1,   // residue sequence number
+              ru.x(), ru.y(), ru.z());  // we skip the charge
     }
     if (bi->getSymmetry() >= 3) {
       vec rv = 0.1 * bi->getV() + r;
       fprintf(_out, "HETATM%5d %4s %3s %1s%4d    %8.3f%8.3f%8.4f\n",
-              bi->getId() + 1,             // atom serial number
-              bi->getType().c_str(),       // atom name
-              "REV",                       // residue name
-              " ",                         // chain identifier 1 char
-              bi->getResidueNumber() + 1,  // residue sequence number
-              rv.x(), rv.y(), rv.z());     // we skip the charge
+              bi->getId() + 1,          // atom serial number
+              bi->getType().c_str(),    // atom name
+              "REV",                    // residue name
+              " ",                      // chain identifier 1 char
+              bi->getResidueId() + 1,   // residue sequence number
+              rv.x(), rv.y(), rv.z());  // we skip the charge
     }
   }
   fprintf(_out, "ENDMDL\n");

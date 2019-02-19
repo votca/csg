@@ -30,6 +30,9 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
+namespace basebead_constants {
+const std::string unassigned_element = "unassigned";
+}
 /**
  * \brief information about a base bead
  *
@@ -68,6 +71,8 @@ class BaseBead {
    * \param bead type object
    */
   virtual void setType(std::string type) { type_.setName(type); }
+
+  std::string getElement() const { return element_symbol_.getName(); }
 
   /**
    * get the mass of the base bead

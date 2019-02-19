@@ -129,7 +129,10 @@ class Topology {
    * @return Bead * is a pointer to the bead
    **/
   Bead_T *getBead(const int id) { return &beads_.at(id); }
-  Molecule_T *getMolecule(const int id) const { return &molecules_.at(id); }
+  Molecule_T *getMolecule(const int id) { return &molecules_.at(id); }
+  const Molecule_T *getMoleculeConst(const int id) const {
+    return &molecules_.at(id);
+  }
 
   /**
    * delete all molecule information
@@ -246,7 +249,7 @@ class Topology {
    *
    * Calculates the shortest length to connect two sides of the box
    */
-  double ShortestBoxSize();
+  double ShortestBoxSize() const;
 
   /**
    *  calculates the box volume
@@ -257,7 +260,7 @@ class Topology {
   /**
    *  rebuild exclusion list
    */
-  void RebuildExclusions() { exclusions_.CreateExclusions(this); }
+  void RebuildExclusions();  // { exclusions_.CreateExclusions(this); }
 
   /**
    * access exclusion list
@@ -491,7 +494,7 @@ BoundaryCondition::eBoxtype Topology<Bead_T, Molecule_T>::autoDetectBoxType(
 }
 
 template <class Bead_T, class Molecule_T>
-double Topology<Bead_T, Molecule_T>::ShortestBoxSize() {
+double Topology<Bead_T, Molecule_T>::ShortestBoxSize() const {
   TOOLS::vec _box_a = getBox().getCol(0);
   TOOLS::vec _box_b = getBox().getCol(1);
   TOOLS::vec _box_c = getBox().getCol(2);
@@ -521,6 +524,18 @@ std::vector<int> Topology<Bead_T, Molecule_T>::getBeadIds() const {
   return bead_ids;
 }
 
+template <class Bead_T, class Molecule_T>
+void Topology<Bead_T, Molecule_T>::RebuildExclusions() {
+
+  vector<Bead *> beads;
+  for (Interaction *interaction : interactions_) {
+    vector<int> bead_ids = interaction->getBeadIds();
+    for (const int &bead_id : bead_ids) {
+      beads.push_back(&beads_[bead_id]);
+    }
+  }
+  exclusions_.ExcludeList(beads);
+}
 }  // namespace csg
 }  // namespace votca
 

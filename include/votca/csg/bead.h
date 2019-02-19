@@ -66,7 +66,7 @@ class Bead : public BaseBead {
    * as the molecule number. Residues are components of molecules.
    * \return residue id
    */
-  const int &getResidueNumber() const { return residue_id_; }
+  const int &getResidueId() const { return residue_id_; }
 
   std::string getResidueType() const { return residue_type_.getName(); }
 
@@ -256,19 +256,19 @@ class Bead : public BaseBead {
   const TOOLS::vec &getF() const;
 
   /** does this configuration store velocities? */
-  bool HasVel() { return bead_velocity_set_; }
+  bool HasVel() const { return bead_velocity_set_; }
 
   /** does this configuration store forces? */
-  bool HasF() { return bead_force_set_; }
+  bool HasF() const { return bead_force_set_; }
 
   /** does this configuration store u-orientations? */
-  bool HasU() { return bU_; }
+  bool HasU() const { return bU_; }
 
   /** does this configuration store v-orientations? */
-  bool HasV() { return bV_; }
+  bool HasV() const { return bV_; }
 
   /** does this configuration store w-orientations? */
-  bool HasW() { return bW_; }
+  bool HasW() const { return bW_; }
 
   /** dos the bead store a velocity */
   void HasVel(bool b);

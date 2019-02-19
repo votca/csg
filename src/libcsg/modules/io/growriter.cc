@@ -36,7 +36,7 @@ void GROWriter::Write(CSG_Topology *conf) {
   CSG_Topology *top = conf;
 
   fprintf(_out, "%s\n", "what a nice title");
-  fprintf(_out, "%5d\n", top->BeadCount());
+  fprintf(_out, "%5d\n", static_cast<int>(top->BeadCount()));
 
   bool v = top->HasVel();
   int pr = 3;  // precision of writeout, given by the spec
@@ -56,10 +56,10 @@ void GROWriter::Write(CSG_Topology *conf) {
     sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
 
   for (i = 0; i < top->BeadCount(); i++) {
-    resnr = top->getBead(i)->getResidueNumber();
+    resnr = top->getBead(i)->getResidueId();
     string resname =
         top->getBead(i)
-            ->getResidueName();  // top->getResidue(resnr)->getName();
+            ->getResidueType();  // top->getResidue(resnr)->getName();
     string atomname = top->getBead(i)->getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),

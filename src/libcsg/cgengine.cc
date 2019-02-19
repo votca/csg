@@ -41,18 +41,19 @@ CGEngine::~CGEngine() {
 */
 TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
                                         CSG_Topology &top_out) {
+
   const unordered_map<int, Molecule> &mols = top_in.Molecules();
   // MoleculeContainer::iterator iter;
   TopologyMap *m = new TopologyMap(&top_in, &top_out);
   // for (iter = mols.begin(); iter != mols.end(); ++iter) {
   for (const pair<int, Molecule> &iter : mols) {
-    const Molecule *mol = &(iter.second);
-    if (IsIgnored(mol->getType())) continue;
-    CGMoleculeDef *def = getMoleculeDef(mol->getType());
-    if (!def) {
+    const Molecule *mol_in = &(iter.second);
+    if (IsIgnored(mol_in->getType())) continue;
+    CGMoleculeDef *mol_def = getMoleculeDef(mol_in->getType());
+    if (!mol_def) {
       cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << mol->getType() << "\" with id "
-           << mol->getId() << " in topology" << endl
+           << "WARNING: unknown molecule \"" << mol_in->getType()
+           << "\" with id " << mol_in->getId() << " in topology" << endl
            << "molecule will not be mapped to CG representation\n"
            << "Check weather a mapping file for all molecule exists, was "
               "specified in --cg "
@@ -61,8 +62,8 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
            << "--------------------------------------\n";
       continue;
     }
-    Molecule *mcg = def->CreateMolecule(top_out);
-    Map *map = def->CreateMap(&top_in, *mol, *mcg);
+    Molecule *mcg = mol_def->CreateMolecule(top_out);
+    Map *map = mol_def->CreateMap(&top_in, *mol_in, *mcg);
     m->AddMoleculeMap(map);
   }
   top_out.RebuildExclusions();
@@ -74,11 +75,11 @@ void CGEngine::LoadMoleculeType(string filename) {
   Tokenizer::iterator iter;
 
   for (iter = tok.begin(); iter != tok.end(); ++iter) {
-    CGMoleculeDef *def = new CGMoleculeDef();
+    CGMoleculeDef *mol_def = new CGMoleculeDef();
     string file = *iter;
     boost::trim(file);
-    def->Load(file);
-    _molecule_defs[def->getIdent()] = def;
+    mol_def->Load(file);
+    _molecule_defs[mol_def->getIdent()] = mol_def;
   }
 }
 

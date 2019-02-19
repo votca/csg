@@ -75,7 +75,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
     t_atoms *atoms = &(mol->atoms);
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      Molecule *mi = top.CreateMolecule(molname, top.MoleculeCount());
+      Molecule *mi = top.CreateMolecule(top.MoleculeCount(), molname);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -89,7 +89,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 
         string bead_type = *(atoms->atomtype[iatom]);
 
-        string element = topology_constants::unassigned_element;
+        string element = basebead_constants::unassigned_element;
         if (elements.isEleShort(bead_type)) {
           element = bead_type;
         }
@@ -101,7 +101,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
         byte_t symmetry = 1;
         Bead *bead =
             top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
-                           residue_name, a->resind, element, a->m, a->q);
+                           a->resind, residue_name, element, a->m, a->q);
         // Bead *bead =
         //    top.CreateBead(symmetry, *(atoms->atomname[iatom]), bead_type,
         //                         a->resind, residue_name, molname, a->m,

@@ -19,7 +19,7 @@
 #define _VOTCA_CSG_APPLICATION_H
 
 #include "cgobserver.h"
-#include "topology.h"
+#include "csgtopology.h"
 #include "topologymap.h"
 #include "trajectoryreader.h"
 #include <votca/tools/application.h>

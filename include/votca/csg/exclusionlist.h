@@ -93,12 +93,12 @@ inline void ExclusionList::Remove(iteratable &l) {
 }
 
 template <typename iteratable>
-inline void ExclusionList::ExcludeList(iteratable &l) {
-  typename iteratable::iterator i, j;
+inline void ExclusionList::ExcludeList(iteratable &beads) {
+  typename iteratable::iterator bead_iter1, bead_iter2;
 
-  for (i = l.begin(); i != l.end(); ++i) {
-    for (j = i; j != l.end(); ++j) {
-      InsertExclusion(*i, *j);
+  for (bead_iter1 = beads.begin(); bead_iter1 != beads.end(); ++bead_iter1) {
+    for (bead_iter2 = bead_iter1; bead_iter2 != beads.end(); ++bead_iter2) {
+      InsertExclusion(*bead_iter1, *bead_iter2);
     }
   }
 }

@@ -49,21 +49,21 @@ using boost::lexical_cast;
 CGMoleculeDef::~CGMoleculeDef() {
   {
     vector<beaddef_t *>::iterator i;
-    for (i = _beads.begin(); i != _beads.end(); ++i) {
+    for (i = beads_.begin(); i != beads_.end(); ++i) {
       delete *i;
     }
-    _beads.clear();
+    beads_.clear();
   }
 }
 
 void CGMoleculeDef::Load(string filename) {
-  load_property_from_xml(_options, filename);
+  load_property_from_xml(options_, filename);
   // parse xml tree
-  _name = _options.get("cg_molecule.name").as<string>();
-  _ident = _options.get("cg_molecule.ident").as<string>();
+  type_ = options_.get("cg_molecule.name").as<string>();
+  ident_ = options_.get("cg_molecule.ident").as<string>();
 
-  ParseTopology(_options.get("cg_molecule.topology"));
-  ParseMapping(_options.get("cg_molecule.maps"));
+  ParseTopology(options_.get("cg_molecule.topology"));
+  ParseMapping(options_.get("cg_molecule.maps"));
 }
 
 void CGMoleculeDef::ParseTopology(Property &options) {
@@ -78,28 +78,28 @@ void CGMoleculeDef::ParseBeads(Property &options) {
        ++iter) {
     Property *p = *iter;
     beaddef_t *beaddef = new beaddef_t;
-    beaddef->_options = p;
+    beaddef->options_ = p;
 
-    beaddef->residue_number_ = bead_constants::residue_number_unassigned;
-    beaddef->_name = p->get("name").as<string>();
-    beaddef->_type = p->get("type").as<string>();
-    beaddef->_mapping = p->get("mapping").as<string>();
+    beaddef->residue_id_ = bead_constants::residue_id_unassigned;
+    beaddef->type_ = p->get("name").as<string>();
+    beaddef->type_ = p->get("type").as<string>();
+    beaddef->mapping_ = p->get("mapping").as<string>();
     if (p->exists("symmetry")) {
-      beaddef->_symmetry = p->get("symmetry").as<int>();
+      beaddef->symmetry_ = p->get("symmetry").as<int>();
     } else {
-      beaddef->_symmetry = 1;
+      beaddef->symmetry_ = 1;
     }
-    if (_beads_by_name.find(beaddef->_name) != _beads_by_name.end()) {
-      throw std::runtime_error(string("bead name ") + beaddef->_name +
+    if (beads_by_type_.find(beaddef->type_) != beads_by_type_.end()) {
+      throw std::runtime_error(string("bead name ") + beaddef->type_ +
                                " not unique in mapping");
     }
-    _beads.push_back(beaddef);
-    _beads_by_name[beaddef->_name] = beaddef;
+    beads_.push_back(beaddef);
+    beads_by_type_[beaddef->type_] = beaddef;
   }
 }
 
 void CGMoleculeDef::ParseBonded(Property &options) {
-  _bonded = options.Select("*");
+  bonded_ = options.Select("*");
 }
 
 void CGMoleculeDef::ParseMapping(Property &options) {
@@ -107,26 +107,27 @@ void CGMoleculeDef::ParseMapping(Property &options) {
 
   for (list<Property *>::iterator iter = maps.begin(); iter != maps.end();
        ++iter) {
-    _maps[(*iter)->get("name").as<string>()] = *iter;
+    maps_[(*iter)->get("name").as<string>()] = *iter;
   }
 }
 
 Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   int molecule_id = top.MoleculeCount();
-  Molecule *minfo = top.CreateMolecule(_name, molecule_id);
+  Molecule *minfo = top.CreateMolecule(molecule_id, type_);
 
   // create the atoms
   vector<beaddef_t *>::iterator iter;
-  for (iter = _beads.begin(); iter != _beads.end(); ++iter) {
+  for (iter = beads_.begin(); iter != beads_.end(); ++iter) {
     Bead *bead;
 
-    string type = (*iter)->_type;
-    bead = top.CreateBead((*iter)->_symmetry, type, (*iter)->id_, molecule_id,
-                          bead_constants::residue_name_unassigned,
-                          (*iter)->residue_number_,
-                          topology_constants::unassigned_element, 0.0, 0.0);
-    // bead = top.CreateBead<Bead>((*iter)->_symmetry, (*iter)->_name, type,
-    //                            (*iter)->residue_number_, _name, _name, 0, 0);
+    string bead_type = (*iter)->type_;
+    bead = top.CreateBead((*iter)->symmetry_, bead_type, (*iter)->id_,
+                          molecule_id, (*iter)->residue_id_,
+                          bead_constants::residue_type_unassigned,
+                          basebead_constants::unassigned_element, 0.0, 0.0);
+    // bead = top.CreateBead<Bead>((*iter)->symmetry_, (*iter)->type_,
+    // bead_type,
+    //                            (*iter)->residue_id_, type_, type_, 0, 0);
     minfo->AddBead(bead);
   }
 
@@ -134,7 +135,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   list<Property *>::iterator ibnd;
   map<string, string> had_iagroup;
 
-  for (ibnd = _bonded.begin(); ibnd != _bonded.end(); ++ibnd) {
+  for (ibnd = bonded_.begin(); ibnd != bonded_.end(); ++ibnd) {
     list<int> atoms;
     string iagroup = (*ibnd)->get("name").as<string>();
 
@@ -201,19 +202,19 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   return minfo;
 }
 
-Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology, const Molecule &in,
-                              Molecule &out) {
-  if ((unsigned int)out.BeadCount() != _beads.size()) {
+Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
+                              const Molecule &mol_in, Molecule &mol_out) {
+  if ((unsigned int)mol_out.BeadCount() != beads_.size()) {
     throw runtime_error(
         "number of beads for cg molecule and mapping definition do "
         "not match, check your molecule naming.");
   }
 
-  Map *map = new Map(in, out);
-  for (vector<beaddef_t *>::iterator def = _beads.begin(); def != _beads.end();
+  Map *map = new Map(mol_in, mol_out);
+  for (vector<beaddef_t *>::iterator def = beads_.begin(); def != beads_.end();
        ++def) {
 
-    unordered_set<int> bead_ids = out.getBeadIdsByType((*def)->_name);
+    unordered_set<int> bead_ids = mol_out.getBeadIdsByType((*def)->type_);
     assert(bead_ids.size() == 1 &&
            "There should only be one bead, if you want a more unique specifier "
            "the beads globally unique id should be used.");
@@ -221,16 +222,16 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology, const Molecule &in,
     int bead_id = *bead_ids.begin();
     if (bead_id < 0) {
       throw runtime_error(string("mapping error: reference molecule " +
-                                 (*def)->_name + " does not exist"));
+                                 (*def)->type_ + " does not exist"));
     }
 
-    Property *mdef = getMapByName((*def)->_mapping);
+    Property *mdef = getMapByType((*def)->mapping_);
     if (!mdef) {
-      throw runtime_error(string("mapping " + (*def)->_mapping + " not found"));
+      throw runtime_error(string("mapping " + (*def)->mapping_ + " not found"));
     }
 
     BeadMap *bmap;
-    switch ((*def)->_symmetry) {
+    switch ((*def)->symmetry_) {
       case 1:
         bmap = new Map_Sphere();
         break;
@@ -241,26 +242,26 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology, const Molecule &in,
         throw runtime_error(string("unknown symmetry in bead definition!"));
     }
     ////////////////////////////////////////////////////
-    bmap->Initialize(topology, &in, out.getBead(bead_id), ((*def)->_options),
-                     mdef);
+    bmap->Initialize(topology, &mol_in, mol_out.getBead(bead_id),
+                     ((*def)->options_), mdef);
     map->AddBeadMap(bmap);
   }
   return map;
 }
 
-CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByName(const string &name) {
-  map<string, beaddef_t *>::iterator iter = _beads_by_name.find(name);
-  if (iter == _beads_by_name.end()) {
-    std::cout << "cannot find: <" << name << "> in " << _name << "\n";
+CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByType(const string &type) {
+  map<string, beaddef_t *>::iterator iter = beads_by_type_.find(type);
+  if (iter == beads_by_type_.end()) {
+    std::cout << "cannot find: <" << type << "> in " << type_ << "\n";
     return NULL;
   }
   return (*iter).second;
 }
 
-Property *CGMoleculeDef::getMapByName(const string &name) {
-  map<string, Property *>::iterator iter = _maps.find(name);
-  if (iter == _maps.end()) {
-    std::cout << "cannot find map " << name << "\n";
+Property *CGMoleculeDef::getMapByType(const string &type) {
+  map<string, Property *>::iterator iter = maps_.find(type);
+  if (iter == maps_.end()) {
+    std::cout << "cannot find map " << type << "\n";
     return NULL;
   }
   return (*iter).second;

@@ -33,7 +33,8 @@ class BeadMap;
 *******************************************************/
 class Map {
  public:
-  Map(Molecule &in, Molecule &out) : _in(in), _out(out) {}
+  Map(const Molecule &mol_in, Molecule &mol_out)
+      : mol_in_(mol_in), mol_out_(mol_out) {}
   ~Map();
 
   void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
@@ -41,7 +42,7 @@ class Map {
   void Apply();
 
  protected:
-  Molecule _in, _out;
+  Molecule mol_in_, mol_out_;
   std::vector<BeadMap *> _maps;
 };
 
@@ -52,22 +53,26 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply() = 0;
-  virtual void Initialize(Molecule *in, Bead *out, Property *opts_map,
-                          Property *opts_bead);
+  virtual void Initialize(const CSG_Topology *topology_parent,
+                          const Molecule *mol_in, Bead *bead_out,
+                          Property *opts_map, Property *opts_bead);
 
  protected:
-  Molecule *_in;
-  Bead *_out;
-  Property *_opts_map;
-  Property *_opts_bead;
+  const CSG_Topology *topology_parent_;
+  const Molecule *mol_in_;
+  Bead *bead_out_;
+  Property *opts_map_;
+  Property *opts_bead_;
 };
 
-inline void BeadMap::Initialize(Molecule *in, Bead *out, Property *opts_bead,
-                                Property *opts_map) {
-  _in = in;
-  _out = out;
-  _opts_map = opts_map;
-  _opts_bead = opts_bead;
+inline void BeadMap::Initialize(const CSG_Topology *topology_parent,
+                                const Molecule *mol_in, Bead *bead_out,
+                                Property *opts_bead, Property *opts_map) {
+  topology_parent_ = topology_parent;
+  mol_in_ = mol_in;
+  bead_out_ = bead_out;
+  opts_map_ = opts_map;
+  opts_bead_ = opts_bead;
 }
 
 /*******************************************************
@@ -78,23 +83,24 @@ class Map_Sphere : public BeadMap {
   Map_Sphere() {}
   void Apply();
 
-  void Initialize(Molecule *in, Bead *out, Property *opts_bead,
-                  Property *opts_map);
+  void Initialize(const CSG_Topology *topology_parent, const Molecule *mol_in,
+                  Bead *bead_out, Property *opts_bead, Property *opts_map);
 
  protected:
-  void AddElem(Bead *in, double weight, double force_weight);
+  void AddElem(const Bead *bead_in, double weight, double force_weight);
 
   struct element_t {
-    Bead *_in;
+    const Bead *bead_in_;
     double _weight;
     double _force_weight;
   };
   std::vector<element_t> _matrix;
 };
 
-inline void Map_Sphere::AddElem(Bead *in, double weight, double force_weight) {
+inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
+                                double force_weight) {
   element_t el;
-  el._in = in;
+  el.bead_in_ = bead_in;
   el._weight = weight;
   el._force_weight = force_weight;
   _matrix.push_back(el);

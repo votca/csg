@@ -16,16 +16,17 @@
  */
 
 #include <votca/csg/orthorhombicbox.h>
+#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
-
+using namespace votca::tools;
 vec OrthorhombicBox::BCShortestConnection(const vec &r_i,
                                           const vec &r_j) const {
   vec r_ij;
-  double a = _box.get(0, 0);
-  double b = _box.get(1, 1);
-  double c = _box.get(2, 2);
+  double a = box_.get(0, 0);
+  double b = box_.get(1, 1);
+  double c = box_.get(2, 2);
   r_ij = r_j - r_i;
   r_ij.setZ(r_ij.getZ() - c * round(r_ij.getZ() / c));
   r_ij.setY(r_ij.getY() - b * round(r_ij.getY() / b));

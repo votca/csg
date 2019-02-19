@@ -31,8 +31,8 @@ void NBListGrid::Generate(BeadList &list1, BeadList &list2,
   if (list1.empty()) return;
   if (list2.empty()) return;
 
-  assert(list1.getTopology() == list2.getTopology());
-  CSG_Topology *top = _top = list1.getTopology();
+  assert(list1.getCSGTopology() == list2.getCSGTopology());
+  CSG_Topology *top = _top = list1.getCSGTopology();
 
   InitializeGrid(top->getBox());
 
@@ -51,7 +51,7 @@ void NBListGrid::Generate(BeadList &list, bool do_exclusions) {
   _do_exclusions = do_exclusions;
   if (list.empty()) return;
 
-  CSG_Topology *top = _top = list.getTopology();
+  CSG_Topology *top = _top = list.getCSGTopology();
 
   InitializeGrid(top->getBox());
 

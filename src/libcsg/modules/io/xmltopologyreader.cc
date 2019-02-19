@@ -197,7 +197,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
 
   Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
-    Molecule *mi = _top->CreateMolecule(molname, _top->MoleculeCount());
+    Molecule *mi = _top->CreateMolecule(_top->MoleculeCount(), molname);
     XMLMolecule *xmlMolecule = new XMLMolecule(molname, nmols);
     xmlMolecule->pid = mi->getId();
     xmlMolecule->mi = mi;
@@ -219,16 +219,16 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       //                                    molname, molname, b.mass, b.q);
       byte_t symmetry = 1;
 
-      string element = topology_constants::unassigned_element;
+      string element = basebead_constants::unassigned_element;
       string name_all_caps = boost::algorithm::to_upper_copy<string>(b.name);
       if (elements.isEleShort(b.name)) {
         element = b.name;
       } else if (elements.isEleFull(name_all_caps)) {
         element = elements.getEleShort(name_all_caps);
       }
-      Bead *bead = _top->CreateBead(symmetry, b.type, _bead_index, _mol_index,
-                                    bead_constants::residue_name_unassigned,
-                                    b.residue_number, element, b.mass, b.q);
+      Bead *bead = _top->CreateBead(
+          symmetry, b.type, _bead_index, _mol_index, b.residue_number,
+          bead_constants::residue_type_unassigned, element, b.mass, b.q);
 
       bead->setMoleculeId(_mol_index);
       mi->AddBead(bead);
