@@ -95,11 +95,11 @@ void XMLTopologyReader::ParseMolecules(Property &p) {
     if (it->name() == "clear") {
       _top->ClearMoleculeList();
     } else if (it->name() == "rename") {
-      string molname = it->getAttribute<string>("name");
+      string molecule_type_ = it->getAttribute<string>("name");
       string range = it->getAttribute<string>("range");
-      _top->RenameMolecules(range, molname);
+      _top->RenameMoleculesType(range, molecule_type_);
     } else if (it->name() == "define" || it->name() == "molecule") {
-      string molname = it->getAttribute<string>("name");
+      string molecule_type_ = it->getAttribute<string>("name");
       int first = 0;
       if (it->name() == "define") first = it->getAttribute<int>("first");
       int nbeads = it->getAttribute<int>("nbeads");
@@ -117,25 +117,25 @@ void XMLTopologyReader::ParseMolecules(Property &p) {
             "Attribute nmols is suppose to be > 0, but found " +
             boost::lexical_cast<string>(it->getAttribute<string>("nmols")));
       if (it->name() == "define") {
-        _top->CreateMoleculesByRange(molname, first, nbeads, nmols);
+        //_top->CreateMoleculesByRange(molecule_type_, first, nbeads, nmols);
       } else {
         if (_has_base_topology)
           throw std::runtime_error(
               "The defined list of beads only works for pure xml topology, "
               "without 'base' attribute.");
-        ParseMolecule(*it, molname, nbeads, nmols);
+        ParseMolecule(*it, molecule_type_, nbeads, nmols);
       }
     }
   }
 }
 
-void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
-                                      int nmols) {
+void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
+                                      int nbeads, int nmols) {
   vector<XMLBead *> xmlBeads;
   vector<int> xmlResidues;
   for (Property::iterator it = p.begin(); it != p.end(); ++it) {
     if (it->name() == "bead") {
-      string atname = it->getAttribute<string>("name");
+      string atom_type_ = it->getAttribute<string>("name");
       string attype = it->getAttribute<string>("type");
       double atmass, atq;
       int resid;
@@ -172,7 +172,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
         }
       }
       xmlResidues.push_back(resid);
-      XMLBead *xmlBead = new XMLBead(atname, attype, resid, atmass, atq);
+      XMLBead *xmlBead = new XMLBead(atom_type_, attype, resid, atmass, atq);
       xmlBeads.push_back(xmlBead);
     } else {
       throw std::runtime_error(
@@ -197,11 +197,11 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
 
   Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
-    Molecule *mi = _top->CreateMolecule(_top->MoleculeCount(), molname);
-    XMLMolecule *xmlMolecule = new XMLMolecule(molname, nmols);
+    Molecule *mi = _top->CreateMolecule(_top->MoleculeCount(), molecule_type_);
+    XMLMolecule *xmlMolecule = new XMLMolecule(molecule_type_, nmols);
     xmlMolecule->pid = mi->getId();
     xmlMolecule->mi = mi;
-    _molecules.insert(make_pair(molname, xmlMolecule));
+    _molecules.insert(make_pair(molecule_type_, xmlMolecule));
     vector<int>::iterator resit = xmlResidues.begin();
     unordered_map<string, int> residuename_residuenumber;
     //    for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
@@ -209,14 +209,15 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
     for (XMLBead *xml_bead : xmlBeads) {
       XMLBead &b = *xml_bead;
 
-      if (residuename_residuenumber.count(molname) == 0) {
-        residuename_residuenumber[molname] = 1;
+      if (residuename_residuenumber.count(molecule_type_) == 0) {
+        residuename_residuenumber[molecule_type_] = 1;
       } else {
-        ++residuename_residuenumber[molname];
+        ++residuename_residuenumber[molecule_type_];
       }
       // Bead *bead = _top->CreateBead(1, b.name, b.type,
-      //                                    residuename_residuenumber[molname],
-      //                                    molname, molname, b.mass, b.q);
+      //                                    residuename_residuenumber[molecule_type_],
+      //                                    molecule_type_, molecule_type_,
+      //                                    b.mass, b.q);
       byte_t symmetry = 1;
 
       string element = basebead_constants::unassigned_element;
@@ -237,8 +238,8 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
       XMLBead *b_rep = new XMLBead(b);
       b_rep->pid = _bead_index;
       if (xmlMolecule->name2beads.count(b.name) != 0)
-        throw std::runtime_error("Atom " + b.name + " in molecule " + molname +
-                                 " already exists.");
+        throw std::runtime_error("Atom " + b.name + " in molecule " +
+                                 molecule_type_ + " already exists.");
       xmlMolecule->name2beads.insert(make_pair(b.name, b_rep));
       _bead_index++;
     }
@@ -256,16 +257,16 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molname, int nbeads,
 void XMLTopologyReader::ParseBeadTypes(Property &el) {
   for (Property::iterator it = el.begin(); it != el.end(); ++it) {
     if (it->name() == "rename") {
-      string name = it->getAttribute<string>("name");
-      string newname = it->getAttribute<string>("newname");
-      if (name == "" || newname == "") {
+      string bead_type = it->getAttribute<string>("name");
+      string bead_new_type = it->getAttribute<string>("newname");
+      if (bead_type == "" || bead_new_type == "") {
         throw runtime_error("invalid rename tag, name or newname are empty.");
       }
-      _top->RenameBeadType(name, newname);
+      _top->RenameBeadsType(bead_type, bead_new_type);
     } else if (it->name() == "mass") {
-      string name = it->getAttribute<string>("name");
+      string bead_type = it->getAttribute<string>("name");
       double value = it->getAttribute<double>("value");
-      _top->SetBeadTypeMass(name, value);
+      _top->setBeadOfGivenTypeToNewMass(bead_type, value);
     } else {
       throw std::runtime_error("Wrong element under beadtypes: " + it->name());
     }
@@ -301,14 +302,14 @@ void XMLTopologyReader::ParseBond(Property &p) {
        it != bead_list.end();) {
     BondBead b1(*(it++));
     BondBead b2(*(it++));
-    if (b1.molname == b2.molname) {
+    if (b1.molecule_type_ == b2.molecule_type_) {
       // Iterates over molecules and gets atom pids.
-      MRange mRange = _molecules.equal_range(b1.molname);
+      MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
            ++itm) {
         XMLMolecule &xmlMolecule = *itm->second;
-        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atname];
-        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
+        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
+        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         ic = new IBond(xmlBead1.pid, xmlBead2.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
@@ -340,15 +341,16 @@ void XMLTopologyReader::ParseAngle(Property &p) {
     BondBead b1(*(it++));
     BondBead b2(*(it++));
     BondBead b3(*(it++));
-    if ((b1.molname == b2.molname) && (b2.molname == b3.molname)) {
+    if ((b1.molecule_type_ == b2.molecule_type_) &&
+        (b2.molecule_type_ == b3.molecule_type_)) {
       // Iterates over molecules and gets atom pids.
-      MRange mRange = _molecules.equal_range(b1.molname);
+      MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
            ++itm) {
         XMLMolecule &xmlMolecule = *itm->second;
-        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atname];
-        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
-        XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atname];
+        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
+        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
+        XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
         ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
@@ -380,17 +382,18 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
     BondBead b2(*(it++));
     BondBead b3(*(it++));
     BondBead b4(*(it++));
-    if ((b1.molname == b2.molname) && (b3.molname == b4.molname) &&
-        (b1.molname == b4.molname)) {
+    if ((b1.molecule_type_ == b2.molecule_type_) &&
+        (b3.molecule_type_ == b4.molecule_type_) &&
+        (b1.molecule_type_ == b4.molecule_type_)) {
       // Iterates over molecules and gets atom pids.
-      MRange mRange = _molecules.equal_range(b1.molname);
+      MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
            ++itm) {
         XMLMolecule &xmlMolecule = *itm->second;
-        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atname];
-        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atname];
-        XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atname];
-        XMLBead &xmlBead4 = *xmlMolecule.name2beads[b4.atname];
+        XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
+        XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
+        XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
+        XMLBead &xmlBead4 = *xmlMolecule.name2beads[b4.atom_type_];
         ic = new IDihedral(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid,
                            xmlBead4.pid);
         ic->setGroup(name);

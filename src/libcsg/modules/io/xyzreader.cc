@@ -110,8 +110,8 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
         byte_t symmetry = 1;
         b = top.CreateBead(
             symmetry, bead_type, i, molecule_constants::molecule_id_unassigned,
-            bead_constants::residue_type_unassigned,
-            bead_constants::residue_id_unassigned, element, 0.0, 0.0);
+            bead_constants::residue_id_unassigned,
+            bead_constants::residue_type_unassigned, element, 0.0, 0.0);
 
       } else {
         b = top.getBead(i);

@@ -90,7 +90,7 @@ class Topology {
    * access containter with all bonded interactions
    * @return bonded interaction container
    */
-  std::vector<Interaction *> &BondedInteractions() const {
+  const std::vector<Interaction *> &BondedInteractions() const {
     return interactions_;
   }
 
@@ -269,7 +269,7 @@ class Topology {
   ExclusionList &getExclusions() { return exclusions_; }
 
   std::vector<int> getBeadIds() const;
-
+  std::vector<int> getMoleculeIds() const;
   BoundaryCondition::eBoxtype getBoxType() { return bc_.getBoxType(); }
 
   template <typename iteratable>
@@ -522,6 +522,15 @@ std::vector<int> Topology<Bead_T, Molecule_T>::getBeadIds() const {
     bead_ids.push_back(id_and_bead.first);
   }
   return bead_ids;
+}
+
+template <class Bead_T, class Molecule_T>
+std::vector<int> Topology<Bead_T, Molecule_T>::getMoleculeIds() const {
+  vector<int> molecule_ids;
+  for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
+    molecule_ids.push_back(id_and_molecule.first);
+  }
+  return molecule_ids;
 }
 
 template <class Bead_T, class Molecule_T>

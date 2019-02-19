@@ -54,7 +54,7 @@ class BaseMolecule : public BeadStructure<T> {
   const std::string &getType() const { return type_.getName(); }
 
   /// set the name of the molecule
-  void setName(const std::string &name) { type_.setName(name); }
+  void setType(const std::string &type) { type_.setName(type); }
 
   // The bead already has a name handled by beadstructure, but we need to
   // override it

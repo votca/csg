@@ -32,7 +32,7 @@ void XYZWriter::Close() { fclose(_out); }
 
 void XYZWriter::Write(CSG_Topology *conf) {
   CSG_Topology *top = conf;
-  fprintf(_out, "%d\n", (int)top->Beads().size());
+  fprintf(_out, "%d\n", (int)top->BeadCount());
   fprintf(_out, "frame: %d time: %f\n", top->getStep() + 1, top->getTime());
 
   vector<int> bead_ids = conf->getBeadIds();

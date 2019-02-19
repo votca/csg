@@ -85,7 +85,7 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
   Interaction *ic;
   vector<Interaction *>::iterator iter;
 
-  vector<Interaction *> &ics = top.BondedInteractions();
+  const vector<Interaction *> &ics = top.BondedInteractions();
 
   for (iter = ics.begin(); iter != ics.end(); ++iter) {
     ic = *iter;

@@ -37,14 +37,14 @@ class BondBead {
     tok.ToVector(tmp_vec);
     if (tmp_vec.size() != 2)
       throw std::runtime_error("Wrong number of elements in bead: " + line);
-    molname = tmp_vec[0];
-    atname = tmp_vec[1];
-    molname.erase(molname.find_last_not_of(" \n\r\t") + 1);
-    atname.erase(atname.find_last_not_of(" \n\r\t") + 1);
+    molecule_type_ = tmp_vec[0];
+    atom_type_ = tmp_vec[1];
+    molecule_type_.erase(molecule_type_.find_last_not_of(" \n\r\t") + 1);
+    atom_type_.erase(atom_type_.find_last_not_of(" \n\r\t") + 1);
   }
 
-  std::string molname;
-  std::string atname;
+  std::string molecule_type_;
+  std::string atom_type_;
 };
 
 class XMLBead {
@@ -100,7 +100,8 @@ class XMLTopologyReader : public TopologyReader {
   void ParseBeadTypes(Property &el);
   void ParseBonded(Property &el);
   void ParseBox(Property &p);
-  void ParseMolecule(Property &p, std::string molname, int nbeads, int nmols);
+  void ParseMolecule(Property &p, std::string molecule_type_, int nbeads,
+                     int nmols);
   void ParseBond(Property &p);
   void ParseAngle(Property &p);
   void ParseDihedral(Property &p);

@@ -427,7 +427,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       //      boost::lexical_cast<string>(ind);
       int molecule_id = mol_and_atom_ids.first;
       Molecule *mi = top.CreateMolecule(
-          molecule_id, molecule_constants::molecule_name_unassigned);
+          molecule_id, molecule_constants::molecule_type_unassigned);
       mol_map[molecule_id] = mi;
       mol_reInd_map[molecule_id] = ind;
 
