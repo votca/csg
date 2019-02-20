@@ -31,7 +31,7 @@ class TriclinicBox : public BoundaryCondition {
   TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
                                   const TOOLS::vec &r_j) const;
 
-  eBoxtype getBoxType() { return typeTriclinic; }
+  eBoxtype getBoxType() const { return typeTriclinic; }
 
  protected:
 };

@@ -22,9 +22,9 @@ using namespace votca::tools;
 namespace votca {
 namespace csg {
 
-void BondedStatistics::BeginCG(Topology *top, Topology *top_atom) {
-  InteractionContainer &ic = top->BondedInteractions();
-  InteractionContainer::iterator ia;
+void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
+  const vector<Interaction *> &ic = top->BondedInteractions();
+  vector<Interaction *>::const_iterator ia;
 
   _bonded_values.clear();
   for (ia = ic.begin(); ia != ic.end(); ++ia) {
@@ -34,14 +34,15 @@ void BondedStatistics::BeginCG(Topology *top, Topology *top_atom) {
 
 void BondedStatistics::EndCG() {}
 
-void BondedStatistics::EvalConfiguration(Topology *conf, Topology *conv_atom) {
-  InteractionContainer &ic = conf->BondedInteractions();
-  InteractionContainer::iterator ia;
+void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
+                                         CSG_Topology *conv_atom) {
+  const vector<Interaction *> &ic = conf->BondedInteractions();
+  vector<Interaction *>::const_iterator ia;
 
   DataCollection<double>::container::iterator is;
   for (ia = ic.begin(), is = _bonded_values.begin(); ia != ic.end();
        ++ia, ++is) {
-    (*is)->push_back((*ia)->EvaluateVar(*conf));
+    (*is)->push_back((*ia)->EvaluateVar(*(conf->getBoundaryCondition())));
   }
 }
 

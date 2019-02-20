@@ -24,8 +24,8 @@
 #include <vector>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadlist.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/nblist_3body.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
 
   nb->setCutoff(2.0);
 
-  Topology top;
+  CSG_Topology top;
 
   matrix m;
   m.ZeroMatrix();
@@ -57,7 +57,6 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   mol = top.CreateMolecule("UNKNOWN");
 
   string bead_type_name = "CG";
-  top.RegisterBeadType(bead_type_name);
 
   int symmetry = 1;
   string name = "dummy1";
@@ -66,9 +65,9 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   double mass = 1.0;
   double charge = -1.0;
   Bead *b;
-  b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           molecule_constants::molecule_name_unassigned, mass,
-                           charge);
+  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                     molecule_constants::molecule_type_unassigned, mass,
+                     charge);
   pos[0] = 0.0;
   pos[1] = 0.0;
   pos[2] = 0.0;
@@ -81,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   resnr = 0;
   mass = 2.0;
   charge = -2.0;
-  b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           molecule_constants::molecule_name_unassigned,
+  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                     molecule_constants::molecule_type_unassigned,
 
-                           mass, charge);
+                     mass, charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;
@@ -97,10 +96,10 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   resnr = 0;
   mass = 3.0;
   charge = -3.0;
-  b = top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                           molecule_constants::molecule_name_unassigned,
+  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                     molecule_constants::molecule_type_unassigned,
 
-                           mass, charge);
+                     mass, charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;

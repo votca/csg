@@ -24,7 +24,7 @@
 #include <fstream>
 #include <stddef.h>
 #include <string>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/topologyreader.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/vec.h>
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   Elements ele;
 
-  Topology top;
+  CSG_Topology top;
   TopologyReader::RegisterPlugins();
   TopologyReader* reader;
   string str = "Molecule1.pdb";

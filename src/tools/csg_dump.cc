@@ -103,12 +103,12 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
 
       // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
       for (const int &bead_id : bead_ids) {
-        int resnr = (*mol)->getBead(bead_id)->getResidueNumber();
+        int resnr = (*mol)->getBead(bead_id)->getResidueId();
 
         cout << bead_id << " Name " << (*mol)->getBeadName(bead_id) << " Type "
              << (*mol)->getBead(bead_id)->getType() << " Mass "
              << (*mol)->getBead(bead_id)->getMass() << " Resnr " << resnr
-             << " Resname " << (*mol)->getBead(bead_id)->getResidueName()
+             << " Resname " << (*mol)->getBead(bead_id)->getResidueType()
              << " Charge " << (*mol)->getBead(bead_id)->getQ() << endl;
       }
     }

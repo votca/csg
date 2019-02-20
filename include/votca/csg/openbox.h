@@ -31,7 +31,7 @@ class OpenBox : public BoundaryCondition {
   TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
                                   const TOOLS::vec &r_j) const;
 
-  eBoxtype getBoxType() { return typeOpen; }
+  eBoxtype getBoxType() const { return typeOpen; }
 };
 
 }  // namespace csg

@@ -23,7 +23,7 @@
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/triplelist.h>
 #include <votca/tools/vec.h>
 
@@ -39,10 +39,9 @@ BOOST_AUTO_TEST_CASE(triplelist_constructor) {
 BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   TripleList<Bead *, BeadTriple> triplelist;
 
-  Topology top;
+  CSG_Topology top;
 
   string bead_type_name = "CG";
-  top.RegisterBeadType(bead_type_name);
 
   int symmetry = 1;
   string name = "dummy1";
@@ -51,9 +50,8 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned, mass, charge);
 
   symmetry = 1;
   name = "dummy2";
@@ -61,10 +59,10 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   mass = 2.0;
   charge = -2.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned,
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned,
 
-                       mass, charge);
+                 mass, charge);
 
   symmetry = 1;
   name = "dummy3";
@@ -72,10 +70,10 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   mass = 3.0;
   charge = -3.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned,
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned,
 
-                       mass, charge);
+                 mass, charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);

@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_register) {
 
 BOOST_AUTO_TEST_CASE(test_command) {
 
-  Topology top;
+  CSG_Topology top;
   BondedStatistics bonded_statistics;
   string interaction_group = "interaction";
   string interaction_group_name = ":interaction";
@@ -102,7 +102,6 @@ BOOST_AUTO_TEST_CASE(test_command) {
     byte_t symmetry = 1;
 
     string bead_type_name = "H2";
-    top.RegisterBeadType(bead_type_name);
 
     double mass = 0.9;
     double charge = 0.0;
@@ -120,10 +119,10 @@ BOOST_AUTO_TEST_CASE(test_command) {
 
           string bead_name = to_string(number_of_H2) + "_H2";
           vec bead_pos(x, y, z);
-          Bead *bead_ptr = top.CreateBead<Bead>(
+          Bead *bead_ptr = top.CreateBead(
               symmetry, bead_name, bead_type_name, residue_number,
-              bead_constants::residue_name_unassigned,
-              molecule_constants::molecule_name_unassigned, mass, charge);
+              bead_constants::residue_type_unassigned,
+              molecule_constants::molecule_type_unassigned, mass, charge);
           bead_ptr->setId(number_of_H2);
           bead_ptr->setPos(bead_pos);
           number_of_H2++;

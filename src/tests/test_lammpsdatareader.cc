@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   }
   printTestFile1_(lammpsdatafilename);
 
-  Topology top;
+  CSG_Topology top;
 
   TopologyReader::RegisterPlugins();
   TopologyReader* lammpsDataReader;
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   }
   printTestFile1_(lammpsdatafilename);
 
-  Topology top;
+  CSG_Topology top;
 
   TopologyReader::RegisterPlugins();
   TopologyReader* lammpsDataReader;

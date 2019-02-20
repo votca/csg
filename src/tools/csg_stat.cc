@@ -40,7 +40,7 @@ class CsgStatApp : public CsgApplication {
   void Initialize();
   bool EvaluateOptions();
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
   void EndEvaluate();
 
   CsgApplication::Worker *ForkWorker() { return _imc.ForkWorker(); }
@@ -98,7 +98,7 @@ bool CsgStatApp::EvaluateOptions() {
   return true;
 }
 
-void CsgStatApp::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgStatApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   _imc.BeginEvaluate(top, top_ref);
 }
 

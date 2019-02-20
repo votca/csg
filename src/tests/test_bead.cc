@@ -23,7 +23,7 @@
 #include <math.h>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/tools/vec.h>
 
 namespace votca {
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(bead_test)
 
 BOOST_AUTO_TEST_CASE(test_bead_constructor) {
 
-  Topology top;
+  CSG_Topology top;
 
   string bead_type_name = "C1";
   int symmetry = 1;
@@ -49,14 +49,13 @@ BOOST_AUTO_TEST_CASE(test_bead_constructor) {
   double mass = 1.21;
   double charge = -0.87;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned, mass, charge);
 }
 
 BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
-  Topology top;
+  CSG_Topology top;
 
   string bead_type_name = "C1";
 
@@ -67,9 +66,9 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(
-      symmetry, name, bead_type_name, resnr, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+  Bead* b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                           molecule_constants::molecule_type_unassigned, mass,
+                           charge);
 
   BOOST_CHECK_CLOSE(b->getMass(), mass, 1e-5);
   BOOST_CHECK_CLOSE(b->getQ(), charge, 1e-5);
@@ -82,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
 BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
-  Topology top;
+  CSG_Topology top;
 
   string bead_type_name = "C1";
 
@@ -93,9 +92,9 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(
-      symmetry, name, bead_type_name, resnr, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+  Bead* b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                           molecule_constants::molecule_type_unassigned, mass,
+                           charge);
 
   double newMass = 9.4;
   double newCharge = 2.6;

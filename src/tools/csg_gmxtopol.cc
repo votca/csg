@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <votca/csg/csgapplication.h>
+
 using namespace votca::csg;
 using namespace std;
 using boost::format;
@@ -83,7 +84,7 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
   int nb = -1;
 
   Interaction *ic;
-  vector<Interaction *>::iterator iter;
+  vector<Interaction *>::const_iterator iter;
 
   const vector<Interaction *> &ics = top.BondedInteractions();
 

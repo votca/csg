@@ -270,7 +270,9 @@ class Topology {
 
   std::vector<int> getBeadIds() const;
   std::vector<int> getMoleculeIds() const;
-  BoundaryCondition::eBoxtype getBoxType() { return bc_.getBoxType(); }
+  BoundaryCondition::eBoxtype getBoxType() const { return bc_.getBoxType(); }
+
+  const BoundaryCondition *getBoundaryCondition() const { return &bc_; }
 
   template <typename iteratable>
   void InsertExclusion(Bead_T *bead1, iteratable &l);
@@ -338,6 +340,11 @@ void Topology<Bead_T, Molecule_T>::Cleanup() {
   }
   // cleanup bc_ object
   bc_ = OpenBox();
+}
+
+template <class Bead_T, class Molecule_T>
+Topology<Bead_T, Molecule_T>::~Topology() {
+  Cleanup();
 }
 
 template <class Bead_T, class Molecule_T>
@@ -455,8 +462,7 @@ void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
 template <class Bead_T, class Molecule_T>
 std::list<Interaction *> Topology<Bead_T, Molecule_T>::InteractionsInGroup(
     const string &group) const {
-  std::map<std::string, std::list<Interaction *>>::iterator iter;
-  iter = interactions_by_group_.find(group);
+  auto iter = interactions_by_group_.find(group);
   if (iter == interactions_by_group_.end()) return std::list<Interaction *>();
   return iter->second;
 }

@@ -31,7 +31,7 @@ class OrthorhombicBox : public BoundaryCondition {
   TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
                                   const TOOLS::vec &r_j) const;
 
-  eBoxtype getBoxType() { return typeOrthorhombic; }
+  eBoxtype getBoxType() const { return typeOrthorhombic; }
 
  protected:
 };

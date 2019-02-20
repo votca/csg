@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   outfile.close();
 
-  Topology top;
+  CSG_Topology top;
 
   // Make square box
   matrix box;
@@ -200,13 +200,10 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     string atom_type = atom_types.at(ind);
-    if (!top.BeadTypeExist(atom_type)) {
-      top.RegisterBeadType(atom_type);
-    }
-    Bead *b = top.CreateBead<Bead>(
-        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
-        molecule_constants::molecule_name_unassigned,
-        elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead(symmetry, atom_types.at(ind), atom_type,
+                             residue_num, residue_name,
+                             molecule_constants::molecule_type_unassigned,
+                             elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));
@@ -250,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   // Create a topology object with a simple system (2-bonded thiophene monomers)
   // and write it to a lammps dump file
-  Topology top;
+  CSG_Topology top;
 
   // Make square box
   matrix box;
@@ -316,13 +313,10 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
 
     string atom_type = atom_types.at(ind);
-    if (!top.BeadTypeExist(atom_type)) {
-      top.RegisterBeadType(atom_type);
-    }
-    Bead *b = top.CreateBead<Bead>(
-        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
-        molecule_constants::molecule_name_unassigned,
-        elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead(symmetry, atom_types.at(ind), atom_type,
+                             residue_num, residue_name,
+                             molecule_constants::molecule_type_unassigned,
+                             elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));

@@ -15,11 +15,14 @@
  *
  */
 
-#include "../../include/votca/csg/csgtopology.h"
 #include <math.h>
-#include <votca/csg/csgapplication.h>
+
+#include "../../include/votca/csg/csgapplication.h"
+#include "../../include/votca/csg/csgtopology.h"
+
 #include <votca/tools/histogramnew.h>
 #include <votca/tools/tokenizer.h>
+
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;

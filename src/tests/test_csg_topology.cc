@@ -26,8 +26,8 @@
 #include <votca/tools/types.h>
 #include <votca/tools/vec.h>
 
+#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/interaction.h"
-#include "../../include/votca/csg/topology.h"
 
 using namespace std;
 using namespace votca::tools;
@@ -35,7 +35,7 @@ using namespace votca::csg;
 
 BOOST_AUTO_TEST_SUITE(csg_topology_test)
 
-BOOST_AUTO_TEST_CASE(constructors_test) { Topology top; }
+BOOST_AUTO_TEST_CASE(constructors_test) { CSG_Topology top; }
 
 BOOST_AUTO_TEST_CASE(box_test) {
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(box_test) {
 
   matrix box(v1, v2, v3);
 
-  Topology top;
+  CSG_Topology top;
   top.setBox(box);
 
   auto vol = top.BoxVolume();
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(box_test) {
 
 BOOST_AUTO_TEST_CASE(simple_test) {
 
-  Topology top;
+  CSG_Topology top;
   top.setStep(1);
   BOOST_CHECK_EQUAL(top.getStep(), 1);
   top.setTime(1.21);
@@ -80,9 +80,8 @@ BOOST_AUTO_TEST_CASE(simple_test) {
 }
 
 BOOST_AUTO_TEST_CASE(create_bead_type) {
-  Topology top;
+  CSG_Topology top;
   string bead_type_name = "type1";
-  top.RegisterBeadType(bead_type_name);
   BOOST_CHECK(top.BeadTypeExist(bead_type_name));
 
   top.Cleanup();
@@ -92,20 +91,19 @@ BOOST_AUTO_TEST_CASE(create_bead_type) {
  * bead has the correct properties.
  **/
 BOOST_AUTO_TEST_CASE(create_bead) {
-  Topology top;
+  CSG_Topology top;
   // 1 - for spherical bead
   byte_t symmetry = 1;
   string bead_name = "bead_test";
 
   string bead_type_name = "type1";
-  top.RegisterBeadType(bead_type_name);
 
   int residue_number = 1;
   string residue_name = "Protein";
   double mass = 1.1;
   double charge = 0.3;
 
-  auto bead_ptr = top.CreateBead<Bead>(
+  auto bead_ptr = top.CreateBead(
       symmetry, bead_name, bead_type_name, residue_number, residue_name,
       molecule_constants::molecule_name_unassigned, mass, charge);
 
@@ -128,12 +126,11 @@ BOOST_AUTO_TEST_CASE(create_bead) {
  * interactions are then checked to be sure they hold the right information.
  **/
 BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
-  Topology top;
+  CSG_Topology top;
   // 1 - for spherical bead
   byte_t symmetry = 1;
 
   string bead_type_name = "type1";
-  top.RegisterBeadType(bead_type_name);
 
   int residue_number = 1;
   string residue_name = "Protein";
@@ -142,19 +139,19 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
 
   // Create 3 beads
   string bead_name = "bead_test";
-  auto bead_ptr = top.CreateBead<Bead>(
+  auto bead_ptr = top.CreateBead(
       symmetry, bead_name, bead_type_name, residue_number, residue_name,
       molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr->setId(0);
 
   string bead_name2 = "bead_test2";
-  auto bead_ptr2 = top.CreateBead<Bead>(
+  auto bead_ptr2 = top.CreateBead(
       symmetry, bead_name2, bead_type_name, residue_number, residue_name,
       molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr2->setId(1);
 
   string bead_name3 = "bead_test3";
-  auto bead_ptr3 = top.CreateBead<Bead>(
+  auto bead_ptr3 = top.CreateBead(
       symmetry, bead_name3, bead_type_name, residue_number, residue_name,
       molecule_constants::molecule_name_unassigned, mass, charge);
   bead_ptr3->setId(2);

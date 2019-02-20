@@ -70,7 +70,7 @@ class CsgREupdate : public CsgApplication {
 
   void Initialize();
   bool EvaluateOptions();
-  void BeginEvaluate(Topology *top, Topology *top_atom = 0);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom = 0);
   void LoadOptions(const std::string &file);
 
   void Run();
@@ -113,8 +113,8 @@ class CsgREupdate : public CsgApplication {
   std::string _rdf_ext;
 
   void WriteOutFiles();
-  void EvalBonded(Topology *conf, PotentialInfo *potinfo);
-  void EvalNonbonded(Topology *conf, PotentialInfo *potinfo);
+  void EvalBonded(CSG_Topology *conf, PotentialInfo *potinfo);
+  void EvalNonbonded(CSG_Topology *conf, PotentialInfo *potinfo);
 
   // Compute Avg U, dU, and d2U values in reference AA ensemble
   void AAavgBonded(PotentialInfo *potinfo);
@@ -147,9 +147,9 @@ class CsgREupdateWorker : public CsgApplication::Worker {
   double _beta;
   int _nframes;
 
-  void EvalConfiguration(Topology *conf, Topology *conf_atom);
-  void EvalBonded(Topology *conf, PotentialInfo *potinfo);
-  void EvalNonbonded(Topology *conf, PotentialInfo *potinfo);
+  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom);
+  void EvalBonded(CSG_Topology *conf, PotentialInfo *potinfo);
+  void EvalNonbonded(CSG_Topology *conf, PotentialInfo *potinfo);
 };
 
 #endif /* _VOTCA_CSG_REUPDATE_H */

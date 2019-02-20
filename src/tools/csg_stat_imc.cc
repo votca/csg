@@ -68,7 +68,7 @@ void Imc::Initialize() {
   if (_do_imc) InitializeGroups();
 };
 
-void Imc::BeginEvaluate(Topology *top, Topology *top_atom) {
+void Imc::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   // we didn't process any frames so far
   _nframes = 0;
   _nblock = 0;
@@ -93,21 +93,21 @@ void Imc::BeginEvaluate(Topology *top, Topology *top_atom) {
 
       if (beads1.size() == 0)
         throw std::runtime_error(
-            "Topology does not have beads of type \"" +
+            "CSG_Topology does not have beads of type \"" +
             (*iter)->get("type1").value() +
             "\"\n"
             "This was specified in type1 of interaction \"" +
             name + "\"");
       if (beads2.size() == 0)
         throw std::runtime_error(
-            "Topology does not have beads of type \"" +
+            "CSG_Topology does not have beads of type \"" +
             (*iter)->get("type2").value() +
             "\"\n"
             "This was specified in type2 of interaction \"" +
             name + "\"");
       if (beads3.size() == 0)
         throw std::runtime_error(
-            "Topology does not have beads of type \"" +
+            "CSG_Topology does not have beads of type \"" +
             (*iter)->get("type3").value() +
             "\"\n"
             "This was specified in type3 of interaction \"" +
@@ -124,14 +124,14 @@ void Imc::BeginEvaluate(Topology *top, Topology *top_atom) {
 
       if (beads1.size() == 0)
         throw std::runtime_error(
-            "Topology does not have beads of type \"" +
+            "CSG_Topology does not have beads of type \"" +
             (*iter)->get("type1").value() +
             "\"\n"
             "This was specified in type1 of interaction \"" +
             name + "\"");
       if (beads2.size() == 0)
         throw std::runtime_error(
-            "Topology does not have beads of type \"" +
+            "CSG_Topology does not have beads of type \"" +
             (*iter)->get("type2").value() +
             "\"\n"
             "This was specified in type2 of interaction \"" +
@@ -223,7 +223,7 @@ void Imc::LoadOptions(const string &file) {
 }
 
 // evaluate current conformation
-void Imc::Worker::EvalConfiguration(Topology *top, Topology *top_atom) {
+void Imc::Worker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_atom) {
 
   _cur_vol = top->BoxVolume();
   // process non-bonded interactions
@@ -264,7 +264,7 @@ class IMCNBSearchHandler {
 };
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoNonbonded(Topology *top) {
+void Imc::Worker::DoNonbonded(CSG_Topology *top) {
   for (list<Property *>::iterator iter = _imc->_nonbonded.begin();
        iter != _imc->_nonbonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
@@ -417,7 +417,7 @@ void Imc::Worker::DoNonbonded(Topology *top) {
 }
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoBonded(Topology *top) {
+void Imc::Worker::DoBonded(CSG_Topology *top) {
   for (list<Property *>::iterator iter = _imc->_bonded.begin();
        iter != _imc->_bonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
@@ -433,7 +433,7 @@ void Imc::Worker::DoBonded(Topology *top) {
     std::list<Interaction *>::iterator ic_iter;
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
-      double v = ic->EvaluateVar(*top);
+      double v = ic->EvaluateVar(*(top->getBoundaryCondition()));
       _current_hists[i._index].Process(v);
     }
   }

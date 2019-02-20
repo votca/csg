@@ -31,6 +31,7 @@ namespace TOOLS = votca::tools;
 
 class CSG_Topology : public Topology<Bead, Molecule> {
  public:
+  ~CSG_Topology(){};
   Molecule* CreateMolecule(int id, std::string molecule_type) {
     if (!type_container_.MoleculeTypeExist(molecule_type)) {
       type_container_.AddMoleculeType(molecule_type);

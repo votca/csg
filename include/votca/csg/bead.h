@@ -59,7 +59,7 @@ class Bead : public BaseBead {
 
   int getResnr() const {
     throw std::runtime_error(
-        "getResnr() is now depricated use getResidueNumber() instead");
+        "getResnr() is now depricated use getResidueId() instead");
   }
   /**
    * Get The residue number of the bead, not the residue number is not the same

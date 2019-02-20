@@ -60,7 +60,9 @@ class Molecule : public BaseMolecule<Bead> {
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
 
-  std::vector<Interaction *> Interactions() { return _interactions; }
+  const std::vector<Interaction *> Interactions() const {
+    return _interactions;
+  }
 
  private:
   std::vector<Interaction *> _interactions;

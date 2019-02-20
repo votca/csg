@@ -60,7 +60,7 @@ class BoundaryCondition {
   }
 
   enum eBoxtype { typeAuto = 0, typeTriclinic, typeOrthorhombic, typeOpen };
-  virtual eBoxtype getBoxType() {
+  virtual eBoxtype getBoxType() const {
     throw std::runtime_error("getBoxType is not implemented.");
   }
 

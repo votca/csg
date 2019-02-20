@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(beadtriple_test)
 
 BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
 
-  Topology top;
+  CSG_Topology top;
 
   string bead_type_name = "CG";
 
@@ -46,9 +46,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned, mass, charge);
 
   symmetry = 1;
   name = "dummy2";
@@ -56,9 +55,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned, mass, charge);
 
   symmetry = 1;
   name = "dummy3";
@@ -66,9 +64,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
+                 molecule_constants::molecule_type_unassigned, mass, charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);
