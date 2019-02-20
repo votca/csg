@@ -22,9 +22,9 @@
 
 #include <string>
 #include <votca/csg/bead.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/vec.h>
 
 using namespace std;

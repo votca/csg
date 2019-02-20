@@ -44,34 +44,38 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   string bead_type_name = "CG";
 
   int symmetry = 1;
-  string name = "dummy1";
-  string residue_name = "Residue";
-  int resnr = 0;
+  int molecule_id = 1;
+  int bead_id = 1;
+  string bead_type = "dummy1";
+  string residue_type = "Residue";
+  int residue_id = 0;
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                 molecule_constants::molecule_type_unassigned, mass, charge);
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, basebead_constants::unassigned_element, mass,
+                 charge);
 
+  bead_id = 2;
   symmetry = 1;
-  name = "dummy2";
-  resnr = 0;
+  bead_type = "dummy2";
+  residue_id = 0;
   mass = 2.0;
   charge = -2.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                 molecule_constants::molecule_type_unassigned,
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, basebead_constants::unassigned_element, mass,
+                 charge);
 
-                 mass, charge);
-
+  bead_id = 3;
   symmetry = 1;
-  name = "dummy3";
-  resnr = 0;
+  bead_type = "dummy3";
+  residue_id = 0;
   mass = 3.0;
   charge = -3.0;
 
-  top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                 molecule_constants::molecule_type_unassigned,
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, basebead_constants::unassigned_element,
 
                  mass, charge);
 
@@ -90,18 +94,18 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   BOOST_CHECK_CLOSE(triplefront->bead1()->getMass(), 1.0, 1e-5);
   BOOST_CHECK_CLOSE(triplefront->bead2()->getMass(), 2.0, 1e-5);
   BOOST_CHECK_CLOSE(triplefront->bead3()->getMass(), 3.0, 1e-5);
-  BOOST_CHECK_EQUAL(triplefront->bead1()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(triplefront->bead2()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(triplefront->bead3()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead1()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead2()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead3()->getResidueId(), 0);
   BOOST_CHECK_EQUAL(triplelist.size(), 1);
 
   tripleback = triplelist.back();
   BOOST_CHECK_CLOSE(tripleback->bead1()->getMass(), 1.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead2()->getMass(), 2.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead3()->getMass(), 3.0, 1e-5);
-  BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueId(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

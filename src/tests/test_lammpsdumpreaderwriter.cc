@@ -193,17 +193,22 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
       {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}};
 
   Elements elements;
-  int residue_num = 1;
-  string residue_name = "DNA";
+  int residue_id = 1;
+  string residue_type = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     string atom_type = atom_types.at(ind);
-    Bead *b = top.CreateBead(symmetry, atom_types.at(ind), atom_type,
-                             residue_num, residue_name,
-                             molecule_constants::molecule_type_unassigned,
-                             elements.getMass(atom_types.at(ind)), charge);
+    string element_symbol = basebead_constants::unassigned_element;
+    int atom_id = static_cast<int>(ind);
+    if (elements.isEleShort(atom_type)) {
+      element_symbol = atom_type;
+    }
+    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
+                             molecule_constants::molecule_id_unassigned,
+                             residue_id, residue_type, element_symbol,
+                             elements.getMass(atom_type), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));
@@ -305,17 +310,22 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}};
 
   Elements elements;
-  int residue_num = 1;
-  string residue_name = "DNA";
+  int residue_id = 1;
+  string residue_type = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
 
     string atom_type = atom_types.at(ind);
-    Bead *b = top.CreateBead(symmetry, atom_types.at(ind), atom_type,
-                             residue_num, residue_name,
-                             molecule_constants::molecule_type_unassigned,
+    int atom_id = static_cast<int>(ind);
+    string element_symbol = basebead_constants::unassigned_element;
+    if (elements.isEleShort(atom_type)) {
+      element_symbol = atom_type;
+    }
+    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
+                             molecule_constants::molecule_id_unassigned,
+                             residue_id, residue_type, element_symbol,
                              elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),

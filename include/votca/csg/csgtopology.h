@@ -36,6 +36,10 @@ class CSG_Topology : public Topology<Bead, Molecule> {
     if (!type_container_.MoleculeTypeExist(molecule_type)) {
       type_container_.AddMoleculeType(molecule_type);
     }
+
+    assert(!molecules_.count(id) &&
+           "molecule with the provided id already exists within the topology!");
+
     Molecule molecule = Molecule(id, molecule_type);
     molecules_[id] = molecule;
     return &molecules_[id];
@@ -51,6 +55,10 @@ class CSG_Topology : public Topology<Bead, Molecule> {
     if (!type_container_.BeadTypeExist(bead_type)) {
       type_container_.AddBeadType(bead_type);
     }
+
+    assert(!beads_.count(bead_id) &&
+           "bead with provided id already exists in the topology!");
+
     Bead bead = Bead(symmetry, bead_id, bead_type, residue_id, residue_type,
                      molecule_id, element_symbol, mass, charge);
 

@@ -54,18 +54,20 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   vec pos;
 
   Molecule *mol;
-  mol = top.CreateMolecule("UNKNOWN");
+  int molecule_id = 1;
+  mol = top.CreateMolecule(molecule_id,
+                           molecule_constants::molecule_type_unassigned);
 
-  string bead_type_name = "CG";
+  int bead_id = 0;
+  string bead_type = "CG";
   int symmetry = 1;
-  string name = "dummy1";
-  int resnr = 0;
-  string residue_name = "Residue";
+  int residue_id = 0;
+  string residue_type = "Residue";
   double mass = 1.0;
   double charge = -1.0;
   Bead *b;
-  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                     molecule_constants::molecule_type_unassigned, mass,
+  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                     residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   pos[0] = 0.0;
   pos[1] = 0.0;
@@ -74,13 +76,13 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
 
+  bead_id = 1;
   symmetry = 1;
-  name = "dummy2";
-  resnr = 0;
+  residue_id = 0;
   mass = 2.0;
   charge = -2.0;
-  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                     molecule_constants::molecule_type_unassigned, mass,
+  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                     residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
@@ -89,13 +91,13 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   pos[2] = 0.0;
   b->setPos(pos);
 
+  bead_id = 2;
   symmetry = 1;
-  name = "dummy3";
-  resnr = 0;
+  residue_id = 0;
   mass = 3.0;
   charge = -3.0;
-  b = top.CreateBead(symmetry, name, bead_type_name, resnr, residue_name,
-                     molecule_constants::molecule_type_unassigned, mass,
+  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                     residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());

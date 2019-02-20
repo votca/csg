@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(test_basebead_getters_setters) {
   basebead.setId(0);
   BOOST_CHECK_EQUAL(basebead.getId(), 0);
 
-  basebead.setName("Bead1");
+  basebead.setType("Bead1");
   string name = "Bead1";
-  BOOST_CHECK(name == basebead.getName());
+  BOOST_CHECK(name == basebead.getType());
 
   basebead.setMass(1.0);
   BOOST_CHECK_CLOSE(basebead.getMass(), 1.0, 1e-5);

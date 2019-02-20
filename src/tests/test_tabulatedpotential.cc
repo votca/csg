@@ -111,21 +111,22 @@ BOOST_AUTO_TEST_CASE(test_command) {
     // consistently
 
     int number_of_H2 = 0;
-    int residue_number = 0;
+    int bead_id = 0;
+    int residue_id = 0;
     for (double x = 2.0; x < (x1 - 2.0); x += 4.0) {
       for (double y = 2.0; y < (y2 - 2.0); y += 3.0) {
         for (double z = 2.0; z < (z3 - 2.0); z += 4.0) {
-          residue_number++;
+          ++residue_id;
 
-          string bead_name = to_string(number_of_H2) + "_H2";
+          string bead_type = to_string(number_of_H2) + "_H2";
           vec bead_pos(x, y, z);
           Bead *bead_ptr = top.CreateBead(
-              symmetry, bead_name, bead_type_name, residue_number,
+              symmetry, bead_type, bead_id, number_of_H2, residue_id,
               bead_constants::residue_type_unassigned,
-              molecule_constants::molecule_type_unassigned, mass, charge);
-          bead_ptr->setId(number_of_H2);
+              basebead_constants::unassigned_element, mass, charge);
           bead_ptr->setPos(bead_pos);
-          number_of_H2++;
+          ++number_of_H2;
+          ++bead_id;
         }
       }
     }

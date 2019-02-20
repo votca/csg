@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
 
   vector<int> resnr = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
-  vector<string> bd_name = {"C", "H", "H", "H", "H", "C", "H", "H", "H", "H"};
+  vector<string> bead_type = {"C", "H", "H", "H", "H", "C", "H", "H", "H", "H"};
   vector<double> x = {-0.5249, -0.6202, -0.539,  -0.4682, -0.4724,
                       -0.2248, -0.1518, -0.3153, -0.2442, -0.1880};
   vector<double> y = {0.1055, 0.1521, 0.0026, 0.1124, 0.1550,
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   for (int i = 0; i < 10; i++) {
     bd = top.getBead(i);
     BOOST_CHECK_EQUAL(bd->getId(), i);
-    BOOST_CHECK_EQUAL(bd->getResidueNumber(), resnr.at(i));
-    BOOST_CHECK_EQUAL(bd->getName(), bd_name.at(i));
+    BOOST_CHECK_EQUAL(bd->getResidueId(), resnr.at(i));
+    BOOST_CHECK_EQUAL(bd->getType(), bead_type.at(i));
     v = bd->getPos();
     BOOST_CHECK_CLOSE(bd->getQ(), 0, 1e-5);
     BOOST_CHECK_CLOSE(v.getX(), x.at(i), 1e-5);

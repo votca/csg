@@ -79,13 +79,6 @@ BOOST_AUTO_TEST_CASE(simple_test) {
   BOOST_CHECK_CLOSE(top.getTime(), 1.21, 1e-5);
 }
 
-BOOST_AUTO_TEST_CASE(create_bead_type) {
-  CSG_Topology top;
-  string bead_type_name = "type1";
-  BOOST_CHECK(top.BeadTypeExist(bead_type_name));
-
-  top.Cleanup();
-}
 /**
  * Test is creating a bead with the topology object and then ensuring that the
  * bead has the correct properties.
@@ -94,27 +87,25 @@ BOOST_AUTO_TEST_CASE(create_bead) {
   CSG_Topology top;
   // 1 - for spherical bead
   byte_t symmetry = 1;
-  string bead_name = "bead_test";
 
-  string bead_type_name = "type1";
-
-  int residue_number = 1;
-  string residue_name = "Protein";
+  string bead_type = "type1";
+  int bead_id = 1;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "Protein";
   double mass = 1.1;
   double charge = 0.3;
 
   auto bead_ptr = top.CreateBead(
-      symmetry, bead_name, bead_type_name, residue_number, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+      symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+      basebead_constants::unassigned_element, mass, charge);
 
   BOOST_CHECK_CLOSE(bead_ptr->getQ(), 0.3, 1e-5);
   BOOST_CHECK_CLOSE(bead_ptr->getMass(), 1.1, 1e-5);
-  BOOST_CHECK_EQUAL(bead_ptr->getResidueNumber(), residue_number);
+  BOOST_CHECK_EQUAL(bead_ptr->getResidueId(), residue_id);
+  BOOST_CHECK_EQUAL(bead_ptr->getMoleculeId(), molecule_id);
   BOOST_CHECK_EQUAL(bead_ptr->getSymmetry(), symmetry);
-  BOOST_CHECK(bead_ptr->getName() == bead_name);
-
-  string bead_type2 = bead_ptr->getType();
-  BOOST_CHECK(bead_type2 == bead_type_name);
+  BOOST_CHECK(bead_ptr->getType() == bead_type);
   BOOST_CHECK_EQUAL(top.BeadCount(), 1);
 
   top.Cleanup();
@@ -130,30 +121,32 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   // 1 - for spherical bead
   byte_t symmetry = 1;
 
-  string bead_type_name = "type1";
+  string bead_type = "type1";
 
-  int residue_number = 1;
-  string residue_name = "Protein";
+  int bead_id = 1;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "Protein";
   double mass = 1.1;
   double charge = 0.3;
 
   // Create 3 beads
-  string bead_name = "bead_test";
   auto bead_ptr = top.CreateBead(
-      symmetry, bead_name, bead_type_name, residue_number, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+      symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+      basebead_constants::unassigned_element, mass, charge);
   bead_ptr->setId(0);
 
-  string bead_name2 = "bead_test2";
+  bead_id = 2;
   auto bead_ptr2 = top.CreateBead(
-      symmetry, bead_name2, bead_type_name, residue_number, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+      symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+      basebead_constants::unassigned_element, mass, charge);
   bead_ptr2->setId(1);
 
-  string bead_name3 = "bead_test3";
+  bead_id = 3;
+  string bead_type3 = "bead_test3";
   auto bead_ptr3 = top.CreateBead(
-      symmetry, bead_name3, bead_type_name, residue_number, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+      symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
+      basebead_constants::unassigned_element, mass, charge);
   bead_ptr3->setId(2);
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 3);
