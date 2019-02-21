@@ -33,7 +33,6 @@ int BeadList::Generate(CSG_Topology &top, const string &select) {
   topology_ = &top;
   bool selectByName = false;
   string pSelect;  // parsed selection string
-
   if (select.substr(0, 5) == "name:") {
     // select according to bead name instead of type
     pSelect = select.substr(5);
