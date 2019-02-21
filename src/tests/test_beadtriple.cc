@@ -41,35 +41,35 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
 
   int symmetry = 1;
   int residue_id = 0;
-  int bead_id = 1;
+  int bead_id1 = 1;
   int molecule_id = 1;
   string residue_type = "DNA";
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
                  residue_type, basebead_constants::unassigned_element, mass,
                  charge);
 
   symmetry = 1;
-  bead_id = 2;
+  int bead_id2 = 2;
   molecule_id = 1;
   residue_id = 0;
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
                  residue_type, basebead_constants::unassigned_element, mass,
                  charge);
 
   symmetry = 1;
-  bead_id = 3;
+  int bead_id3 = 3;
   molecule_id = 1;
   residue_id = 0;
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
                  residue_type, basebead_constants::unassigned_element, mass,
                  charge);
 
@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   vec dist13(0.2, 0.4, 0.3);
   vec dist23(0.1, 0.2, 0.0);
 
-  BeadTriple testtriple(top.getBead(0), top.getBead(1), top.getBead(2), dist12,
-                        dist13, dist23);
+  BeadTriple testtriple(top.getBead(bead_id1), top.getBead(bead_id2),
+                        top.getBead(bead_id3), dist12, dist13, dist23);
 
   double d12ref = 0.3741657;
   double d13ref = 0.5385165;
