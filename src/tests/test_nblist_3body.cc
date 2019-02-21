@@ -63,13 +63,13 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
 
   int symmetry = 1;
   string bead_type = "dummy1";
-  int bead_id = 1;
+  int bead_id1 = 1;
   string residue_type = "Protein";
   int residue_id = 0;
   double mass = 1.0;
   double charge = -1.0;
   Bead *b;
-  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  b = top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
                      residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   pos[0] = 0.0;
@@ -79,13 +79,13 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
 
-  bead_id = 2;
+  int bead_id2 = 2;
   symmetry = 1;
   bead_type = "dummy2";
   residue_id = 0;
   mass = 2.0;
   charge = -2.0;
-  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  b = top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
                      residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   mol->AddBead(b);
@@ -95,13 +95,13 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   pos[2] = 0.0;
   b->setPos(pos);
 
-  bead_id = 3;
+  int bead_id3 = 3;
   symmetry = 1;
   bead_type = "dummy3";
   residue_id = 0;
   mass = 3.0;
   charge = -3.0;
-  b = top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  b = top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
                      residue_type, basebead_constants::unassigned_element, mass,
                      charge);
   mol->AddBead(b);
@@ -118,32 +118,102 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
 
   BOOST_CHECK_EQUAL(nb->size(), 3);
 
-  NBList_3Body::iterator triple_iter;
-  triple_iter = nb->begin();
-  BOOST_CHECK_EQUAL((*triple_iter)->bead1()->getId(), 0);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead2()->getId(), 1);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead3()->getId(), 2);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.414214, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+  for (NBList_3Body::iterator triple_iter = nb->begin();
+       triple_iter != nb->end(); ++triple_iter) {
 
-  ++triple_iter;
+    // Basically check that all 3 ids { 0, 1, 2 } are present in triple_iter
+    map<int, int> bead_number_and_bead_ids;
+    bead_number_and_bead_ids[1] = ((*triple_iter)->bead1()->getId());
+    bead_number_and_bead_ids[2] = ((*triple_iter)->bead2()->getId());
+    bead_number_and_bead_ids[3] = ((*triple_iter)->bead3()->getId());
 
-  BOOST_CHECK_EQUAL((*triple_iter)->bead1()->getId(), 1);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead2()->getId(), 0);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead3()->getId(), 2);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.414214, 1e-4);
+    vector<bool> found_beads(3, false);
+    for (const pair<const int, int> &bead_number_and_bead_id :
+         bead_number_and_bead_ids) {
+      if (bead_number_and_bead_id.second == 0) {
+        found_beads.at(0) = true;
+      } else if (bead_number_and_bead_id.second == 1) {
+        found_beads.at(1) = true;
+      } else if (bead_number_and_bead_id.second == 2) {
+        found_beads.at(2) = true;
+      }
+    }
 
-  ++triple_iter;
+    for (const bool &found : found_beads) {
+      BOOST_CHECK(found);
+    }
 
-  BOOST_CHECK_EQUAL((*triple_iter)->bead1()->getId(), 2);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead2()->getId(), 0);
-  BOOST_CHECK_EQUAL((*triple_iter)->bead3()->getId(), 1);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.414214, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
-  BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+    // Check that the distance between beads correct
+    if (bead_number_and_bead_ids[1] == 0 && bead_number_and_bead_ids[2] == 1) {
+      // For ids 0 and 1
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 1 &&
+               bead_number_and_bead_ids[2] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 0 &&
+               bead_number_and_bead_ids[2] == 2) {
+      // For ids 0 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 2 &&
+               bead_number_and_bead_ids[2] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 1 &&
+               bead_number_and_bead_ids[2] == 2) {
+      // For ids 1 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 2 &&
+               bead_number_and_bead_ids[2] == 1) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist12(), 1.0, 1e-4);
+    } else {
+      throw runtime_error("Failed to trigger test something is off!");
+    }
+    if (bead_number_and_bead_ids[1] == 0 && bead_number_and_bead_ids[3] == 1) {
+      // For ids 0 and 1
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 1 &&
+               bead_number_and_bead_ids[3] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 0 &&
+               bead_number_and_bead_ids[3] == 2) {
+      // For ids 0 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 2 &&
+               bead_number_and_bead_ids[3] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 1 &&
+               bead_number_and_bead_ids[3] == 2) {
+      // For ids 1 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[1] == 2 &&
+               bead_number_and_bead_ids[3] == 1) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist13(), 1.0, 1e-4);
+    } else {
+      throw runtime_error("Failed to trigger test something is off!");
+    }
+    if (bead_number_and_bead_ids[2] == 0 && bead_number_and_bead_ids[3] == 1) {
+      // For ids 0 and 1
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[2] == 1 &&
+               bead_number_and_bead_ids[3] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[2] == 0 &&
+               bead_number_and_bead_ids[3] == 2) {
+      // For ids 0 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[2] == 2 &&
+               bead_number_and_bead_ids[3] == 0) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.414214, 1e-4);
+    } else if (bead_number_and_bead_ids[2] == 1 &&
+               bead_number_and_bead_ids[3] == 2) {
+      // For ids 1 and 2
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+    } else if (bead_number_and_bead_ids[2] == 2 &&
+               bead_number_and_bead_ids[3] == 1) {
+      BOOST_CHECK_CLOSE((*triple_iter)->dist23(), 1.0, 1e-4);
+    } else {
+      throw runtime_error("Failed to trigger test something is off!");
+    }
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
