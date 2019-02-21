@@ -52,11 +52,6 @@ void LAMMPSDumpWriter::Write(CSG_Topology *conf) {
 
   vector<int> bead_ids = conf->getBeadIds();
   for (const int bead_id : bead_ids) {
-    // for (BeadContainer::iterator iter = conf->Beads().begin();
-    //     iter != conf->Beads().end(); ++iter) {
-
-    // Bead * bead = conf->getBead(bead_id);
-    //*iter;
     Bead *bead = conf->getBead(bead_id);
     string type = bead->getType();
 

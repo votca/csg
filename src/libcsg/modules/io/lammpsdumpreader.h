@@ -59,8 +59,8 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 
   std::ifstream _fl;
   std::string _fname;
-  bool _topology;
-  int _natoms;
+  bool read_topology_data_ = false;
+  int number_of_atoms_ = 0;
 };
 
 }  // namespace csg

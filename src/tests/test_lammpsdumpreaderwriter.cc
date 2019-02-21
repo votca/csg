@@ -231,7 +231,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   reader->Close();
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
-    Bead *b = top.getBead(ind);
+    int bead_id = static_cast<int>(ind);
+    Bead *b = top.getBead(bead_id);
     BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz_file.at(ind).at(0), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz_file.at(ind).at(1), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz_file.at(ind).at(2), 0.01);
@@ -365,7 +366,8 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   reader->Close();
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
-    Bead *b = top.getBead(ind);
+    int bead_id = static_cast<int>(ind);
+    Bead *b = top.getBead(bead_id);
     BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz.at(ind).at(0), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz.at(ind).at(1), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz.at(ind).at(2), 0.01);
