@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <list>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -47,7 +48,7 @@ class Topology {
  public:
   /// constructor
   Topology() : time_(0.0), has_vel_(false), has_force_(false) {
-    bc_ = OpenBox();
+    bc_ = OpenBox().clone();
   }
   ~Topology();
 
@@ -128,9 +129,22 @@ class Topology {
    * container
    * @return Bead * is a pointer to the bead
    **/
-  Bead_T *getBead(const int id) { return &beads_.at(id); }
-  Molecule_T *getMolecule(const int id) { return &molecules_.at(id); }
+  Bead_T *getBead(const int id) {
+    assert(beads_.count(id) &&
+           "Cannot access bead with provided id because it is not stored in "
+           "the topology obeject");
+    return &beads_.at(id);
+  }
+  Molecule_T *getMolecule(const int id) {
+    assert(molecules_.count(id) &&
+           "Cannot access molecule with provided id because it is not stored "
+           "in the topology object.");
+    return &molecules_.at(id);
+  }
   const Molecule_T *getMoleculeConst(const int id) const {
+    assert(molecules_.count(id) &&
+           "Cannot access const molecule with provided id because it is not "
+           "stored in the topology object.");
     return &molecules_.at(id);
   }
 
@@ -180,7 +194,7 @@ class Topology {
    * get the simulation box
    * \return triclinic box matrix
    */
-  const TOOLS::matrix &getBox() const { return bc_.getBox(); }
+  const TOOLS::matrix &getBox() const { return bc_->getBox(); }
 
   /**
    * set the time of current frame
@@ -255,7 +269,7 @@ class Topology {
    *  calculates the box volume
    *  \return box volume
    */
-  double BoxVolume() const { return bc_.BoxVolume(); }
+  double BoxVolume() const { return bc_->BoxVolume(); }
 
   /**
    *  rebuild exclusion list
@@ -270,9 +284,9 @@ class Topology {
 
   std::vector<int> getBeadIds() const;
   std::vector<int> getMoleculeIds() const;
-  BoundaryCondition::eBoxtype getBoxType() const { return bc_.getBoxType(); }
+  BoundaryCondition::eBoxtype getBoxType() const { return bc_->getBoxType(); }
 
-  const BoundaryCondition *getBoundaryCondition() const { return &bc_; }
+  const BoundaryCondition *getBoundaryCondition() const { return bc_.get(); }
 
   template <typename iteratable>
   void InsertExclusion(Bead_T *bead1, iteratable &l);
@@ -284,9 +298,10 @@ class Topology {
   void SetHasForce(const bool v) { has_force_ = v; }
 
  protected:
-  BoundaryCondition bc_;
+  std::unique_ptr<BoundaryCondition> bc_;
 
-  BoundaryCondition::eBoxtype autoDetectBoxType(const TOOLS::matrix &box) const;
+  BoundaryCondition::eBoxtype autoDetectBoxType_(
+      const TOOLS::matrix &box) const;
 
   /// bead types in the topology
   // std::map<std::string, int> beadtypes_;
@@ -339,7 +354,7 @@ void Topology<Bead_T, Molecule_T>::Cleanup() {
     interactions_.clear();
   }
   // cleanup bc_ object
-  bc_ = OpenBox();
+  bc_ = OpenBox().clone();
 }
 
 template <class Bead_T, class Molecule_T>
@@ -356,7 +371,7 @@ void Topology<Bead_T, Molecule_T>::CopyTopologyData(
   has_force_ = top.has_force_;
   beads_ = top.beads_;
   molecules_ = top.molecules_;
-  bc_ = top.bc_;
+  bc_ = top.bc_->clone();
   type_container_ = top.type_container_;
 }
 
@@ -365,22 +380,25 @@ void Topology<Bead_T, Molecule_T>::setBox(const TOOLS::matrix &box,
                                           BoundaryCondition::eBoxtype boxtype) {
   // determine box type automatically in case boxtype==typeAuto
   if (boxtype == BoundaryCondition::typeAuto) {
-    boxtype = autoDetectBoxType(box);
+    boxtype = autoDetectBoxType_(box);
   }
 
   switch (boxtype) {
     case BoundaryCondition::typeTriclinic:
-      bc_ = TriclinicBox();
+      std::cout << "Box is triclinic" << std::endl;
+      bc_ = TriclinicBox().clone();
       break;
     case BoundaryCondition::typeOrthorhombic:
-      bc_ = OrthorhombicBox();
+      bc_ = OrthorhombicBox().clone();
+      std::cout << "Box is OrthoRhombic" << std::endl;
       break;
     default:
-      bc_ = OpenBox();
+      std::cout << "Box is Open" << std::endl;
+      bc_ = OpenBox().clone();
       break;
   }
 
-  bc_.setBox(box);
+  bc_->setBox(box);
 }
 
 template <class Bead_T, class Molecule_T>
@@ -470,7 +488,7 @@ std::list<Interaction *> Topology<Bead_T, Molecule_T>::InteractionsInGroup(
 template <class Bead_T, class Molecule_T>
 TOOLS::vec Topology<Bead_T, Molecule_T>::BCShortestConnection(
     const TOOLS::vec &r_i, const TOOLS::vec &r_j) const {
-  return bc_.BCShortestConnection(r_i, r_j);
+  return bc_->BCShortestConnection(r_i, r_j);
 }
 
 template <class Bead_T, class Molecule_T>
@@ -481,7 +499,7 @@ TOOLS::vec Topology<Bead_T, Molecule_T>::getDist(const int bead1,
 }
 
 template <class Bead_T, class Molecule_T>
-BoundaryCondition::eBoxtype Topology<Bead_T, Molecule_T>::autoDetectBoxType(
+BoundaryCondition::eBoxtype Topology<Bead_T, Molecule_T>::autoDetectBoxType_(
     const TOOLS::matrix &box) const {
   // set the box type to OpenBox in case "box" is the zero matrix,
   // to OrthorhombicBox in case "box" is a diagonal matrix,

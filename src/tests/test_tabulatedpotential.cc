@@ -98,10 +98,12 @@ BOOST_AUTO_TEST_CASE(test_command) {
     matrix box(v1, v2, v3);
     top.setBox(box);
 
+    const BoundaryCondition *bc = top.getBoundaryCondition();
+    BOOST_CHECK_EQUAL(bc->getBoxType(), BoundaryCondition::typeOrthorhombic);
     // Create three beads
     byte_t symmetry = 1;
 
-    string bead_type_name = "H2";
+    string bead_type = "H2";
 
     double mass = 0.9;
     double charge = 0.0;
@@ -109,8 +111,8 @@ BOOST_AUTO_TEST_CASE(test_command) {
     // Create a bunch of H2 molecules, each bead is considered a molecule they
     // are placed on a regular grid so the table properties can be compared
     // consistently
-
-    int number_of_H2 = 0;
+    cout << "Creating Beads" << endl;
+    int number_of_H2_molecules = 0;
     int bead_id = 0;
     int residue_id = 0;
     for (double x = 2.0; x < (x1 - 2.0); x += 4.0) {
@@ -118,23 +120,22 @@ BOOST_AUTO_TEST_CASE(test_command) {
         for (double z = 2.0; z < (z3 - 2.0); z += 4.0) {
           ++residue_id;
 
-          string bead_type = to_string(number_of_H2) + "_H2";
           vec bead_pos(x, y, z);
           Bead *bead_ptr = top.CreateBead(
-              symmetry, bead_type, bead_id, number_of_H2, residue_id,
+              symmetry, bead_type, bead_id, number_of_H2_molecules, residue_id,
               bead_constants::residue_type_unassigned,
               basebead_constants::unassigned_element, mass, charge);
           bead_ptr->setPos(bead_pos);
-          ++number_of_H2;
+          ++number_of_H2_molecules;
           ++bead_id;
         }
       }
     }
 
-    cout << "Number of H2 " << number_of_H2 << endl;
+    cout << "Creating interactions" << endl;
     // Every molecule interacts with every other molecule
-    for (int index = 0; index < number_of_H2; ++index) {
-      for (int index2 = index + 1; index2 < number_of_H2; ++index2) {
+    for (int index = 0; index < number_of_H2_molecules; ++index) {
+      for (int index2 = index + 1; index2 < number_of_H2_molecules; ++index2) {
         auto bond = new IBond(index, index2);
         bond->setGroup(interaction_group + to_string(index) + "_" +
                        to_string(index2));
@@ -144,10 +145,12 @@ BOOST_AUTO_TEST_CASE(test_command) {
       }
     }
 
+    cout << "Evalulating topology" << endl;
     bonded_statistics.BeginCG(&top, nullptr);
+    cout << "Eval Config" << endl;
     bonded_statistics.EvalConfiguration(&top, nullptr);
   }  // End of setup
-
+  cout << "Creating DataCollection" << endl;
   DataCollection<double> &bonded_values = bonded_statistics.BondedValues();
   cout << "bonded_values after pulling out of statistics "
        << bonded_values.size() << endl;
@@ -157,6 +160,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   tabulatedpotential.Register(commands);
 
   // Test 1
+  cout << "Running Test 1" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -180,6 +184,10 @@ BOOST_AUTO_TEST_CASE(test_command) {
     Eigen::VectorXd col3_ref(5);
     col3_ref << 1.16, 0.90, 0.26, -1.00, -1.87;
 
+    cout << column1 << endl;
+    cout << col1_ref << endl;
+    cout << column2 << endl;
+    cout << column3 << endl;
     BOOST_CHECK_EQUAL(column1.isApprox(col1_ref, 1e-2), true);
     BOOST_CHECK_EQUAL(column2.isApprox(col2_ref, 1e-2), true);
     BOOST_CHECK_EQUAL(column3.isApprox(col3_ref, 1e-2), true);
@@ -187,6 +195,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 1
 
   // Test 2
+  cout << "Running Test 2" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -219,6 +228,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 2
 
   // Test 3
+  cout << "Running Test 3" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -253,6 +263,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 3
 
   // Test 4
+  cout << "Running Test 4" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -281,6 +292,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 4
 
   // Test 5
+  cout << "Running Test 5" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -311,6 +323,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 5
 
   // Test 6
+  cout << "Running Test 6" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -342,6 +355,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 6
 
   // Test 7
+  cout << "Running Test 7" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -370,6 +384,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 7
 
   // Test 8
+  cout << "Running Test 8" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do

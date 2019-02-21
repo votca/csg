@@ -25,6 +25,7 @@
 #include <votca/csg/beadtriple.h>
 #include <votca/csg/csgtopology.h>
 #include <votca/csg/triplelist.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -43,48 +44,48 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
 
   string bead_type_name = "CG";
 
-  int symmetry = 1;
+  byte_t symmetry = 1;
   int molecule_id = 1;
-  int bead_id = 1;
+  int bead_id1 = 1;
   string bead_type = "dummy1";
   string residue_type = "Residue";
   int residue_id = 0;
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
                  residue_type, basebead_constants::unassigned_element, mass,
                  charge);
 
-  bead_id = 2;
+  int bead_id2 = 2;
   symmetry = 1;
   bead_type = "dummy2";
   residue_id = 0;
   mass = 2.0;
   charge = -2.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+  top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
                  residue_type, basebead_constants::unassigned_element, mass,
                  charge);
 
-  bead_id = 3;
+  int bead_id3 = 3;
   symmetry = 1;
   bead_type = "dummy3";
   residue_id = 0;
   mass = 3.0;
   charge = -3.0;
 
-  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element,
-
-                 mass, charge);
+  top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
+                 residue_type, basebead_constants::unassigned_element, mass,
+                 charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);
   vec dist23(0.1, 0.2, 0.0);
 
-  BeadTriple *testtriple = new BeadTriple(
-      top.getBead(0), top.getBead(1), top.getBead(2), dist12, dist13, dist23);
+  BeadTriple *testtriple =
+      new BeadTriple(top.getBead(bead_id1), top.getBead(bead_id2),
+                     top.getBead(bead_id3), dist12, dist13, dist23);
 
   triplelist.AddTriple(testtriple);
 

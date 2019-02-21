@@ -18,7 +18,9 @@
 #ifndef _VOTCA_CSG_BOUNDARYCONDITION_H
 #define _VOTCA_CSG_BOUNDARYCONDITION_H
 
+#include <memory>
 #include <stdexcept>
+#include <utility>
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
 
@@ -32,6 +34,15 @@ class BoundaryCondition {
  public:
   virtual ~BoundaryCondition(){};
 
+  /**
+   * @brief Safe way to allow child classes to be copied
+   *
+   * The child classes must use the same method and override it with their type
+   * for this to work.
+   *
+   * @return standard pointer to child class
+   */
+  virtual std::unique_ptr<BoundaryCondition> clone() const = 0;
   /**
    * set the simulation box
    * \param box triclinic box matrix

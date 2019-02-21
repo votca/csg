@@ -316,7 +316,8 @@ class Bead : public BaseBead {
    **/
   std::string getLabel() {
     std::stringstream label;
-    label << molecule_type_id_ << ":" << getResidueType() << ":" << getType();
+    label << molecule_id_.getId() << ":" << getResidueType() << ":"
+          << getType();
     return label.str();
   };
 
@@ -331,8 +332,6 @@ class Bead : public BaseBead {
   TOOLS::byte_t symmetry_;
   double charge_;
 
-  int molecule_type_id_ = -1;
-
   int residue_id_ = -1;
 
   TOOLS::vec velocity_, bead_force_, u_, v_, w_;
@@ -345,13 +344,11 @@ class Bead : public BaseBead {
 
   /// constructur
   Bead(TOOLS::byte_t symmetry, int id, std::string type, int residue_id,
-       std::string residue_type, int molecule_type_id,
-       std::string element_symbol, double m, double q)
-      : symmetry_(symmetry),
-        charge_(q),
-        molecule_type_id_(molecule_type_id),
-        residue_id_(residue_id) {
+       std::string residue_type, int molecule_id, std::string element_symbol,
+       double m, double q)
+      : symmetry_(symmetry), charge_(q), residue_id_(residue_id) {
     setId(id);
+    molecule_id_.setId(molecule_id);
     setType(type);
     residue_type_.setName(residue_type);
     element_symbol_.setName(element_symbol);
