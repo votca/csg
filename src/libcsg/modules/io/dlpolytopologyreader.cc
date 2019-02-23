@@ -329,7 +329,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
             // ic->setGroup(line);
             ic->setGroup(type);
             ic->setIndex(i);
-            ic->setMolecule(mi->getId());
+            ic->setMoleculeId(mi->getId());
             top.AddBondedInteraction(ic);
             mi->AddInteraction(ic);
           }
@@ -378,7 +378,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
           }
           ic_replica->setGroup((*ic)->getGroup());
           ic_replica->setIndex((*ic)->getIndex());
-          ic_replica->setMolecule(mi_replica->getId());
+          ic_replica->setMoleculeId(mi_replica->getId());
           top.AddBondedInteraction(ic_replica);
           mi_replica->AddInteraction(ic_replica);
         }

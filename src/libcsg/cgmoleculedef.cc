@@ -193,7 +193,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
 
       ic->setGroup(iagroup);
       ic->setIndex(index);
-      ic->setMolecule(minfo->getId());
+      ic->setMoleculeId(minfo->getId());
       top.AddBondedInteraction(ic);
       minfo->AddInteraction(ic);
       index++;

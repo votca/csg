@@ -39,7 +39,8 @@ namespace csg {
 */
 class Interaction {
  public:
-  Interaction() : _index(-1), _group(""), _group_id(-1), _name(""), _mol(-1){};
+  Interaction()
+      : _index(-1), _group(""), _group_id(-1), _name(""), mol_id_(-1){};
 
   virtual ~Interaction() {}
   virtual double EvaluateVar(const BoundaryCondition &bc) = 0;
@@ -70,13 +71,13 @@ class Interaction {
     return _index;
   }
 
-  void setMolecule(const int &mol) {
-    _mol = mol;
+  void setMoleculeId(const int &mol_id) {
+    mol_id_ = mol_id;
     RebuildName();
   }
   const int &getMolecule() const {
-    assert(_mol != -1);
-    return _mol;
+    assert(mol_id_ != -1);
+    return mol_id_;
   }
 
   virtual TOOLS::vec Grad(const BoundaryCondition &bc, int bead) = 0;
@@ -102,7 +103,7 @@ class Interaction {
   std::string _group;
   int _group_id;
   std::string _name;
-  int _mol;
+  int mol_id_;
   std::vector<int> _beads;
 
   void RebuildName();
@@ -110,7 +111,7 @@ class Interaction {
 
 inline void Interaction::RebuildName() {
   std::stringstream s;
-  if (_mol != -1) s << "molecule " << _mol;
+  if (mol_id_ != -1) s << "molecule " << mol_id_;
   if (!_group.empty()) {
     s << ":" << _group;
     if (_group_id != -1) {

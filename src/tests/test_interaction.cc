@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   bond1.setGroup("large");
   bond1.setGroupId(1);
   bond1.setIndex(1);
-  bond1.setMolecule(1);
+  bond1.setMoleculeId(1);
 
   string name = bond1.getName();
   cout << name << endl;
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   angle1.setGroup("medium");
   angle1.setGroupId(1);
   angle1.setIndex(1);
-  angle1.setMolecule(1);
+  angle1.setMoleculeId(1);
 
   name = angle1.getName();
   cout << name << endl;
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   dihedral1.setGroup("small");
   dihedral1.setGroupId(1);
   dihedral1.setIndex(1);
-  dihedral1.setMolecule(1);
+  dihedral1.setMoleculeId(1);
 
   name = dihedral1.getName();
   cout << name << endl;

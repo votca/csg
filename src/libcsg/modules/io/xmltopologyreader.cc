@@ -313,7 +313,7 @@ void XMLTopologyReader::ParseBond(Property &p) {
         ic = new IBond(xmlBead1.pid, xmlBead2.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
-        ic->setMolecule(xmlMolecule.pid);
+        ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
         _top->AddBondedInteraction(ic);
         b_index++;
@@ -354,7 +354,7 @@ void XMLTopologyReader::ParseAngle(Property &p) {
         ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
-        ic->setMolecule(xmlMolecule.pid);
+        ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
         _top->AddBondedInteraction(ic);
         b_index++;
@@ -398,7 +398,7 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
                            xmlBead4.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
-        ic->setMolecule(xmlMolecule.pid);
+        ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
         _top->AddBondedInteraction(ic);
         b_index++;
