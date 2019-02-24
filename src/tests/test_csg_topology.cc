@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
 
   string bead_type = "type1";
 
-  int bead_id = 1;
+  int bead_id = 0;
   int molecule_id = 1;
   int residue_id = 1;
   string residue_type = "Protein";
@@ -136,13 +136,13 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
       basebead_constants::unassigned_element, mass, charge);
   bead_ptr->setId(0);
 
-  bead_id = 2;
+  bead_id = 1;
   auto bead_ptr2 = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       basebead_constants::unassigned_element, mass, charge);
   bead_ptr2->setId(1);
 
-  bead_id = 3;
+  bead_id = 2;
   string bead_type3 = "bead_test3";
   auto bead_ptr3 = top.CreateBead(
       symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
@@ -152,19 +152,25 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   BOOST_CHECK_EQUAL(top.BeadCount(), 3);
 
   // Create two bonded interactions
-  string interaction_group = "bond";
-  auto bond1 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     vector<int>{0, 1});
-  bond1->setGroup(interaction_group);
+  int bond_id = 0;
+  string interaction_group = "BONDS";
+  Interaction* bond1 = top.CreateInteraction(
+      Interaction::interaction_type::bond, interaction_group, bond_id,
+      molecule_id, vector<int>{0, 1});
+
+  ++bond_id;
+  // bond1->setGroup(interaction_group);
   // auto bond2 = new IBond(1, 2);
-  auto bond2 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     vector<int>{1, 2});
-  bond2->setGroup(interaction_group);
+  Interaction* bond2 = top.CreateInteraction(
+      Interaction::interaction_type::bond, interaction_group, bond_id,
+      molecule_id, vector<int>{1, 2});
+  // bond2->setGroup(interaction_group);
 
-  top.AddBondedInteraction(bond1);
-  top.AddBondedInteraction(bond2);
+  // top.AddBondedInteraction(bond1);
+  // top.AddBondedInteraction(bond2);
 
-  auto interaction_container = top.BondedInteractions();
+  const vector<unique_ptr<Interaction>>& interaction_container =
+      top.BondedInteractions();
   BOOST_CHECK_EQUAL(interaction_container.size(), 2);
 
   cout << "interaction name " << interaction_container.at(0)->getName() << endl;

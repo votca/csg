@@ -62,28 +62,53 @@ class CSG_Topology : public Topology<Bead, Molecule> {
     Bead bead = Bead(symmetry, bead_id, bead_type, residue_id, residue_type,
                      molecule_id, element_symbol, mass, charge);
 
+    std::cout << "Creating bead " << bead_id << std::endl;
     beads_[bead_id] = bead;
     return &beads_.at(bead_id);
   }
 
   Interaction* CreateInteraction(Interaction::interaction_type type,
-                                 std::vector<int> bead_ids) {
+                                 std::string group, int bond_id,
+                                 int molecule_id, std::vector<int> bead_ids) {
     assert(beads_.size() > 0 &&
            "Cannot create interactions before beads have been initialized");
+
     std::vector<const BaseBead*> beads;
     for (const int& bead_id : bead_ids) {
+      std::cout << "Bead id " << bead_id << std::endl;
+      assert(beads_.count(bead_id) &&
+             "Cannot add interaction as there are no beads, create the beads "
+             "before the interactions.");
       beads.push_back(&beads_.at(bead_id));
     }
+
     if (type == Interaction::bond) {
-      interactions_.push_back(new IBond(beads));
+      interactions_.push_back(std::unique_ptr<IBond>(new IBond(beads)));
     } else if (type == Interaction::angle) {
-      interactions_.push_back(new IAngle(beads));
+      interactions_.push_back(std::unique_ptr<IAngle>(new IAngle(beads)));
     } else if (type == Interaction::dihedral) {
-      interactions_.push_back(new IDihedral(beads));
+      interactions_.push_back(std::unique_ptr<IDihedral>(new IDihedral(beads)));
     } else {
       assert(!"Interaction type is not recognized");
     }
-    return interactions_.back();
+    std::unique_ptr<Interaction>& ic = interactions_.back();
+    ic->setGroup(group);
+    ic->setIndex(bond_id);
+    ic->setMoleculeId(molecule_id);
+    // Update the interaction groups
+    std::cout << "Updateing interaction groups " << std::endl;
+    std::map<std::string, int>::iterator iter;
+    iter = interaction_groups_.find(ic->getGroup());
+    if (iter != interaction_groups_.end()) {
+      ic->setGroupId((*iter).second);
+    } else {
+      int group_size = interaction_groups_.size();
+      interaction_groups_[ic->getGroup()] = group_size;
+      ic->setGroupId(group_size);
+    }
+    interactions_by_group_[ic->getGroup()].push_back(ic.get());
+
+    return interactions_.back().get();
   }
 };
 

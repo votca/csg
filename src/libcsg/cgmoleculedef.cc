@@ -182,22 +182,24 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
       Interaction *ic;
 
       if ((*ibnd)->name() == "bond") {
-        ic = top.CreateInteraction(Interaction::interaction_type::bond, atoms);
+        ic = top.CreateInteraction(Interaction::interaction_type::bond, iagroup,
+                                   index, minfo->getId(), atoms);
         // ic = new IBond(atoms);
       } else if ((*ibnd)->name() == "angle") {
         // ic = new IAngle(atoms);
-        ic = top.CreateInteraction(Interaction::interaction_type::angle, atoms);
+        ic = top.CreateInteraction(Interaction::interaction_type::angle,
+                                   iagroup, index, minfo->getId(), atoms);
       } else if ((*ibnd)->name() == "dihedral") {
         // ic = new IDihedral(atoms);
         ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
-                                   atoms);
+                                   iagroup, index, minfo->getId(), atoms);
       } else {
         throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
       }
 
-      ic->setGroup(iagroup);
-      ic->setIndex(index);
-      ic->setMoleculeId(minfo->getId());
+      // ic->setGroup(iagroup);
+      // ic->setIndex(index);
+      // ic->setMoleculeId(minfo->getId());
       // top.AddBondedInteraction(ic);
       minfo->AddInteraction(ic);
       index++;

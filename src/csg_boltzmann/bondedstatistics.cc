@@ -23,11 +23,12 @@ namespace votca {
 namespace csg {
 
 void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
-  const vector<Interaction *> &ic = top->BondedInteractions();
-  vector<Interaction *>::const_iterator ia;
+  const vector<unique_ptr<Interaction>> &interactions =
+      top->BondedInteractions();
+  vector<unique_ptr<Interaction>>::const_iterator ia;
 
   _bonded_values.clear();
-  for (ia = ic.begin(); ia != ic.end(); ++ia) {
+  for (ia = interactions.begin(); ia != interactions.end(); ++ia) {
     _bonded_values.CreateArray((*ia)->getName());
   }
 }
@@ -36,12 +37,13 @@ void BondedStatistics::EndCG() {}
 
 void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
                                          CSG_Topology *conv_atom) {
-  const vector<Interaction *> &ic = conf->BondedInteractions();
-  vector<Interaction *>::const_iterator ia;
+  const vector<unique_ptr<Interaction>> &interactions =
+      conf->BondedInteractions();
+  vector<unique_ptr<Interaction>>::const_iterator ia;
 
   DataCollection<double>::container::iterator is;
-  for (ia = ic.begin(), is = _bonded_values.begin(); ia != ic.end();
-       ++ia, ++is) {
+  for (ia = interactions.begin(), is = _bonded_values.begin();
+       ia != interactions.end(); ++ia, ++is) {
     (*is)->push_back((*ia)->EvaluateVar(*(conf->getBoundaryCondition())));
   }
 }

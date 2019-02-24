@@ -456,10 +456,11 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
 
       // Interaction *ic = new IBond(bead_id1, bead_id2);
       Interaction *ic = top.CreateInteraction(
-          Interaction::interaction_type::bond, vector<int>{bead_id1, bead_id2});
-      ic->setGroup("Bonds");
-      ic->setIndex(bond_index);
-      ic->setMoleculeId(mi->getId());
+          Interaction::interaction_type::bond, "BONDS", bond_index, mi->getId(),
+          vector<int>{bead_id1, bead_id2});
+      // ic->setGroup("Bonds");
+      // ic->setIndex(bond_index);
+      // ic->setMoleculeId(mi->getId());
       mi->AddInteraction(ic);
       // top.AddBondedInteraction(ic);
       ++bond_index;

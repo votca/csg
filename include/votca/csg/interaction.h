@@ -61,7 +61,10 @@ class Interaction {
     assert(_group_id != -1);
     return _group_id;
   }
-  void setGroupId(int id) { _group_id = id; }
+  void setGroupId(int id) {
+    _group_id = id;
+    RebuildName();
+  }
 
   void setIndex(const int &index) {
     _index = index;
@@ -156,7 +159,7 @@ class IBond : public Interaction {
 
  private:
   IBond(std::vector<const BaseBead *> beads) {
-    assert(beads.size() != 2 && "IBond must be called with 2 beads.");
+    assert(beads.size() == 2 && "IBond must be called with 2 beads.");
     beads_ = beads;
   }
   friend class CSG_Topology;

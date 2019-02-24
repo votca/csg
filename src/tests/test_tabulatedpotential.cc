@@ -133,16 +133,22 @@ BOOST_AUTO_TEST_CASE(test_command) {
     }
 
     cout << "Creating interactions" << endl;
+    int molecule_id = 0;
     // Every molecule interacts with every other molecule
+    int interaction_id = 0;
     for (int index = 0; index < number_of_H2_molecules; ++index) {
       for (int index2 = index + 1; index2 < number_of_H2_molecules; ++index2) {
-        auto bond = top.CreateInteraction(Interaction::interaction_type::bond,
-                                          vector<int>{index, index2});
-        bond->setGroup(interaction_group + to_string(index) + "_" +
-                       to_string(index2));
+        string interaction_group =
+            interaction_group + to_string(index) + "_" + to_string(index2);
+        auto bond = top.CreateInteraction(
+            Interaction::interaction_type::bond, interaction_group,
+            interaction_id, molecule_id, vector<int>{index, index2});
+        // bond->setGroup(interaction_group + to_string(index) + "_" +
+        //               to_string(index2));
         // top.AddBondedInteraction(bond);
         interactions.push_back(interaction_group_name + to_string(index) + "_" +
                                to_string(index2));
+        ++interaction_id;
       }
     }
 

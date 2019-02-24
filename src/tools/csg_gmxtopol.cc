@@ -83,16 +83,15 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
                                     Molecule &cg) {
   int nb = -1;
 
-  Interaction *ic;
-  vector<Interaction *>::const_iterator iter;
+  // unique_ptr<Interaction> ic;
+  vector<unique_ptr<Interaction>>::const_iterator ic_iter;
+  const vector<unique_ptr<Interaction>> &ics = top.BondedInteractions();
 
-  const vector<Interaction *> &ics = top.BondedInteractions();
-
-  for (iter = ics.begin(); iter != ics.end(); ++iter) {
-    ic = *iter;
-    if (ic->getMolecule() != cg.getId()) continue;
-    if (nb != ic->BeadCount()) {
-      nb = ic->BeadCount();
+  for (ic_iter = ics.begin(); ic_iter != ics.end(); ++ic_iter) {
+    // ic = *iter;
+    if ((*ic_iter)->getMolecule() != cg.getId()) continue;
+    if (nb != (*ic_iter)->BeadCount()) {
+      nb = (*ic_iter)->BeadCount();
       switch (nb) {
         case 2:
           out << "\n[ bonds ]\n";
@@ -105,16 +104,17 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
           break;
         default:
           string err = "cannot handle number of beads in interaction:";
-          err += to_string(ic->getMolecule() + 1) + ":" + ic->getGroup();
-          err += ":" + to_string(ic->getIndex() + 1);
+          err += to_string((*ic_iter)->getMolecule() + 1) + ":" +
+                 (*ic_iter)->getGroup();
+          err += ":" + to_string((*ic_iter)->getIndex() + 1);
           throw runtime_error(err);
       }
     }
-    for (int i = 0; i < nb; ++i) out << ic->getBeadId(i) + 1 << " ";
+    for (int i = 0; i < nb; ++i) out << (*ic_iter)->getBeadId(i) + 1 << " ";
     out << "  1  ; ";
-    out << to_string(ic->getMolecule() + 1);
-    out << ":" + ic->getGroup();
-    out << ":" + to_string(ic->getIndex() + 1) << endl;
+    out << to_string((*ic_iter)->getMolecule() + 1);
+    out << ":" + (*ic_iter)->getGroup();
+    out << ":" + to_string((*ic_iter)->getIndex() + 1) << endl;
   }
 }
 

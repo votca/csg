@@ -91,11 +91,11 @@ class Topology {
    * access containter with all bonded interactions
    * @return bonded interaction container
    */
-  const std::vector<Interaction *> &BondedInteractions() const {
+  const std::vector<std::unique_ptr<Interaction>> &BondedInteractions() const {
     return interactions_;
   }
 
-  void AddBondedInteraction(Interaction *ic);
+  void AddBondedInteraction(std::unique_ptr<Interaction> ic);
   std::list<Interaction *> InteractionsInGroup(const std::string &group) const;
 
   /**
@@ -310,7 +310,7 @@ class Topology {
   std::unordered_map<int, Molecule_T> molecules_;
 
   /// bonded interactions in the topology
-  std::vector<Interaction *> interactions_;
+  std::vector<std::unique_ptr<Interaction>> interactions_;
 
   ExclusionList exclusions_;
 
@@ -345,11 +345,12 @@ void Topology<Bead_T, Molecule_T>::Cleanup() {
   type_container_.Clear();
 
   // cleanup interactions
-  {
-    std::vector<Interaction *>::iterator i;
-    for (i = interactions_.begin(); i < interactions_.end(); ++i) delete (*i);
-    interactions_.clear();
-  }
+  interactions_.clear();
+  /*  {
+      std::vector<Interaction *>::iterator i;
+      for (i = interactions_.begin(); i < interactions_.end(); ++i) delete (*i);
+      interactions_.clear();
+    }*/
   // cleanup bc_ object
   bc_ = OpenBox().clone();
 }
@@ -459,7 +460,7 @@ void Topology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
   }
 }
 
-template <class Bead_T, class Molecule_T>
+/*template <class Bead_T, class Molecule_T>
 void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
   std::map<std::string, int>::iterator iter;
   iter = interaction_groups_.find(ic->getGroup());
@@ -472,7 +473,7 @@ void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
   }
   interactions_.push_back(ic);
   interactions_by_group_[ic->getGroup()].push_back(ic);
-}
+}*/
 
 template <class Bead_T, class Molecule_T>
 std::list<Interaction *> Topology<Bead_T, Molecule_T>::InteractionsInGroup(
@@ -558,7 +559,7 @@ template <class Bead_T, class Molecule_T>
 void Topology<Bead_T, Molecule_T>::RebuildExclusions() {
 
   vector<Bead *> beads;
-  for (Interaction *interaction : interactions_) {
+  for (std::unique_ptr<Interaction> &interaction : interactions_) {
     vector<int> bead_ids = interaction->getBeadIds();
     for (const int &bead_id : bead_ids) {
       beads.push_back(&beads_[bead_id]);

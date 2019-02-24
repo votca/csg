@@ -87,7 +87,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   BOOST_CHECK_EQUAL(top.getStep(), 961);
 
-  auto interaction_cont = top.BondedInteractions();
+  const vector<unique_ptr<Interaction>>& interaction_cont =
+      top.BondedInteractions();
   int numBondInter = 99;
   int numAngleInter = 98;
   int numDihedralInter = 97;
@@ -157,7 +158,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   BOOST_CHECK_EQUAL(top.getStep(), 1010);
 
-  auto interaction_cont = top.BondedInteractions();
+  const vector<unique_ptr<Interaction>>& interaction_cont =
+      top.BondedInteractions();
   int numBondInter = 99;
   int numAngleInter = 98;
   int numDihedralInter = 97;
