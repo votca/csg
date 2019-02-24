@@ -307,19 +307,36 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
             sl >> ids[0];
             sl >> ids[1];
             if (type == "BONDS") {
-              ic = new IBond(id_map[ids[0] - 1],
-                             id_map[ids[1] - 1]);  // -1 due to fortran vs c
+              // ic = new IBond(id_map[ids[0] - 1],
+              //               id_map[ids[1] - 1]);  // -1 due to fortran vs c
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              ic = top.CreateInteraction(Interaction::interaction_type::bond,
+                                         vector<int>{bead_id1, bead_id2});
             } else if (type == "ANGLES") {
               sl >> ids[2];
-              ic = new IAngle(id_map[ids[0] - 1], id_map[ids[1] - 1],
-                              id_map[ids[2] - 1]);  // -1 due to fortran vs c
+              // ic = new IAngle(id_map[ids[0] - 1], id_map[ids[1] - 1],
+              //                id_map[ids[2] - 1]);  // -1 due to fortran vs c
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              int bead_id3 = id_map[ids[2] - 1];
+              ic = top.CreateInteraction(
+                  Interaction::interaction_type::angle,
+                  vector<int>{bead_id1, bead_id2, bead_id3});
             } else if (type.substr(0, 6) == "DIHEDR") {
               type = "DIHEDRALS";
               sl >> ids[2];
               sl >> ids[3];
-              ic = new IDihedral(id_map[ids[0] - 1], id_map[ids[1] - 1],
-                                 id_map[ids[2] - 1],
-                                 id_map[ids[3] - 1]);  // -1 due to fortran vs c
+              // ic = new IDihedral(id_map[ids[0] - 1], id_map[ids[1] - 1],
+              //                   id_map[ids[2] - 1],
+              //                 id_map[ids[3] - 1]);  // -1 due to fortran vs c
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              int bead_id3 = id_map[ids[2] - 1];
+              int bead_id4 = id_map[ids[3] - 1];
+              ic = top.CreateInteraction(
+                  Interaction::interaction_type::dihedral,
+                  vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
             } else {
               throw std::runtime_error(
                   "Error: type should be BONDS, ANGLES or DIHEDRALS");
@@ -330,7 +347,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
             ic->setGroup(type);
             ic->setIndex(i);
             ic->setMoleculeId(mi->getId());
-            top.AddBondedInteraction(ic);
             mi->AddInteraction(ic);
           }
         }
@@ -363,23 +379,40 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
           int offset =
               mi_replica->getBead(0)->getId() - mi->getBead(0)->getId();
           if ((*ic)->BeadCount() == 2) {
-            ic_replica = new IBond((*ic)->getBeadId(0) + offset,
-                                   (*ic)->getBeadId(1) + offset);
+            // ic_replica = new IBond((*ic)->getBeadId(0) + offset,
+            //                       (*ic)->getBeadId(1) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            ic_replica =
+                top.CreateInteraction(Interaction::interaction_type::bond,
+                                      vector<int>{bead_id1, bead_id2});
           } else if ((*ic)->BeadCount() == 3) {
-            ic_replica = new IAngle((*ic)->getBeadId(0) + offset,
-                                    (*ic)->getBeadId(1) + offset,
-                                    (*ic)->getBeadId(2) + offset);
+            // ic_replica = new IAngle((*ic)->getBeadId(0) + offset,
+            //                        (*ic)->getBeadId(1) + offset,
+            //                        (*ic)->getBeadId(2) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            int bead_id3 = (*ic)->getBeadId(2) + offset;
+            ic_replica = top.CreateInteraction(
+                Interaction::interaction_type::angle,
+                vector<int>{bead_id1, bead_id2, bead_id3});
           } else if ((*ic)->BeadCount() == 4) {
-            ic_replica = new IDihedral(
-                (*ic)->getBeadId(0) + offset, (*ic)->getBeadId(1) + offset,
-                (*ic)->getBeadId(2) + offset, (*ic)->getBeadId(3) + offset);
+            // ic_replica = new IDihedral(
+            //    (*ic)->getBeadId(0) + offset, (*ic)->getBeadId(1) + offset,
+            //    (*ic)->getBeadId(2) + offset, (*ic)->getBeadId(3) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            int bead_id3 = (*ic)->getBeadId(2) + offset;
+            int bead_id4 = (*ic)->getBeadId(3) + offset;
+            ic_replica = top.CreateInteraction(
+                Interaction::interaction_type::dihedral,
+                vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
           } else {
             throw std::runtime_error("Error: BeadCount not equal 2, 3 or 4");
           }
           ic_replica->setGroup((*ic)->getGroup());
           ic_replica->setIndex((*ic)->getIndex());
           ic_replica->setMoleculeId(mi_replica->getId());
-          top.AddBondedInteraction(ic_replica);
           mi_replica->AddInteraction(ic_replica);
         }
       }

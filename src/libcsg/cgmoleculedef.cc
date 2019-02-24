@@ -136,7 +136,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   map<string, string> had_iagroup;
 
   for (ibnd = bonded_.begin(); ibnd != bonded_.end(); ++ibnd) {
-    list<int> atoms;
+    vector<int> atoms;
     string iagroup = (*ibnd)->get("name").as<string>();
 
     if (had_iagroup[iagroup] == "yes") {
@@ -182,11 +182,15 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
       Interaction *ic;
 
       if ((*ibnd)->name() == "bond") {
-        ic = new IBond(atoms);
+        ic = top.CreateInteraction(Interaction::interaction_type::bond, atoms);
+        // ic = new IBond(atoms);
       } else if ((*ibnd)->name() == "angle") {
-        ic = new IAngle(atoms);
+        // ic = new IAngle(atoms);
+        ic = top.CreateInteraction(Interaction::interaction_type::angle, atoms);
       } else if ((*ibnd)->name() == "dihedral") {
-        ic = new IDihedral(atoms);
+        // ic = new IDihedral(atoms);
+        ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
+                                   atoms);
       } else {
         throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
       }
@@ -194,7 +198,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
       ic->setGroup(iagroup);
       ic->setIndex(index);
       ic->setMoleculeId(minfo->getId());
-      top.AddBondedInteraction(ic);
+      // top.AddBondedInteraction(ic);
       minfo->AddInteraction(ic);
       index++;
     }

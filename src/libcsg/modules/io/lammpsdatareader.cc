@@ -594,13 +594,14 @@ void LAMMPSDataReader::ReadBonds_(CSG_Topology &top) {
       int atom1Index = atomIdToIndex_[atom1Id];
       int atom2Index = atomIdToIndex_[atom2Id];
 
-      Interaction *ic = new IBond(atom1Index, atom2Index);
+      Interaction *ic =
+          top.CreateInteraction(Interaction::interaction_type::bond,
+                                vector<int>{atom1Index, atom2Index});
       ic->setGroup("BONDS");
       ic->setIndex(bondId);
       Bead *b = top.getBead(atom1Index);
       Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
     }
 
@@ -652,13 +653,15 @@ void LAMMPSDataReader::ReadAngles_(CSG_Topology &top) {
       int atom2Index = atomIdToIndex_[atom2Id];
       int atom3Index = atomIdToIndex_[atom3Id];
 
-      Interaction *ic = new IAngle(atom1Index, atom2Index, atom3Index);
+      Interaction *ic = top.CreateInteraction(
+          Interaction::interaction_type::angle,
+          vector<int>{atom1Index, atom2Index, atom3Index});
       ic->setGroup("ANGLES");
       ic->setIndex(angleId);
       Bead *b = top.getBead(atom1Index);
       Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
+      // top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
     }
 
@@ -713,14 +716,15 @@ void LAMMPSDataReader::ReadDihedrals_(CSG_Topology &top) {
       int atom3Index = atomIdToIndex_[atom3Id];
       int atom4Index = atomIdToIndex_[atom4Id];
 
-      Interaction *ic =
-          new IDihedral(atom1Index, atom2Index, atom3Index, atom4Index);
+      Interaction *ic = top.CreateInteraction(
+          Interaction::interaction_type::dihedral,
+          vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});
       ic->setGroup("DIHEDRALS");
       ic->setIndex(dihedralId);
       Bead *b = top.getBead(atom1Index);
       Molecule *mi = top.getMolecule(b->getMoleculeId());
       ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
+      // top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
     }
     ++dihedral_count;

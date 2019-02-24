@@ -24,6 +24,7 @@
 #include <cassert>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace TOOLS = votca::tools;
 
@@ -81,7 +82,7 @@ class Interaction {
   }
 
   virtual TOOLS::vec Grad(const BoundaryCondition &bc, int bead) = 0;
-  int BeadCount() { return _beads.size(); }
+  int BeadCount() { return beads_.size(); }
 
   /**
    * @brief Given the bead index in the interaction vector return the id
@@ -92,11 +93,19 @@ class Interaction {
    */
   int getBeadId(const int &bead_index) const {
     assert(bead_index > -1 &&
-           boost::lexical_cast<size_t>(bead_index) < _beads.size());
-    return _beads[bead_index];
+           boost::lexical_cast<size_t>(bead_index) < beads_.size());
+    return beads_[bead_index]->getId();
   }
 
-  std::vector<int> getBeadIds() const { return _beads; }
+  std::vector<int> getBeadIds() const {
+    std::vector<int> bead_ids;
+    for (const BaseBead *bead_ptr : beads_) {
+      bead_ids.push_back(bead_ptr->getId());
+    }
+    return bead_ids;
+  }
+
+  enum interaction_type { bond, angle, dihedral };
 
  protected:
   int _index;
@@ -104,7 +113,7 @@ class Interaction {
   int _group_id;
   std::string _name;
   int mol_id_;
-  std::vector<int> _beads;
+  std::vector<const BaseBead *> beads_;
 
   void RebuildName();
 };
@@ -127,24 +136,30 @@ inline void Interaction::RebuildName() {
 */
 class IBond : public Interaction {
  public:
-  IBond(int bead1, int bead2) {
-    _beads.resize(2);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
-  }
-
-  IBond(std::list<int> &beads) {
-    assert(beads.size() >= 2);
-    _beads.resize(2);
-    for (int i = 0; i < 2; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
+  /*  IBond(int bead1, int bead2) {
+      beads_.resize(2);
+      beads_[0] = bead1;
+      beads_[1] = bead2;
     }
-  }
+
+    IBond(std::list<int> &beads) {
+      assert(beads.size() >= 2);
+      beads_.resize(2);
+      for (int i = 0; i < 2; ++i) {
+        beads_[i] = beads.front();
+        beads.pop_front();
+      }
+    }*/
+  // SHOULD ONLY BE CALLED BY Topology Object
   double EvaluateVar(const BoundaryCondition &bc);
   TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
+  IBond(std::vector<const BaseBead *> beads) {
+    assert(beads.size() != 2 && "IBond must be called with 2 beads.");
+    beads_ = beads;
+  }
+  friend class CSG_Topology;
 };
 
 /**
@@ -152,25 +167,32 @@ class IBond : public Interaction {
 */
 class IAngle : public Interaction {
  public:
-  IAngle(int bead1, int bead2, int bead3) {
-    _beads.resize(3);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
-    _beads[2] = bead3;
-  }
-  IAngle(std::list<int> &beads) {
-    assert(beads.size() >= 3);
-    _beads.resize(3);
-    for (int i = 0; i < 3; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
-    }
-  }
+  /*  IAngle(int bead1, int bead2, int bead3) {
+      beads_.resize(3);
+      beads_[0] = bead1;
+      beads_[1] = bead2;
+      beads_[2] = bead3;
+    }*/
+  /*  IAngle(std::list<int> &beads) {
+      assert(beads.size() >= 3);
+      beads_.resize(3);
+      for (int i = 0; i < 3; ++i) {
+        beads_[i] = beads.front();
+        beads.pop_front();
+      }
+    }*/
+  // SHOULD ONLY BE CALLED BY Topology Object
 
   double EvaluateVar(const BoundaryCondition &bc);
   TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
+  IAngle(std::vector<const BaseBead *> beads) {
+    assert(beads.size() == 3 &&
+           "Cannot create an IAngle with more or less than 3 beads.");
+    beads_ = beads;
+  }
+  friend class CSG_Topology;
 };
 
 /**
@@ -178,47 +200,61 @@ class IAngle : public Interaction {
 */
 class IDihedral : public Interaction {
  public:
-  IDihedral(int bead1, int bead2, int bead3, int bead4) {
-    _beads.resize(4);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
-    _beads[2] = bead3;
-    _beads[3] = bead4;
-  }
-  IDihedral(std::list<int> &beads) {
-    assert(beads.size() >= 4);
-    _beads.resize(4);
-    for (int i = 0; i < 4; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
+  /*  IDihedral(int bead1, int bead2, int bead3, int bead4) {
+      beads_.resize(4);
+      beads_[0] = bead1;
+      beads_[1] = bead2;
+      beads_[2] = bead3;
+      beads_[3] = bead4;
     }
-  }
+    IDihedral(std::list<int> &beads) {
+      assert(beads.size() >= 4);
+      beads_.resize(4);
+      for (int i = 0; i < 4; ++i) {
+        beads_[i] = beads.front();
+        beads.pop_front();
+      }
+    }*/
+  // SHOULD ONLY BE CALLED BY Topology Object
 
   double EvaluateVar(const BoundaryCondition &bc);
   TOOLS::vec Grad(const BoundaryCondition &bc, int bead);
 
  private:
+  IDihedral(std::vector<const BaseBead *> beads) {
+    assert(beads.size() == 4 &&
+           "Cannot create a Dihedral with more or less than three beads");
+    beads_ = beads;
+  }
+  friend class CSG_Topology;
 };
 
 inline double IBond::EvaluateVar(const BoundaryCondition &bc) {
-  return abs(bc.BCShortestConnection(_beads[0], _beads[1]));
+  std::cout << "Shortest distance between beads " << beads_[0] << " and "
+            << beads_[1] << std::endl;
+  return abs(bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos()));
 }
 
 inline TOOLS::vec IBond::Grad(const BoundaryCondition &bc, int bead) {
-  TOOLS::vec r = bc.BCShortestConnection(_beads[0], _beads[1]);
+  TOOLS::vec r =
+      bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos());
   r.normalize();
   return (bead == 0) ? -r : r;
 }
 
 inline double IAngle::EvaluateVar(const BoundaryCondition &bc) {
-  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
-  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v1(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[0]->getPos()));
+  TOOLS::vec v2(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[2]->getPos()));
   return acos(v1 * v2 / sqrt((v1 * v1) * (v2 * v2)));
 }
 
 inline TOOLS::vec IAngle::Grad(const BoundaryCondition &bc, int bead) {
-  TOOLS::vec v1(bc.BCShortestConnection(_beads[1], _beads[0]));
-  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
+  TOOLS::vec v1(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[0]->getPos()));
+  TOOLS::vec v2(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[2]->getPos()));
 
   double acos_prime =
       1.0 / (sqrt(1 - (v1 * v2) * (v1 * v2) /
@@ -247,9 +283,12 @@ inline TOOLS::vec IAngle::Grad(const BoundaryCondition &bc, int bead) {
 }
 
 inline double IDihedral::EvaluateVar(const BoundaryCondition &bc) {
-  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
-  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
-  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
+  TOOLS::vec v1(
+      bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos()));
+  TOOLS::vec v2(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[2]->getPos()));
+  TOOLS::vec v3(
+      bc.BCShortestConnection(beads_[2]->getPos(), beads_[3]->getPos()));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
@@ -258,9 +297,12 @@ inline double IDihedral::EvaluateVar(const BoundaryCondition &bc) {
 }
 
 inline TOOLS::vec IDihedral::Grad(const BoundaryCondition &bc, int bead) {
-  TOOLS::vec v1(bc.BCShortestConnection(_beads[0], _beads[1]));
-  TOOLS::vec v2(bc.BCShortestConnection(_beads[1], _beads[2]));
-  TOOLS::vec v3(bc.BCShortestConnection(_beads[2], _beads[3]));
+  TOOLS::vec v1(
+      bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos()));
+  TOOLS::vec v2(
+      bc.BCShortestConnection(beads_[1]->getPos(), beads_[2]->getPos()));
+  TOOLS::vec v3(
+      bc.BCShortestConnection(beads_[2]->getPos(), beads_[3]->getPos()));
   TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector

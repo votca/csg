@@ -310,12 +310,14 @@ void XMLTopologyReader::ParseBond(Property &p) {
         XMLMolecule &xmlMolecule = *itm->second;
         XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
-        ic = new IBond(xmlBead1.pid, xmlBead2.pid);
+        // ic = new IBond(xmlBead1.pid, xmlBead2.pid);
+        ic = _top->CreateInteraction(Interaction::interaction_type::bond,
+                                     vector<int>{xmlBead1.pid, xmlBead2.pid});
         ic->setGroup(name);
         ic->setIndex(b_index);
         ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        _top->AddBondedInteraction(ic);
+        //_top->AddBondedInteraction(ic);
         b_index++;
       }
     } else {
@@ -351,12 +353,15 @@ void XMLTopologyReader::ParseAngle(Property &p) {
         XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
-        ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
+        ic = _top->CreateInteraction(
+            Interaction::interaction_type::angle,
+            vector<int>{xmlBead1.pid, xmlBead2.pid, xmlBead3.pid});
+        // ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
         ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        _top->AddBondedInteraction(ic);
+        //_top->AddBondedInteraction(ic);
         b_index++;
       }
     } else {
@@ -394,13 +399,16 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
         XMLBead &xmlBead4 = *xmlMolecule.name2beads[b4.atom_type_];
-        ic = new IDihedral(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid,
-                           xmlBead4.pid);
+        ic = _top->CreateInteraction(Interaction::interaction_type::dihedral,
+                                     vector<int>{xmlBead1.pid, xmlBead2.pid,
+                                                 xmlBead3.pid, xmlBead4.pid});
+        // ic = new IDihedral(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid,
+        //                  xmlBead4.pid);
         ic->setGroup(name);
         ic->setIndex(b_index);
         ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        _top->AddBondedInteraction(ic);
+        //_top->AddBondedInteraction(ic);
         b_index++;
       }
     } else {

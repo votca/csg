@@ -65,6 +65,26 @@ class CSG_Topology : public Topology<Bead, Molecule> {
     beads_[bead_id] = bead;
     return &beads_.at(bead_id);
   }
+
+  Interaction* CreateInteraction(Interaction::interaction_type type,
+                                 std::vector<int> bead_ids) {
+    assert(beads_.size() > 0 &&
+           "Cannot create interactions before beads have been initialized");
+    std::vector<const BaseBead*> beads;
+    for (const int& bead_id : bead_ids) {
+      beads.push_back(&beads_.at(bead_id));
+    }
+    if (type == Interaction::bond) {
+      interactions_.push_back(new IBond(beads));
+    } else if (type == Interaction::angle) {
+      interactions_.push_back(new IAngle(beads));
+    } else if (type == Interaction::dihedral) {
+      interactions_.push_back(new IDihedral(beads));
+    } else {
+      assert(!"Interaction type is not recognized");
+    }
+    return interactions_.back();
+  }
 };
 
 }  // namespace csg

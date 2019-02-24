@@ -303,9 +303,6 @@ class Topology {
   BoundaryCondition::eBoxtype autoDetectBoxType_(
       const TOOLS::matrix &box) const;
 
-  /// bead types in the topology
-  // std::map<std::string, int> beadtypes_;
-
   /// beads in the topology
   std::unordered_map<int, Bead_T> beads_;
 

@@ -153,9 +153,12 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
 
   // Create two bonded interactions
   string interaction_group = "bond";
-  auto bond1 = new IBond(0, 1);
+  auto bond1 = top.CreateInteraction(Interaction::interaction_type::bond,
+                                     vector<int>{0, 1});
   bond1->setGroup(interaction_group);
-  auto bond2 = new IBond(1, 2);
+  // auto bond2 = new IBond(1, 2);
+  auto bond2 = top.CreateInteraction(Interaction::interaction_type::bond,
+                                     vector<int>{1, 2});
   bond2->setGroup(interaction_group);
 
   top.AddBondedInteraction(bond1);
