@@ -24,15 +24,10 @@ using namespace votca::tools;
 vec OrthorhombicBox::BCShortestConnection(const vec &r_i,
                                           const vec &r_j) const {
 
-  std::cout << "vector 1 " << r_i.getX() << " " << r_i.getY() << " "
-            << r_i.getZ() << std::endl;
-  std::cout << "vector 2 " << r_j.getX() << " " << r_j.getY() << " "
-            << r_j.getZ() << std::endl;
   vec r_ij;
   double a = box_.get(0, 0);
   double b = box_.get(1, 1);
   double c = box_.get(2, 2);
-  std::cout << "Sides of box " << a << " " << b << " " << c << std::endl;
   r_ij = r_j - r_i;
   r_ij.setZ(r_ij.getZ() - c * round(r_ij.getZ() / c));
   r_ij.setY(r_ij.getY() - b * round(r_ij.getY() / b));

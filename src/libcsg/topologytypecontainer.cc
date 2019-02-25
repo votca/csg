@@ -22,16 +22,28 @@ namespace csg {
 bool TopologyTypeContainer::MoleculeTypeExist(std::string molecule_type) const {
   return molecule_types_.count(molecule_type);
 }
-void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {}
+void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {
+  if (molecule_types_.count(molecule_type) == 0) {
+    molecule_types_[molecule_type] = molecule_types_.size();
+  }
+}
 
 bool TopologyTypeContainer::ResidueTypeExist(std::string residue_type) const {
   return residue_types_.count(residue_type);
 }
-void TopologyTypeContainer::AddResidueType(std::string residue_type) {}
+void TopologyTypeContainer::AddResidueType(std::string residue_type) {
+  if (residue_types_.count(residue_type) == 0) {
+    residue_types_[residue_type] = residue_types_.size();
+  }
+}
 bool TopologyTypeContainer::BeadTypeExist(std::string bead_type) const {
   return bead_types_.count(bead_type);
 }
-void TopologyTypeContainer::AddBeadType(std::string bead_type) {}
+void TopologyTypeContainer::AddBeadType(std::string bead_type) {
+  if (bead_types_.count(bead_type) == 0) {
+    bead_types_[bead_type] = bead_types_.size();
+  }
+}
 
 }  // namespace csg
 }  // namespace votca

@@ -18,8 +18,9 @@
 #ifndef _VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
 #define _VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
 
+#include <cassert>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 
 namespace votca {
 namespace csg {
@@ -40,7 +41,7 @@ class TopologyTypeContainer {
 
   size_t MoleculeTypeCount() const { return molecule_types_.size(); }
 
-  const std::unordered_set<std::string>& getMoleculeTypes() const {
+  const std::unordered_map<std::string, int>& getMoleculeTypes() const {
     return molecule_types_;
   }
 
@@ -54,6 +55,10 @@ class TopologyTypeContainer {
 
   void AddBeadType(std::string bead_type);
 
+  int getBeadTypeId(std::string bead_type) const {
+    assert(bead_types_.count(bead_type) && "Bead type is not recognized");
+    return bead_types_.at(bead_type);
+  }
   void Clear() {
     bead_types_.clear();
     residue_types_.clear();
@@ -61,9 +66,9 @@ class TopologyTypeContainer {
   }
 
  private:
-  std::unordered_set<std::string> bead_types_;
-  std::unordered_set<std::string> residue_types_;
-  std::unordered_set<std::string> molecule_types_;
+  std::unordered_map<std::string, int> bead_types_;
+  std::unordered_map<std::string, int> residue_types_;
+  std::unordered_map<std::string, int> molecule_types_;
 };
 }  // namespace csg
 }  // namespace votca
