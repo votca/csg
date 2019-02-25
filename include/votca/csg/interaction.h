@@ -233,8 +233,8 @@ class IDihedral : public Interaction {
 };
 
 inline double IBond::EvaluateVar(const BoundaryCondition &bc) {
-  std::cout << "Shortest distance between beads " << beads_[0] << " and "
-            << beads_[1] << std::endl;
+  //  std::cout << "Shortest distance between beads " << beads_[0] << " and "
+  //            << beads_[1] << std::endl;
   return abs(bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos()));
 }
 

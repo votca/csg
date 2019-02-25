@@ -44,7 +44,9 @@ void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
   DataCollection<double>::container::iterator is;
   for (ia = interactions.begin(), is = _bonded_values.begin();
        ia != interactions.end(); ++ia, ++is) {
-    (*is)->push_back((*ia)->EvaluateVar(*(conf->getBoundaryCondition())));
+    double value = (*ia)->EvaluateVar(*(conf->getBoundaryCondition()));
+    cout << value << endl;
+    (*is)->push_back(value);
   }
 }
 

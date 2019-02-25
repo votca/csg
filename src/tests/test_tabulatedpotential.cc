@@ -138,17 +138,23 @@ BOOST_AUTO_TEST_CASE(test_command) {
     int interaction_id = 0;
     for (int index = 0; index < number_of_H2_molecules; ++index) {
       for (int index2 = index + 1; index2 < number_of_H2_molecules; ++index2) {
-        string interaction_group =
-            interaction_group + to_string(index) + "_" + to_string(index2);
+        string interaction_group2 = interaction_group;
+        interaction_group2 += to_string(index) + "_" + to_string(index2);
+        cout << interaction_group2 << endl;
         auto bond = top.CreateInteraction(
-            Interaction::interaction_type::bond, interaction_group,
+            Interaction::interaction_type::bond, interaction_group2,
             interaction_id, molecule_id, vector<int>{index, index2});
         // bond->setGroup(interaction_group + to_string(index) + "_" +
         //               to_string(index2));
         // top.AddBondedInteraction(bond);
-        interactions.push_back(interaction_group_name + to_string(index) + "_" +
-                               to_string(index2));
-        ++interaction_id;
+        interactions.push_back("molecule " + to_string(molecule_id) +
+                               interaction_group_name + to_string(index) + "_" +
+                               to_string(index2) + " " +
+                               to_string(bond->getGroupId()) + ":index " +
+                               to_string(interaction_id));
+        //        ++interaction_id;
+        cout << "bond index " << bond->getIndex() << " " << bond->getGroup()
+             << " " << bond->getGroupId() << " " << bond->getName() << endl;
       }
     }
 
@@ -177,9 +183,18 @@ BOOST_AUTO_TEST_CASE(test_command) {
     arguments.push_back("5");
 
     string command = "tab";
+    cout << "Command with args" << endl;
+    cout << "bonded statistics " << bonded_statistics.BondedValues().size()
+         << endl;
+    auto iter = bonded_values.begin();
+    while (iter != bonded_values.end()) {
+      cout << (*iter)->getName() << endl;
+      ++iter;
+    }
     tabulatedpotential.Command(bonded_statistics, command, arguments);
+    cout << "Command with interactions" << endl;
     tabulatedpotential.Command(bonded_statistics, command, interactions);
-
+    cout << "Get columns from file" << endl;
     Eigen::VectorXd column1 = getColumnFromFile(interactions.at(0), 1);
     Eigen::VectorXd column2 = getColumnFromFile(interactions.at(0), 2);
     Eigen::VectorXd column3 = getColumnFromFile(interactions.at(0), 3);
