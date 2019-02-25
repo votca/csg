@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TOPOLOGY_H
-#define _VOTCA_CSG_TOPOLOGY_H
+#ifndef VOTCA_CSG_TOPOLOGY_H
+#define VOTCA_CSG_TOPOLOGY_H
 
 #include <algorithm>
 #include <list>
@@ -43,6 +43,16 @@ namespace csg {
 
 namespace TOOLS = votca::tools;
 
+/**
+ * @brief Creates a template topology class
+ *
+ * This class essentially is in control of all topology objects that can be
+ * created. This means it controls the memory managment of any of all the
+ * topology objects.
+ *
+ * @tparam Bead_T a bead/atom class
+ * @tparam Molecule_T molecule class
+ */
 template <class Bead_T, class Molecule_T>
 class Topology {
  public:
@@ -95,38 +105,12 @@ class Topology {
     return interactions_;
   }
 
-  void AddBondedInteraction(std::unique_ptr<Interaction> ic);
-  std::list<Interaction *> InteractionsInGroup(const std::string &group) const;
-
-  /**
-   * \brief Determine if a bead type exists.
-   *
-   * @return bool true if it has been registered
-   **/
-  // bool BeadTypeExist(std::string type) const;
-
-  /**
-   * \brief Register the bead type with the topology object.
-   *
-   * Records are kept of the different bead types in the topology object. This
-   * method stores the bead type.
-   **/
-  // void RegisterBeadType(std::string name);
-
-  /**
-   * \brief Given a bead type this method returns the id associated with the
-   * type
-   *
-   * @param[in] string name of the type
-   * @return int the id of the type
-   **/
-  // int getBeadTypeId(std::string type) const;
-
   /**
    * \brief Returns a pointer to the bead with index i
    *
    * @param[in] int index is the index of the bead in the internal bead
    * container
+   *
    * @return Bead * is a pointer to the bead
    **/
   Bead_T *getBead(const int id) {
@@ -135,12 +119,28 @@ class Topology {
            "the topology obeject");
     return &beads_.at(id);
   }
+
+  /**
+   * @brief Grabs a molecule with the specified id
+   *
+   * @param[in] id
+   *
+   * @return raw pointer to the molecule
+   */
   Molecule_T *getMolecule(const int id) {
     assert(molecules_.count(id) &&
            "Cannot access molecule with provided id because it is not stored "
            "in the topology object.");
     return &molecules_.at(id);
   }
+
+  /**
+   * @brief Graps a const pointer to a molecule
+   *
+   * @param[in] id of the molecule
+   *
+   * @return const pointer to the molecule
+   */
   const Molecule_T *getMoleculeConst(const int id) const {
     assert(molecules_.count(id) &&
            "Cannot access const molecule with provided id because it is not "
@@ -282,12 +282,43 @@ class Topology {
    */
   ExclusionList &getExclusions() { return exclusions_; }
 
+  /**
+   * @brief Grabs all the ids of all the beads stored in the topology
+   *
+   * @return vector of the bead ids
+   */
   std::vector<int> getBeadIds() const;
+
+  /**
+   * @brief Grabs all the ids of the molecules stored in the topology
+   *
+   * @return vector of all the molecule ids
+   */
   std::vector<int> getMoleculeIds() const;
+
+  /**
+   * @brief Returns a map of all the residues and their respective types in the
+   * molecule specified by `molecule_id`
+   *
+   * @param[in] molecule_id
+   *
+   * @return residue ids "each one is unique" and the type of residue
+   */
   std::map<int, std::string> getResidueIdsAndTypesInMolecule(
       int molecule_id) const;
+
+  /**
+   * @brief The boundary condition type of the topology
+   *
+   * @return box type
+   */
   BoundaryCondition::eBoxtype getBoxType() const { return bc_->getBoxType(); }
 
+  /**
+   * @brief Returns a pointer to the boundary condition object
+   *
+   * @return const pointer
+   */
   const BoundaryCondition *getBoundaryCondition() const { return bc_.get(); }
 
   template <typename iteratable>
@@ -299,6 +330,16 @@ class Topology {
   bool HasForce() { return has_force_; }
   void SetHasForce(const bool v) { has_force_ = v; }
 
+  /**
+   * @brief Returns the type id of the bead with with id `bead_id`
+   *
+   * Each bead has an id, and each bead has a type, the types can also be given
+   * an id it is this id that is returned.
+   *
+   * @param[in] bead_id
+   *
+   * @return bead_type_id
+   */
   int getBeadTypeId(int bead_id) const {
     return type_container_.getBeadTypeId(beads_.at(bead_id).getType());
   }
@@ -341,6 +382,10 @@ class Topology {
   /// The particle group (For H5MD file format)
   std::string particle_group_;
 
+  /**
+   * @brief Keeps track of the various different topology objects stored in
+   * the topology object
+   */
   TopologyTypeContainer type_container_;
 };
 
@@ -356,17 +401,8 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 
   beads_.clear();
   molecules_.clear();
-
   type_container_.Clear();
-
-  // cleanup interactions
   interactions_.clear();
-  /*  {
-      std::vector<Interaction *>::iterator i;
-      for (i = interactions_.begin(); i < interactions_.end(); ++i) delete (*i);
-      interactions_.clear();
-    }*/
-  // cleanup bc_ object
   bc_ = OpenBox().clone();
 }
 
@@ -386,6 +422,7 @@ void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
   molecules_ = top.molecules_;
   bc_ = top.bc_->clone();
   type_container_ = top.type_container_;
+  particle_group_ = top.particle_group_;
 }
 
 template <class Bead_T, class Molecule_T>
@@ -474,18 +511,6 @@ void TemplateTopology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
     }
   }
 }
-
-/*template <class Bead_T, class Molecule_T>
-void TemplateTopology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic)
-{ std::map<std::string, int>::iterator iter; iter =
-interaction_groups_.find(ic->getGroup()); if (iter != interaction_groups_.end())
-{ ic->setGroupId((*iter).second); } else { int group_size =
-interaction_groups_.size(); interaction_groups_[ic->getGroup()] = group_size;
-    ic->setGroupId(group_size);
-  }
-  interactions_.push_back(ic);
-  interactions_by_group_[ic->getGroup()].push_back(ic);
-}*/
 
 template <class Bead_T, class Molecule_T>
 std::list<Interaction *>
@@ -600,4 +625,4 @@ void TemplateTopology<Bead_T, Molecule_T>::RebuildExclusions() {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TOPOLOGY_H */
+#endif  // VOTCA_CSG_TOPOLOGY_H
