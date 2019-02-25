@@ -54,13 +54,13 @@ namespace TOOLS = votca::tools;
  * @tparam Molecule_T molecule class
  */
 template <class Bead_T, class Molecule_T>
-class Topology {
+class TemplateTopology {
  public:
   /// constructor
-  Topology() : time_(0.0), has_vel_(false), has_force_(false) {
+  TemplateTopology() : time_(0.0), has_vel_(false), has_force_(false) {
     bc_ = OpenBox().clone();
   }
-  ~Topology();
+  ~TemplateTopology();
 
   /**
    * \brief Cleans up all the stored data
@@ -159,7 +159,8 @@ class Topology {
    * Copies everything but the interactions
    * \param top topology to copy from
    */
-  void CopyTopologyData(const TemplateTopology<Bead_T, Molecule_T> &top);
+  void CopyTemplateTopologyData(
+      const TemplateTopology<Bead_T, Molecule_T> &top);
 
   /**
    *  \brief rename all the molecules in range
@@ -407,12 +408,12 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 }
 
 template <class Bead_T, class Molecule_T>
-TemplateTopology<Bead_T, Molecule_T>::~Topology() {
+TemplateTopology<Bead_T, Molecule_T>::~TemplateTopology() {
   Cleanup();
 }
 
 template <class Bead_T, class Molecule_T>
-void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
+void TemplateTopology<Bead_T, Molecule_T>::CopyTemplateTopologyData(
     const TemplateTopology<Bead_T, Molecule_T> &top) {
   step_ = top.step_;
   time_ = top.time_;
