@@ -44,10 +44,10 @@ namespace csg {
  * E.g. If a beadstructure is composed of the following:
  *
  * BeadStructure 1
- * Name:"A" Id:1 ---- Name:"B" Id:2
+ * Type:"A" Id:1 ---- Type:"B" Id:2
  *
  * BeadStucture 2
- * Name:"A" Id:3 ---- Name:"B" Id:4
+ * Type:"A" Id:3 ---- Type:"B" Id:4
  *
  * Here BeadStructure 1 and 2 will compare equal
  *
@@ -85,6 +85,13 @@ class BeadStructure {
    **/
   T *getBead(int id);
 
+  /**
+   * @brief Grabs the const version of the bead pointer
+   *
+   * @param[in] id grabs the bead with the provided `id`
+   *
+   * @return const pointer to the bead
+   */
   const T *getBeadConst(int id) const;
   /**
    * \brief Create a connection between two beads in the structure
@@ -99,8 +106,18 @@ class BeadStructure {
    **/
   std::vector<T *> getNeighBeads(int bead_id);
 
+  /**
+   * @brief Returns a vector containing all the bead ids in the structure
+   *
+   * @return vector of ints
+   */
   std::vector<int> getBeadIds() const;
 
+  /**
+   * @brief Returns a copy of the internal graph
+   *
+   * @return graph
+   */
   TOOLS::Graph getGraph();
 
   /**
@@ -115,6 +132,7 @@ class BeadStructure {
    **/
   bool isStructureEquivalent(BeadStructure<T> &beadstructure);
 
+  /// Determine if a bead exists in the structure
   bool BeadExist(int bead_id) const { return beads_.count(bead_id); }
 
  protected:
