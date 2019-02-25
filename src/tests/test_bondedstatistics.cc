@@ -58,19 +58,26 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
                  residue_type, element, mass, charge);
   // Create two bonded interactions
   string interaction_group = "covalent_bond1";
-  string interaction_group_compare = ":covalent_bond1";
   int bond_id = 0;
+  int group_id = 3;
+  string interaction_group_compare = "molecule " + to_string(molecule_id) +
+                                     ":covalent_bond1 " + to_string(group_id) +
+                                     ":index " + to_string(bond_id);
   auto bond1 = top.CreateInteraction(Interaction::interaction_type::bond,
                                      interaction_group, bond_id, molecule_id,
                                      vector<int>{0, 1});
+  bond1->setGroupId(group_id);
   // bond1->setGroup(interaction_group);
 
   ++bond_id;
   string interaction_group2 = "covalent_bond2";
-  string interaction_group_compare2 = ":covalent_bond2";
+  string interaction_group_compare2 = "molecule " + to_string(molecule_id) +
+                                      ":covalent_bond2 " + to_string(group_id) +
+                                      ":index " + to_string(bond_id);
   auto bond2 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     interaction_group, bond_id, molecule_id,
+                                     interaction_group2, bond_id, molecule_id,
                                      vector<int>{1, 2});
+  bond2->setGroupId(group_id);
   // bond2->setGroup(interaction_group2);
 
   // top.AddBondedInteraction(bond1);
