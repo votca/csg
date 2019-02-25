@@ -69,6 +69,12 @@ class BaseBead {
    */
   virtual void setType(std::string type) { type_.setName(type); }
 
+  /**
+   * @brief Returns the element type of the bead
+   *
+   * @return either the element symbol i.e. "Si" for silcon or unassigned if it
+   * has not been specified.
+   */
   std::string getElement() const { return element_symbol_.getName(); }
 
   /**
