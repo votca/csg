@@ -48,14 +48,19 @@ void ExclusionList::Clear(void) {
   }
 }*/
 
-bool ExclusionList::IsExcluded(Bead *bead1, Bead *bead2) {
-  exclusion_t *excl;
+bool ExclusionList::IsExcluded(const Bead *bead1, const Bead *bead2) const {
   if (bead1->getMoleculeId() != bead2->getMoleculeId()) return false;
   if (bead2->getId() < bead1->getId()) swap(bead1, bead2);
-  if ((excl = GetExclusions(bead1))) {
-    if (find(excl->_exclude.begin(), excl->_exclude.end(), bead2) !=
-        excl->_exclude.end())
-      return true;
+
+  for (const pair<Bead *, exclusion_t *> bead_excl : _excl_by_bead) {
+
+    if (bead_excl.first->getId() == bead1->getId()) {
+      exclusion_t *excl = _excl_by_bead.at(bead_excl.first);
+      if (find(excl->_exclude.begin(), excl->_exclude.end(), bead2) !=
+          excl->_exclude.end()) {
+        return true;
+      }
+    }
   }
   return false;
 }

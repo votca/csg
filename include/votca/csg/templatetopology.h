@@ -174,8 +174,7 @@ class TemplateTopology {
    * Copies everything but the interactions
    * \param top topology to copy from
    */
-  void CopyTemplateTopologyData(
-      const TemplateTopology<Bead_T, Molecule_T> &top);
+  void CopyTopologyData(const TemplateTopology<Bead_T, Molecule_T> &top);
 
   /**
    *  \brief rename all the molecules in range
@@ -307,6 +306,8 @@ class TemplateTopology {
    */
   ExclusionList &getExclusions() { return exclusions_; }
 
+  const ExclusionList &getExclusionsConst() const { return exclusions_; }
+
   /**
    * @brief Grabs all the ids of all the beads stored in the topology
    *
@@ -437,7 +438,7 @@ TemplateTopology<Bead_T, Molecule_T>::~TemplateTopology() {
 }
 
 template <class Bead_T, class Molecule_T>
-void TemplateTopology<Bead_T, Molecule_T>::CopyTemplateTopologyData(
+void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
     const TemplateTopology<Bead_T, Molecule_T> &top) {
   step_ = top.step_;
   time_ = top.time_;

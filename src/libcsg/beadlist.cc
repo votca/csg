@@ -29,7 +29,6 @@ using namespace votca::tools;
 using namespace std;
 
 int BeadList::Generate(CSG_Topology &top, const string &select) {
-  //  BeadContainer::iterator iter;
   topology_ = &top;
   bool selectByName = false;
   string pSelect;  // parsed selection string
@@ -42,8 +41,7 @@ int BeadList::Generate(CSG_Topology &top, const string &select) {
   }
 
   vector<int> bead_ids = top.getBeadIds();
-  for (const int &bead_id : bead_ids) {
-    //  for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
+  for (int &bead_id : bead_ids) {
     Bead *bead_ptr = top.getBead(bead_id);
     if (!selectByName) {
       if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {
@@ -51,9 +49,6 @@ int BeadList::Generate(CSG_Topology &top, const string &select) {
       }
     } else {
       throw runtime_error("Bead name is no longer supported");
-      //    if (wildcmp(pSelect.c_str(), bead_ptr->getName().c_str())) {
-      //      push_back(bead_ptr);
-      //    }
     }
   }
   return size();
@@ -76,10 +71,12 @@ int BeadList::GenerateInSphericalSubvolume(CSG_Topology &top,
   }
 
   vector<int> bead_ids = top.getBeadIds();
-  for (const int &bead_id : bead_ids) {
+  for (int &bead_id : bead_ids) {
     Bead *bead_ptr = top.getBead(bead_id);
     // for (iter = top.Beads().begin(); iter != top.Beads().end(); ++iter) {
-    if (abs(topology_->BCShortestConnection(ref, bead_ptr->getPos())) > radius)
+    // if (abs(topology_->BCShortestConnection(ref, bead_ptr->getPos())) >
+    // radius)
+    if (abs(top.BCShortestConnection(ref, bead_ptr->getPos())) > radius)
       continue;
     if (!selectByName) {
       if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {

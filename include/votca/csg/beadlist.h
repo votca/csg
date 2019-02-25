@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BEADLIST_H
-#define _VOTCA_CSG_BEADLIST_H
+#ifndef VOTCA_CSG_BEADLIST_H
+#define VOTCA_CSG_BEADLIST_H
 
 #include <votca/tools/vec.h>
 
@@ -37,7 +37,6 @@ namespace csg {
     only the bead type.
 
 */
-
 class BeadList : public std::list<Bead *> {
  public:
   BeadList(){};
@@ -50,7 +49,9 @@ class BeadList : public std::list<Bead *> {
   int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
                                    TOOLS::vec ref, double radius);
 
-  CSG_Topology *getCSGTopology() { return topology_; }
+  /// Get the csg topology object
+  const CSG_Topology *getCSGTopologyConst() const { return topology_; }
+  CSG_Topology *getCSGTopology() const { return topology_; }
 
  private:
   CSG_Topology *topology_;
@@ -59,4 +60,4 @@ class BeadList : public std::list<Bead *> {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_BEADLIST_H */
+#endif  // VOTCA_CSG_BEADLIST_H
