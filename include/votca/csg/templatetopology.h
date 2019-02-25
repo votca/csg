@@ -121,6 +121,21 @@ class TemplateTopology {
   }
 
   /**
+   * \brief Returns a constant pointer to the bead with index i
+   *
+   * @param[in] int index is the index of the bead in the internal bead
+   * container
+   *
+   * @return const Bead * is a pointer to the bead
+   **/
+  const Bead_T *getBeadConst(const int id) const {
+    assert(beads_.count(id) &&
+           "Cannot access bead with provided id because it is not stored in "
+           "the topology obeject");
+    return &beads_.at(id);
+  }
+
+  /**
    * @brief Grabs a molecule with the specified id
    *
    * @param[in] id
@@ -275,7 +290,16 @@ class TemplateTopology {
   /**
    *  rebuild exclusion list
    */
-  void RebuildExclusions();  // { exclusions_.CreateExclusions(this); }
+  void RebuildExclusions();
+
+  /**
+   * @brief Grabs all the interactions in a specified group
+   *
+   * @param[in] group
+   *
+   * @return returns a list of Interactions
+   */
+  std::list<Interaction *> InteractionsInGroup(const string &group) const;
 
   /**
    * access exclusion list
