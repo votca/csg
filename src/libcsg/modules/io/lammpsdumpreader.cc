@@ -245,6 +245,7 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
           atom_attributes_string["element"], atom_attributes_double["mass"],
           atom_attributes_double["q"]);
     }
+    cout << "Getting bead of id " << atom_attributes_int["id"] << endl;
     Bead *b = top.getBead(atom_attributes_int["id"]);
     b->HasPos(pos);
     b->HasF(force);

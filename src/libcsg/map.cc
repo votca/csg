@@ -116,18 +116,28 @@ void Map_Sphere::Initialize(const CSG_Topology *topology_parent_,
     }
   }
 
-  for (size_t i = 0; i < beads.size(); ++i) {
-    unordered_set<int> bead_ids = mol_in->getBeadIdsByLabel(beads.at(i));
-    assert(bead_ids.size() == 1 &&
-           "More than a single bead with the same label, maybe the globally "
-           "unique bead id should be used instead.");
+  //  for (size_t i = 0; i < beads.size(); ++i) {
+  //    unordered_set<int> bead_ids = mol_in->getBeadIdsByLabel(beads.at(i));
+  //    assert(bead_ids.size() == 1 &&
+  //           "More than a single bead with the same label, maybe the globally
+  //           " "unique bead id should be used instead.");
 
-    int bead_id = *bead_ids.begin();
+  vector<int> bead_ids = mol_in->getBeadIds();
+  // WARNING this assumes that the bead weights are read in the same order
+  // as the bead ids are allocated, this method is prone to error because it
+  // does not guarantee that the weights and forces line up with the correct
+  // beads
+  sort(bead_ids.begin(), bead_ids.end());
+  int index = 0;
+  for (const int &bead_id : bead_ids) {
+
+    // int bead_id = *bead_ids.begin();
     if (bead_id < 0) {
-      throw std::runtime_error(
-          string("mapping error: molecule " + beads[i] + " does not exist"));
+      throw std::runtime_error(string("mapping error: molecule " +
+                                      beads[index] + " does not exist"));
     }
-    AddElem(mol_in->getBeadConst(bead_id), weights[i], fweights[i]);
+    AddElem(mol_in->getBeadConst(bead_id), weights[index], fweights[index]);
+    ++index;
   }
 }
 
