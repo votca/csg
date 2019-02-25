@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_CGENGINE_H
-#define _VOTCA_CSG_CGENGINE_H
+#ifndef VOTCA_CSG_CGENGINE_H
+#define VOTCA_CSG_CGENGINE_H
 
 #include "cgmoleculedef.h"
 #include "cgobserver.h"
@@ -43,14 +43,11 @@ namespace csg {
 
 namespace TOOLS = votca::tools;
 /**
-    \brief coarse graining engine
-
-    This class manages the coarse graining, at the moment it does the
-   measurement stuff
-
-    TODO: split this into an additional VotcaApplication object
-
-*/
+ * @brief Coarse graining engine
+ *
+ * This class manages the coarse graining, at the moment it does the
+ * measurement stuff
+ */
 class CGEngine {
  public:
   CGEngine();
@@ -111,4 +108,4 @@ inline bool CGEngine::IsIgnored(std::string ident) {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_CGENGINE_H */
+#endif  // VOTCA_CSG_CGENGINE_H
