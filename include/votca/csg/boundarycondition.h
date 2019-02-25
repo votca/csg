@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BOUNDARYCONDITION_H
-#define _VOTCA_CSG_BOUNDARYCONDITION_H
+#ifndef VOTCA_CSG_BOUNDARYCONDITION_H
+#define VOTCA_CSG_BOUNDARYCONDITION_H
 
 #include <memory>
 #include <stdexcept>
@@ -29,6 +29,17 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
+/**
+ * @brief Class keeps track of how the boundaries of the system are handled
+ *
+ * There are a total of 3 different boundaries:
+ * open - no boundaries
+ * orthorhombic - orthorombic boundaries
+ * triclinic - triclinic boundaries
+ *
+ * This class enables the correct treatement of distances beteween topology
+ * objects, such that distances accound for the periodic boundaries.
+ */
 class BoundaryCondition {
 
  public:
@@ -82,4 +93,4 @@ class BoundaryCondition {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_BOUNDARYCONDITION_H */
+#endif  // VOTCA_CSG_BOUNDARYCONDITION_H
