@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_CGMOLECULEDEF_H
-#define _VOTCA_CSG_CGMOLECULEDEF_H
+#ifndef VOTCA_CSG_CGMOLECULEDEF_H
+#define VOTCA_CSG_CGMOLECULEDEF_H
 
 #include <list>
 #include <map>
@@ -34,14 +34,11 @@ namespace csg {
 using namespace votca::tools;
 
 /**
-    \brief definition of a coarse grained molecule
-
-    This class is to define a coarse grained molecule, which includes the
-   topology, mapping, ...
-
-    \todo clean up this class, do the bonded interactions right!!!!
-    \todo check for consistency of xml file, seperate xml parser and class!!
-*/
+ * @brief Definition of coarse grained molecule
+ *
+ * This class is to define a coarse grained molecule, which includes the
+ * topology, mapping, ...
+ */
 class CGMoleculeDef {
  public:
   CGMoleculeDef() {}
@@ -53,30 +50,29 @@ class CGMoleculeDef {
 
   void Load(std::string filename);
 
-  const std::string &getType() { return type_; }
+  const std::string &getType() { return cg_molecule_type_; }
   const std::string &getIdent() { return ident_; }
 
  private:
   Property options_;
 
   struct beaddef_t {
-    int id_;
+    std::string cg_name_;
     std::string type_;
     byte_t symmetry_;
-    int residue_id_;
     std::string mapping_;
     std::vector<std::string> subbeads_;
     Property *options_;
   };
 
-  // name of the coarse grained molecule
-  std::string type_;
+  // type of the coarse grained molecule
+  std::string cg_molecule_type_;
   // name of the molecule to coarse grain
   std::string ident_;
 
   // beads of the cg molecule
   std::vector<beaddef_t *> beads_;
-  std::map<std::string, beaddef_t *> beads_by_type_;
+  std::map<std::string, beaddef_t *> beads_by_cg_name_;
 
   // mapping schemes
   std::map<std::string, Property *> maps_;
@@ -88,11 +84,11 @@ class CGMoleculeDef {
   void ParseBonded(Property &options);
   void ParseMapping(Property &options);
 
-  beaddef_t *getBeadByType(const std::string &type);
-  Property *getMapByType(const std::string &type);
+  beaddef_t *getBeadByCGName(const std::string &cg_name);
+  Property *getMapByName(const std::string &map_name);
 };
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_CGMOLECULEDEF_H */
+#endif  // VOTCA_CSG_CGMOLECULEDEF_H

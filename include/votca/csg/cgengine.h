@@ -66,17 +66,19 @@ class CGEngine {
   CGMoleculeDef *getMoleculeDef(std::string name);
 
   /**
-   * \brief ignores molecule in mapping process
-   * \param pattern glob pattern for molecule ident
+   * \brief Adds molecules that are to be ignored during the mapping process
+   * \param molecule_type glob molecule_type for molecule molecule_type
    */
-  void AddIgnore(std::string pattern) { _ignores.push_back(pattern); }
+  void AddIgnore(std::string molecule_type) {
+    _ignores.push_back(molecule_type);
+  }
 
   /**
    * \brief checks whether molecule is ignored
    * \param ident identifyier of molecule
    * \return true if is ignored
    */
-  bool IsIgnored(std::string ident);
+  bool IsIgnored(std::string molecule_type);
 
  private:
   std::map<std::string, CGMoleculeDef *> _molecule_defs;
@@ -93,14 +95,14 @@ inline CGMoleculeDef *CGEngine::getMoleculeDef(std::string name) {
   }
 
   iter = _molecule_defs.find(name);
-  if (iter == _molecule_defs.end()) return NULL;
+  assert(iter != _molecule_defs.end() && "Molecule definition does not exist");
   return (*iter).second;
 }
 
-inline bool CGEngine::IsIgnored(std::string ident) {
+inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();
        iter != _ignores.end(); ++iter) {
-    if (wildcmp(iter->c_str(), ident.c_str())) return true;
+    if (wildcmp(iter->c_str(), molecule_type.c_str())) return true;
   }
   return false;
 }

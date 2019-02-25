@@ -60,7 +60,7 @@ CGMoleculeDef::~CGMoleculeDef() {
 void CGMoleculeDef::Load(string filename) {
   load_property_from_xml(options_, filename);
   // parse xml tree
-  type_ = options_.get("cg_molecule.name").as<string>();
+  cg_molecule_type_ = options_.get("cg_molecule.name").as<string>();
   ident_ = options_.get("cg_molecule.ident").as<string>();
 
   ParseTopology(options_.get("cg_molecule.topology"));
@@ -81,8 +81,7 @@ void CGMoleculeDef::ParseBeads(Property &options) {
     beaddef_t *beaddef = new beaddef_t;
     beaddef->options_ = p;
 
-    beaddef->residue_id_ = topology_constants::unassigned_residue_id;
-    beaddef->type_ = p->get("name").as<string>();
+    beaddef->cg_name_ = p->get("name").as<string>();
     beaddef->type_ = p->get("type").as<string>();
     beaddef->mapping_ = p->get("mapping").as<string>();
     if (p->exists("symmetry")) {
@@ -90,12 +89,12 @@ void CGMoleculeDef::ParseBeads(Property &options) {
     } else {
       beaddef->symmetry_ = 1;
     }
-    if (beads_by_type_.find(beaddef->type_) != beads_by_type_.end()) {
-      throw std::runtime_error(string("bead name ") + beaddef->type_ +
+    if (beads_by_cg_name_.find(beaddef->cg_name_) != beads_by_cg_name_.end()) {
+      throw std::runtime_error(string("bead name ") + beaddef->cg_name_ +
                                " not unique in mapping");
     }
     beads_.push_back(beaddef);
-    beads_by_type_[beaddef->type_] = beaddef;
+    beads_by_cg_name_[beaddef->cg_name_] = beaddef;
   }
 }
 
@@ -114,21 +113,20 @@ void CGMoleculeDef::ParseMapping(Property &options) {
 
 Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   int molecule_id = top.MoleculeCount();
-  Molecule *minfo = top.CreateMolecule(molecule_id, type_);
+  Molecule *minfo = top.CreateMolecule(molecule_id, cg_molecule_type_);
 
   // create the atoms
-  vector<beaddef_t *>::iterator iter;
-  for (iter = beads_.begin(); iter != beads_.end(); ++iter) {
+  // vector<beaddef_t *>::iterator beaddef_
+  // for (beaddef = beads_.begin(); beaddef != beads_.end(); ++beaddef) {
+  for (beaddef_t *beaddef : beads_) {
     Bead *bead;
 
-    string bead_type = (*iter)->type_;
-    bead = top.CreateBead((*iter)->symmetry_, bead_type, top.BeadCount(),
-                          molecule_id, (*iter)->residue_id_,
-                          topology_constants::unassigned_residue_type,
-                          topology_constants::unassigned_element, 0.0, 0.0);
-    // bead = top.CreateBead<Bead>((*iter)->symmetry_, (*iter)->type_,
-    // bead_type,
-    //                            (*iter)->residue_id_, type_, type_, 0, 0);
+    string bead_type = beaddef->type_;
+    bead =
+        top.CreateBead(beaddef->symmetry_, bead_type, top.BeadCount(),
+                       molecule_id, topology_constants::unassigned_residue_id,
+                       topology_constants::unassigned_residue_type,
+                       topology_constants::unassigned_element, 0.0, 0.0);
     minfo->AddBead(bead);
   }
 
@@ -185,23 +183,16 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
       if ((*ibnd)->name() == "bond") {
         ic = top.CreateInteraction(Interaction::interaction_type::bond, iagroup,
                                    index, minfo->getId(), atoms);
-        // ic = new IBond(atoms);
       } else if ((*ibnd)->name() == "angle") {
-        // ic = new IAngle(atoms);
         ic = top.CreateInteraction(Interaction::interaction_type::angle,
                                    iagroup, index, minfo->getId(), atoms);
       } else if ((*ibnd)->name() == "dihedral") {
-        // ic = new IDihedral(atoms);
         ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
                                    iagroup, index, minfo->getId(), atoms);
       } else {
         throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
       }
 
-      // ic->setGroup(iagroup);
-      // ic->setIndex(index);
-      // ic->setMoleculeId(minfo->getId());
-      // top.AddBondedInteraction(ic);
       minfo->AddInteraction(ic);
       index++;
     }
@@ -218,10 +209,10 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
   }
 
   Map *map = new Map(mol_in, mol_out);
-  for (vector<beaddef_t *>::iterator def = beads_.begin(); def != beads_.end();
-       ++def) {
+  for (vector<beaddef_t *>::iterator beaddef = beads_.begin();
+       beaddef != beads_.end(); ++beaddef) {
 
-    unordered_set<int> bead_ids = mol_out.getBeadIdsByType((*def)->type_);
+    unordered_set<int> bead_ids = mol_out.getBeadIdsByType((*beaddef)->type_);
     assert(bead_ids.size() == 1 &&
            "There should only be one bead, if you want a more unique specifier "
            "the beads globally unique id should be used.");
@@ -229,16 +220,17 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
     int bead_id = *bead_ids.begin();
     if (bead_id < 0) {
       throw runtime_error(string("mapping error: reference molecule " +
-                                 (*def)->type_ + " does not exist"));
+                                 (*beaddef)->type_ + " does not exist"));
     }
 
-    Property *mdef = getMapByType((*def)->mapping_);
+    Property *mdef = getMapByName((*beaddef)->mapping_);
     if (!mdef) {
-      throw runtime_error(string("mapping " + (*def)->mapping_ + " not found"));
+      throw runtime_error(
+          string("mapping " + (*beaddef)->mapping_ + " not found"));
     }
 
     BeadMap *bmap;
-    switch ((*def)->symmetry_) {
+    switch ((*beaddef)->symmetry_) {
       case 1:
         bmap = new Map_Sphere();
         break;
@@ -250,25 +242,28 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
     }
     ////////////////////////////////////////////////////
     bmap->Initialize(topology, &mol_in, mol_out.getBead(bead_id),
-                     ((*def)->options_), mdef);
+                     ((*beaddef)->options_), mdef);
     map->AddBeadMap(bmap);
   }
   return map;
 }
 
-CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByType(const string &type) {
-  map<string, beaddef_t *>::iterator iter = beads_by_type_.find(type);
-  if (iter == beads_by_type_.end()) {
-    std::cout << "cannot find: <" << type << "> in " << type_ << "\n";
-    return NULL;
+CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByCGName(
+    const string &cg_name) {
+  map<string, beaddef_t *>::iterator cg_name_and_beaddef =
+      beads_by_cg_name_.find(cg_name);
+  if (cg_name_and_beaddef == beads_by_cg_name_.end()) {
+    std::cout << "cannot find: <" << cg_name << "> in " << cg_molecule_type_
+              << "\n";
+    return nullptr;
   }
-  return (*iter).second;
+  return (*cg_name_and_beaddef).second;
 }
 
-Property *CGMoleculeDef::getMapByType(const string &type) {
-  map<string, Property *>::iterator iter = maps_.find(type);
+Property *CGMoleculeDef::getMapByName(const string &mapping_name) {
+  map<string, Property *>::iterator iter = maps_.find(mapping_name);
   if (iter == maps_.end()) {
-    std::cout << "cannot find map " << type << "\n";
+    std::cout << "cannot find map " << mapping_name << "\n";
     return NULL;
   }
   return (*iter).second;

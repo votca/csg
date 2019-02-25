@@ -42,12 +42,14 @@ CGEngine::~CGEngine() {
 TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
                                         CSG_Topology &top_out) {
 
+  // Grab all the molecules
   const unordered_map<int, Molecule> &mols = top_in.Molecules();
-  // MoleculeContainer::iterator iter;
-  TopologyMap *m = new TopologyMap(&top_in, &top_out);
-  // for (iter = mols.begin(); iter != mols.end(); ++iter) {
-  for (const pair<int, Molecule> &iter : mols) {
-    const Molecule *mol_in = &(iter.second);
+  // Setup which topology is being added to (top_out) and which topology is
+  // being used to determine what is to be added (top_in)
+  TopologyMap *topology_map = new TopologyMap(&top_in, &top_out);
+  for (const pair<int, Molecule> &id_and_molecule : mols) {
+    // Grab a molecule
+    const Molecule *mol_in = &(id_and_molecule.second);
     if (IsIgnored(mol_in->getType())) continue;
     CGMoleculeDef *mol_def = getMoleculeDef(mol_in->getType());
     if (!mol_def) {
@@ -64,10 +66,10 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
     }
     Molecule *mcg = mol_def->CreateMolecule(top_out);
     Map *map = mol_def->CreateMap(&top_in, *mol_in, *mcg);
-    m->AddMoleculeMap(map);
+    topology_map->AddMoleculeMap(map);
   }
   top_out.RebuildExclusions();
-  return m;
+  return topology_map;
 }
 
 void CGEngine::LoadMoleculeType(string filename) {
