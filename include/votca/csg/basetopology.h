@@ -284,6 +284,8 @@ class Topology {
 
   std::vector<int> getBeadIds() const;
   std::vector<int> getMoleculeIds() const;
+  std::map<int, std::string> getResidueIdsAndTypesInMolecule(
+      int molecule_id) const;
   BoundaryCondition::eBoxtype getBoxType() const { return bc_->getBoxType(); }
 
   const BoundaryCondition *getBoundaryCondition() const { return bc_.get(); }
@@ -299,6 +301,15 @@ class Topology {
 
   int getBeadTypeId(int bead_id) const {
     return type_container_.getBeadTypeId(beads_.at(bead_id).getType());
+  }
+
+  /**
+   * @brief Returns the available molecule types and their type ids
+   *
+   * @return
+   */
+  const std::unordered_map<std::string, int> getMoleculeTypes() const {
+    return type_container_.getMoleculeTypes();
   }
 
  protected:
@@ -557,6 +568,22 @@ std::vector<int> Topology<Bead_T, Molecule_T>::getMoleculeIds() const {
     molecule_ids.push_back(id_and_molecule.first);
   }
   return molecule_ids;
+}
+
+template <class Bead_T, class Molecule_T>
+std::map<int, std::string>
+    Topology<Bead_T, Molecule_T>::getResidueIdsAndTypesInMolecule(
+        int molecule_id) const {
+
+  assert(molecules_.count(molecule_id) &&
+         "Molecule id does not exist in topology object");
+  std::map<int, std::string> id_and_residue_type;
+  vector<int> bead_ids = molecules_.at(molecule_id).getBeadIds();
+  for (const int &bead_id : bead_ids) {
+    id_and_residue_type[beads_.at(bead_id).getResidueId()] =
+        beads_.at(bead_id).getResidueType();
+  }
+  return id_and_residue_type;
 }
 
 template <class Bead_T, class Molecule_T>

@@ -49,7 +49,6 @@ class CSG_Topology : public Topology<Bead, Molecule> {
                    int molecule_id, int residue_id, std::string residue_type,
                    std::string element_symbol, double mass, double charge) {
 
-    cout << "Bead id is " << bead_id << endl;
     assert(bead_id >= 0 && "Bead id is invalid");
     if (!type_container_.ResidueTypeExist(residue_type)) {
       type_container_.AddResidueType(residue_type);
@@ -64,7 +63,6 @@ class CSG_Topology : public Topology<Bead, Molecule> {
     Bead bead = Bead(symmetry, bead_id, bead_type, residue_id, residue_type,
                      molecule_id, element_symbol, mass, charge);
 
-    std::cout << "Creating bead " << bead_id << std::endl;
     beads_[bead_id] = bead;
     return &beads_.at(bead_id);
   }

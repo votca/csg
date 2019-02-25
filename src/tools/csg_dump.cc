@@ -74,47 +74,61 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
         cout << endl << "           ";
       }
     }
-/*
-    cout << "\nList of residues:\n";
-    map<int, set<pair<int, string>>> molecule_id_residue_ids_and_names =
-        top->getResidueIdsAndNames();
-    //    for (pair<const int, string> &id_and_name : residue_ids_and_names) {
-    //      cout << id_and_name.first << " name: " << id_and_name.second
-    //           << " id: " << id_and_name.first << endl;
-    //    }
-    for (const pair<const int, set<pair<int, string>>>
-             &id_and_res_num_and_res_name : molecule_id_residue_ids_and_names) {
-      int molecular_type_id = id_and_res_num_and_res_name.first;
-      for (const pair<int, string> &res_num_and_res_name :
-           id_and_res_num_and_res_name.second) {
-        cout << molecular_type_id - 1
-             << " name: " << res_num_and_res_name.second
-             << " id: " << res_num_and_res_name.first << endl;
+
+    cout << "\nList of residues:" << endl;
+    // Get all the residues by cycling through all the molecules
+    vector<int> molecule_ids = top->getMoleculeIds();
+    sort(molecule_ids.begin(), molecule_ids.end());
+    for (const int &molecule_id : molecule_ids) {
+      std::map<int, std::string> residue_ids_and_types =
+          top->getResidueIdsAndTypesInMolecule(molecule_id);
+      for (const pair<int, string> &id_and_type : residue_ids_and_types) {
+        cout << "name: " << id_and_type.second;
+        cout << " id: " << id_and_type.first << endl;
       }
     }
-
+    /*
+cout << "\nList of residues:\n";
+map<int, set<pair<int, string>>> molecule_id_residue_ids_and_names =
+top->getResidueIdsAndNames();
+//    for (pair<const int, string> &id_and_name : residue_ids_and_names) {
+//      cout << id_and_name.first << " name: " << id_and_name.second
+//           << " id: " << id_and_name.first << endl;
+//    }
+for (const pair<const int, set<pair<int, string>>>
+ &id_and_res_num_and_res_name : molecule_id_residue_ids_and_names) {
+int molecular_type_id = id_and_res_num_and_res_name.first;
+for (const pair<int, string> &res_num_and_res_name :
+id_and_res_num_and_res_name.second) {
+cout << molecular_type_id - 1
+ << " name: " << res_num_and_res_name.second
+ << " id: " << res_num_and_res_name.first << endl;
+}
+}
+*/
     cout << "\nList of molecules:\n";
-    MoleculeContainer::iterator mol;
-    for (mol = top->Molecules().begin(); mol != top->Molecules().end(); ++mol) {
-      cout << "molecule: " << (*mol)->getId() + 1 << " " << (*mol)->getName()
-           << " beads: " << (*mol)->BeadCount() << endl;
+    //    MoleculeContainer::iterator mol;
+    //    for (mol = top->Molecules().begin(); mol != top->Molecules().end();
+    //    ++mol) {
+    for (const int &molecule_id : molecule_ids) {
+      const Molecule *mol = top->getMoleculeConst(molecule_id);
+      cout << "molecule: " << (mol)->getId() + 1 << " " << (mol)->getType()
+           << " beads: " << (mol)->BeadCount() << endl;
 
-      vector<int> bead_ids = (*mol)->getBeadIds();
+      vector<int> bead_ids = (mol)->getBeadIds();
 
       // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
       for (const int &bead_id : bead_ids) {
-        int resnr = (*mol)->getBead(bead_id)->getResidueId();
-
-        cout << bead_id << " Name " << (*mol)->getBeadName(bead_id) << " Type "
-             << (*mol)->getBead(bead_id)->getType() << " Mass "
-             << (*mol)->getBead(bead_id)->getMass() << " Resnr " << resnr
-             << " Resname " << (*mol)->getBead(bead_id)->getResidueType()
-             << " Charge " << (*mol)->getBead(bead_id)->getQ() << endl;
+        const Bead *bead = mol->getBeadConst(bead_id);
+        cout << bead_id << " Type " << bead->getType() << " Mass "
+             << bead->getMass() << " Resnr " << bead->getResidueId()
+             << " Resname " << bead->getResidueType() << " Charge "
+             << bead->getQ() << endl;
       }
     }
   } else {
     cout << "\nList of exclusions:\n" << top->getExclusions();
- */ }
+  }
 
-return true;
+  return true;
 }

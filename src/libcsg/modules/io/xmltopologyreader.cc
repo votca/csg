@@ -227,9 +227,6 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
       } else if (elements.isEleFull(name_all_caps)) {
         element = elements.getEleShort(name_all_caps);
       }
-      cout << "Creating bead " << b.type << " id " << _top->BeadCount()
-           << " molecule id " << xmlMolecule->pid << " res num "
-           << b.residue_number << " element " << element << endl;
       Bead *bead = _top->CreateBead(symmetry, b.type, _top->BeadCount(),
                                     xmlMolecule->pid, b.residue_number,
                                     bead_constants::residue_type_unassigned,

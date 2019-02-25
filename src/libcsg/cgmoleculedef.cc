@@ -121,7 +121,6 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
     Bead *bead;
 
     string bead_type = (*iter)->type_;
-    cout << "Creating bead in CGMoleculeDef " << top.BeadCount() << endl;
     bead = top.CreateBead((*iter)->symmetry_, bead_type, top.BeadCount(),
                           molecule_id, (*iter)->residue_id_,
                           bead_constants::residue_type_unassigned,
