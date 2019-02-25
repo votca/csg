@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include <votca/tools/constants.h>
+
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;
@@ -123,8 +125,8 @@ BOOST_AUTO_TEST_CASE(test_command) {
           vec bead_pos(x, y, z);
           Bead *bead_ptr = top.CreateBead(
               symmetry, bead_type, bead_id, number_of_H2_molecules, residue_id,
-              bead_constants::residue_type_unassigned,
-              basebead_constants::unassigned_element, mass, charge);
+              topology_constants::unassigned_residue_type,
+              topology_constants::unassigned_element, mass, charge);
           bead_ptr->setPos(bead_pos);
           ++number_of_H2_molecules;
           ++bead_id;

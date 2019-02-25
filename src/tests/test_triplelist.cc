@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   double charge = -1.0;
 
   top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   int bead_id2 = 2;
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   charge = -2.0;
 
   top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   int bead_id3 = 3;
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   charge = -3.0;
 
   top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   vec dist12(0.1, 0.2, 0.3);

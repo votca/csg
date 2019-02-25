@@ -28,6 +28,7 @@
 #include <votca/csg/interaction.h>
 #include <votca/csg/map.h>
 
+#include <votca/tools/constants.h>
 #include <votca/tools/property.h>
 #include <votca/tools/tokenizer.h>
 
@@ -80,7 +81,7 @@ void CGMoleculeDef::ParseBeads(Property &options) {
     beaddef_t *beaddef = new beaddef_t;
     beaddef->options_ = p;
 
-    beaddef->residue_id_ = bead_constants::residue_id_unassigned;
+    beaddef->residue_id_ = topology_constants::unassigned_residue_id;
     beaddef->type_ = p->get("name").as<string>();
     beaddef->type_ = p->get("type").as<string>();
     beaddef->mapping_ = p->get("mapping").as<string>();
@@ -123,8 +124,8 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
     string bead_type = (*iter)->type_;
     bead = top.CreateBead((*iter)->symmetry_, bead_type, top.BeadCount(),
                           molecule_id, (*iter)->residue_id_,
-                          bead_constants::residue_type_unassigned,
-                          basebead_constants::unassigned_element, 0.0, 0.0);
+                          topology_constants::unassigned_residue_type,
+                          topology_constants::unassigned_element, 0.0, 0.0);
     // bead = top.CreateBead<Bead>((*iter)->symmetry_, (*iter)->type_,
     // bead_type,
     //                            (*iter)->residue_id_, type_, type_, 0, 0);

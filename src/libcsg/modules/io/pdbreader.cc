@@ -237,7 +237,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         if (elements.isEleShort(atom_type)) {
           element_symbol = atom_type;
         } else {
-          element_symbol = basebead_constants::unassigned_element;
+          element_symbol = topology_constants::unassigned_element;
         }
       }
 
@@ -280,7 +280,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // res -1 as internal number starts with 0
         byte_t symmetry = 1;
         b = top.CreateBead(symmetry, atom_type, atom_number,
-                           molecule_constants::molecule_id_unassigned,
+                           topology_constants::unassigned_molecule_id,
                            residue_id, residue_type, element_symbol,
                            _elements.getMass(element_symbol), charge);
       } else {
@@ -426,7 +426,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
 
       int molecule_id = mol_and_atom_ids.first;
       Molecule *mi = top.CreateMolecule(
-          molecule_id, molecule_constants::molecule_type_unassigned);
+          molecule_id, topology_constants::unassigned_molecule_type);
       mol_map[molecule_id] = mi;
       mol_reInd_map[molecule_id] = ind;
 

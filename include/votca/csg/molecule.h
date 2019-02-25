@@ -32,10 +32,6 @@ namespace TOOLS = votca::tools;
 
 class Interaction;
 
-namespace molecule_constants {
-const std::string molecule_type_unassigned = "unassigned";
-const int molecule_id_unassigned = -1;
-}  // namespace molecule_constants
 /**
     \brief Information about molecules.
 

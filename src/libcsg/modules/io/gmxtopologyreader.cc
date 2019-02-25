@@ -23,6 +23,7 @@
 #include <iostream>
 #include <string>
 
+#include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 
 #include <boost/algorithm/string.hpp>
@@ -89,7 +90,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 
         string bead_type = *(atoms->atomtype[iatom]);
 
-        string element = basebead_constants::unassigned_element;
+        string element = topology_constants::unassigned_element;
         if (elements.isEleShort(bead_type)) {
           element = bead_type;
         }

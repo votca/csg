@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <votca/csg/bead.h>
 #include <votca/csg/csgtopology.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 
 using namespace votca::tools;
@@ -220,7 +221,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
       //                                    b.mass, b.q);
       byte_t symmetry = 1;
 
-      string element = basebead_constants::unassigned_element;
+      string element = topology_constants::unassigned_element;
       string name_all_caps = boost::algorithm::to_upper_copy<string>(b.name);
       if (elements.isEleShort(b.name)) {
         element = b.name;
@@ -229,7 +230,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
       }
       Bead *bead = _top->CreateBead(symmetry, b.type, _top->BeadCount(),
                                     xmlMolecule->pid, b.residue_number,
-                                    bead_constants::residue_type_unassigned,
+                                    topology_constants::unassigned_residue_type,
                                     element, b.mass, b.q);
 
       bead->setMoleculeId(_mol_index);

@@ -100,7 +100,7 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
       if (topology) {
         string bead_type = fields[0];
 
-        string element = basebead_constants::unassigned_element;
+        string element = topology_constants::unassigned_element;
         string name_upper_case = boost::to_upper_copy<string>(bead_type);
         if (elements.isEleFull(name_upper_case)) {
           element = elements.getEleShort(name_upper_case);
@@ -109,9 +109,9 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
         }
         byte_t symmetry = 1;
         b = top.CreateBead(
-            symmetry, bead_type, i, molecule_constants::molecule_id_unassigned,
-            bead_constants::residue_id_unassigned,
-            bead_constants::residue_type_unassigned, element, 0.0, 0.0);
+            symmetry, bead_type, i, topology_constants::unassigned_molecule_id,
+            topology_constants::unassigned_residue_id,
+            topology_constants::unassigned_residue_type, element, 0.0, 0.0);
 
       } else {
         b = top.getBead(i);

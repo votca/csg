@@ -25,6 +25,7 @@
 #include <votca/csg/csgtopology.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -45,19 +46,19 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   double mass = 1.1;
   double charge = 0.3;
   top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
   ++bead_id;
   top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
   ++bead_id;
   top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
   ++bead_id;
   top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   int bond_id = 1;

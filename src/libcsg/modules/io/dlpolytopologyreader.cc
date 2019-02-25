@@ -23,6 +23,7 @@
 #include <fstream>
 #include <stddef.h>
 #include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/types.h>
@@ -261,10 +262,11 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
           // 1);
           byte_t symmetry = 1;
 
-          Bead *bead = top.CreateBead(
-              symmetry, beadtype, top.BeadCount(), mi->getId(),
-              bead_constants::residue_id_unassigned,
-              bead_constants::residue_type_unassigned, element, mass, charge);
+          Bead *bead =
+              top.CreateBead(symmetry, beadtype, top.BeadCount(), mi->getId(),
+                             topology_constants::unassigned_residue_id,
+                             topology_constants::unassigned_residue_type,
+                             element, mass, charge);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();

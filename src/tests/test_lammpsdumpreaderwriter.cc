@@ -200,13 +200,13 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     string atom_type = atom_types.at(ind);
-    string element_symbol = basebead_constants::unassigned_element;
+    string element_symbol = topology_constants::unassigned_element;
     int atom_id = static_cast<int>(ind);
     if (elements.isEleShort(atom_type)) {
       element_symbol = atom_type;
     }
     Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
-                             molecule_constants::molecule_id_unassigned,
+                             topology_constants::unassigned_molecule_id,
                              residue_id, residue_type, element_symbol,
                              elements.getMass(atom_type), charge);
 
@@ -320,12 +320,12 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
     string atom_type = atom_types.at(ind);
     int atom_id = static_cast<int>(ind);
-    string element_symbol = basebead_constants::unassigned_element;
+    string element_symbol = topology_constants::unassigned_element;
     if (elements.isEleShort(atom_type)) {
       element_symbol = atom_type;
     }
     Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
-                             molecule_constants::molecule_id_unassigned,
+                             topology_constants::unassigned_molecule_id,
                              residue_id, residue_type, element_symbol,
                              elements.getMass(atom_types.at(ind)), charge);
 

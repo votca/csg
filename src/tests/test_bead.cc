@@ -24,6 +24,7 @@
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/csgtopology.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 namespace votca {
@@ -51,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_bead_constructor) {
   double charge = -0.87;
 
   top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 }
 
@@ -71,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
   Bead* b = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
 
   BOOST_CHECK_CLOSE(b->getMass(), mass, 1e-5);
   BOOST_CHECK_CLOSE(b->getQ(), charge, 1e-5);
@@ -99,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
   Bead* b = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
 
   double newMass = 9.4;
   double newCharge = 2.6;

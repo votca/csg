@@ -25,6 +25,7 @@
 #include <map>
 #include <string>
 #include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
 
 using namespace std;
 using namespace votca::csg;
@@ -141,7 +142,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     vec pos_bead1(5.0, 3.0, 5.0);
     auto bead_ptr = top.CreateBead(
         symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-        basebead_constants::unassigned_element, mass, charge);
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr->setPos(pos_bead1);
 
     bead_id = 1;
@@ -149,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     vec pos_bead2(5.0, 4.0, 5.0);
     auto bead_ptr2 = top.CreateBead(
         symmetry, bead_type2, bead_id, molecule_id, residue_id, residue_type,
-        basebead_constants::unassigned_element, mass, charge);
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr2->setPos(pos_bead2);
 
     bead_id = 2;
@@ -157,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     vec pos_bead3(5.0, 6.0, 5.0);
     auto bead_ptr3 = top.CreateBead(
         symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
-        basebead_constants::unassigned_element, mass, charge);
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr3->setPos(pos_bead3);
 
     // Create two bonded interactions

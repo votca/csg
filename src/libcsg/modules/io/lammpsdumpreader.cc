@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <vector>
+#include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
 
 namespace votca {
@@ -237,8 +238,8 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
 
     if (read_topology_data_) {
       byte_t symmetry = 1;
-      string residue_type = bead_constants::residue_type_unassigned;
-      int residue_id = bead_constants::residue_id_unassigned;
+      string residue_type = topology_constants::unassigned_residue_type;
+      int residue_id = topology_constants::unassigned_residue_id;
       top.CreateBead(
           symmetry, atom_attributes_string["type"], atom_attributes_int["id"],
           atom_attributes_int["mol"], residue_id, residue_type,

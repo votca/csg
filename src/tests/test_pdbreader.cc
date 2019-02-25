@@ -27,6 +27,7 @@
 #include <votca/csg/csgtopology.h>
 #include <votca/csg/topologyreader.h>
 #include <votca/csg/trajectorywriter.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/vec.h>
 

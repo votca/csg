@@ -30,9 +30,6 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
-namespace basebead_constants {
-const std::string unassigned_element = "unassigned";
-}
 /**
  * \brief information about a base bead
  *

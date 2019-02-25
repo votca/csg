@@ -22,6 +22,7 @@
 #include <iostream>
 #include <math.h>
 #include <string>
+#include <votca/tools/constants.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/types.h>
 #include <votca/tools/vec.h>
@@ -98,7 +99,7 @@ BOOST_AUTO_TEST_CASE(create_bead) {
 
   auto bead_ptr = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
 
   BOOST_CHECK_CLOSE(bead_ptr->getQ(), 0.3, 1e-5);
   BOOST_CHECK_CLOSE(bead_ptr->getMass(), 1.1, 1e-5);
@@ -133,20 +134,20 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   // Create 3 beads
   auto bead_ptr = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
   bead_ptr->setId(0);
 
   bead_id = 1;
   auto bead_ptr2 = top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
   bead_ptr2->setId(1);
 
   bead_id = 2;
   string bead_type3 = "bead_test3";
   auto bead_ptr3 = top.CreateBead(
       symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
-      basebead_constants::unassigned_element, mass, charge);
+      topology_constants::unassigned_element, mass, charge);
   bead_ptr3->setId(2);
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 3);

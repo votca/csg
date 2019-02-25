@@ -26,6 +26,7 @@
 #include <votca/csg/beadtriple.h>
 #include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   double charge = -1.0;
 
   top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   symmetry = 1;
@@ -59,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   charge = -1.0;
 
   top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   symmetry = 1;
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   charge = -1.0;
 
   top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
-                 residue_type, basebead_constants::unassigned_element, mass,
+                 residue_type, topology_constants::unassigned_element, mass,
                  charge);
 
   vec dist12(0.1, 0.2, 0.3);

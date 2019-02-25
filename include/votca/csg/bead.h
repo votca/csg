@@ -35,11 +35,6 @@ namespace csg {
 
 class Molecule;
 
-namespace bead_constants {
-const std::string bead_type_unassigned = "unassigned";
-const int residue_id_unassigned = -1;
-const std::string residue_type_unassigned = "unassigned";
-}  // namespace bead_constants
 /**
  * \brief information about a bead
  *
