@@ -33,16 +33,11 @@ namespace csg {
 
 namespace TOOLS = votca::tools;
 
-// class Interaction;
-
 /**
-    \brief information about molecules
+    \brief Information about molecules
 
     The Molecule class stores which beads belong to a molecule.
     The organization of beads into molecules is needed for the CG mapping.
-
-    \todo sort atoms in molecule
-
 */
 template <class T>
 class BaseMolecule : public BeadStructure<T> {
@@ -50,14 +45,21 @@ class BaseMolecule : public BeadStructure<T> {
   /// get the molecule ID
   int getId() const { return id_.getId(); }
 
-  /// get the name of the molecule
+  /// get the name/type of the molecule
   const std::string &getType() const { return type_.getName(); }
 
-  /// set the name of the molecule
+  /// set the name/type of the molecule
   void setType(const std::string &type) { type_.setName(type); }
 
-  // The bead already has a name handled by beadstructure, but we need to
-  // override it
+  /**
+   * @brief Adds a bead to the base molecule
+   *
+   * Note that the method inherited by BeadStructure is overwritten here, this
+   * is because when the bead is added to the molecule the beads attribute is
+   * also updated such that the bead contains the molecular id.
+   *
+   * @param bead
+   */
   void AddBead(T *bead);
 
   /**
@@ -109,7 +111,7 @@ class BaseMolecule : public BeadStructure<T> {
   TOOLS::Identity<int> id_;
   TOOLS::Name type_;
 
-  std::unordered_map<std::string, std::unordered_set<int>> bead_name_and_ids_;
+  std::unordered_map<std::string, std::unordered_set<int>> bead_type_and_ids_;
 };
 
 template <class T>
@@ -119,7 +121,7 @@ void BaseMolecule<T>::AddBead(T *bead) {
          " when it has been previously added.");
 
   BeadStructure<T>::AddBead(bead);
-  bead_name_and_ids_[bead->getType()].insert(bead->getId());
+  bead_type_and_ids_[bead->getType()].insert(bead->getId());
   bead->setMoleculeId(getId());
 }
 
@@ -150,10 +152,10 @@ const TOOLS::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
 template <class T>
 std::unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
     const std::string &name) const {
-  assert(bead_name_and_ids_.count(name) &&
+  assert(bead_type_and_ids_.count(name) &&
          "BaseMolecule does not contain any "
          "beads with name ");
-  return bead_name_and_ids_.at(name);
+  return bead_type_and_ids_.at(name);
 }
 
 template <class T>
