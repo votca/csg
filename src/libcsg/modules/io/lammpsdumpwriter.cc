@@ -55,9 +55,9 @@ void LAMMPSDumpWriter::Write(CSG_Topology *conf) {
   sort(bead_ids.begin(), bead_ids.end());
   for (const int bead_id : bead_ids) {
     Bead *bead = conf->getBead(bead_id);
-    string type = bead->getType();
+    int bead_type_id = conf->getBeadTypeId(bead_id);
 
-    fprintf(_out, "%i %s", bead->getId() + 1, type.c_str());
+    fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
     fprintf(_out, " %f %f %f", bead->getPos().getX(), bead->getPos().getY(),
             bead->getPos().getZ());
     if (v) {

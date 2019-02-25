@@ -297,7 +297,9 @@ class Topology {
   bool HasForce() { return has_force_; }
   void SetHasForce(const bool v) { has_force_ = v; }
 
-  int getBeadTypeId(int bead_id) const {}
+  int getBeadTypeId(int bead_id) const {
+    return type_container_.getBeadTypeId(beads_.at(bead_id).getType());
+  }
 
  protected:
   std::unique_ptr<BoundaryCondition> bc_;
