@@ -159,7 +159,7 @@ class Topology {
    * Copies everything but the interactions
    * \param top topology to copy from
    */
-  void CopyTopologyData(const Topology<Bead_T, Molecule_T> &top);
+  void CopyTopologyData(const TemplateTopology<Bead_T, Molecule_T> &top);
 
   /**
    *  \brief rename all the molecules in range
@@ -346,13 +346,13 @@ class Topology {
 
 template <class Bead_T, class Molecule_T>
 template <typename iteratable>
-void Topology<Bead_T, Molecule_T>::InsertExclusion(Bead_T *bead1,
-                                                   iteratable &l) {
+void TemplateTopology<Bead_T, Molecule_T>::InsertExclusion(Bead_T *bead1,
+                                                           iteratable &l) {
   exclusions_.InsertExclusion(bead1, l);
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::Cleanup() {
+void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 
   beads_.clear();
   molecules_.clear();
@@ -371,13 +371,13 @@ void Topology<Bead_T, Molecule_T>::Cleanup() {
 }
 
 template <class Bead_T, class Molecule_T>
-Topology<Bead_T, Molecule_T>::~Topology() {
+TemplateTopology<Bead_T, Molecule_T>::~Topology() {
   Cleanup();
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::CopyTopologyData(
-    const Topology<Bead_T, Molecule_T> &top) {
+void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
+    const TemplateTopology<Bead_T, Molecule_T> &top) {
   step_ = top.step_;
   time_ = top.time_;
   has_vel_ = top.has_vel_;
@@ -389,8 +389,8 @@ void Topology<Bead_T, Molecule_T>::CopyTopologyData(
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::setBox(const TOOLS::matrix &box,
-                                          BoundaryCondition::eBoxtype boxtype) {
+void TemplateTopology<Bead_T, Molecule_T>::setBox(
+    const TOOLS::matrix &box, BoundaryCondition::eBoxtype boxtype) {
   // determine box type automatically in case boxtype==typeAuto
   if (boxtype == BoundaryCondition::typeAuto) {
     boxtype = autoDetectBoxType_(box);
@@ -415,7 +415,7 @@ void Topology<Bead_T, Molecule_T>::setBox(const TOOLS::matrix &box,
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::RenameMoleculesType(
+void TemplateTopology<Bead_T, Molecule_T>::RenameMoleculesType(
     std::string range_molecule_ids, const std::string type) {
   TOOLS::RangeParser rp;
   TOOLS::RangeParser::iterator molecule_id_ptr;
@@ -432,8 +432,8 @@ void Topology<Bead_T, Molecule_T>::RenameMoleculesType(
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::RenameBeadsType(const std::string old_type,
-                                                   std::string new_type) {
+void TemplateTopology<Bead_T, Molecule_T>::RenameBeadsType(
+    const std::string old_type, std::string new_type) {
   for (pair<const int, Bead_T> &id_and_bead : beads_) {
     string bead_type = id_and_bead.second.getType();
     if (wildcmp(bead_type.c_str(), old_type.c_str())) {
@@ -443,8 +443,8 @@ void Topology<Bead_T, Molecule_T>::RenameBeadsType(const std::string old_type,
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::setBeadOfGivenTypeToNewMass(string type,
-                                                               double mass) {
+void TemplateTopology<Bead_T, Molecule_T>::setBeadOfGivenTypeToNewMass(
+    string type, double mass) {
 
   for (std::pair<const int, Bead_T> &id_and_bead : beads_) {
     std::string bead_type = id_and_bead.second.getType();
@@ -455,7 +455,7 @@ void Topology<Bead_T, Molecule_T>::setBeadOfGivenTypeToNewMass(string type,
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
+void TemplateTopology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
   std::unordered_map<std::string, size_t>
       number_of_beads_in_each_molecular_type;
 
@@ -476,14 +476,11 @@ void Topology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
 }
 
 /*template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
-  std::map<std::string, int>::iterator iter;
-  iter = interaction_groups_.find(ic->getGroup());
-  if (iter != interaction_groups_.end()) {
-    ic->setGroupId((*iter).second);
-  } else {
-    int group_size = interaction_groups_.size();
-    interaction_groups_[ic->getGroup()] = group_size;
+void TemplateTopology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic)
+{ std::map<std::string, int>::iterator iter; iter =
+interaction_groups_.find(ic->getGroup()); if (iter != interaction_groups_.end())
+{ ic->setGroupId((*iter).second); } else { int group_size =
+interaction_groups_.size(); interaction_groups_[ic->getGroup()] = group_size;
     ic->setGroupId(group_size);
   }
   interactions_.push_back(ic);
@@ -491,29 +488,31 @@ void Topology<Bead_T, Molecule_T>::AddBondedInteraction(Interaction *ic) {
 }*/
 
 template <class Bead_T, class Molecule_T>
-std::list<Interaction *> Topology<Bead_T, Molecule_T>::InteractionsInGroup(
-    const string &group) const {
+std::list<Interaction *>
+    TemplateTopology<Bead_T, Molecule_T>::InteractionsInGroup(
+        const string &group) const {
   auto iter = interactions_by_group_.find(group);
   if (iter == interactions_by_group_.end()) return std::list<Interaction *>();
   return iter->second;
 }
 
 template <class Bead_T, class Molecule_T>
-TOOLS::vec Topology<Bead_T, Molecule_T>::BCShortestConnection(
+TOOLS::vec TemplateTopology<Bead_T, Molecule_T>::BCShortestConnection(
     const TOOLS::vec &r_i, const TOOLS::vec &r_j) const {
   return bc_->BCShortestConnection(r_i, r_j);
 }
 
 template <class Bead_T, class Molecule_T>
-TOOLS::vec Topology<Bead_T, Molecule_T>::getDist(const int bead1,
-                                                 const int bead2) const {
+TOOLS::vec TemplateTopology<Bead_T, Molecule_T>::getDist(
+    const int bead1, const int bead2) const {
   return BCShortestConnection(getBead(bead1)->getPos(),
                               getBead(bead2)->getPos());
 }
 
 template <class Bead_T, class Molecule_T>
-BoundaryCondition::eBoxtype Topology<Bead_T, Molecule_T>::autoDetectBoxType_(
-    const TOOLS::matrix &box) const {
+BoundaryCondition::eBoxtype
+    TemplateTopology<Bead_T, Molecule_T>::autoDetectBoxType_(
+        const TOOLS::matrix &box) const {
   // set the box type to OpenBox in case "box" is the zero matrix,
   // to OrthorhombicBox in case "box" is a diagonal matrix,
   // or to TriclinicBox otherwise
@@ -531,7 +530,7 @@ BoundaryCondition::eBoxtype Topology<Bead_T, Molecule_T>::autoDetectBoxType_(
 }
 
 template <class Bead_T, class Molecule_T>
-double Topology<Bead_T, Molecule_T>::ShortestBoxSize() const {
+double TemplateTopology<Bead_T, Molecule_T>::ShortestBoxSize() const {
   TOOLS::vec _box_a = getBox().getCol(0);
   TOOLS::vec _box_b = getBox().getCol(1);
   TOOLS::vec _box_c = getBox().getCol(2);
@@ -553,7 +552,7 @@ double Topology<Bead_T, Molecule_T>::ShortestBoxSize() const {
 }
 
 template <class Bead_T, class Molecule_T>
-std::vector<int> Topology<Bead_T, Molecule_T>::getBeadIds() const {
+std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getBeadIds() const {
   vector<int> bead_ids;
   for (const std::pair<const int, Bead_T> id_and_bead : beads_) {
     bead_ids.push_back(id_and_bead.first);
@@ -562,7 +561,7 @@ std::vector<int> Topology<Bead_T, Molecule_T>::getBeadIds() const {
 }
 
 template <class Bead_T, class Molecule_T>
-std::vector<int> Topology<Bead_T, Molecule_T>::getMoleculeIds() const {
+std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getMoleculeIds() const {
   vector<int> molecule_ids;
   for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
     molecule_ids.push_back(id_and_molecule.first);
@@ -572,7 +571,7 @@ std::vector<int> Topology<Bead_T, Molecule_T>::getMoleculeIds() const {
 
 template <class Bead_T, class Molecule_T>
 std::map<int, std::string>
-    Topology<Bead_T, Molecule_T>::getResidueIdsAndTypesInMolecule(
+    TemplateTopology<Bead_T, Molecule_T>::getResidueIdsAndTypesInMolecule(
         int molecule_id) const {
 
   assert(molecules_.count(molecule_id) &&
@@ -587,7 +586,7 @@ std::map<int, std::string>
 }
 
 template <class Bead_T, class Molecule_T>
-void Topology<Bead_T, Molecule_T>::RebuildExclusions() {
+void TemplateTopology<Bead_T, Molecule_T>::RebuildExclusions() {
 
   vector<Bead *> beads;
   for (std::unique_ptr<Interaction> &interaction : interactions_) {

@@ -20,16 +20,16 @@
 
 #include <votca/tools/types.h>
 
-#include "basetopology.h"
 #include "bead.h"
 #include "molecule.h"
+#include "templatetopology.h"
 
 namespace votca {
 namespace csg {
 
 namespace TOOLS = votca::tools;
 
-class CSG_Topology : public Topology<Bead, Molecule> {
+class CSG_Topology : public TemplateTopology<Bead, Molecule> {
  public:
   ~CSG_Topology(){};
   Molecule* CreateMolecule(int id, std::string molecule_type) {
