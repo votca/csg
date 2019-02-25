@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BEAD_H
-#define _VOTCA_CSG_BEAD_H
+#ifndef VOTCA_CSG_BEAD_H
+#define VOTCA_CSG_BEAD_H
 
 #include <assert.h>
 #include <cassert>
@@ -39,9 +39,8 @@ class Molecule;
  * \brief information about a bead
  *
  * The Bead class describes an atom or a coarse grained bead. It stores
- * information like the id, the name, the mass, the
- * charge and the residue it belongs to. The coordinates are stored in the
- * configuration class.
+ * information like the id, the name, the mass, the charge and the residue it
+ * belongs to.
  *
  **/
 class Bead : public BaseBead {
@@ -56,6 +55,7 @@ class Bead : public BaseBead {
     throw std::runtime_error(
         "getResnr() is now depricated use getResidueId() instead");
   }
+
   /**
    * Get The residue number of the bead, not the residue number is not the same
    * as the molecule number. Residues are components of molecules.
@@ -63,6 +63,11 @@ class Bead : public BaseBead {
    */
   const int &getResidueId() const { return residue_id_; }
 
+  /**
+   * @brief Returns the residue type
+   *
+   * @return string indicating the type if unassigned will return `unassigned`
+   */
   std::string getResidueType() const { return residue_type_.getName(); }
 
   /**
@@ -356,8 +361,6 @@ class Bead : public BaseBead {
     bead_force_set_ = false;
   }
 
-  // void *_userdata;
-
   friend class CSG_Topology;
   friend class Molecule;
 };
@@ -426,4 +429,4 @@ inline void Bead::HasW(bool b) { bW_ = b; }
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_BEAD_H
+#endif  // VOTCA_CSG_BEAD_H
