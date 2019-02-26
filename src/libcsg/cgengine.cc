@@ -81,7 +81,7 @@ void CGEngine::LoadMoleculeType(string filename) {
     string file = *iter;
     boost::trim(file);
     mol_def->Load(file);
-    _molecule_defs[mol_def->getIdent()] = mol_def;
+    _molecule_defs[mol_def->getAtomisticType()] = mol_def;
   }
 }
 

@@ -10,7 +10,8 @@ foreach(PROG
   test_beadstructure_base
   test_beadstructure_algorithms
   test_bondedstatistics
-  test_csg_topology
+	test_cgmoleculedef
+	test_csg_topology
   test_interaction
   test_lammpsdatareader 
   test_lammpsdumpreaderwriter

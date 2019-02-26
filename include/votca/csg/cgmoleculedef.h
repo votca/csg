@@ -50,8 +50,8 @@ class CGMoleculeDef {
 
   void Load(std::string filename);
 
-  const std::string &getType() { return cg_molecule_type_; }
-  const std::string &getIdent() { return ident_; }
+  const std::string &getCGType() { return cg_molecule_type_; }
+  const std::string &getAtomisticType() { return atomistic_molecule_type_; }
 
  private:
   Property options_;
@@ -68,7 +68,7 @@ class CGMoleculeDef {
   // type of the coarse grained molecule
   std::string cg_molecule_type_;
   // name of the molecule to coarse grain
-  std::string ident_;
+  std::string atomistic_molecule_type_;
 
   // beads of the cg molecule
   std::vector<beaddef_t *> beads_;

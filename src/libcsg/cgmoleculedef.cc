@@ -61,7 +61,7 @@ void CGMoleculeDef::Load(string filename) {
   load_property_from_xml(options_, filename);
   // parse xml tree
   cg_molecule_type_ = options_.get("cg_molecule.name").as<string>();
-  ident_ = options_.get("cg_molecule.ident").as<string>();
+  atomistic_molecule_type_ = options_.get("cg_molecule.ident").as<string>();
 
   ParseTopology(options_.get("cg_molecule.topology"));
   ParseMapping(options_.get("cg_molecule.maps"));
