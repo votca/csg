@@ -150,7 +150,7 @@ void CGForceMatching::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   _x = Eigen::VectorXd::Zero(_col_cntr);
 
   if (_has_existing_forces) {
-    _top_force.CopyTopologyData(*top);
+    _top_force.Copy(*top);
     _trjreader_force =
         TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
     if (_trjreader_force == NULL)

@@ -179,10 +179,11 @@ class TemplateTopology {
   /**
    * \brief copy topology data of different topology
    *
-   * Copies everything but the interactions
+   * Copies everything, such that everything in the topology object is a clope
+   * of **top**, it will have ownership of all its attributes.
    * \param top topology to copy from
    */
-  void CopyTopologyData(const TemplateTopology<Bead_T, Molecule_T> &top);
+  void Copy(const TemplateTopology<Bead_T, Molecule_T> &top);
 
   void CopyBoundaryConditions(const TemplateTopology<Bead_T, Molecule_T> &top);
   /**
@@ -453,7 +454,7 @@ void TemplateTopology<Bead_T, Molecule_T>::CopyBoundaryConditions(
 }
 
 template <class Bead_T, class Molecule_T>
-void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
+void TemplateTopology<Bead_T, Molecule_T>::Copy(
     const TemplateTopology<Bead_T, Molecule_T> &top) {
   step_ = top.step_;
   time_ = top.time_;
@@ -468,12 +469,20 @@ void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
   for (const std::unique_ptr<Interaction> &interaction : top.interactions_) {
     interactions_.push_back(interaction->Clone());
   }
-  /*
-    ExclusionList exclusions_;
 
-    std::map<std::string, int> interaction_groups_;
+  interaction_groups_ = top.interaction_groups_;
 
-    std::map<std::string, std::list<Interaction *>> interactions_by_group_;*/
+  for (const std::pair<std::string, std::list<Interaction *>>
+           &interaction_name_and_list : top.interactions_by_group_) {
+    string interaction_name = interaction_name_and_list.first;
+    for (const Interaction *interaction : interaction_name_and_list.second) {
+      int index_of_interaction = interaction->getIndex();
+      interactions_by_group_[interaction_name].push_back(
+          interactions_[index_of_interaction].get());
+    }
+  }
+
+  RebuildExclusions();
 }
 
 template <class Bead_T, class Molecule_T>

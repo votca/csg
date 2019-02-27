@@ -79,7 +79,7 @@ class CsgMapApp : public CsgApplication {
     } else {
       // we want to combine atomistic and coarse-grained into one topology
       CSG_Topology *hybtol = new CSG_Topology();
-      hybtol->CopyTopologyData(*top);
+      hybtol->Copy(*top);
       /*MoleculeContainer::iterator it_mol;
 
       hybtol->setBox(top->getBox());
