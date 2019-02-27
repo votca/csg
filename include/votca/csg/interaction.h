@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_INTERACTION_H
-#define _VOTCA_CSG_INTERACTION_H
+#ifndef VOTCA_CSG_INTERACTION_H
+#define VOTCA_CSG_INTERACTION_H
 
 #include "bead.h"
 #include "boundarycondition.h"
@@ -26,61 +26,59 @@
 #include <string>
 #include <vector>
 
+#include <votca/tools/constants.h>
 namespace TOOLS = votca::tools;
 
 namespace votca {
 namespace csg {
 
+enum InteractionType { unassigned, bond, angle, dihedral };
+
+std::string InteractionTypeToString(const InteractionType interaction_type);
 /**
-    \brief base calss for all interactions
+\brief base calss for all interactions
 
-    This is the base class for all interactions.
+This is the base class for all interactions.
 
-    \todo double names/groups right, add molecules!!
+\todo double names/groups right, add molecules!!
 */
 class Interaction {
  public:
   Interaction()
-      : _index(-1), _group(""), _group_id(-1), _name(""), mol_id_(-1){};
+      : index_(-1),
+        group_(""),
+        group_id_(-1),
+        interaction_type_(InteractionType::unassigned),
+        mol_id_(TOOLS::topology_constants::unassigned_molecule_id){};
 
   virtual ~Interaction() {}
   virtual double EvaluateVar(const BoundaryCondition &bc) = 0;
 
-  std::string getName() const { return _name; }
+  InteractionType getType() const { return interaction_type_; }
 
-  void setGroup(const std::string &group) {
-    _group = group;
-    RebuildName();
-  }
+  void setGroup(const std::string &group) { group_ = group; }
   const std::string &getGroup() const {
-    assert(_group.compare("") != 0);
-    return _group;
+    assert(group_.compare("") != 0);
+    return group_;
   }
 
-  int getGroupId() {
-    assert(_group_id != -1);
-    return _group_id;
+  int getGroupId() const {
+    assert(group_id_ != -1 && "Cannot access group id as it has not been set");
+    return group_id_;
   }
-  void setGroupId(int id) {
-    _group_id = id;
-    RebuildName();
-  }
+  void setGroupId(int id) { group_id_ = id; }
 
-  void setIndex(const int &index) {
-    _index = index;
-    RebuildName();
-  }
+  void setIndex(const int &index) { index_ = index; }
   const int &getIndex() const {
-    assert(_index != -1);
-    return _index;
+    assert(index_ != -1 &&
+           "Cannot access interaction index as it has not been set");
+    return index_;
   }
 
-  void setMoleculeId(const int &mol_id) {
-    mol_id_ = mol_id;
-    RebuildName();
-  }
+  void setMoleculeId(const int &mol_id) { mol_id_ = mol_id; }
   const int &getMolecule() const {
-    assert(mol_id_ != -1);
+    assert(mol_id_ != TOOLS::topology_constants::unassigned_molecule_id &&
+           "Cannot access interaction molecule id as it has not been set");
     return mol_id_;
   }
 
@@ -96,7 +94,8 @@ class Interaction {
    */
   int getBeadId(const int &bead_index) const {
     assert(bead_index > -1 &&
-           boost::lexical_cast<size_t>(bead_index) < beads_.size());
+           boost::lexical_cast<size_t>(bead_index) < beads_.size() &&
+           "Cannot access interaction bead id as it has not been set");
     return beads_[bead_index]->getId();
   }
 
@@ -108,31 +107,28 @@ class Interaction {
     return bead_ids;
   }
 
-  enum interaction_type { bond, angle, dihedral };
+  /**
+   * @brief Label returns a comprehensive descrition of the interaction
+   *
+   * The returned string is of the following form:
+   * molecule id id:group name name:group id id:interaction type type:index
+   * index
+   *
+   * So it might look like this
+   * molcule id 1:group name Non-Bonded:group id 2:interaction type angle:index
+   * 12
+   * @return
+   */
+  std::string getLabel() const;
 
  protected:
-  int _index;
-  std::string _group;
-  int _group_id;
-  std::string _name;
+  int index_;
+  std::string group_;
+  int group_id_;
+  InteractionType interaction_type_;
   int mol_id_;
   std::vector<const BaseBead *> beads_;
-
-  void RebuildName();
 };
-
-inline void Interaction::RebuildName() {
-  std::stringstream s;
-  if (mol_id_ != -1) s << "molecule " << mol_id_;
-  if (!_group.empty()) {
-    s << ":" << _group;
-    if (_group_id != -1) {
-      s << " " << _group_id;
-    }
-  }
-  if (_index != -1) s << ":index " << _index;
-  _name = s.str();
-}
 
 /**
     \brief bond interaction
@@ -161,6 +157,7 @@ class IBond : public Interaction {
   IBond(std::vector<const BaseBead *> beads) {
     assert(beads.size() == 2 && "IBond must be called with 2 beads.");
     beads_ = beads;
+    interaction_type_ = InteractionType::bond;
   }
   friend class CSG_Topology;
 };
@@ -194,6 +191,7 @@ class IAngle : public Interaction {
     assert(beads.size() == 3 &&
            "Cannot create an IAngle with more or less than 3 beads.");
     beads_ = beads;
+    interaction_type_ = InteractionType::angle;
   }
   friend class CSG_Topology;
 };
@@ -228,6 +226,7 @@ class IDihedral : public Interaction {
     assert(beads.size() == 4 &&
            "Cannot create a Dihedral with more or less than three beads");
     beads_ = beads;
+    interaction_type_ = InteractionType::dihedral;
   }
   friend class CSG_Topology;
 };
@@ -284,7 +283,6 @@ inline TOOLS::vec IAngle::Grad(const BoundaryCondition &bc, int bead) {
   assert(false);
   return TOOLS::vec(0, 0, 0);
 }
-
 inline double IDihedral::EvaluateVar(const BoundaryCondition &bc) {
   TOOLS::vec v1(
       bc.BCShortestConnection(beads_[0]->getPos(), beads_[1]->getPos()));
@@ -423,4 +421,4 @@ inline TOOLS::vec IDihedral::Grad(const BoundaryCondition &bc, int bead) {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_INTERACTION_H
+#endif  // VOTCA_CSG_INTERACTION_H

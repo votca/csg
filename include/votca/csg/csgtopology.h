@@ -67,9 +67,9 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     return &beads_.at(bead_id);
   }
 
-  Interaction* CreateInteraction(Interaction::interaction_type type,
-                                 std::string group, int bond_id,
-                                 int molecule_id, std::vector<int> bead_ids) {
+  Interaction* CreateInteraction(InteractionType type, std::string group,
+                                 int bond_id, int molecule_id,
+                                 std::vector<int> bead_ids) {
     assert(beads_.size() > 0 &&
            "Cannot create interactions before beads have been initialized");
 
@@ -82,11 +82,11 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
       beads.push_back(&beads_.at(bead_id));
     }
 
-    if (type == Interaction::bond) {
+    if (type == InteractionType::bond) {
       interactions_.push_back(std::unique_ptr<IBond>(new IBond(beads)));
-    } else if (type == Interaction::angle) {
+    } else if (type == InteractionType::angle) {
       interactions_.push_back(std::unique_ptr<IAngle>(new IAngle(beads)));
-    } else if (type == Interaction::dihedral) {
+    } else if (type == InteractionType::dihedral) {
       interactions_.push_back(std::unique_ptr<IDihedral>(new IDihedral(beads)));
     } else {
       assert(!"Interaction type is not recognized");

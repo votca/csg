@@ -16,6 +16,7 @@
  */
 
 #include "bondedstatistics.h"
+#include "../../include/votca/csg/interaction.h"
 
 using namespace votca::tools;
 
@@ -29,7 +30,7 @@ void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
 
   _bonded_values.clear();
   for (ia = interactions.begin(); ia != interactions.end(); ++ia) {
-    _bonded_values.CreateArray((*ia)->getName());
+    _bonded_values.CreateArray((*ia)->getLabel());
   }
 }
 

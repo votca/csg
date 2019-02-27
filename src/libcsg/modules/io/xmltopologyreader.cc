@@ -313,9 +313,9 @@ void XMLTopologyReader::ParseBond(Property &p) {
         XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         // ic = new IBond(xmlBead1.pid, xmlBead2.pid);
-        ic = _top->CreateInteraction(
-            Interaction::interaction_type::bond, interaction_group, bond_index,
-            xmlMolecule.pid, vector<int>{xmlBead1.pid, xmlBead2.pid});
+        ic = _top->CreateInteraction(InteractionType::bond, interaction_group,
+                                     bond_index, xmlMolecule.pid,
+                                     vector<int>{xmlBead1.pid, xmlBead2.pid});
         // ic->setGroup(interaction_group);
         // ic->setIndex(bond_index);
         // ic->setMoleculeId(xmlMolecule.pid);
@@ -357,7 +357,7 @@ void XMLTopologyReader::ParseAngle(Property &p) {
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
         ic = _top->CreateInteraction(
-            Interaction::interaction_type::angle, interaction_group, bond_index,
+            InteractionType::angle, interaction_group, bond_index,
             xmlMolecule.pid,
             vector<int>{xmlBead1.pid, xmlBead2.pid, xmlBead3.pid});
         // ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
@@ -404,7 +404,7 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = *xmlMolecule.name2beads[b3.atom_type_];
         XMLBead &xmlBead4 = *xmlMolecule.name2beads[b4.atom_type_];
-        ic = _top->CreateInteraction(Interaction::interaction_type::dihedral,
+        ic = _top->CreateInteraction(InteractionType::dihedral,
                                      interaction_group, bond_index,
                                      xmlMolecule.pid,
                                      vector<int>{xmlBead1.pid, xmlBead2.pid,

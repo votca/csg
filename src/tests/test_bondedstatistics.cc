@@ -61,23 +61,22 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
   string interaction_group = "covalent_bond1";
   int bond_id = 0;
   int group_id = 3;
-  string interaction_group_compare = "molecule " + to_string(molecule_id) +
-                                     ":covalent_bond1 " + to_string(group_id) +
-                                     ":index " + to_string(bond_id);
-  auto bond1 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     interaction_group, bond_id, molecule_id,
-                                     vector<int>{0, 1});
+  string interaction_group_compare = "molecule id " + to_string(molecule_id) +
+                                     ":group name covalent_bond1:group id " +
+                                     to_string(group_id) + ":index " +
+                                     to_string(bond_id);
+  auto bond1 = top.CreateInteraction(InteractionType::bond, interaction_group,
+                                     bond_id, molecule_id, vector<int>{0, 1});
   bond1->setGroupId(group_id);
   // bond1->setGroup(interaction_group);
 
   ++bond_id;
   string interaction_group2 = "covalent_bond2";
-  string interaction_group_compare2 = "molecule " + to_string(molecule_id) +
-                                      ":covalent_bond2 " + to_string(group_id) +
-                                      ":index " + to_string(bond_id);
-  auto bond2 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     interaction_group2, bond_id, molecule_id,
-                                     vector<int>{1, 2});
+  string interaction_group_compare2 =
+      "molecule id " + to_string(molecule_id) + ":group name covalent_bond2" +
+      ":group id " + to_string(group_id) + ":index " + to_string(bond_id);
+  auto bond2 = top.CreateInteraction(InteractionType::bond, interaction_group2,
+                                     bond_id, molecule_id, vector<int>{1, 2});
   bond2->setGroupId(group_id);
   // bond2->setGroup(interaction_group2);
 
@@ -165,15 +164,14 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     string interaction_group = "covalent_bond1";
     // auto bond1 = new IBond(0, 1);
     int bond_id = 0;
-    auto bond1 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                       interaction_group, bond_id, molecule_id,
-                                       vector<int>{0, 1});
+    auto bond1 = top.CreateInteraction(InteractionType::bond, interaction_group,
+                                       bond_id, molecule_id, vector<int>{0, 1});
     // bond1->setGroup(interaction_group);
     ++bond_id;
     string interaction_group2 = "covalent_bond2";
-    auto bond2 = top.CreateInteraction(Interaction::interaction_type::bond,
-                                       interaction_group2, bond_id, molecule_id,
-                                       vector<int>{1, 2});
+    auto bond2 =
+        top.CreateInteraction(InteractionType::bond, interaction_group2,
+                              bond_id, molecule_id, vector<int>{1, 2});
     // bond2->setGroup(interaction_group2);
 
     // top.AddBondedInteraction(bond1);

@@ -155,16 +155,16 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   // Create two bonded interactions
   int bond_id = 0;
   string interaction_group = "BONDS";
-  Interaction* bond1 = top.CreateInteraction(
-      Interaction::interaction_type::bond, interaction_group, bond_id,
-      molecule_id, vector<int>{0, 1});
+  Interaction* bond1 =
+      top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+                            molecule_id, vector<int>{0, 1});
 
   ++bond_id;
   // bond1->setGroup(interaction_group);
   // auto bond2 = new IBond(1, 2);
-  Interaction* bond2 = top.CreateInteraction(
-      Interaction::interaction_type::bond, interaction_group, bond_id,
-      molecule_id, vector<int>{1, 2});
+  Interaction* bond2 =
+      top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+                            molecule_id, vector<int>{1, 2});
   // bond2->setGroup(interaction_group);
 
   // top.AddBondedInteraction(bond1);
@@ -174,8 +174,12 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
       top.BondedInteractions();
   BOOST_CHECK_EQUAL(interaction_container.size(), 2);
 
-  cout << "interaction name " << interaction_container.at(0)->getName() << endl;
-  cout << "interaction name " << interaction_container.at(1)->getName() << endl;
+  cout << "interaction name "
+       << InteractionTypeToString(interaction_container.at(0)->getType())
+       << endl;
+  cout << "interaction name "
+       << InteractionTypeToString(interaction_container.at(1)->getType())
+       << endl;
   BOOST_CHECK_EQUAL(interaction_container.at(0)->getBeadId(0), 0);
   BOOST_CHECK_EQUAL(interaction_container.at(0)->getBeadId(1), 1);
   BOOST_CHECK_EQUAL(interaction_container.at(1)->getBeadId(0), 1);

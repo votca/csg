@@ -74,7 +74,6 @@ BOOST_AUTO_TEST_CASE(test_command) {
   CSG_Topology top;
   BondedStatistics bonded_statistics;
   string interaction_group = "interaction";
-  string interaction_group_name = ":interaction";
   vector<string> interactions;
   interactions.push_back("file_interactions.txt");
   // Setup BondedStatistics Object
@@ -144,19 +143,20 @@ BOOST_AUTO_TEST_CASE(test_command) {
         interaction_group2 += to_string(index) + "_" + to_string(index2);
         cout << interaction_group2 << endl;
         auto bond = top.CreateInteraction(
-            Interaction::interaction_type::bond, interaction_group2,
-            interaction_id, molecule_id, vector<int>{index, index2});
+            InteractionType::bond, interaction_group2, interaction_id,
+            molecule_id, vector<int>{index, index2});
         // bond->setGroup(interaction_group + to_string(index) + "_" +
         //               to_string(index2));
         // top.AddBondedInteraction(bond);
-        interactions.push_back("molecule " + to_string(molecule_id) +
-                               interaction_group_name + to_string(index) + "_" +
-                               to_string(index2) + " " +
-                               to_string(bond->getGroupId()) + ":index " +
-                               to_string(interaction_id));
+        interactions.push_back("molecule id " + to_string(molecule_id) +
+                               ":group name " + interaction_group +
+                               to_string(index) + "_" + to_string(index2) +
+                               ":group id " + to_string(bond->getGroupId()) +
+                               ":index " + to_string(interaction_id));
         //        ++interaction_id;
         cout << "bond index " << bond->getIndex() << " " << bond->getGroup()
-             << " " << bond->getGroupId() << " " << bond->getName() << endl;
+             << " " << bond->getGroupId() << " "
+             << InteractionTypeToString(bond->getType()) << endl;
       }
     }
 

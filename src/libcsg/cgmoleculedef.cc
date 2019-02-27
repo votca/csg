@@ -155,7 +155,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
         //    ++atom) {
         cout << "Atom " << *atom << endl;
         //			unordered_set<int> bead_ids =
-        //minfo->getBeadIdsByType(*atom);
+        // minfo->getBeadIdsByType(*atom);
         //      assert(bead_ids.size() == 1 &&
         /*             "There is more than one bead with that type if you want a
            unique " "identifier you should probably just use the beads global
@@ -193,14 +193,14 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
         Interaction *ic;
         cout << "While atoms not empty" << endl;
         if ((*ibnd)->name() == "bond") {
-          ic = top.CreateInteraction(Interaction::interaction_type::bond,
-                                     iagroup, index, minfo->getId(), atoms);
+          ic = top.CreateInteraction(InteractionType::bond, iagroup, index,
+                                     minfo->getId(), atoms);
         } else if ((*ibnd)->name() == "angle") {
-          ic = top.CreateInteraction(Interaction::interaction_type::angle,
-                                     iagroup, index, minfo->getId(), atoms);
+          ic = top.CreateInteraction(InteractionType::angle, iagroup, index,
+                                     minfo->getId(), atoms);
         } else if ((*ibnd)->name() == "dihedral") {
-          ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
-                                     iagroup, index, minfo->getId(), atoms);
+          ic = top.CreateInteraction(InteractionType::dihedral, iagroup, index,
+                                     minfo->getId(), atoms);
         } else {
           throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
         }

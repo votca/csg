@@ -597,7 +597,7 @@ void LAMMPSDataReader::ReadBonds_(CSG_Topology &top) {
       Molecule *mi = top.getMolecule(b->getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
-          Interaction::interaction_type::bond, "BONDS", bondId, mi->getId(),
+          InteractionType::bond, "BONDS", bondId, mi->getId(),
           vector<int>{atom1Index, atom2Index});
       // ic->setGroup("BONDS");
       // ic->setIndex(bondId);
@@ -657,7 +657,7 @@ void LAMMPSDataReader::ReadAngles_(CSG_Topology &top) {
       Molecule *mi = top.getMolecule(b->getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
-          Interaction::interaction_type::angle, "ANGLES", angleId, mi->getId(),
+          InteractionType::angle, "ANGLES", angleId, mi->getId(),
           vector<int>{atom1Index, atom2Index, atom3Index});
       // ic->setGroup("ANGLES");
       // ic->setIndex(angleId);
@@ -720,8 +720,7 @@ void LAMMPSDataReader::ReadDihedrals_(CSG_Topology &top) {
       Bead *b = top.getBead(atom1Index);
       Molecule *mi = top.getMolecule(b->getMoleculeId());
       Interaction *ic = top.CreateInteraction(
-          Interaction::interaction_type::dihedral, "DIHEDRALS", dihedralId,
-          mi->getId(),
+          InteractionType::dihedral, "DIHEDRALS", dihedralId, mi->getId(),
           vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});
       // ic->setGroup("DIHEDRALS");
       // ic->setIndex(dihedralId);
