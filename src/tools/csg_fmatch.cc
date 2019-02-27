@@ -586,15 +586,20 @@ void CGForceMatching::EvalBonded(CSG_Topology *conf, SplineInfo *sinfo) {
 
     int &mpos = sinfo->matr_pos;
 
-    double var = (*interListIter)
-                     ->EvaluateVar(*(
-                         conf->getBoundaryCondition()));  // value of bond,
-                                                          // angle, or dihedral
+    vector<int> bead_ids = (*interListIter)->getBeadIds();
+    unordered_map<int, const vec *> bead_ids_and_positions =
+        conf->getBeadPositions(bead_ids);
+    double var =
+        (*interListIter)
+            ->EvaluateVar(*(conf->getBoundaryCondition()),
+                          bead_ids_and_positions);  // value of bond,
+                                                    // angle, or dihedral
 
     for (int loop = 0; loop < beads_in_int; loop++) {
       int ii = (*interListIter)->getBeadId(loop);
-      vec gradient =
-          (*interListIter)->Grad(*(conf->getBoundaryCondition()), loop);
+      vec gradient = (*interListIter)
+                         ->Grad(*(conf->getBoundaryCondition()), loop,
+                                bead_ids_and_positions);
 
       SP.AddToFitMatrix(_A, var,
                         _least_sq_offset + 3 * _nbeads * _frame_counter + ii,

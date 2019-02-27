@@ -120,6 +120,14 @@ class TemplateTopology {
     return &beads_.at(id);
   }
 
+  std::unordered_map<int, const TOOLS::vec *> getBeadPositions(
+      std::vector<int> bead_ids) const {
+    std::unordered_map<int, const TOOLS::vec *> bead_id_and_positions;
+    for (int &bead_id : bead_ids) {
+      bead_id_and_positions[bead_id] = &(beads_.at(bead_id).getPos());
+    }
+    return bead_id_and_positions;
+  }
   /**
    * \brief Returns a constant pointer to the bead with index i
    *
@@ -456,6 +464,16 @@ void TemplateTopology<Bead_T, Molecule_T>::CopyTopologyData(
   bc_ = top.bc_->clone();
   type_container_ = top.type_container_;
   particle_group_ = top.particle_group_;
+
+  for (const std::unique_ptr<Interaction> &interaction : top.interactions_) {
+    interactions_.push_back(interaction->Clone());
+  }
+  /*
+    ExclusionList exclusions_;
+
+    std::map<std::string, int> interaction_groups_;
+
+    std::map<std::string, std::list<Interaction *>> interactions_by_group_;*/
 }
 
 template <class Bead_T, class Molecule_T>

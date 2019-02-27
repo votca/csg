@@ -45,7 +45,11 @@ void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
   DataCollection<double>::container::iterator is;
   for (ia = interactions.begin(), is = _bonded_values.begin();
        ia != interactions.end(); ++ia, ++is) {
-    double value = (*ia)->EvaluateVar(*(conf->getBoundaryCondition()));
+    vector<int> bead_ids = (*ia)->getBeadIds();
+    unordered_map<int, const TOOLS::vec *> bead_positions =
+        conf->getBeadPositions(bead_ids);
+    double value =
+        (*ia)->EvaluateVar(*(conf->getBoundaryCondition()), bead_positions);
     cout << value << endl;
     (*is)->push_back(value);
   }

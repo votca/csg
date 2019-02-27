@@ -433,7 +433,11 @@ void Imc::Worker::DoBonded(CSG_Topology *top) {
     std::list<Interaction *>::iterator ic_iter;
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
-      double v = ic->EvaluateVar(*(top->getBoundaryCondition()));
+      vector<int> bead_ids = ic->getBeadIds();
+      unordered_map<int, const vec *> bead_ids_and_positions =
+          top->getBeadPositions(bead_ids);
+      double v = ic->EvaluateVar(*(top->getBoundaryCondition()),
+                                 bead_ids_and_positions);
       _current_hists[i._index].Process(v);
     }
   }
