@@ -215,6 +215,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 #endif
 
       // read molecule
+      Elements elements;
       int id_map[natoms];
       for (int i = 0; i < natoms;) {  // i is altered in repeater loop
         stringstream sl(_NextKeyline(fl, WhiteSpace));
@@ -226,7 +227,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
         string beadtype;
         sl >> beadtype;
 
-        Elements elements;
         string element;
         if (elements.isEleShort(beadtype)) {
           element = beadtype;

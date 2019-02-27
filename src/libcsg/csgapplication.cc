@@ -219,6 +219,8 @@ void CsgApplication::Run(void) {
   // read in the topology for master
   //////////////////////////////////////////////////
   reader->ReadTopology(_op_vm["top"].as<string>(), master->_top);
+  delete reader;
+
   cout << "I have " << master->_top.BeadCount() << " beads in "
        << master->_top.MoleculeCount() << " molecules" << endl;
   master->_top.CheckMoleculeNaming();
@@ -309,7 +311,8 @@ void CsgApplication::Run(void) {
 
       // this will be changed to CopyTopologyData
       // read in the topology
-      reader->ReadTopology(_op_vm["top"].as<string>(), myWorker->_top);
+      // reader->ReadTopology(_op_vm["top"].as<string>(), myWorker->_top);
+      myWorker->_top.Copy(master->_top);
       myWorker->_top.CheckMoleculeNaming();
 
       if (_do_mapping) {
@@ -402,10 +405,8 @@ void CsgApplication::Run(void) {
     _threadsMutexesOut.clear();
     _traj_reader->Close();
 
-    delete _traj_reader;
+    // delete _traj_reader;
   }
-
-  delete reader;
 }
 
 CsgApplication::Worker::~Worker() {
