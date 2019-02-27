@@ -27,6 +27,7 @@ namespace votca {
 namespace csg {
 using namespace votca::tools;
 
+class BoundaryCondition;
 class BeadMap;
 /*******************************************************
     Mapper class, collection of maps
@@ -53,22 +54,22 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply() = 0;
-  virtual void Initialize(const CSG_Topology *topology_parent,
+  virtual void Initialize(const BoundaryCondition *boundaries,
                           const Molecule *mol_in, Bead *bead_out,
                           Property *opts_map, Property *opts_bead);
 
  protected:
-  const CSG_Topology *topology_parent_;
+  const BoundaryCondition *boundaries_;
   const Molecule *mol_in_;
   Bead *bead_out_;
   Property *opts_map_;
   Property *opts_bead_;
 };
 
-inline void BeadMap::Initialize(const CSG_Topology *topology_parent,
+inline void BeadMap::Initialize(const BoundaryCondition *boundaries,
                                 const Molecule *mol_in, Bead *bead_out,
                                 Property *opts_bead, Property *opts_map) {
-  topology_parent_ = topology_parent;
+  boundaries_ = boundaries;
   mol_in_ = mol_in;
   bead_out_ = bead_out;
   opts_map_ = opts_map;
@@ -83,7 +84,7 @@ class Map_Sphere : public BeadMap {
   Map_Sphere() {}
   void Apply();
 
-  void Initialize(const CSG_Topology *topology_parent, const Molecule *mol_in,
+  void Initialize(const BoundaryCondition *boundaries, const Molecule *mol_in,
                   Bead *bead_out, Property *opts_bead, Property *opts_map);
 
  protected:

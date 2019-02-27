@@ -176,6 +176,7 @@ class TemplateTopology {
    */
   void CopyTopologyData(const TemplateTopology<Bead_T, Molecule_T> &top);
 
+  void CopyBoundaryConditions(const TemplateTopology<Bead_T, Molecule_T> &top);
   /**
    *  \brief rename all the molecules in range
    * \param range range string of type 1:2:10 = 1, 3, 5, 7, ...
@@ -435,6 +436,12 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 template <class Bead_T, class Molecule_T>
 TemplateTopology<Bead_T, Molecule_T>::~TemplateTopology() {
   Cleanup();
+}
+
+template <class Bead_T, class Molecule_T>
+void TemplateTopology<Bead_T, Molecule_T>::CopyBoundaryConditions(
+    const TemplateTopology<Bead_T, Molecule_T> &top) {
+  bc_ = top.bc_->clone();
 }
 
 template <class Bead_T, class Molecule_T>

@@ -237,24 +237,14 @@ void CsgApplication::Run(void) {
         if (str.length() > 0) cg.AddIgnore(str);
       }
     }
-
-    master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
-
-    cout << "I have " << master->_top_cg.BeadCount() << " beads in "
-         << master->_top_cg.MoleculeCount()
-         << " molecules for the coarsegraining" << endl;
-    master->_map->Apply();
-    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
-  } else if (!EvaluateTopology(&master->_top))
-    return;
-
+  }
   //////////////////////////////////////////////////
   // Here trajectory parsing starts
   //////////////////////////////////////////////////
+  double begin = 0;
+  int first_frame;
+  bool has_begin = false;
   if (DoTrajectory() && _op_vm.count("trj")) {
-    double begin = 0;
-    int first_frame;
-    bool has_begin = false;
 
     if (_op_vm.count("begin")) {
       has_begin = true;
@@ -270,12 +260,44 @@ void CsgApplication::Run(void) {
 
     // create reader for trajectory
     _traj_reader = TrjReaderFactory().Create(_op_vm["trj"].as<string>());
-    if (_traj_reader == NULL)
+    if (_traj_reader == NULL) {
       throw runtime_error(string("input format not supported: ") +
                           _op_vm["trj"].as<string>());
+    }
     // open the trajectory
     _traj_reader->Open(_op_vm["trj"].as<string>());
+  }
 
+  //////////////////////////////////////////////////
+  // Consolidate differences between first trajectory files and topology file
+  /////////////////verbose/////////////////////////////////
+  // Note that the trajectory files will contain the boundary information
+  // which may otherwise not be stored in the _top object
+  _traj_reader->FirstFrame(master->_top);
+  master->_top_cg.CopyBoundaryConditions(master->_top);
+
+  if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
+    cout << "NOTE: You are using OpenBox boundary conditions. Check if this "
+            "is intended.\n"
+         << endl;
+  }
+
+  if (_do_mapping) {
+    // Now that the _top object boundaries are consistent with the trajectory
+    // files it is possible to create the CG topology.
+    cout << "Calling CreateCGTopology" << endl;
+    master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
+
+    cout << "I have " << master->_top_cg.BeadCount() << " beads in "
+         << master->_top_cg.MoleculeCount()
+         << " molecules for the coarsegraining" << endl;
+    master->_map->Apply();
+    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
+  } else if (!EvaluateTopology(&master->_top)) {
+    return;
+  }
+
+  if (DoTrajectory() && _op_vm.count("trj")) {
     //////////////////////////////////////////////////
     // Create all the workers
     /////////////////verbose/////////////////////////////////
@@ -300,12 +322,6 @@ void CsgApplication::Run(void) {
     // Proceed to first frame of interest
     //////////////////////////////////////////////////
 
-    _traj_reader->FirstFrame(master->_top);
-    if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
-      cout << "NOTE: You are using OpenBox boundary conditions. Check if this "
-              "is intended.\n"
-           << endl;
-    }
     // seek first frame, let thread0 do that
     bool bok;
     for (bok = true; bok == true; bok = _traj_reader->NextFrame(master->_top)) {

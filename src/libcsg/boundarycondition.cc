@@ -31,6 +31,9 @@ double BoundaryCondition::BoxVolume() const {
 }
 
 double BoundaryCondition::getShortestBoxDimension() const {
+  cout << "Getting box columns" << endl;
+  assert(getBoxType() != eBoxtype::typeOpen &&
+         "Cannot get the shortest dimension of the box because it is open");
   TOOLS::vec _box_a = box_.getCol(0);
   TOOLS::vec _box_b = box_.getCol(1);
   TOOLS::vec _box_c = box_.getCol(2);

@@ -42,6 +42,8 @@ CGEngine::~CGEngine() {
 TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
                                         CSG_Topology &top_out) {
 
+  assert(top_in.getBoxType() == top_out.getBoxType() &&
+         "box types of topology in and out differ");
   // Grab all the molecules
   const unordered_map<int, Molecule> &mols = top_in.Molecules();
   // Setup which topology is being added to (top_out) and which topology is
@@ -65,7 +67,7 @@ TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
       continue;
     }
     Molecule *mcg = mol_def->CreateMolecule(top_out);
-    Map *map = mol_def->CreateMap(&top_in, *mol_in, *mcg);
+    Map *map = mol_def->CreateMap(top_in.getBoundaryCondition(), *mol_in, *mcg);
     topology_map->AddMoleculeMap(map);
   }
   top_out.RebuildExclusions();

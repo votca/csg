@@ -15,12 +15,12 @@
  *
  */
 
+#include "../../include/votca/csg/boundarycondition.h"
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <numeric>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/csgtopology.h>
 #include <votca/csg/map.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
@@ -47,11 +47,11 @@ void Map::Apply() {
   }
 }
 
-void Map_Sphere::Initialize(const CSG_Topology *topology_parent_,
+void Map_Sphere::Initialize(const BoundaryCondition *boundaries,
                             const Molecule *mol_in, Bead *bead_out,
                             Property *opts_bead, Property *opts_map) {
 
-  BeadMap::Initialize(topology_parent_, mol_in, bead_out, opts_bead, opts_map);
+  BeadMap::Initialize(boundaries, mol_in, bead_out, opts_bead, opts_map);
 
   vector<string> beads;
   vector<double> weights;
@@ -149,8 +149,8 @@ void Map_Sphere::Apply() {
   bead_out_->ClearParentBeads();
 
   // the following is needed for pbc treatment
-  // CSG_Topology *top = bead_out_->getParent();
-  double max_dist = 0.5 * topology_parent_->getShortestBoxDimension();
+  // BoundaryCondition *top = bead_out_->getParent();
+  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
   vec r0 = vec(0, 0, 0);
   string name0;
   int id0 = 0;
@@ -169,7 +169,7 @@ void Map_Sphere::Apply() {
     bead_out_->AddParentBead(bead->getId());
     M += bead->getMass();
     if (bead->HasPos()) {
-      vec r = topology_parent_->BCShortestConnection(r0, bead->getPos());
+      vec r = boundaries_->BCShortestConnection(r0, bead->getPos());
       if (abs(r) > max_dist) {
         cout << r0 << " " << bead->getPos() << endl;
         throw std::runtime_error(
@@ -207,8 +207,8 @@ void Map_Ellipsoid::Apply() {
   bPos = bVel = bF = false;
 
   // the following is needed for pbc treatment
-  // CSG_Topology *top = bead_out_->getParent();
-  double max_dist = 0.5 * topology_parent_->getShortestBoxDimension();
+  // BoundaryCondition *top = bead_out_->getParent();
+  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
   vec r0 = vec(0, 0, 0);
   if (matrix_.size() > 0) {
     if (matrix_.front().bead_in_->HasPos()) {
@@ -223,7 +223,7 @@ void Map_Ellipsoid::Apply() {
     const Bead *bead = iter->bead_in_;
     bead_out_->AddParentBead(bead->getId());
     if (bead->HasPos()) {
-      vec r = topology_parent_->BCShortestConnection(r0, bead->getPos());
+      vec r = boundaries_->BCShortestConnection(r0, bead->getPos());
       if (abs(r) > max_dist) {
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box");

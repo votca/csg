@@ -213,7 +213,7 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   return minfo;
 }
 
-Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
+Map *CGMoleculeDef::CreateMap(const BoundaryCondition *boundaries,
                               const Molecule &mol_in, Molecule &mol_out) {
   if ((unsigned int)mol_out.BeadCount() != beads_.size()) {
     throw runtime_error(
@@ -254,7 +254,7 @@ Map *CGMoleculeDef::CreateMap(const CSG_Topology *topology,
         throw runtime_error(string("unknown symmetry in bead definition!"));
     }
     ////////////////////////////////////////////////////
-    bmap->Initialize(topology, &mol_in, mol_out.getBead(bead_id),
+    bmap->Initialize(boundaries, &mol_in, mol_out.getBead(bead_id),
                      ((*beaddef)->options_), mdef);
     map->AddBeadMap(bmap);
   }

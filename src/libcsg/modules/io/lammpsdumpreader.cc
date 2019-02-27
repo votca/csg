@@ -62,6 +62,7 @@ bool LAMMPSDumpReader::FirstFrame(CSG_Topology &top) {
 bool LAMMPSDumpReader::NextFrame(CSG_Topology &top) {
   string line;
   getline(_fl, line);
+  cout << "Reading lammps dump file" << endl;
   while (!_fl.eof()) {
     if (line.substr(0, 5) != "ITEM:")
       throw std::ios_base::failure("unexpected line in lammps file:\n" + line);
@@ -70,6 +71,7 @@ bool LAMMPSDumpReader::NextFrame(CSG_Topology &top) {
     } else if (line.substr(6, 15) == "NUMBER OF ATOMS") {
       ReadNumAtoms(top, line);
     } else if (line.substr(6, 10) == "BOX BOUNDS") {
+      cout << "Reading box bounds " << endl;
       ReadBox(top, line);
     } else if (line.substr(6, 5) == "ATOMS") {
       ReadAtoms(top, line);
@@ -111,6 +113,7 @@ void LAMMPSDumpReader::ReadBox(CSG_Topology &top, string itemline) {
     if (v.size() != 2) throw std::ios_base::failure("invalid box format");
     m[i][i] = v[1] - v[0];
   }
+  cout << "Reading dump file box and setting " << endl;
   top.setBox(m);
 }
 

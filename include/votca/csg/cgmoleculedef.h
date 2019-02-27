@@ -33,6 +33,7 @@ namespace votca {
 namespace csg {
 using namespace votca::tools;
 
+class BoundaryCondition;
 /**
  * @brief Definition of coarse grained molecule
  *
@@ -55,7 +56,7 @@ class CGMoleculeDef {
    * @return
    */
   Molecule *CreateMolecule(CSG_Topology &top);
-  Map *CreateMap(const CSG_Topology *topology, const Molecule &in,
+  Map *CreateMap(const BoundaryCondition *boundaries, const Molecule &in,
                  Molecule &out);
 
   void Load(std::string filename);
