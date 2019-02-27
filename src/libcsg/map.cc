@@ -150,21 +150,21 @@ void Map_Sphere::Apply() {
 
   // the following is needed for pbc treatment
   // CSG_Topology *top = bead_out_->getParent();
-  double max_dist = 0.5 * topology_parent_->ShortestBoxSize();
+  double max_dist = 0.5 * topology_parent_->getShortestBoxDimension();
   vec r0 = vec(0, 0, 0);
   string name0;
   int id0 = 0;
-  if (_matrix.size() > 0) {
-    if (_matrix.front().bead_in_->HasPos()) {
-      r0 = _matrix.front().bead_in_->getPos();
-      name0 = _matrix.front().bead_in_->getType();
-      id0 = _matrix.front().bead_in_->getId();
+  if (matrix_.size() > 0) {
+    if (matrix_.front().bead_in_->HasPos()) {
+      r0 = matrix_.front().bead_in_->getPos();
+      name0 = matrix_.front().bead_in_->getType();
+      id0 = matrix_.front().bead_in_->getId();
     }
   }
 
   double M = 0;
 
-  for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
+  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
     const Bead *bead = iter->bead_in_;
     bead_out_->AddParentBead(bead->getId());
     M += bead->getMass();
@@ -180,15 +180,15 @@ void Map_Sphere::Apply() {
             +" , molecule " +
             boost::lexical_cast<string>(bead->getMoleculeId() + 1) + ")");
       }
-      cg += (*iter)._weight * (r + r0);
+      cg += (*iter).weight_ * (r + r0);
       bPos = true;
     }
     if (bead->HasVel()) {
-      vel += (*iter)._weight * bead->getVel();
+      vel += (*iter).weight_ * bead->getVel();
       bVel = true;
     }
     if (bead->HasF()) {
-      f += (*iter)._force_weight * bead->getF();
+      f += (*iter).force_weight_ * bead->getF();
       bF = true;
     }
   }
@@ -208,18 +208,18 @@ void Map_Ellipsoid::Apply() {
 
   // the following is needed for pbc treatment
   // CSG_Topology *top = bead_out_->getParent();
-  double max_dist = 0.5 * topology_parent_->ShortestBoxSize();
+  double max_dist = 0.5 * topology_parent_->getShortestBoxDimension();
   vec r0 = vec(0, 0, 0);
-  if (_matrix.size() > 0) {
-    if (_matrix.front().bead_in_->HasPos()) {
-      r0 = _matrix.front().bead_in_->getPos();
+  if (matrix_.size() > 0) {
+    if (matrix_.front().bead_in_->HasPos()) {
+      r0 = matrix_.front().bead_in_->getPos();
     }
   }
 
   int n;
   n = 0;
   bead_out_->ClearParentBeads();
-  for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
+  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
     const Bead *bead = iter->bead_in_;
     bead_out_->AddParentBead(bead->getId());
     if (bead->HasPos()) {
@@ -228,19 +228,19 @@ void Map_Ellipsoid::Apply() {
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box");
       }
-      cg += (*iter)._weight * (r + r0);
+      cg += (*iter).weight_ * (r + r0);
       bPos = true;
     }
     if (bead->HasVel() == true) {
-      vel += (*iter)._weight * bead->getVel();
+      vel += (*iter).weight_ * bead->getVel();
       bVel = true;
     }
     if (bead->HasF()) {
-      f += (*iter)._force_weight * bead->getF();
+      f += (*iter).force_weight_ * bead->getF();
       bF = true;
     }
 
-    if ((*iter)._weight > 0 && bead->HasPos()) {
+    if ((*iter).weight_ > 0 && bead->HasPos()) {
       c += bead->getPos();
       n++;
     }
@@ -250,7 +250,7 @@ void Map_Ellipsoid::Apply() {
   if (bVel) bead_out_->setVel(vel);
   if (bF) bead_out_->setF(f);
 
-  if (!_matrix[0].bead_in_->HasPos()) {
+  if (!matrix_[0].bead_in_->HasPos()) {
     bead_out_->setU(vec(1.0, 0, 0));
     bead_out_->setV(vec(.0, 1, 0));
     bead_out_->setW(vec(.0, 0, 1));
@@ -259,18 +259,18 @@ void Map_Ellipsoid::Apply() {
 
   // calculate the tensor of gyration
   c = c / (double)n;
-  for (iter = _matrix.begin(); iter != _matrix.end(); ++iter) {
-    if ((*iter)._weight == 0) continue;
+  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
+    if ((*iter).weight_ == 0) continue;
     const Bead *bead = iter->bead_in_;
     vec v = bead->getPos() - c;
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
-    m[0][0] += v.getX() * v.getX() / (double)_matrix.size();
-    m[0][1] += v.getX() * v.getY() / (double)_matrix.size();
-    m[0][2] += v.getX() * v.getZ() / (double)_matrix.size();
-    m[1][1] += v.getY() * v.getY() / (double)_matrix.size();
-    m[1][2] += v.getY() * v.getZ() / (double)_matrix.size();
-    m[2][2] += v.getZ() * v.getZ() / (double)_matrix.size();
+    m[0][0] += v.getX() * v.getX() / (double)matrix_.size();
+    m[0][1] += v.getX() * v.getY() / (double)matrix_.size();
+    m[0][2] += v.getX() * v.getZ() / (double)matrix_.size();
+    m[1][1] += v.getY() * v.getY() / (double)matrix_.size();
+    m[1][2] += v.getY() * v.getZ() / (double)matrix_.size();
+    m[2][2] += v.getZ() * v.getZ() / (double)matrix_.size();
   }
   m[1][0] = m[0][1];
   m[2][0] = m[0][2];
@@ -281,12 +281,12 @@ void Map_Ellipsoid::Apply() {
   m.SolveEigensystem(es);
 
   vec u = es.eigenvecs[0];
-  vec v = _matrix[1].bead_in_->getPos() - _matrix[0].bead_in_->getPos();
+  vec v = matrix_[1].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
   v.normalize();
 
   bead_out_->setV(v);
 
-  vec w = _matrix[2].bead_in_->getPos() - _matrix[0].bead_in_->getPos();
+  vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
   w.normalize();
 
   if ((v ^ w) * u < 0) u = vec(0., 0., 0.) - u;

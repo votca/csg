@@ -91,19 +91,19 @@ class Map_Sphere : public BeadMap {
 
   struct element_t {
     const Bead *bead_in_;
-    double _weight;
-    double _force_weight;
+    double weight_;
+    double force_weight_;
   };
-  std::vector<element_t> _matrix;
+  std::vector<element_t> matrix_;
 };
 
 inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
                                 double force_weight) {
   element_t el;
   el.bead_in_ = bead_in;
-  el._weight = weight;
-  el._force_weight = force_weight;
-  _matrix.push_back(el);
+  el.weight_ = weight;
+  el.force_weight_ = force_weight;
+  matrix_.push_back(el);
 }
 
 /*******************************************************

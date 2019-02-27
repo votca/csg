@@ -81,6 +81,8 @@ class BoundaryCondition {
     throw std::runtime_error("BCShortestConnection is not implemented.");
   }
 
+  double getShortestBoxDimension() const;
+
   enum eBoxtype { typeAuto = 0, typeTriclinic, typeOrthorhombic, typeOpen };
   virtual eBoxtype getBoxType() const {
     throw std::runtime_error("getBoxType is not implemented.");

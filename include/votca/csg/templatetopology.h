@@ -278,7 +278,7 @@ class TemplateTopology {
    *
    * Calculates the shortest length to connect two sides of the box
    */
-  double ShortestBoxSize() const;
+  double getShortestBoxDimension() const;
 
   /**
    *  calculates the box volume
@@ -581,25 +581,8 @@ BoundaryCondition::eBoxtype
 }
 
 template <class Bead_T, class Molecule_T>
-double TemplateTopology<Bead_T, Molecule_T>::ShortestBoxSize() const {
-  TOOLS::vec _box_a = getBox().getCol(0);
-  TOOLS::vec _box_b = getBox().getCol(1);
-  TOOLS::vec _box_c = getBox().getCol(2);
-
-  // create plane normals
-  TOOLS::vec _norm_a = _box_b ^ _box_c;
-  TOOLS::vec _norm_b = _box_c ^ _box_a;
-  TOOLS::vec _norm_c = _box_a ^ _box_b;
-
-  _norm_a.normalize();
-  _norm_b.normalize();
-  _norm_c.normalize();
-
-  double la = _box_a * _norm_a;
-  double lb = _box_b * _norm_b;
-  double lc = _box_c * _norm_c;
-
-  return std::min(la, std::min(lb, lc));
+double TemplateTopology<Bead_T, Molecule_T>::getShortestBoxDimension() const {
+  return bc_->getShortestBoxDimension();
 }
 
 template <class Bead_T, class Molecule_T>

@@ -44,6 +44,16 @@ class CGMoleculeDef {
   CGMoleculeDef() {}
   ~CGMoleculeDef();
 
+  /**
+   * @brief Creates a coarse grained molecule
+   *
+   * Based on an xml file loaded using the **Load** method this method will
+   * generate a coarse grained molecule.
+   *
+   * @param[in] top
+   *
+   * @return
+   */
   Molecule *CreateMolecule(CSG_Topology &top);
   Map *CreateMap(const CSG_Topology *topology, const Molecule &in,
                  Molecule &out);
@@ -61,7 +71,7 @@ class CGMoleculeDef {
     std::string type_;
     byte_t symmetry_;
     std::string mapping_;
-    std::vector<std::string> subbeads_;
+    //  std::vector<std::string> subbeads_;
     Property *options_;
   };
 
