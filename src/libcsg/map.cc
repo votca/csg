@@ -32,18 +32,30 @@ using namespace std;
 namespace votca {
 namespace csg {
 
-Map::~Map() {
-  vector<BeadMap *>::iterator iter;
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) {
-    delete (*iter);
-  }
-  _maps.clear();
-}
+Map::~Map() { maps_.clear(); }
 
+BeadMap *Map::CreateBeadMap(const byte_t symmetry,
+                            const BoundaryCondition *boundaries,
+                            const Molecule *mol_in, Bead *bead_out,
+                            Property *opts_map, Property *opts_bead) {
+
+  switch (symmetry) {
+    case 1:
+      maps_.push_back(unique_ptr<Map_Sphere>(new Map_Sphere()));
+      break;
+    case 3:
+      maps_.push_back(unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid()));
+      break;
+    default:
+      throw runtime_error(string("unknown symmetry in bead definition!"));
+  }
+  ////////////////////////////////////////////////////
+  maps_.back()->Initialize(boundaries, mol_in, bead_out, opts_map, opts_bead);
+  return maps_.back().get();
+}
 void Map::Apply() {
-  vector<BeadMap *>::iterator iter;
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) {
-    (*iter)->Apply();
+  for (unique_ptr<BeadMap> &map : maps_) {
+    map->Apply();
   }
 }
 

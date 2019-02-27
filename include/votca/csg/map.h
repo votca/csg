@@ -38,13 +38,16 @@ class Map {
       : mol_in_(mol_in), mol_out_(mol_out) {}
   ~Map();
 
-  void AddBeadMap(BeadMap *bmap) { _maps.push_back(bmap); }
-
   void Apply();
+
+  BeadMap *CreateBeadMap(const byte_t symmetry,
+                         const BoundaryCondition *boundaries,
+                         const Molecule *mol_in, Bead *bead_out,
+                         Property *opts_map, Property *opts_bead);
 
  protected:
   Molecule mol_in_, mol_out_;
-  std::vector<BeadMap *> _maps;
+  std::vector<std::unique_ptr<BeadMap>> maps_;
 };
 
 /*******************************************************
@@ -59,11 +62,13 @@ class BeadMap {
                           Property *opts_map, Property *opts_bead);
 
  protected:
+  BeadMap(){};
   const BoundaryCondition *boundaries_;
   const Molecule *mol_in_;
   Bead *bead_out_;
   Property *opts_map_;
   Property *opts_bead_;
+  friend class Map;
 };
 
 inline void BeadMap::Initialize(const BoundaryCondition *boundaries,
@@ -81,13 +86,13 @@ inline void BeadMap::Initialize(const BoundaryCondition *boundaries,
 *******************************************************/
 class Map_Sphere : public BeadMap {
  public:
-  Map_Sphere() {}
   void Apply();
 
   void Initialize(const BoundaryCondition *boundaries, const Molecule *mol_in,
                   Bead *bead_out, Property *opts_bead, Property *opts_map);
 
  protected:
+  Map_Sphere() {}
   void AddElem(const Bead *bead_in, double weight, double force_weight);
 
   struct element_t {
@@ -96,6 +101,7 @@ class Map_Sphere : public BeadMap {
     double force_weight_;
   };
   std::vector<element_t> matrix_;
+  friend class Map;
 };
 
 inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
@@ -112,10 +118,11 @@ inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
 *******************************************************/
 class Map_Ellipsoid : public Map_Sphere {
  public:
-  Map_Ellipsoid() {}
   void Apply();
 
  protected:
+  Map_Ellipsoid() {}
+  friend class Map;
 };
 
 }  // namespace csg

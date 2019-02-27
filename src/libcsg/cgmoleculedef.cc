@@ -242,7 +242,9 @@ Map *CGMoleculeDef::CreateMap(const BoundaryCondition *boundaries,
           string("mapping " + (*beaddef)->mapping_ + " not found"));
     }
 
-    BeadMap *bmap;
+    map->CreateBeadMap((*beaddef)->symmetry_, boundaries, &mol_in,
+                       mol_out.getBead(bead_id), ((*beaddef)->options_), mdef);
+    /*BeadMap *bmap;
     switch ((*beaddef)->symmetry_) {
       case 1:
         bmap = new Map_Sphere();
@@ -256,7 +258,7 @@ Map *CGMoleculeDef::CreateMap(const BoundaryCondition *boundaries,
     ////////////////////////////////////////////////////
     bmap->Initialize(boundaries, &mol_in, mol_out.getBead(bead_id),
                      ((*beaddef)->options_), mdef);
-    map->AddBeadMap(bmap);
+    map->AddBeadMap(bmap);*/
   }
   return map;
 }
