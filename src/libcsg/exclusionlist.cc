@@ -25,7 +25,7 @@ namespace csg {
 using namespace std;
 
 void ExclusionList::Clear(void) {
-  list<exclusion_t *>::iterator iter;
+  vector<exclusion_t *>::iterator iter;
 
   for (iter = _exclusions.begin(); iter != _exclusions.end(); ++iter)
     delete *iter;
@@ -75,9 +75,10 @@ bool compareAtomIdBeadList(const Bead *a, const Bead *b) {
 }
 
 std::ostream &operator<<(std::ostream &out, ExclusionList &exl) {
-  exl._exclusions.sort(compareAtomIdiExclusionList);
+  sort(exl._exclusions.begin(), exl._exclusions.end(),
+       compareAtomIdiExclusionList);
 
-  list<ExclusionList::exclusion_t *>::iterator ex;
+  vector<ExclusionList::exclusion_t *>::iterator ex;
   for (ex = exl._exclusions.begin(); ex != exl._exclusions.end(); ++ex) {
     (*ex)->_exclude.sort(compareAtomIdBeadList);
     list<Bead *>::iterator i;
