@@ -115,19 +115,19 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   int molecule_id = top.MoleculeCount();
   Molecule *minfo = top.CreateMolecule(molecule_id, cg_molecule_type_);
 
-  // create the atoms
-  // vector<beaddef_t *>::iterator beaddef_
-  // for (beaddef = beads_.begin(); beaddef != beads_.end(); ++beaddef) {
+  unordered_map<std::string, int> bead_name_to_id;
   for (beaddef_t *beaddef : beads_) {
     Bead *bead;
 
     string bead_type = beaddef->type_;
+    cout << "bead type " << bead_type << endl;
     bead =
         top.CreateBead(beaddef->symmetry_, bead_type, top.BeadCount(),
                        molecule_id, topology_constants::unassigned_residue_id,
                        topology_constants::unassigned_residue_type,
                        topology_constants::unassigned_element, 0.0, 0.0);
     minfo->AddBead(bead);
+    bead_name_to_id[beaddef->cg_name_] = bead->getId();
   }
 
   // create the bonds
@@ -135,66 +135,79 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   map<string, string> had_iagroup;
 
   for (ibnd = bonded_.begin(); ibnd != bonded_.end(); ++ibnd) {
-    vector<int> atoms;
     string iagroup = (*ibnd)->get("name").as<string>();
-
+    cout << "iagroup " << iagroup << endl;
     if (had_iagroup[iagroup] == "yes") {
       throw runtime_error(
           string("double occurence of interactions with name ") + iagroup);
     }
     had_iagroup[iagroup] = "yes";
+    cout << (*ibnd)->get("beads").value() << endl;
+    Tokenizer tok_line((*ibnd)->get("beads").value(), "\n");
+    for (Tokenizer::iterator line = tok_line.begin(); line != tok_line.end();
+         ++line) {
+      vector<int> atoms;
+      cout << "new line " << endl;
+      Tokenizer tok_atom(*line, " \t");
+      for (Tokenizer::iterator atom = tok_atom.begin(); atom != tok_atom.end();
+           ++atom) {
+        //    for (Tokenizer::iterator atom = tok.begin(); atom != tok.end();
+        //    ++atom) {
+        cout << "Atom " << *atom << endl;
+        //			unordered_set<int> bead_ids =
+        //minfo->getBeadIdsByType(*atom);
+        //      assert(bead_ids.size() == 1 &&
+        /*             "There is more than one bead with that type if you want a
+           unique " "identifier you should probably just use the beads global
+           unique " "id.");*/
 
-    Tokenizer tok((*ibnd)->get("beads").value(), " \n\t");
-    for (Tokenizer::iterator atom = tok.begin(); atom != tok.end(); ++atom) {
-      unordered_set<int> bead_ids = minfo->getBeadIdsByType(*atom);
-      assert(bead_ids.size() == 1 &&
-             "There is more than one bead with that type if you want a unique "
-             "identifier you should probably just use the beads global unique "
-             "id.");
-
-      int bead_id = *bead_ids.begin();
-      if (bead_id < 0) {
-        throw runtime_error(
-            string("error while trying to create bonded interaction, bead " +
-                   *atom + " not found"));
+        assert(bead_name_to_id.count(*atom) && "Bead name is not recognized");
+        /*     int bead_id = *bead_ids.begin();
+                                 if (bead_id < 0) {
+                                 throw runtime_error(
+                                 string("error while trying to create bonded
+         interaction, bead " + *atom + " not found"));
+         }*/
+        atoms.push_back(bead_name_to_id[*atom]);
       }
-      atoms.push_back(bead_id);
-    }
 
-    int NrBeads = 1;
-    if ((*ibnd)->name() == "bond") {
-      NrBeads = 2;
-    } else if ((*ibnd)->name() == "angle") {
-      NrBeads = 3;
-    } else if ((*ibnd)->name() == "dihedral") {
-      NrBeads = 4;
-    }
-
-    if ((atoms.size() % NrBeads) != 0) {
-      throw runtime_error("Number of atoms in interaction '" +
-                          (*ibnd)->get("name").as<string>() +
-                          "' is not a multiple of " +
-                          lexical_cast<string>(NrBeads) + "! Missing beads?");
-    }
-    int index = 0;
-    while (!atoms.empty()) {
-      Interaction *ic;
-
+      int NrBeads = 1;
       if ((*ibnd)->name() == "bond") {
-        ic = top.CreateInteraction(Interaction::interaction_type::bond, iagroup,
-                                   index, minfo->getId(), atoms);
+        NrBeads = 2;
       } else if ((*ibnd)->name() == "angle") {
-        ic = top.CreateInteraction(Interaction::interaction_type::angle,
-                                   iagroup, index, minfo->getId(), atoms);
+        NrBeads = 3;
       } else if ((*ibnd)->name() == "dihedral") {
-        ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
-                                   iagroup, index, minfo->getId(), atoms);
-      } else {
-        throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
+        NrBeads = 4;
       }
 
-      minfo->AddInteraction(ic);
-      index++;
+      if ((atoms.size() % NrBeads) != 0) {
+        throw runtime_error("Number of atoms in interaction '" +
+                            (*ibnd)->get("name").as<string>() +
+                            "' is not a multiple of " +
+                            lexical_cast<string>(NrBeads) + "! Missing beads?");
+      }
+      int index = 0;
+      cout << "size of atoms " << atoms.size() << endl;
+      // while (!atoms.empty()) {
+      if (!atoms.empty()) {
+        Interaction *ic;
+        cout << "While atoms not empty" << endl;
+        if ((*ibnd)->name() == "bond") {
+          ic = top.CreateInteraction(Interaction::interaction_type::bond,
+                                     iagroup, index, minfo->getId(), atoms);
+        } else if ((*ibnd)->name() == "angle") {
+          ic = top.CreateInteraction(Interaction::interaction_type::angle,
+                                     iagroup, index, minfo->getId(), atoms);
+        } else if ((*ibnd)->name() == "dihedral") {
+          ic = top.CreateInteraction(Interaction::interaction_type::dihedral,
+                                     iagroup, index, minfo->getId(), atoms);
+        } else {
+          throw runtime_error("unknown bonded type in map: " + (*ibnd)->name());
+        }
+
+        minfo->AddInteraction(ic);
+        index++;
+      }
     }
   }
   return minfo;
