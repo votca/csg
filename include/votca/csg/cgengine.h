@@ -63,7 +63,7 @@ class CGEngine {
   */
   void LoadMoleculeType(std::string filename);
 
-  CGMoleculeDef *getMoleculeDef(std::string name);
+  //  AtomisiticToCGMoleculeConverter *getMolecularConverter(std::string name);
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process
@@ -81,13 +81,15 @@ class CGEngine {
   bool IsIgnored(std::string molecule_type);
 
  private:
-  std::map<std::string, CGMoleculeDef *> _molecule_defs;
+  // std::map<std::string, AtomisiticToCGMoleculeConverter *> _molecule_defs;
+  AtomToCGConverter converter;
 
   std::list<std::string> _ignores;
 };
-
-inline CGMoleculeDef *CGEngine::getMoleculeDef(std::string name) {
-  std::map<std::string, CGMoleculeDef *>::iterator iter;
+/*
+inline AtomisiticToCGMoleculeConverter
+*CGEngine::getMolecularConverter(std::string name) { std::map<std::string,
+AtomisiticToCGMoleculeConverter *>::iterator iter;
 
   // if there is only 1 molecule definition, don't care about the name
   if (_molecule_defs.size() == 1 && name == "unnamed") {
@@ -97,7 +99,7 @@ inline CGMoleculeDef *CGEngine::getMoleculeDef(std::string name) {
   iter = _molecule_defs.find(name);
   assert(iter != _molecule_defs.end() && "Molecule definition does not exist");
   return (*iter).second;
-}
+}*/
 
 inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();

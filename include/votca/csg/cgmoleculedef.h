@@ -26,6 +26,7 @@
 #include "exclusionlist.h"
 #include "map.h"
 #include "molecule.h"
+#include <boost/bimap.hpp>
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
 
@@ -40,10 +41,11 @@ class BoundaryCondition;
  * This class is to define a coarse grained molecule, which includes the
  * topology, mapping, ...
  */
-class CGMoleculeDef {
+class AtomToCGConverter {
  public:
-  CGMoleculeDef() {}
-  ~CGMoleculeDef();
+  AtomToCGConverter(CSG_Topology atomistic_top, CSG_Topology cg_top)
+      : topology_map_(&atomistic_top, &cg_top){};
+  ~AtomToCGConverter();
 
   /**
    * @brief Creates a coarse grained molecule
@@ -55,40 +57,41 @@ class CGMoleculeDef {
    *
    * @return
    */
-  Molecule *CreateMolecule(CSG_Topology &top);
-  Map *CreateMap(const BoundaryCondition *boundaries, const Molecule &in,
-                 Molecule &out);
+  // Molecule *CreateMolecule(CSG_Topology &top);
+  // Map *CreateMap(const BoundaryCondition *boundaries, const Molecule &in,
+  //               Molecule &out);
 
-  void Load(std::string filename);
+  void LoadConversionStencil(std::string filename);
 
   const std::string &getCGType() { return cg_molecule_type_; }
   const std::string &getAtomisticType() { return atomistic_molecule_type_; }
 
  private:
-  Property options_;
+  //  Property options_;
 
-  struct beaddef_t {
-    std::string cg_name_;
-    std::string type_;
-    byte_t symmetry_;
-    std::string mapping_;
-    //  std::vector<std::string> subbeads_;
-    Property *options_;
-  };
+  /* struct beaddef_t {
+     std::string cg_name_;
+     std::string type_;
+     byte_t symmetry_;
+     std::string mapping_;
+     //  std::vector<std::string> subbeads_;
+     Property *options_;
+   };*/
 
   // type of the coarse grained molecule
-  std::string cg_molecule_type_;
+  // std::string cg_molecule_type_;
   // name of the molecule to coarse grain
-  std::string atomistic_molecule_type_;
-
+  // std::string atomistic_molecule_type_;
+  boost::bimap<std::string, std::string> atomic_molecule_and_cg_molecule;
   // beads of the cg molecule
-  std::vector<beaddef_t *> beads_;
-  std::map<std::string, beaddef_t *> beads_by_cg_name_;
+  std::unordered_map<std::string, CGStencil> cg_molecule_and_stencil;
+  // std::vector<beaddef_t *> beads_;
+  // std::map<std::string, beaddef_t *> beads_by_cg_name_;
 
   // mapping schemes
-  std::map<std::string, Property *> maps_;
+  // std::map<std::string, Property *> maps_;
 
-  std::list<Property *> bonded_;
+  // std::list<Property *> bonded_;
 
   void ParseTopology(Property &options);
   void ParseBeads(Property &options);
@@ -97,6 +100,8 @@ class CGMoleculeDef {
 
   beaddef_t *getBeadByCGName(const std::string &cg_name);
   Property *getMapByName(const std::string &map_name);
+
+  TopologyMap topology_map_;
 };
 
 }  // namespace csg

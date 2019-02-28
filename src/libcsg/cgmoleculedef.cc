@@ -47,7 +47,7 @@ namespace csg {
 
 using boost::lexical_cast;
 
-CGMoleculeDef::~CGMoleculeDef() {
+AtomToCGConverter::~AtomToCGConverter() {
   {
     vector<beaddef_t *>::iterator i;
     for (i = beads_.begin(); i != beads_.end(); ++i) {
@@ -57,52 +57,81 @@ CGMoleculeDef::~CGMoleculeDef() {
   }
 }
 
-void CGMoleculeDef::Load(string filename) {
-  load_property_from_xml(options_, filename);
+void AtomToCGConverter::ConvertAndAdd(Molecule &atomistic_mol,
+                                      CSG_Topology &cg_top) {
+
+  string molecule_type = atomistic_mol.getType();
+
+  cout << "--------------------------------------\n"
+       << "WARNING: unknown molecule \"" << atomistic_mol->getType()
+       << "\" with id " << atomistic_mol->getId() << " in topology" << endl
+       << "molecule will not be mapped to CG representation\n"
+       << "Check weather a mapping file for all molecule exists, was "
+          "specified in --cg "
+       << "separated by ; and the ident tag in xml-file matches the "
+          "molecule name\n"
+       << "--------------------------------------\n";
+}
+
+void AtomToCGConverter::LoadConversionStencil(string filename) {
+
+  Property *options;
+  load_property_from_xml(options, filename);
   // parse xml tree
-  cg_molecule_type_ = options_.get("cg_molecule.name").as<string>();
-  atomistic_molecule_type_ = options_.get("cg_molecule.ident").as<string>();
+  string cg_molecule_type_ = options_.get("cg_molecule.name").as<string>();
+  string atomistic_molecule_type_ =
+      options_.get("cg_molecule.ident").as<string>();
 
-  ParseTopology(options_.get("cg_molecule.topology"));
-  ParseMapping(options_.get("cg_molecule.maps"));
+  atomic_molecule_and_cg_molecule.insert(
+      atomic_molecule_and_cg_molecule::value_type(cg_molecule_type,
+                                                  atomistic_molecule_type));
+
+  ParseTopology(options.get("cg_molecule.topology"));
+  ParseMapping(options.get("cg_molecule.maps"));
 }
 
-void CGMoleculeDef::ParseTopology(Property &options) {
-  ParseBeads(options.get("cg_beads"));
-  if (options.exists("cg_bonded")) ParseBonded(options.get("cg_bonded"));
-}
-
-void CGMoleculeDef::ParseBeads(Property &options) {
-  list<Property *> beads = options.Select("cg_bead");
-
-  for (list<Property *>::iterator iter = beads.begin(); iter != beads.end();
-       ++iter) {
-    Property *p = *iter;
-    beaddef_t *beaddef = new beaddef_t;
-    beaddef->options_ = p;
-
-    beaddef->cg_name_ = p->get("name").as<string>();
-    beaddef->type_ = p->get("type").as<string>();
-    beaddef->mapping_ = p->get("mapping").as<string>();
-    if (p->exists("symmetry")) {
-      beaddef->symmetry_ = p->get("symmetry").as<int>();
-    } else {
-      beaddef->symmetry_ = 1;
-    }
-    if (beads_by_cg_name_.find(beaddef->cg_name_) != beads_by_cg_name_.end()) {
-      throw std::runtime_error(string("bead name ") + beaddef->cg_name_ +
-                               " not unique in mapping");
-    }
-    beads_.push_back(beaddef);
-    beads_by_cg_name_[beaddef->cg_name_] = beaddef;
+void AtomToCGConverter::ParseTopology(Property &options) {
+  vector<beaddef_t> beaddefs = ParseBeads(options.get("cg_beads"));
+  if (options.exists("cg_bonded")) {
+    ParseBonded(options.get("cg_bonded"));
   }
 }
 
-void CGMoleculeDef::ParseBonded(Property &options) {
+vector<beaddef_t> AtomToCGConverter::ParseBeads(Property &options) {
+  list<Property *> beads = options.Select("cg_bead");
+
+  vector<beaddef_t> beaddefs;
+  for (list<Property *>::iterator iter = beads.begin(); iter != beads.end();
+       ++iter) {
+    Property *p = *iter;
+    // beaddef_t *beaddef = new beaddef_t;
+    beaddef_t beaddef;
+    beaddef.options_ = p;
+
+    beaddef.cg_name_ = p->get("name").as<string>();
+    beaddef.type_ = p->get("type").as<string>();
+    beaddef.mapping_ = p->get("mapping").as<string>();
+    if (p->exists("symmetry")) {
+      beaddef.symmetry_ = p->get("symmetry").as<int>();
+    } else {
+      beaddef.symmetry_ = 1;
+    }
+    //   if (beads_by_cg_name_.find(beaddef->cg_name_) !=
+    //   beads_by_cg_name_.end()) {
+    //     throw std::runtime_error(string("bead name ") + beaddef.cg_name_ +
+    //                              " not unique in mapping");
+    //   }
+    beaddefs.push_back(beaddef);
+    //    beads_by_cg_name_[beaddef.cg_name_] = beaddef;
+  }
+  return beaddefs;
+}
+
+void AtomToCGConverter::ParseBonded(Property &options) {
   bonded_ = options.Select("*");
 }
 
-void CGMoleculeDef::ParseMapping(Property &options) {
+void AtomToCGConverter::ParseMapping(Property &options) {
   list<Property *> maps = options.Select("map");
 
   for (list<Property *>::iterator iter = maps.begin(); iter != maps.end();
@@ -111,7 +140,7 @@ void CGMoleculeDef::ParseMapping(Property &options) {
   }
 }
 
-Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
+Molecule *AtomToCGConverter::CreateMolecule(CSG_Topology &top) {
   int molecule_id = top.MoleculeCount();
   Molecule *minfo = top.CreateMolecule(molecule_id, cg_molecule_type_);
 
@@ -213,8 +242,8 @@ Molecule *CGMoleculeDef::CreateMolecule(CSG_Topology &top) {
   return minfo;
 }
 
-Map *CGMoleculeDef::CreateMap(const BoundaryCondition *boundaries,
-                              const Molecule &mol_in, Molecule &mol_out) {
+Map *AtomToCGConverter::CreateMap(const BoundaryCondition *boundaries,
+                                  const Molecule &mol_in, Molecule &mol_out) {
   if ((unsigned int)mol_out.BeadCount() != beads_.size()) {
     throw runtime_error(
         "number of beads for cg molecule and mapping definition do "
@@ -263,7 +292,7 @@ Map *CGMoleculeDef::CreateMap(const BoundaryCondition *boundaries,
   return map;
 }
 
-CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByCGName(
+AtomToCGConverter::beaddef_t *AtomToCGConverter::getBeadByCGName(
     const string &cg_name) {
   map<string, beaddef_t *>::iterator cg_name_and_beaddef =
       beads_by_cg_name_.find(cg_name);
@@ -275,7 +304,7 @@ CGMoleculeDef::beaddef_t *CGMoleculeDef::getBeadByCGName(
   return (*cg_name_and_beaddef).second;
 }
 
-Property *CGMoleculeDef::getMapByName(const string &mapping_name) {
+Property *AtomToCGConverter::getMapByName(const string &mapping_name) {
   map<string, Property *>::iterator iter = maps_.find(mapping_name);
   if (iter == maps_.end()) {
     std::cout << "cannot find map " << mapping_name << "\n";

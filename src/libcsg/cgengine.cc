@@ -30,60 +30,67 @@ namespace po = boost::program_options;
 CGEngine::CGEngine() {}
 
 CGEngine::~CGEngine() {
-  map<string, CGMoleculeDef *>::iterator i;
-  for (i = _molecule_defs.begin(); i != _molecule_defs.end(); ++i)
-    delete (*i).second;
-  _molecule_defs.clear();
+  /*  map<string, AtomToCGConverter *>::iterator i;
+    for (i = _molecule_defs.begin(); i != _molecule_defs.end(); ++i)
+      delete (*i).second;
+    _molecule_defs.clear();*/
 }
 
 /**
     \todo melts with different molecules
 */
-TopologyMap *CGEngine::CreateCGTopology(CSG_Topology &top_in,
-                                        CSG_Topology &top_out) {
+AtomToCGConverter *CGEngine::CreateCGTopology(CSG_Topology &atomistic_top_in,
+                                              CSG_Topology &cg_top_out) {
 
-  assert(top_in.getBoxType() == top_out.getBoxType() &&
+  assert(atomistic_top_in.getBoxType() == cg_top_out.getBoxType() &&
          "box types of topology in and out differ");
   // Grab all the molecules
-  const unordered_map<int, Molecule> &mols = top_in.Molecules();
-  // Setup which topology is being added to (top_out) and which topology is
-  // being used to determine what is to be added (top_in)
-  TopologyMap *topology_map = new TopologyMap(&top_in, &top_out);
-  for (const pair<int, Molecule> &id_and_molecule : mols) {
+  const unordered_map<int, Molecule> &atomistic_mols =
+      atomistic_top_in.Molecules();
+  // Setup which topology is being added to (cg_top_out) and which topology is
+  // being used to determine what is to be added (atomistic_top_in)
+  // TopologyMap *topology_map = new TopologyMap(&atomistic_top_in,
+  // &cg_top_out);
+  for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
     // Grab a molecule
-    const Molecule *mol_in = &(id_and_molecule.second);
-    if (IsIgnored(mol_in->getType())) continue;
-    CGMoleculeDef *mol_def = getMoleculeDef(mol_in->getType());
-    if (!mol_def) {
-      cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << mol_in->getType()
-           << "\" with id " << mol_in->getId() << " in topology" << endl
-           << "molecule will not be mapped to CG representation\n"
-           << "Check weather a mapping file for all molecule exists, was "
-              "specified in --cg "
-           << "separated by ; and the ident tag in xml-file matches the "
-              "molecule name\n"
-           << "--------------------------------------\n";
-      continue;
-    }
-    Molecule *mcg = mol_def->CreateMolecule(top_out);
-    Map *map = mol_def->CreateMap(top_in.getBoundaryCondition(), *mol_in, *mcg);
+    const Molecule *atomistic_mol = &(id_and_molecule.second);
+    if (IsIgnored(atomistic_mol->getType())) continue;
+    // AtomToCGConverter *converter =
+    // getMolecularConverter(atomistic_mol->getType());
+    /*    if (!converter) {
+          cout << "--------------------------------------\n"
+               << "WARNING: unknown molecule \"" << atomistic_mol->getType()
+               << "\" with id " << atomistic_mol->getId() << " in topology" <<
+       endl
+               << "molecule will not be mapped to CG representation\n"
+               << "Check weather a mapping file for all molecule exists, was "
+                  "specified in --cg "
+               << "separated by ; and the ident tag in xml-file matches the "
+                  "molecule name\n"
+               << "--------------------------------------\n";
+          continue;
+        }*/
+    converter.ConvertAndAdd(atomistic_mol, cg_top_out);
+    // Molecule *mcg = converter->CreateMolecule(cg_top_out);
+    Map *map = converter->CreateMap(atomistic_top_in.getBoundaryCondition(),
+                                    *atomistic_mol, *mcg);
     topology_map->AddMoleculeMap(map);
   }
-  top_out.RebuildExclusions();
-  return topology_map;
+  cg_top_out.RebuildExclusions();
+  // return topology_map;
+  return converter;
 }
 
-void CGEngine::LoadMoleculeType(string filename) {
+void CGEngine::RegisterCGMolecule(string filename) {
   Tokenizer tok(filename, ";");
   Tokenizer::iterator iter;
 
   for (iter = tok.begin(); iter != tok.end(); ++iter) {
-    CGMoleculeDef *mol_def = new CGMoleculeDef();
+    //    AtomToCGConverter *converter = new AtomToCGConverter();
     string file = *iter;
     boost::trim(file);
-    mol_def->Load(file);
-    _molecule_defs[mol_def->getAtomisticType()] = mol_def;
+    converter.LoadConversionStencil(file);
+    //_molecule_defs[converter->getAtomisticType()] = converter;
   }
 }
 
