@@ -227,7 +227,7 @@ void CsgApplication::Run(void) {
 
   if (_do_mapping) {
     // read in the coarse graining definitions (xml files)
-    cg.LoadMoleculeType(_op_vm["cg"].as<string>());
+    cg.RegisterCGMolecules(_op_vm["cg"].as<string>());
     // create the mapping + cg topology
 
     if (_op_vm.count("map-ignore") != 0) {

@@ -70,18 +70,20 @@ AtomToCGConverter *CGEngine::CreateCGTopology(CSG_Topology &atomistic_top_in,
                << "--------------------------------------\n";
           continue;
         }*/
-    converter.ConvertAndAdd(atomistic_mol, cg_top_out);
-    // Molecule *mcg = converter->CreateMolecule(cg_top_out);
-    Map *map = converter->CreateMap(atomistic_top_in.getBoundaryCondition(),
-                                    *atomistic_mol, *mcg);
-    topology_map->AddMoleculeMap(map);
+    converter.ConvertAtomisticMoleculeToCGAndAddToCGTopology(atomistic_mol,
+                                                             cg_top_out);
+
+    // AtomisticToCGMolecaleMapper *map =
+    // converter->CreateMap(atomistic_top_in.getBoundaryCondition(),
+    //                                *atomistic_mol, *mcg);
+    // topology_map->AddMoleculeMap(map);
   }
   cg_top_out.RebuildExclusions();
   // return topology_map;
-  return converter;
+  return topology_map;
 }
 
-void CGEngine::RegisterCGMolecule(string filename) {
+void CGEngine::RegisterCGMolecules(string filename) {
   Tokenizer tok(filename, ";");
   Tokenizer::iterator iter;
 
@@ -90,6 +92,7 @@ void CGEngine::RegisterCGMolecule(string filename) {
     string file = *iter;
     boost::trim(file);
     converter.LoadConversionStencil(file);
+    topology_map.LoadMap(file);
     //_molecule_defs[converter->getAtomisticType()] = converter;
   }
 }

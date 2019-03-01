@@ -31,7 +31,8 @@ class TopologyMap {
 
   TopologyMap(CSG_Topology *in, CSG_Topology *out);
 
-  void AddMoleculeMap(Map *map);
+  //  void AddMoleculeMap(Map *map);
+  void LoadMap(std::string filename);
 
   void Apply();
 
@@ -46,7 +47,7 @@ class TopologyMap {
 inline TopologyMap::TopologyMap(CSG_Topology *in, CSG_Topology *out)
     : _in(in), _out(out) {}
 
-inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
+// inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
 
 }  // namespace csg
 }  // namespace votca

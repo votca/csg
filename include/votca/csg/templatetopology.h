@@ -85,6 +85,7 @@ class TemplateTopology {
    */
   size_t BeadCount() const { return beads_.size(); }
 
+  size_t InteractionCount() const { return interactions_.size(); }
   /**
    * access containter with all beads
    * @return bead container
@@ -128,6 +129,18 @@ class TemplateTopology {
     }
     return bead_id_and_positions;
   }
+
+  /**
+   * @brief Determine if a molecule with the specified id exists or not
+   *
+   * @param[in] molecule_id
+   *
+   * @return true if it does exist, else false
+   */
+  bool MoleculeExist(const int molecule_id) const {
+    return molecules_.count(molecule_id);
+  }
+
   /**
    * \brief Returns a constant pointer to the bead with index i
    *

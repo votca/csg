@@ -32,7 +32,7 @@ using namespace std;
 namespace votca {
 namespace csg {
 
-Map::~Map() { maps_.clear(); }
+Map::~Map() { bead_maps_.clear(); }
 
 BeadMap *Map::CreateBeadMap(const byte_t symmetry,
                             const BoundaryCondition *boundaries,
@@ -41,20 +41,21 @@ BeadMap *Map::CreateBeadMap(const byte_t symmetry,
 
   switch (symmetry) {
     case 1:
-      maps_.push_back(unique_ptr<Map_Sphere>(new Map_Sphere()));
+      bead_maps_.push_back(unique_ptr<Map_Sphere>(new Map_Sphere()));
       break;
     case 3:
-      maps_.push_back(unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid()));
+      bead_maps_.push_back(unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid()));
       break;
     default:
       throw runtime_error(string("unknown symmetry in bead definition!"));
   }
-  ////////////////////////////////////////////////////
-  maps_.back()->Initialize(boundaries, mol_in, bead_out, opts_map, opts_bead);
-  return maps_.back().get();
+  bead_maps_.back()->Initialize(boundaries, mol_in, bead_out, opts_map,
+                                opts_bead);
+  return bead_maps_.back().get();
 }
+
 void Map::Apply() {
-  for (unique_ptr<BeadMap> &map : maps_) {
+  for (unique_ptr<BeadMap> &map : bead_maps_) {
     map->Apply();
   }
 }
@@ -128,12 +129,6 @@ void Map_Sphere::Initialize(const BoundaryCondition *boundaries,
     }
   }
 
-  //  for (size_t i = 0; i < beads.size(); ++i) {
-  //    unordered_set<int> bead_ids = mol_in->getBeadIdsByLabel(beads.at(i));
-  //    assert(bead_ids.size() == 1 &&
-  //           "More than a single bead with the same label, maybe the globally
-  //           " "unique bead id should be used instead.");
-
   vector<int> bead_ids = mol_in->getBeadIds();
   // WARNING this assumes that the bead weights are read in the same order
   // as the bead ids are allocated, this method is prone to error because it
@@ -155,59 +150,66 @@ void Map_Sphere::Initialize(const BoundaryCondition *boundaries,
 
 void Map_Sphere::Apply() {
   vector<element_t>::iterator iter;
-  vec cg(0., 0., 0.), f(0., 0., 0.), vel(0., 0., 0.);
   bool bPos, bVel, bF;
   bPos = bVel = bF = false;
-  bead_out_->ClearParentBeads();
+  // bead_out_->ClearParentBeads();
 
   // the following is needed for pbc treatment
-  // BoundaryCondition *top = bead_out_->getParent();
-  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
-  vec r0 = vec(0, 0, 0);
-  string name0;
-  int id0 = 0;
+  vec reference_position = vec(0, 0, 0);
+  string bead_type;
+  int bead_id = 0;
   if (matrix_.size() > 0) {
     if (matrix_.front().bead_in_->HasPos()) {
-      r0 = matrix_.front().bead_in_->getPos();
-      name0 = matrix_.front().bead_in_->getType();
-      id0 = matrix_.front().bead_in_->getId();
+      reference_position = matrix_.front().bead_in_->getPos();
+      bead_type = matrix_.front().bead_in_->getType();
+      bead_id = matrix_.front().bead_in_->getId();
     }
   }
 
-  double M = 0;
+  double sum_of_atomistic_mass = 0;
+  vec weighted_sum_of_atomistic_pos(0., 0., 0.);
+  vec weighted_sum_of_atomistic_forces(0., 0., 0.);
+  vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
+  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
   for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
     const Bead *bead = iter->bead_in_;
-    bead_out_->AddParentBead(bead->getId());
-    M += bead->getMass();
+    // This is not needed because the ids should be the same between the cg bead
+    // and the atomistic bead
+    //    bead_out_->AddParentBead(bead->getId());
+    sum_of_atomistic_mass += bead->getMass();
     if (bead->HasPos()) {
-      vec r = boundaries_->BCShortestConnection(r0, bead->getPos());
-      if (abs(r) > max_dist) {
-        cout << r0 << " " << bead->getPos() << endl;
+      vec shortest_distance_beween_beads =
+          boundaries_->BCShortestConnection(reference_position, bead->getPos());
+
+      if (abs(shortest_distance_beween_beads) > max_dist) {
+        cout << reference_position << " " << bead->getPos() << endl;
         throw std::runtime_error(
             "coarse-grained bead is bigger than half the box \n (atoms " +
-            name0 + " (id " + boost::lexical_cast<string>(id0 + 1) + ")" +
-            ", " + bead->getType() + " (id " +
+            bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) +
+            ")" + ", " + bead->getType() + " (id " +
             boost::lexical_cast<string>(bead->getId() + 1) + ")" +
             +" , molecule " +
             boost::lexical_cast<string>(bead->getMoleculeId() + 1) + ")");
       }
-      cg += (*iter).weight_ * (r + r0);
+      weighted_sum_of_atomistic_pos +=
+          (*iter).weight_ *
+          (shortest_distance_beween_beads + reference_position);
       bPos = true;
     }
     if (bead->HasVel()) {
-      vel += (*iter).weight_ * bead->getVel();
+      weighted_sum_of_atomistic_velocity += (*iter).weight_ * bead->getVel();
       bVel = true;
     }
     if (bead->HasF()) {
-      f += (*iter).force_weight_ * bead->getF();
+      weighted_sum_of_atomistic_forces += (*iter).force_weight_ * bead->getF();
       bF = true;
     }
   }
-  bead_out_->setMass(M);
-  if (bPos) bead_out_->setPos(cg);
-  if (bVel) bead_out_->setVel(vel);
-  if (bF) bead_out_->setF(f);
+  bead_out_->setMass(sum_of_atomistic_mass);
+  if (bPos) bead_out_->setPos(weighted_sum_of_atomistic_pos);
+  if (bVel) bead_out_->setVel(weighted_sum_of_atomistic_velocity);
+  if (bF) bead_out_->setF(weighted_sum_of_atomistic_forces);
 }
 
 /// \todo implement this function

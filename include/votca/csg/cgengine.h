@@ -61,7 +61,7 @@ class CGEngine {
   /**
       load molecule type from file
   */
-  void LoadMoleculeType(std::string filename);
+  void RegisterCGMolecules(std::string filename);
 
   //  AtomisiticToCGMoleculeConverter *getMolecularConverter(std::string name);
 

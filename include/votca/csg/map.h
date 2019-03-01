@@ -32,22 +32,23 @@ class BeadMap;
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
-class Map {
+class AtomisticToCGMoleculeMapper {
  public:
-  Map(const Molecule &mol_in, Molecule &mol_out)
-      : mol_in_(mol_in), mol_out_(mol_out) {}
-  ~Map();
+  AtomisticToCGMoleculeMapper(const Molecule &atomistic_molecule,
+                              Molecule &cg_molecule)
+      : atomistic_molecule_(atomistic_molecule), cg_molecule_(cg_molecule) {}
+  ~AtomisticToCGMoleculeMapper();
 
   void Apply();
 
   BeadMap *CreateBeadMap(const byte_t symmetry,
                          const BoundaryCondition *boundaries,
-                         const Molecule *mol_in, Bead *bead_out,
+                         const Molecule *atomistic_molecule, Bead *bead_out,
                          Property *opts_map, Property *opts_bead);
 
  protected:
-  Molecule mol_in_, mol_out_;
-  std::vector<std::unique_ptr<BeadMap>> maps_;
+  Molecule atomistic_molecule_, cg_molecule_;
+  std::vector<std::unique_ptr<BeadMap>> bead_maps_;
 };
 
 /*******************************************************
@@ -68,7 +69,7 @@ class BeadMap {
   Bead *bead_out_;
   Property *opts_map_;
   Property *opts_bead_;
-  friend class Map;
+  friend class AtomisticToCGMoleculeMapper;
 };
 
 inline void BeadMap::Initialize(const BoundaryCondition *boundaries,
@@ -101,7 +102,7 @@ class Map_Sphere : public BeadMap {
     double force_weight_;
   };
   std::vector<element_t> matrix_;
-  friend class Map;
+  friend class AtomisticToCGMoleculeMapper;
 };
 
 inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
@@ -122,7 +123,7 @@ class Map_Ellipsoid : public Map_Sphere {
 
  protected:
   Map_Ellipsoid() {}
-  friend class Map;
+  friend class AtomisticToCGMoleculeMapper;
 };
 
 }  // namespace csg
