@@ -71,7 +71,7 @@ class AtomCGConverter {
    *
    * @return cg molecule type as a string
    */
-  const std::string &getCGType(string atomistic_molecule_type) const;
+  const std::string &getCGMoleculeType(string atomistic_molecule_type) const;
 
   /**
    * @brief Provided the cg name of the molecule returns the atomic name of the
@@ -81,7 +81,7 @@ class AtomCGConverter {
    *
    * @return atomistic molecule type as a string
    */
-  const std::string &getAtomisticType(string cg_molecule_type) const;
+  const std::string &getAtomisticMoleculeType(string cg_molecule_type) const;
 
   /**
    * @brief Maps a atomistic molecule to a cg molecule and adds it to the cg
@@ -96,6 +96,23 @@ class AtomCGConverter {
    */
   void ConvertAtomisticMoleculeToCGAndAddToCGTopology(
       Molecule &atomistic_molecule, CSG_Topology &cg_top_out);
+
+  /**
+   * @brief
+   *
+   * Must pass all the atomic molecules bead ids in, the bead ids must increase
+   * in magnitude in correlation to how the .xml files are defined
+   *
+   * @param cg_or_atomic_molecule_type
+   * @param atomic_bead_ids
+   *
+   * @return
+   */
+  std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
+      string cg_or_atomic_molecule_type, vector<int> atomic_bead_ids);
+
+  std::vector<std::string> getAtomicBeadNamesOfCGBead(string cg_molecule_type,
+                                                      string cg_bead_type);
 
  private:
   /**

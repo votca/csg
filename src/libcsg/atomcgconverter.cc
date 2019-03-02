@@ -121,6 +121,33 @@ void AtomCGConverter::LoadConversionStencil(string filename) {
   // ParseMapping(options.get("cg_molecule.maps"));
 }
 
+std::unordered_map<int, string>
+    AtomCGConverter::MapAtomicBeadIdsToAtomicBeadNames(
+        string cg_or_atomic_molecule_type, vector<int> bead_ids) {
+
+  assert(
+      (atomic_and_cg_molecule_types_.left.count(cg_or_atomic_molecule_type) ||
+       atomic_and_cg_molecule_types_.right.count(cg_or_atomic_molecule_type)) &&
+      "Cannot map atomic bead ids to atomic bead names because the molecule "
+      "type is not recognized.");
+
+  string cg_molecule_type = cg_or_atomic_molecule_type;
+  if (atomic_and_cg_molecule_types_.left.count(cg_or_atomic_molecule_type)) {
+    cg_molecule_type =
+        atomic_and_cg_molecule_types_.at(cg_or_atomic_molecule_type);
+  }
+
+  return cg_molecule_and_stencil[cg_molecule_type]
+      .MapAtomicBeadIdsToAtomicBeadNames(bead_ids);
+}
+
+// Must use the cg bead name not the type to do this
+vector<string> AtomCGConverter::getAtomicBeadNamesOfCGBead(
+    string cg_molecule_type, string cg_bead_name) {
+  assert(cg_molecule_and_stencil.count(cg_molecule_type) &&
+         "cg molecule type is not known to the atom-to-cg converter");
+  cg_molecule_and_stencil[cg_molecule_type].getAtomicBeadNames(cg_bead_name);
+}
 /*****************************************************************************
  * Private Internal Methods
  *****************************************************************************/
@@ -141,6 +168,14 @@ vector<CGBeadInfo> AtomCGConverter::ParseBeads_(Property &options_in) {
     if (p->exists("symmetry")) {
       bead_info.symmetry_ = p->get("symmetry").as<int>();
     }
+
+    // get the beads
+    vector<string> subbeads;
+    string bead_string(p->get("beads").value());
+    Tokenizer tok_beads(bead_string, " \n\t");
+    tok_beads.ToVector(subbeads);
+
+    bead_info.subbeads_ = subbeads;
 
     if (bead_cg_names.count(bead_info->cg_name_)) {
       throw runtime_error(string("bead name ") + bead_info.cg_name_ +

@@ -25,27 +25,50 @@
 namespace votca {
 namespace csg {
 
+/**
+ * @brief Contains all mapping information for translating atomistic topology
+ * data to cg topology data
+ *
+ * This consists of how to calculate the coarse grained positions,
+ * velocities, and forces from the atomistic positions, velocities and
+ * sources.
+ */
 class TopologyMap {
  public:
   ~TopologyMap();
 
-  TopologyMap(CSG_Topology *in, CSG_Topology *out);
+  TopologyMap(CSG_Topology *atomistic_top, CSG_Topology *cg_top);
 
   //  void AddMoleculeMap(Map *map);
-  void LoadMap(std::string filename);
+  void LoadMap(std::string filename, AtomCGConverter &converter);
 
   void Apply();
 
  private:
-  CSG_Topology *_in;
-  CSG_Topology *_out;
+  CSG_Topology *atomistic_top_;
+  CSG_Topology *cg_top_;
 
-  typedef std::vector<Map *> MapContainer;
-  MapContainer _maps;
+  std::unique_ptr<BoundaryCondition> boundaries_;
+  // First - atomic molecule type
+  // Second - cg molecule type
+  typedef std::pair<std::string, std::string> AtomAndCGMoleculeTypes;
+  std::unordered_map<AtomAndCGMoleculeTypes, AtomisticToCGMoleculeMapper>
+      molecule_names_and_maps_;
+  // typedef std::vector<Map *> MapContainer;
+  // MapContainer _maps;
 };
 
-inline TopologyMap::TopologyMap(CSG_Topology *in, CSG_Topology *out)
-    : _in(in), _out(out) {}
+inline TopologyMap::TopologyMap(CSG_Topology *atomistic_top,
+                                CSG_Topology *cg_top)
+    : atomistic_top_(atomistic_top), cg_top_(cg_top) {
+
+  // Ensure that the boundary conditions are the same between the two topologies
+  assert(atomistic_top->getBoxType() == cg_top->getBoxType() &&
+         "Boundary conditions differ between atomistic and cg topologies, "
+         "cannot create topology map.");
+
+  boundaries_ = cg_top->getBoundaryCondition()->Clone();
+}
 
 // inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
 

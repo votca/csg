@@ -32,9 +32,31 @@ using namespace std;
 namespace votca {
 namespace csg {
 
-Map::~Map() { bead_maps_.clear(); }
+AtomisticToCGMoleculeMapper::~AtomisticToCGMoleculeMapper() {
+  bead_maps_.clear();
+}
 
-BeadMap *Map::CreateBeadMap(const byte_t symmetry,
+void AtomisticToCGMoleculeMapper::Initialize(
+    std::unordered_map<std::string, BeadMapInfo> bead_maps_info) {
+
+  for (pair<string, BeadMapInfo> bead_map_info : bead_maps_info) {
+    switch (bead_map_info.symmetry_) {
+      case 1:
+        bead_type_and_maps_[bead_map_info.cg_bead_type_] =
+            unique_ptr<Map_Sphere>(new Map_Sphere());
+      case 3:
+        bead_type_and_maps_[bead_map_info.cg_bead_type_] =
+            unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid());
+      default:
+        throw runtime_error("unknown symmetry in bead definition!");
+    }
+
+    bead_type_and_maps_[bead_map_info.cg_bead_type_]->Initialize(
+        bead_map_info.atomic_subbeads_, bead_map_info.subbead_weights_);
+  }
+}
+/*
+BeadMap *AtomisticToCGMoleculeMapper::CreateBeadMap(const byte_t symmetry,
                             const BoundaryCondition *boundaries,
                             const Molecule *mol_in, Bead *bead_out,
                             Property *opts_map, Property *opts_bead) {
@@ -53,13 +75,91 @@ BeadMap *Map::CreateBeadMap(const byte_t symmetry,
                                 opts_bead);
   return bead_maps_.back().get();
 }
+*/
+void AtomisticToCGMoleculeMapper::Apply(
+    map<string, Bead *> name_and_atomic_bead) {
 
-void Map::Apply() {
-  for (unique_ptr<BeadMap> &map : bead_maps_) {
-    map->Apply();
+  for (pair<string, std::unique_ptr<BeadMap>> &bead_type_and_map :
+       bead_type_and_maps) {
+    bead_type_and_map.second->apply(name_and_atomic_bead);
   }
+  // for (unique_ptr<BeadMap> &map : bead_maps_) {
+  //  map->Apply();
+  //}
 }
+/*
+void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights){
+        Initialize(subbeads,weights,vector<double>);
+}*/
 
+void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
+                            vector<double> ds) {
+
+  assert(subbeads.size() == weights.size() &&
+         "subbeads and weights are not matched in bead map sphere.");
+
+  vector<double> fweights;
+  // normalize the weights
+  double norm = 1. / std::accumulate(weights.begin(), weights.end(), 0.);
+
+  transform(weights.begin(), weights.end(), weights.begin(),
+            bind2nd(multiplies<double>(), norm));
+  // get the d vector if exists or initialize same as weights
+  if (ds.size() > 0) {
+    // normalize d coefficients
+    norm = 1. / std::accumulate(ds.begin(), ds.end(), 0.);
+    transform(ds.begin(), ds.end(), ds.begin(),
+              bind2nd(multiplies<double>(), norm));
+  } else {
+    // initialize force-weights with weights
+    ds.resize(weights.size());
+    copy(weights.begin(), weights.end(), ds.begin());
+  }
+
+  assert(subbeads.size() == ds.size() &&
+         "subbeads and ds are not matched in bead map sphere.");
+
+  fweights.resize(weights.size());
+  // calculate force weights by d_i/w_i
+  for (size_t i = 0; i < weights.size(); ++i) {
+    if (weights[i] == 0 && ds[i] != 0) {
+      throw runtime_error(
+          "A d coefficient is nonzero while weights is zero in mapping " +
+          opts_map->get("name").as<string>());
+    }
+    if (weights[i] != 0) {
+      fweights[i] = ds[i] / weights[i];
+    } else {
+      fweights[i] = 0;
+    }
+  }
+
+  int index = 0;
+  for (string &name : subbeads) {
+    AddElem(name, weights.at(index), fweights.at(index));
+  }
+  // Which atomistic beads correspond to which weight and which force weight
+  /*
+    vector<int> bead_ids = mol_in->getBeadIds();
+    // WARNING this assumes that the bead weights are read in the same order
+    // as the bead ids are allocated, this method is prone to error because it
+    // does not guarantee that the weights and forces line up with the correct
+    // beads
+    sort(bead_ids.begin(), bead_ids.end());
+    int index = 0;
+    for (const int &bead_id : bead_ids) {
+
+      // int bead_id = *bead_ids.begin();
+      if (bead_id < 0) {
+        throw std::runtime_error(string("mapping error: molecule " +
+                                        beads[index] + " does not exist"));
+      }
+      AddElem(mol_in->getBeadConst(bead_id), weights[index], fweights[index]);
+      ++index;
+    }
+  */
+}
+/*
 void Map_Sphere::Initialize(const BoundaryCondition *boundaries,
                             const Molecule *mol_in, Bead *bead_out,
                             Property *opts_bead, Property *opts_map) {
@@ -147,169 +247,233 @@ void Map_Sphere::Initialize(const BoundaryCondition *boundaries,
     ++index;
   }
 }
+*/
+void Map_Sphere::Apply(BoundaryCondition *boundaries,
+                       map<string, Bead *> atomistic_beads, Bead *cg_bead) {
 
-void Map_Sphere::Apply() {
-  vector<element_t>::iterator iter;
-  bool bPos, bVel, bF;
-  bPos = bVel = bF = false;
+  assert(matrix_.size() == atomistic_beads.size() &&
+         "Cannot apply mapping mismatch in the number of atomistic beads");
+  assert(matrix_.size() > 0 &&
+         "Cannot apply mapping no atomistic beads have been specified.");
+  //	vector<element_t>::iterator iter;
   // bead_out_->ClearParentBeads();
 
   // the following is needed for pbc treatment
-  vec reference_position = vec(0, 0, 0);
-  string bead_type;
-  int bead_id = 0;
-  if (matrix_.size() > 0) {
-    if (matrix_.front().bead_in_->HasPos()) {
-      reference_position = matrix_.front().bead_in_->getPos();
-      bead_type = matrix_.front().bead_in_->getType();
-      bead_id = matrix_.front().bead_in_->getId();
-    }
-  }
+  //  vec reference_position = vec(0, 0, 0);
+  //  string bead_type;
+  //  int bead_id = 0;
+  // if (matrix_.size() > 0) {
 
+  Bead *atom = atomistic_beads.begin().second;
+  assert(atom->HasPos() &&
+         "Cannot apply mapping atomistic beads do not have position.");
+  //	if (matrix_.front().bead_in_->HasPos()) {
+  //	if( atom->HasPos() ) {
+  //		reference_position = matrix_.front().bead_in_->getPos();
+  //     bead_type = matrix_.front().bead_in_->getType();
+  //    bead_id = matrix_.front().bead_in_->getId();
+  vec reference_position = atom->getPos();
+  string bead_type = atom->getType();
+  int bead_id = atom->getId();
+  //	}
+  //}
+
+  bool bVel, bF;
+  bVel = bF = false;
   double sum_of_atomistic_mass = 0;
   vec weighted_sum_of_atomistic_pos(0., 0., 0.);
   vec weighted_sum_of_atomistic_forces(0., 0., 0.);
   vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
   double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
-  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
-    const Bead *bead = iter->bead_in_;
+  for (pair<string, element_t> &name_and_element : matrix_) {
+    //    const Bead *bead = iter->bead_in_;
+    atom = atomisitic_beads[name_and_element.first];
     // This is not needed because the ids should be the same between the cg bead
     // and the atomistic bead
     //    bead_out_->AddParentBead(bead->getId());
-    sum_of_atomistic_mass += bead->getMass();
-    if (bead->HasPos()) {
-      vec shortest_distance_beween_beads =
-          boundaries_->BCShortestConnection(reference_position, bead->getPos());
+    sum_of_atomistic_mass += atom->getMass();
+    assert(atom->HasPos() &&
+           "Cannot apply mapping atomistic beads do not have position.");
+    //   if (atom->HasPos()) {
+    vec shortest_distance_beween_beads =
+        boundaries_->BCShortestConnection(reference_position, atom->getPos());
 
-      if (abs(shortest_distance_beween_beads) > max_dist) {
-        cout << reference_position << " " << bead->getPos() << endl;
-        throw std::runtime_error(
-            "coarse-grained bead is bigger than half the box \n (atoms " +
-            bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) +
-            ")" + ", " + bead->getType() + " (id " +
-            boost::lexical_cast<string>(bead->getId() + 1) + ")" +
-            +" , molecule " +
-            boost::lexical_cast<string>(bead->getMoleculeId() + 1) + ")");
-      }
-      weighted_sum_of_atomistic_pos +=
-          (*iter).weight_ *
-          (shortest_distance_beween_beads + reference_position);
-      bPos = true;
+    if (abs(shortest_distance_beween_beads) > max_dist) {
+      cout << reference_position << " " << atom->getPos() << endl;
+      throw std::runtime_error(
+          "coarse-grained atom is bigger than half the box \n (atoms " +
+          bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) + ")" +
+          ", " + atom->getType() + " (id " +
+          boost::lexical_cast<string>(atom->getId() + 1) + ")" +
+          +" , molecule " +
+          boost::lexical_cast<string>(atom->getMoleculeId() + 1) + ")");
     }
-    if (bead->HasVel()) {
-      weighted_sum_of_atomistic_velocity += (*iter).weight_ * bead->getVel();
+    weighted_sum_of_atomistic_pos +=
+        name_and_element.second.weight_ *
+        (shortest_distance_beween_beads + reference_position);
+    //    bPos = true;
+    //  }
+    if (atom->HasVel()) {
+      weighted_sum_of_atomistic_velocity +=
+          name_and_element.second.weight_ * atom->getVel();
       bVel = true;
     }
-    if (bead->HasF()) {
-      weighted_sum_of_atomistic_forces += (*iter).force_weight_ * bead->getF();
+    if (atom->HasF()) {
+      weighted_sum_of_atomistic_forces +=
+          name_and_element.second.force_weight_ * atom->getF();
       bF = true;
     }
   }
-  bead_out_->setMass(sum_of_atomistic_mass);
-  if (bPos) bead_out_->setPos(weighted_sum_of_atomistic_pos);
-  if (bVel) bead_out_->setVel(weighted_sum_of_atomistic_velocity);
-  if (bF) bead_out_->setF(weighted_sum_of_atomistic_forces);
+  cg_bead->setMass(sum_of_atomistic_mass);
+  cg_bead->setPos(weighted_sum_of_atomistic_pos);
+  if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_velocity);
+  if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
 }
 
 /// \todo implement this function
-void Map_Ellipsoid::Apply() {
-  vector<element_t>::iterator iter;
-  vec cg(0., 0., 0.), c(0., 0., 0.), f(0., 0., 0.), vel(0., 0., 0.);
-  matrix m(0.);
-  bool bPos, bVel, bF;
-  bPos = bVel = bF = false;
+/// Warning the atomistic beads must be a map they cannot be an unordered_map
+void Map_Ellipsoid::Apply(BoundaryCondition *boundaries,
+                          std::map<string, Bead *> atomistic_beads,
+                          Bead *cg_bead) {
+  // vector<element_t>::iterator iter;
+  assert(matrix_.size() == atomistic_beads.size() &&
+         "Cannot apply mapping mismatch in the number of atomistic beads in "
+         "Map_Ellipsoid");
+  assert(matrix_.size() > 0 &&
+         "Cannot apply mapping no atomistic beads have been specified in "
+         "Map_Ellipsoid.");
+  // vec cg(0., 0., 0.), c(0., 0., 0.), f(0., 0., 0.), vel(0., 0., 0.);
 
   // the following is needed for pbc treatment
   // BoundaryCondition *top = bead_out_->getParent();
   double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
-  vec r0 = vec(0, 0, 0);
-  if (matrix_.size() > 0) {
-    if (matrix_.front().bead_in_->HasPos()) {
-      r0 = matrix_.front().bead_in_->getPos();
-    }
-  }
+  std::map<string, Bead *>::iterator name_and_bead_iter;
+  name_and_bead_iter = atomistic_beads.begin();
+  // Bead * atom = name_and_bead_iter->second;
+  assert(name_and_bead_iter->second->HasPos() &&
+         "Cannot apply mapping atomistic beads do not have position.");
+  vec reference_position = name_and_bead_iter->second->getPos();
+  ++name_and_bead_iter;
+  // if (matrix_.size() > 0) {
+  //  if (matrix_.front().bead_in_->HasPos()) {
+  // }
+  //}
 
   int n;
   n = 0;
-  bead_out_->ClearParentBeads();
-  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
-    const Bead *bead = iter->bead_in_;
-    bead_out_->AddParentBead(bead->getId());
-    if (bead->HasPos()) {
-      vec r = boundaries_->BCShortestConnection(r0, bead->getPos());
-      if (abs(r) > max_dist) {
-        throw std::runtime_error(
-            "coarse-grained bead is bigger than half the box");
-      }
-      cg += (*iter).weight_ * (r + r0);
-      bPos = true;
+  // bead_out_->ClearParentBeads();
+  // vec tensor_of_gyration(0.,0.,0.);
+  bool bVel, bF;
+  bVel = bF = false;
+  vec sum_of_atomistic_pos(0., 0., 0.);
+  vec weighted_sum_of_atomistic_pos(0., 0., 0.);
+  vec weighted_sum_of_atomistic_forces(0., 0., 0.);
+  vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
+  // for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
+  for (pair<string, element_t> name_and_element : matrix_) {
+    const Bead *atom = atomistic_beads[name_and_element.first];
+    // bead_out_->AddParentBead(atom->getId());
+    assert(atom->HasPos() &&
+           "Cannot apply mapping atomistic beads do not have position.");
+    // if (atom->HasPos()) {
+    vec shortest_distance_beween_beads =
+        boundaries_->BCShortestConnection(reference_position, atom->getPos());
+    if (abs(shortest_distance_beween_beads) > max_dist) {
+      throw std::runtime_error(
+          "coarse-grained atom is bigger than half the box");
     }
-    if (bead->HasVel() == true) {
-      vel += (*iter).weight_ * bead->getVel();
+    weighted_sum_of_atomistic_pos +=
+        name_and_element.second.weight_ *
+        (shortest_distance_beween_beads + reference_position);
+    // bPos = true;
+    //}
+    if (atom->HasVel() == true) {
+      weighted_sum_of_atomisitc_vel +=
+          name_and_element.second.weight_ * atom->getVel();
       bVel = true;
     }
-    if (bead->HasF()) {
-      f += (*iter).force_weight_ * bead->getF();
+    if (atom->HasF()) {
+      weighted_sum_of_atomisitc_forces +=
+          name_and_element.second.force_weight_ * atom->getF();
       bF = true;
     }
 
-    if ((*iter).weight_ > 0 && bead->HasPos()) {
-      c += bead->getPos();
+    if (name_and_element.second.weight_ > 0 && atom->HasPos()) {
+      sum_of_atomisitc_pos += atom->getPos();
       n++;
     }
   }
 
-  if (bPos) bead_out_->setPos(cg);
-  if (bVel) bead_out_->setVel(vel);
-  if (bF) bead_out_->setF(f);
+  // if (bPos) bead_out_->setPos(weighted_sum_of_atomistic_pos);
+  cg_bead->setPos(weighted_sum_of_atomistic_pos);
+  if (bVel) cg_bead->setVel(weighted_sum_of_atomisitc_vel);
+  if (bF) cg_bead->setF(weighted_sum_of_atomisitc_forces);
 
-  if (!matrix_[0].bead_in_->HasPos()) {
-    bead_out_->setU(vec(1.0, 0, 0));
-    bead_out_->setV(vec(.0, 1, 0));
-    bead_out_->setW(vec(.0, 0, 1));
-    return;
-  }
+  // if (!matrix_[0].bead_in_->HasPos()) {
+  // if (!matrix_[0].bead_in_->HasPos()) {
+  //  cg_bead->setU(vec(1.0, 0, 0));
+  //   cg_bead->setV(vec(.0, 1, 0));
+  //  cg_bead->setW(vec(.0, 0, 1));
+  // return;
+  // }
 
   // calculate the tensor of gyration
-  c = c / (double)n;
-  for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
-    if ((*iter).weight_ == 0) continue;
-    const Bead *bead = iter->bead_in_;
-    vec v = bead->getPos() - c;
+  matrix tensor_of_gyration(0.);
+  vec average_pos = sum_of_atomisitc_pos / (double)n;
+  double number_of_atomistic_beads = static_cast<double>(matrix_.size());
+  // for (iter = matrix_.begin(); iter != matrix_.end(); ++iter) {
+  for (pair<string, element_t> name_and_element : matrix_) {
+    if (name_and_element.second.weight_ == 0) continue;
+    const Bead *atom = atomistic_beads[name_and_element.first];
+    // const Bead *bead = iter->bead_in_;
+    vec pos = atom->getPos() - average_pos;
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
-    m[0][0] += v.getX() * v.getX() / (double)matrix_.size();
-    m[0][1] += v.getX() * v.getY() / (double)matrix_.size();
-    m[0][2] += v.getX() * v.getZ() / (double)matrix_.size();
-    m[1][1] += v.getY() * v.getY() / (double)matrix_.size();
-    m[1][2] += v.getY() * v.getZ() / (double)matrix_.size();
-    m[2][2] += v.getZ() * v.getZ() / (double)matrix_.size();
+    tensor_of_gyration[0][0] +=
+        pos.getX() * pos.getX() / number_of_atomisitic_beads;
+    tensor_of_gyration[0][1] +=
+        pos.getX() * pos.getY() / number_of_atomisitic_beads;
+    tensor_of_gyration[0][2] +=
+        pos.getX() * pos.getZ() / number_of_atomisitic_beads;
+    tensor_of_gyration[1][1] +=
+        pos.getY() * pos.getY() / number_of_atomisitic_beads;
+    tensor_of_gyration[1][2] +=
+        pos.getY() * pos.getZ() / number_of_atomisitic_beads;
+    tensor_of_gyration[2][2] +=
+        pos.getZ() * pos.getZ() / number_of_atomisitic_beads;
   }
-  m[1][0] = m[0][1];
-  m[2][0] = m[0][2];
-  m[2][1] = m[1][2];
+  tensor_of_gyration[1][0] = tensor_of_gyration[0][1];
+  tensor_of_gyration[2][0] = tensor_of_gyration[0][2];
+  tensor_of_gyration[2][1] = tensor_of_gyration[1][2];
 
   // calculate the eigenvectors
   matrix::eigensystem_t es;
-  m.SolveEigensystem(es);
+  tensor_of_gyration.SolveEigensystem(es);
+
+  // I do not like this, this is arbitrarily using the first three beads
+  // to determine the orientation parameters
+  vec reference_position2 = name_and_bead_iter->second->getPos();
+  ++name_and_bead_iter;
+  vec reference_position3 = name_and_bead_iter->second->getPos();
 
   vec u = es.eigenvecs[0];
-  vec v = matrix_[1].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
+  vec v = reference_position2 - reference_position;
   v.normalize();
 
-  bead_out_->setV(v);
+  cg_bead->setV(v);
 
-  vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
+  // vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
+  vec w = reference_position3 - reference_position;
   w.normalize();
 
   if ((v ^ w) * u < 0) u = vec(0., 0., 0.) - u;
-  bead_out_->setU(u);
+  cg_bead->setU(u);
 
   // write out w
   w = u ^ v;
   w.normalize();
-  bead_out_->setW(w);
+  cg_bead->setW(w);
 }
 
 }  // namespace csg

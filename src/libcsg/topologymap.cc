@@ -26,23 +26,38 @@ void TopologyMap::LoadMap(std::string file_name) {
 
   load_property_from_xml(options, file_name);
 
-  Property *options_maps = options.get("cg_molecule.maps");
+  string cg_molecule_type = options.get("cg_molecule.name").as<string>();
+  string atomistic_molecule_type =
+      options.get("cg_molecule.ident").as<string>();
 
-  list<Property *> molecule_maps = options_maps.Select("map");
+  AtomAndCGMoleculeTypes molecule_types(atomistic_molecule_type,
+                                        cg_molecule_type);
+
+  if (molecule_names_and_maps_.count(molecule_types)) {
+    throw invalid_argument(
+        "Cannot create map for specified molecules as it "
+        "already exists.");
+  }
+
+  unordered_map<string, BeadMapInfo> bead_maps_info = ParseBeads_(options);
+  ParseMaps_(options, bead_maps_info);
+
+  name_and_molecule_maps_.at(molecule_types) =
+      AtomisticToCGMolecaleMapper(atomistic_mol, cg_mol);
+
+  list<Property *> bead_maps_prop = options_maps.Select("map");
   // Cycle maps
-  for (list<Property *>::iterator map = molecule_maps.begin();
-       molecule_map != molecule_maps.end(); ++molecule_map) {
-    maps_[(*molecule_map)->get("name").as<string>()] = *molecule_map;
+  for (list<Property *>::iterator bead_map_prop = bead_maps_prop.begin();
+       bead_map_prop != bead_maps_prop.end(); ++bead_map_prop) {
+    // maps_[(*bead_map_prop)->get("name").as<string>()] = *bead_map_prop;
   }
-
-  if ((unsigned int)cg_mol.BeadCount() != beads_.size()) {
-    throw runtime_error(
-        "number of beads for cg molecule and mapping definition do "
-        "not match, check your molecule naming.");
-  }
-
-  AtomisticToCGMolecaleMapper *map =
-      new AtomisticToCGMolecaleMapper(atomistic_mol, cg_mol);
+  /*
+    if ((unsigned int)cg_mol.BeadCount() != beads_.size()) {
+      throw runtime_error(
+          "number of beads for cg molecule and mapping definition do "
+          "not match, check your molecule naming.");
+    }
+  */
   for (vector<CGBeadInfo *>::iterator beaddef = beads_.begin();
        beaddef != beads_.end(); ++beaddef) {
 
@@ -69,21 +84,125 @@ void TopologyMap::LoadMap(std::string file_name) {
   topology_map.AddMoleculeMap(molecule_map);
 }
 
-TopologyMap::~TopologyMap() {
-  MapContainer::iterator i;
+unordered_map<string, BeadMapInfo> TopologyMap::ParseBeads_(
+    Property &options_in) {
+  Property options = options.in.get("cg_beads");
+  list<Property *> beads = options.Select("cg_bead");
 
-  for (i = _maps.begin(); i != _maps.end(); ++i) delete *i;
-  _maps.clear();
+  unordered_map<string, BeadMapInfo> map_type_and_info;
+  for (list<Property *>::iterator bead_iter = beads.begin();
+       bead_iter != beads.end(); ++bead_iter) {
+
+    Property *p = *bead_iter;
+    BeadMapInfo map_info;
+    // map_info.cg_mol_type_ = p->get("name").as<string>();
+    map_info.cg_bead_type_ = p->get("type").as<string>();
+
+    // get the beads
+    vector<string> subbeads;
+    string bead_string(p->get("beads").value());
+    Tokenizer tok_beads(bead_string, " \n\t");
+    tok_beads.ToVector(subbeads);
+
+    map_info.atomistic_subbeads_ = subbeads;
+
+    map_info.cg_symmetry_ = 1;
+    if (p->exists("symmetry")) {
+      map_info.symmetry_ = p->get("symmetry").as<int>();
+    }
+
+    string map_type = p->get("mapping").as<string>();
+    if (map_type_and_info.count(map_type)) {
+      throw runtime_error(string("map name ") + map_type +
+                          " not unique in mapping");
+    }
+    map_type_and_info[map_type] = map_info;
+  }
+  return map_type_and_info;
 }
 
-void TopologyMap::Apply() {
+TopologyMap::ParseMaps_(Property &options_in,
+                        unordered_map<string, BeadMapInfo> &bead_maps_info) {
+
+  Property maps_prop = options.get("cg_molecule.maps");
+  list<Property *> all_maps = maps_prop.Select("map");
+
+  for (list<Property *>::iterator bead_map_iter = all_maps.begin();
+       bead_map_iter != all_maps.end(); ++bead_map_iter) {
+
+    Property *p = *bead_map_iter;
+    string map_type = p->get("name").as<string>();
+    // Ensure that the map is known
+    if (bead_maps_info.count(map_type) == 0) {
+      throw invalid_argument(
+          "Map name " + map_type +
+          " is not known because there are no cg_beads using it.");
+    }
+    // get vector of weights
+    Tokenizer tok_weights(opts_map_->get("weights").value(), " \n\t");
+    tok_weights.ConvertToVector<double>(weights);
+
+    if (weights.size() != bead_maps_info.cg_subbeads_.size()) {
+      string error_msg =
+          accumulate(bead_maps_info[map_type].cg_subbeads_.begin(),
+                     bead_maps_info[map_type].cg_subbeads_.end(), string(" "));
+      throw invalid_argument("The beads in the cg_bead are " + error_msg +
+                             " beads the weights are " + tok_weights);
+    }
+
+    // get vector of d values used for non-spherical beads
+    if (opts_map_->exists("d")) {
+      vector<double> d;
+      Tokenizer tok_d(opts_map_->get("d").value(), " \n\t");
+      tok_d.ConvertToVector(d);
+      if (d.size() != bead_maps_info.cg_subbeads_.size()) {
+        string error_msg = accumulate(
+            bead_maps_info[map_type].cg_subbeads_.begin(),
+            bead_maps_info[map_type].cg_subbeads_.end(), string(" "));
+        throw invalid_argument("The beads in the cg_bead are " + error_msg +
+                               " beads the d values are " + tok_d);
+      }
+      bead_maps_info[map_type].subbead_d_ = d;
+    }
+
+    bead_maps_info[map_type].subbead_weights_ = weights;
+  }
+}
+
+TopologyMap::~TopologyMap() {
+  //  MapContainer::iterator i;
+
+  // for (i = _maps.begin(); i != _maps.end(); ++i) delete *i;
+  // _maps.clear();
+}
+
+void TopologyMap::Apply(AtomCGConverter converter) {
   MapContainer::iterator iter;
 
   _out->setStep(_in->getStep());
   _out->setTime(_in->getTime());
   _out->setBox(_in->getBox());
 
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) (*iter)->Apply();
+  // Get the cg_beads
+  vector<int> cg_molecule_ids = cg_top_->getMoleculeIds();
+  for (int &cg_molecule_id : cg_molecule_ids) {
+    Molecule *cg_molecule = cg_top_->getMolecule(cg_molecule_id);
+    string cg_molecule_type = cg_molecule->getType();
+    vector<int> cg_bead_ids = cg_molecule->getBeadIds();
+    unordered_map<int, string> bead_ids_and_names =
+        converter.MapAtomicBeadIdsToAtomicBeadNames(cg_molecule_type,
+                                                    cg_bead_ids);
+    map<string, Bead *> name_and_atomic_bead;
+    for (pair<int, string> id_and_bead_name : bead_ids_and_names) {
+      name_and_atomic_bead[id_and_bead_name.second] =
+          atomistic_top_->getBead(id_and_bead_name.first);
+    }
+
+    for (int &cg_bead_id : cg_bead_ids) {
+      Bead *cg_bead = cg_top_->getBead(cg_bead_id);
+    }
+  }
+  // for (iter = _maps.begin(); iter != _maps.end(); ++iter) (*iter)->Apply();
 }
 
 }  // namespace csg
