@@ -32,7 +32,7 @@ class BeadMap;
 
 // We don't need the name for the mapping part only for the conversion part
 struct BeadMapInfo {
-  std::string cg_symmetry_;
+  int cg_symmetry_;
   std::string cg_bead_type_;
   std::vector<std::string> atomic_subbeads_;
   std::vector<double> subbead_weights_;
@@ -50,7 +50,7 @@ class AtomisticToCGMoleculeMapper {
         cg_molecule_type_(cg_molecule_type){};
   ~AtomisticToCGMoleculeMapper();
 
-  void Apply();
+  void Apply(std::map<std::string,Bead*> name_and_atomic_bead);
 
   void Initialize(std::unordered_map<std::string, BeadMapInfo> bead_maps_info);
 
@@ -73,19 +73,19 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply(BoundaryCondition *boundaries,
-                     std::map<name, Bead *> atomistic_beads, Bead *cg_bead) = 0;
+                     std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead) = 0;
   virtual void Initialize(std::vector<string> subbeads,
                           std::vector<double> weights,
                           std::vector<double> ds) = 0;
   virtual void Initialize(std::vector<string> subbeads,
-                          std::vector<double> weights) {
-    Initialize(subbeads, weights, vector<double> ds);
-  }
+                          std::vector<double> weights);
+ // virtual void Initialize(subbeads, weights, std::vector<double> ds);
+  
   //	virtual void Initialize(const BoundaryCondition *boundaries,
   //                         const Molecule *mol_in, Bead *bead_out,
   //                        Property *opts_map, Property *opts_bead);
 
-  vector<string> getAtomicBeadNames();
+  std::vector<string> getAtomicBeadNames();
 
  protected:
   BeadMap(){};
@@ -94,7 +94,13 @@ class BeadMap {
   //  Bead *bead_out_;
   //  Property *opts_map_;
   //  Property *opts_bead_;
-  std::unordered_map<string, element_t> matrix_;
+  struct element_t {
+    //		string atomic_bead_name_;
+    // const Bead *bead_in_;
+    double weight_;
+    double force_weight_;
+  };
+  std::unordered_map<std::string, element_t> matrix_;
   friend class AtomisticToCGMoleculeMapper;
 };
 
@@ -114,28 +120,22 @@ class BeadMap {
 class Map_Sphere : public BeadMap {
  public:
   void Apply(BoundaryCondition *boundaries,
-             std::map<string, Bead *> atomistic_beads, Bead *cg_bead);
+             std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead);
 
-  void Initialize();  // const BoundaryCondition *boundaries, const Molecule
+  void Initialize(std::vector<std::string> subbeads, std::vector<double> weights, std::vector<double> ds);  // const BoundaryCondition *boundaries, const Molecule
                       // *mol_in, Bead *bead_out, Property *opts_bead, Property
                       // *opts_map);
 
  protected:
   Map_Sphere() {}
   // void AddElem(const Bead *bead_in, double weight, double force_weight);
-  void AddElem(string atomic_bead_name, double weight, double force_weight);
+  void AddElem(std::string atomic_bead_name, double weight, double force_weight);
 
-  struct element_t {
-    //		string atomic_bead_name_;
-    // const Bead *bead_in_;
-    double weight_;
-    double force_weight_;
-  };
   friend class AtomisticToCGMoleculeMapper;
 };
 
 // inline void Map_Sphere::AddElem(const Bead *bead_in, double weight,
-inline void Map_Sphere::AddElem(string atomic_bead_name, double weight,
+inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
                                 double force_weight) {
   element_t el;
   // el.bead_in_ = bead_in;
@@ -150,7 +150,7 @@ inline void Map_Sphere::AddElem(string atomic_bead_name, double weight,
 class Map_Ellipsoid : public Map_Sphere {
  public:
   void Apply(BoundaryCondition *boundaries,
-             std::map<string, Bead *> atomistic_beads, Bead *cg_bead);
+             std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead);
 
  protected:
   Map_Ellipsoid() {}

@@ -28,7 +28,7 @@ namespace TOOLS = votca::tools;
 class OrthorhombicBox : public BoundaryCondition {
 
  public:
-  virtual std::unique_ptr<BoundaryCondition> clone() const override {
+  virtual std::unique_ptr<BoundaryCondition> Clone() const override {
     //		return std::make_unique<OrthorhombicBox>(*this);
     return std::unique_ptr<BoundaryCondition>(new OrthorhombicBox(*this));
     //(std::forward<OrthorhombicBox>(*this)...));

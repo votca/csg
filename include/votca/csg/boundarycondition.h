@@ -53,7 +53,7 @@ class BoundaryCondition {
    *
    * @return standard pointer to child class
    */
-  virtual std::unique_ptr<BoundaryCondition> clone() const = 0;
+  virtual std::unique_ptr<BoundaryCondition> Clone() const = 0;
   /**
    * set the simulation box
    * \param box triclinic box matrix

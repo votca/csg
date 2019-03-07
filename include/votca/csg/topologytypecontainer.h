@@ -35,7 +35,7 @@ class TopologyTypeContainer {
  public:
   TopologyTypeContainer(){};
 
-  bool MoleculeTypeExist(std::string molecule_type) const;
+  bool MoleculeTypeExist(const std::string molecule_type) const;
 
   void AddMoleculeType(std::string molecule_type);
 
@@ -45,13 +45,13 @@ class TopologyTypeContainer {
     return molecule_types_;
   }
 
-  bool ResidueTypeExist(std::string residue_type) const;
+  bool ResidueTypeExist(const std::string residue_type) const;
 
   void AddResidueType(std::string residue_type);
 
   size_t ResidueTypeCount() const { return residue_types_.size(); }
 
-  bool BeadTypeExist(std::string bead_type) const;
+  bool BeadTypeExist(const std::string bead_type) const;
 
   void AddBeadType(std::string bead_type);
 

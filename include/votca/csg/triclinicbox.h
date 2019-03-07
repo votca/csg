@@ -28,7 +28,7 @@ namespace TOOLS = votca::tools;
 class TriclinicBox : public BoundaryCondition {
 
  public:
-  virtual std::unique_ptr<BoundaryCondition> clone() const override {
+  virtual std::unique_ptr<BoundaryCondition> Clone() const override {
     //		return std::make_unique<TriclinicBox>(*this);
     return std::unique_ptr<BoundaryCondition>(
         new TriclinicBox(*this));  //(std::forward<TriclinicBox>(*this)...));

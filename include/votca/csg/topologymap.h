@@ -15,9 +15,9 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TOPOLOGYMAP_H
-#define _VOTCA_CSG_TOPOLOGYMAP_H
-
+#ifndef VOTCA_CSG_TOPOLOGYMAP_H
+#define VOTCA_CSG_TOPOLOGYMAP_H
+#include "atomcgconverter.h"
 #include "csgtopology.h"
 #include "map.h"
 #include <vector>
@@ -40,9 +40,19 @@ class TopologyMap {
   TopologyMap(CSG_Topology *atomistic_top, CSG_Topology *cg_top);
 
   //  void AddMoleculeMap(Map *map);
-  void LoadMap(std::string filename, AtomCGConverter &converter);
+  //
+  
+  /**
+   * @brief Will load a molecular coarse graining stencil from an .xml file 
+   *
+   * @param[in] filename
+   */
+  void LoadMap(const std::string & filename);
 
-  void Apply();
+  /**
+   * @brief Will map the positions, weights and d-values from an atomistic description to a coarse grained description.
+   */
+  void Apply(AtomCGConverter converter);
 
  private:
   CSG_Topology *atomistic_top_;
@@ -52,10 +62,17 @@ class TopologyMap {
   // First - atomic molecule type
   // Second - cg molecule type
   typedef std::pair<std::string, std::string> AtomAndCGMoleculeTypes;
+   
+
+  /**
+   * @brief Contains the atomic and coarse grained atom types, as well as the the mapping object that will map the atomic molecular type to a coarse graine type.
+   */
   std::unordered_map<AtomAndCGMoleculeTypes, AtomisticToCGMoleculeMapper>
       molecule_names_and_maps_;
   // typedef std::vector<Map *> MapContainer;
   // MapContainer _maps;
+  std::unordered_map<std::string,BeadMapInfo> ParseBeads_(TOOLS::Property & options);
+  void ParseMaps_(TOOLS::Property & options, std::unordered_map<std::string, BeadMapInfo> & bead_maps_info);
 };
 
 inline TopologyMap::TopologyMap(CSG_Topology *atomistic_top,
@@ -67,7 +84,7 @@ inline TopologyMap::TopologyMap(CSG_Topology *atomistic_top,
          "Boundary conditions differ between atomistic and cg topologies, "
          "cannot create topology map.");
 
-  boundaries_ = cg_top->getBoundaryCondition()->Clone();
+  boundaries_ = cg_top_->getBoundaryCondition()->Clone();
 }
 
 // inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
@@ -75,4 +92,4 @@ inline TopologyMap::TopologyMap(CSG_Topology *atomistic_top,
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TOPOLOGYMAP_H */
+#endif // VOTCA_CSG_TOPOLOGYMAP_H 

@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <numeric>
+#include <memory>
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/map.h>
@@ -33,26 +34,26 @@ namespace votca {
 namespace csg {
 
 AtomisticToCGMoleculeMapper::~AtomisticToCGMoleculeMapper() {
-  bead_maps_.clear();
+  bead_type_and_maps_.clear();
 }
 
 void AtomisticToCGMoleculeMapper::Initialize(
-    std::unordered_map<std::string, BeadMapInfo> bead_maps_info) {
+    unordered_map<string, BeadMapInfo> bead_maps_info) {
 
-  for (pair<string, BeadMapInfo> bead_map_info : bead_maps_info) {
-    switch (bead_map_info.symmetry_) {
+  for (pair<const string, BeadMapInfo> & bead_map_info : bead_maps_info) {
+    switch (bead_map_info.second.cg_symmetry_) {
       case 1:
-        bead_type_and_maps_[bead_map_info.cg_bead_type_] =
+        bead_type_and_maps_[bead_map_info.second.cg_bead_type_] =
             unique_ptr<Map_Sphere>(new Map_Sphere());
       case 3:
-        bead_type_and_maps_[bead_map_info.cg_bead_type_] =
+        bead_type_and_maps_[bead_map_info.second.cg_bead_type_] =
             unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid());
       default:
         throw runtime_error("unknown symmetry in bead definition!");
     }
 
-    bead_type_and_maps_[bead_map_info.cg_bead_type_]->Initialize(
-        bead_map_info.atomic_subbeads_, bead_map_info.subbead_weights_);
+    bead_type_and_maps_[bead_map_info.second.cg_bead_type_]->Initialize(
+        bead_map_info.second.atomic_subbeads_, bead_map_info.second.subbead_weights_);
   }
 }
 /*
@@ -76,12 +77,10 @@ BeadMap *AtomisticToCGMoleculeMapper::CreateBeadMap(const byte_t symmetry,
   return bead_maps_.back().get();
 }
 */
-void AtomisticToCGMoleculeMapper::Apply(
-    map<string, Bead *> name_and_atomic_bead) {
+void AtomisticToCGMoleculeMapper::Apply(map<string, Bead *> name_and_atomic_bead) {
 
-  for (pair<string, std::unique_ptr<BeadMap>> &bead_type_and_map :
-       bead_type_and_maps) {
-    bead_type_and_map.second->apply(name_and_atomic_bead);
+  for (pair<string,unique_ptr<BeadMap>> & bead_type_and_map : bead_type_and_maps_) {
+    bead_type_and_map.second->Apply(name_and_atomic_bead);
   }
   // for (unique_ptr<BeadMap> &map : bead_maps_) {
   //  map->Apply();
@@ -264,7 +263,7 @@ void Map_Sphere::Apply(BoundaryCondition *boundaries,
   //  int bead_id = 0;
   // if (matrix_.size() > 0) {
 
-  Bead *atom = atomistic_beads.begin().second;
+  Bead *atom = atomistic_beads.begin()->second;
   assert(atom->HasPos() &&
          "Cannot apply mapping atomistic beads do not have position.");
   //	if (matrix_.front().bead_in_->HasPos()) {
@@ -285,7 +284,7 @@ void Map_Sphere::Apply(BoundaryCondition *boundaries,
   vec weighted_sum_of_atomistic_forces(0., 0., 0.);
   vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
-  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
+  double max_dist = 0.5 * boundaries->getShortestBoxDimension();
   for (pair<string, element_t> &name_and_element : matrix_) {
     //    const Bead *bead = iter->bead_in_;
     atom = atomisitic_beads[name_and_element.first];
@@ -297,7 +296,7 @@ void Map_Sphere::Apply(BoundaryCondition *boundaries,
            "Cannot apply mapping atomistic beads do not have position.");
     //   if (atom->HasPos()) {
     vec shortest_distance_beween_beads =
-        boundaries_->BCShortestConnection(reference_position, atom->getPos());
+        boundaries->BCShortestConnection(reference_position, atom->getPos());
 
     if (abs(shortest_distance_beween_beads) > max_dist) {
       cout << reference_position << " " << atom->getPos() << endl;
@@ -347,7 +346,7 @@ void Map_Ellipsoid::Apply(BoundaryCondition *boundaries,
 
   // the following is needed for pbc treatment
   // BoundaryCondition *top = bead_out_->getParent();
-  double max_dist = 0.5 * boundaries_->getShortestBoxDimension();
+  double max_dist = 0.5 * boundaries->getShortestBoxDimension();
   std::map<string, Bead *>::iterator name_and_bead_iter;
   name_and_bead_iter = atomistic_beads.begin();
   // Bead * atom = name_and_bead_iter->second;
@@ -378,7 +377,7 @@ void Map_Ellipsoid::Apply(BoundaryCondition *boundaries,
            "Cannot apply mapping atomistic beads do not have position.");
     // if (atom->HasPos()) {
     vec shortest_distance_beween_beads =
-        boundaries_->BCShortestConnection(reference_position, atom->getPos());
+        boundaries->BCShortestConnection(reference_position, atom->getPos());
     if (abs(shortest_distance_beween_beads) > max_dist) {
       throw std::runtime_error(
           "coarse-grained atom is bigger than half the box");

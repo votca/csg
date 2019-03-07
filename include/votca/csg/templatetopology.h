@@ -141,6 +141,13 @@ class TemplateTopology {
     return molecules_.count(molecule_id);
   }
 
+  bool BeadTypeExist(const std::string bead_type) const {
+    return type_container_.BeadTypeExist(bead_type);
+  }
+
+  bool MoleculeTypeExist(const std::string molecule_type) const {
+    return type_container_.MoleculeTypeExist(molecule_type);
+  }
   /**
    * \brief Returns a constant pointer to the bead with index i
    *
