@@ -15,87 +15,45 @@
  *
  */
 
+#include <cassert>
+#include <unordered_map>
 #include <fstream>
 #include <votca/csg/cgengine.h>
 #include <votca/csg/version.h>
 #include <votca/tools/tokenizer.h>
-
+#include "../../include/votca/csg/csgtopology.h"
 namespace votca {
 namespace csg {
 
 using namespace std;
 
-namespace po = boost::program_options;
+//namespace po = boost::program_options;
 
-CGEngine::CGEngine() {}
-
-CGEngine::~CGEngine() {
-  /*  map<string, AtomToCGConverter *>::iterator i;
-    for (i = _molecule_defs.begin(); i != _molecule_defs.end(); ++i)
-      delete (*i).second;
-    _molecule_defs.clear();*/
-}
-
-/**
-    \todo melts with different molecules
-*/
-AtomToCGConverter *CGEngine::CreateCGTopology(CSG_Topology &atomistic_top_in,
-                                              CSG_Topology &cg_top_out) {
-
-  assert(atomistic_top_in.getBoxType() == cg_top_out.getBoxType() &&
-         "box types of topology in and out differ");
-  // Grab all the molecules
-  const unordered_map<int, Molecule> &atomistic_mols =
-      atomistic_top_in.Molecules();
-  // Setup which topology is being added to (cg_top_out) and which topology is
-  // being used to determine what is to be added (atomistic_top_in)
-  // TopologyMap *topology_map = new TopologyMap(&atomistic_top_in,
-  // &cg_top_out);
-  for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
-    // Grab a molecule
-    const Molecule *atomistic_mol = &(id_and_molecule.second);
-    if (IsIgnored(atomistic_mol->getType())) continue;
-    // AtomToCGConverter *converter =
-    // getMolecularConverter(atomistic_mol->getType());
-    /*    if (!converter) {
-          cout << "--------------------------------------\n"
-               << "WARNING: unknown molecule \"" << atomistic_mol->getType()
-               << "\" with id " << atomistic_mol->getId() << " in topology" <<
-       endl
-               << "molecule will not be mapped to CG representation\n"
-               << "Check weather a mapping file for all molecule exists, was "
-                  "specified in --cg "
-               << "separated by ; and the ident tag in xml-file matches the "
-                  "molecule name\n"
-               << "--------------------------------------\n";
-          continue;
-        }*/
-    converter.ConvertAtomisticMoleculeToCGAndAddToCGTopology(atomistic_mol,
-                                                             cg_top_out);
-
-    // AtomisticToCGMolecaleMapper *map =
-    // converter->CreateMap(atomistic_top_in.getBoundaryCondition(),
-    //                                *atomistic_mol, *mcg);
-    // topology_map->AddMoleculeMap(map);
-  }
-  cg_top_out.RebuildExclusions();
-  // return topology_map;
-  return topology_map;
-}
-
-void CGEngine::RegisterCGMolecules(string filename) {
+void CGEngine::LoadFiles(string filename){
   Tokenizer tok(filename, ";");
   Tokenizer::iterator iter;
 
   for (iter = tok.begin(); iter != tok.end(); ++iter) {
-    //    AtomToCGConverter *converter = new AtomToCGConverter();
     string file = *iter;
     boost::trim(file);
-    converter.LoadConversionStencil(file);
-    topology_map.LoadMap(file);
-    //_molecule_defs[converter->getAtomisticType()] = converter;
+    file_names_.insert(file);
   }
 }
+
+unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
+    CSG_Topology &atomistic_top_in,
+    CSG_Topology &cg_top_out
+     ) {
+
+  unique_ptr<AtomCGConverter> converter = unique_ptr<AtomCGConverter>(new AtomCGConverter);
+  for ( string file : file_names_ ){
+    converter->LoadMoleculeStencil(file); 
+  }
+  converter->Convert(atomistic_top_in,cg_top_out);
+
+  return converter;
+}
+
 
 }  // namespace csg
 }  // namespace votca

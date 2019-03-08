@@ -18,17 +18,16 @@
 #ifndef VOTCA_CSG_CGENGINE_H
 #define VOTCA_CSG_CGENGINE_H
 
-#include "cgmoleculedef.h"
 #include "cgobserver.h"
 #include "csgtopology.h"
 #include "topologymap.h"
+#include "atomcgconverter.h"
 #include <boost/program_options.hpp>
 #include <list>
 #include <map>
 #include <votca/tools/datacollection.h>
 
 #include "cgengine.h"
-#include "cgmoleculedef.h"
 #include "molecule.h"
 #include "nematicorder.h"
 #include "topologyreader.h"
@@ -42,28 +41,22 @@ namespace votca {
 namespace csg {
 
 namespace TOOLS = votca::tools;
-/**
- * @brief Coarse graining engine
- *
- * This class manages the coarse graining, at the moment it does the
- * measurement stuff
- */
+
 class CGEngine {
  public:
   CGEngine();
   ~CGEngine();
 
   /**
-      create a coarse grained topolgy based on a given topology
-  */
-  TopologyMap *CreateCGTopology(CSG_Topology &in, CSG_Topology &out);
+   * @brief Loads .xml files containing coarse graining stencils and mapping information
+   *
+   * @param[in] filenames - a string of with .xml files, can be a single file or multiple file names separated by ';'
+   */
+  void LoadFiles(string filenames);
 
-  /**
-      load molecule type from file
-  */
-  void RegisterCGMolecules(std::string filename);
+  std::unique_ptr<AtomCGConverter> PopulateCGTopology(
+      CSG_Topology & atomistic_top_in,CSG_Topology & cg_top);
 
-  //  AtomisiticToCGMoleculeConverter *getMolecularConverter(std::string name);
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process
@@ -81,25 +74,11 @@ class CGEngine {
   bool IsIgnored(std::string molecule_type);
 
  private:
-  // std::map<std::string, AtomisiticToCGMoleculeConverter *> _molecule_defs;
-  AtomToCGConverter converter;
+
+  unordered_set<std::string> file_names_;
 
   std::list<std::string> _ignores;
 };
-/*
-inline AtomisiticToCGMoleculeConverter
-*CGEngine::getMolecularConverter(std::string name) { std::map<std::string,
-AtomisiticToCGMoleculeConverter *>::iterator iter;
-
-  // if there is only 1 molecule definition, don't care about the name
-  if (_molecule_defs.size() == 1 && name == "unnamed") {
-    return (*(_molecule_defs.begin())).second;
-  }
-
-  iter = _molecule_defs.find(name);
-  assert(iter != _molecule_defs.end() && "Molecule definition does not exist");
-  return (*iter).second;
-}*/
 
 inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();

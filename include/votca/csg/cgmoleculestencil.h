@@ -41,10 +41,12 @@ class BoundaryCondition;
 
 struct CGBeadInfo {
   std::string cg_name_;
-  std::string type_;
-  byte_t symmetry_;
+  std::string cg_bead_type_;
+  byte_t cg_symmetry_;
   std::string mapping_;
-  vector<string> subbeads_;
+  vector<string> atomic_subbeads_;
+  vector<double> subbead_weights_;
+  vector<double> subbead_d_;
 };
 
 struct CGInteractionInfo {

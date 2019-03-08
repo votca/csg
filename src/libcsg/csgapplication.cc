@@ -179,7 +179,8 @@ bool CsgApplication::ProcessData(Worker *worker) {
   }
   // evaluate
   if (_do_mapping) {
-    worker->_map->Apply();
+    //worker->_map->Apply();
+    worker->converter_->Map(worker->_top_cg,worker->_top);
     worker->EvalConfiguration(&worker->_top_cg, &worker->_top);
   } else
     worker->EvalConfiguration(&worker->_top);
@@ -227,7 +228,8 @@ void CsgApplication::Run(void) {
 
   if (_do_mapping) {
     // read in the coarse graining definitions (xml files)
-    cg.RegisterCGMolecules(_op_vm["cg"].as<string>());
+  //  cg.RegisterCGMolecules(_op_vm["cg"].as<string>());
+    cg.LoadFiles(_op_vm["cg"].as<string>());
     // create the mapping + cg topology
 
     if (_op_vm.count("map-ignore") != 0) {
@@ -288,12 +290,13 @@ void CsgApplication::Run(void) {
     // Now that the _top object boundaries are consistent with the trajectory
     // files it is possible to create the CG topology.
     cout << "Calling CreateCGTopology" << endl;
-    master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
-
+    //master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
+    master->converter_ = cg.PopulateCGTopology(master->_top,master->_top_cg);
     cout << "I have " << master->_top_cg.BeadCount() << " beads in "
          << master->_top_cg.MoleculeCount()
          << " molecules for the coarsegraining" << endl;
-    master->_map->Apply();
+    //master->_map->Apply();
+    master->converter_->Map(master->_top,master->_top_cg);
     if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
   } else if (!EvaluateTopology(&master->_top)) {
     return;
@@ -317,7 +320,8 @@ void CsgApplication::Run(void) {
 
       if (_do_mapping) {
         // create the mapping + cg topology
-        myWorker->_map = cg.CreateCGTopology(myWorker->_top, myWorker->_top_cg);
+        //myWorker->_map = cg.CreateCGTopology(myWorker->_top, myWorker->_top_cg);
+        myWorker->converter_ = cg.PopulateCGTopology(myWorker->_top, myWorker->_top_cg);
       }
     }
 
@@ -345,7 +349,8 @@ void CsgApplication::Run(void) {
 
     // notify all observers that coarse graining has begun
     if (_do_mapping) {
-      master->_map->Apply();
+      //master->_map->Apply();
+      master->converter_->Map(master->_top_cg,master->_top);
       BeginEvaluate(&master->_top_cg, &master->_top);
     } else
       BeginEvaluate(&master->_top);
@@ -409,9 +414,9 @@ void CsgApplication::Run(void) {
   }
 }
 
-CsgApplication::Worker::~Worker() {
+/*CsgApplication::Worker::~Worker() {
   if (_map) delete _map;
-}
+}*/
 
 void CsgApplication::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   list<CGObserver *>::iterator iter;

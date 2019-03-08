@@ -114,7 +114,8 @@ class CsgApplication : public Application {
    protected:
     CsgApplication *_app;
     CSG_Topology _top, _top_cg;
-    TopologyMap *_map;
+    //TopologyMap *_map;
+    unique_ptr<AtomToCGConverter> converter_;
     int _id;
 
     void Run(void);
@@ -169,7 +170,8 @@ inline void CsgApplication::AddObserver(CGObserver *observer) {
   _observers.push_back(observer);
 }
 
-inline CsgApplication::Worker::Worker() : _app(NULL), _map(NULL), _id(-1) {}
+//inline CsgApplication::Worker::Worker() : _app(NULL), _map(NULL), _id(-1) {}
+inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 
 }  // namespace csg
 }  // namespace votca

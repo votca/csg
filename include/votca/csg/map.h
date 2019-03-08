@@ -18,6 +18,7 @@
 #ifndef VOTCA_CSG_MAP_H
 #define VOTCA_CSG_MAP_H
 
+#include "csgtopology.h"
 #include "molecule.h"
 #include <vector>
 #include <votca/tools/property.h>
@@ -31,14 +32,14 @@ class BoundaryCondition;
 class BeadMap;
 
 // We don't need the name for the mapping part only for the conversion part
-struct BeadMapInfo {
+/*struct BeadMapInfo {
   int cg_symmetry_;
   std::string cg_bead_type_;
   std::vector<std::string> atomic_subbeads_;
   std::vector<double> subbead_weights_;
   // Used for non-spherical beads
   std::vector<double> subbead_d_;
-};
+};*/
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
@@ -50,15 +51,12 @@ class AtomisticToCGMoleculeMapper {
         cg_molecule_type_(cg_molecule_type){};
   ~AtomisticToCGMoleculeMapper();
 
-  void Apply(std::map<std::string,Bead*> name_and_atomic_bead);
+  void Initialize(std::unordered_map<std::string, CGBeadInfo> bead_maps_info);
 
-  void Initialize(std::unordered_map<std::string, BeadMapInfo> bead_maps_info);
+  // Pass in a map containing the names of all the atomistic beads in the molecule and pointers to them
+  void Apply(BoundaryCondition * boundaries, std::map<std::string,Bead*> name_and_atomic_bead, CSG_Topology cg_top);
 
-  /*  BeadMap *CreateBeadMap(const byte_t symmetry,
-                           const BoundaryCondition *boundaries,
-                           const Molecule *atomistic_molecule, Bead *bead_out,
-                           Property *opts_map, Property *opts_bead);
-  */
+
  protected:
   // Molecule atomistic_molecule_, cg_molecule_;
   std::string atom_molecule_type_;
