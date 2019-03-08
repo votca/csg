@@ -57,15 +57,43 @@ void AtomisticToCGMoleculeMapper::Initialize(
   }
 }
 
-void AtomisticToCGMoleculeMapper::Apply(BoundaryCondition * boundaries, map<string, Bead *> name_and_atomic_bead, Molecule & cg_molecule ){
+void AtomisticToCGMoleculeMapper::Apply(
+    CSG_Topology &atom_top, 
+    CSG_Topology& cg_top, 
+    pair<int,map<int,vector<pair<string,int>>>> cg_mol_id_cg_bead_id_atomic_bead_ids ){
 
-  vector<int> bead_ids = cg_molecule.getBeadIds();
-  sort(bead_ids.begin(),bead_ids.end());
+  // First int cg_molecule id
+  // map
+  //   first int - the cg_bead_id 
+  //   vector pair
+  //       string - atomic name 
+  //       int - global atomic bead id
+
+
+  // Grab the correct cg molecule
+  int cg_mol_id = cg_mol_id_cg_bead_id_atomic_bead_ids.first;
+  Molecule * cg_mol = cg_top.getMolecule(cg_mol_id);
+ 
+  // Ensure that the type molecule type is correct
+  assert(cg_mol->getType() == cg_molecule_type_ && string("Cannot convert to ")
+        + string("the molecule with id ") + to_string(cg_mol_id)+
+        string(" as it is not of the correct type"));
+  
+  // Cycle throught the cg beads in a cg molecule
+  vector<int> bead_ids = cg_mol->getBeadIds();
   for ( int &cg_bead_id : bead_ids ){ 
-//    for (pair<const string,unique_ptr<BeadMap>> & bead_type_and_map : bead_type_and_maps_) {
-      bead_type_and_map.second->Apply(boundaries, name_and_atomic_bead, cg_molecule.getBead(cg_bead_id));
- //   }
-  }
+    Bead * cg_bead = cg_top.getBead(cg_bead_id);
+    // get the cg bead type
+    string cg_bead_type = cg_bead->getType();
+
+    map<string,Bead *> atomic_names_and_beads;
+    for ( pair<string,int> & atom_name_id : cg_mol_id_cg_bead_id_atomic_bead_ids.second[cg_bead_id]){
+      atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
+    }
+    // Grab the correct map
+    bead_type_and_maps_[cg_bead_type]->Apply(cg_top.getBoundaryCondition(),
+        atomic_names_and_beads,cg_bead);
+  } 
 }
 
 void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
@@ -117,7 +145,7 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
   
 }
 
-void Map_Sphere::Apply(BoundaryCondition *boundaries,
+void Map_Sphere::Apply(const BoundaryCondition *boundaries,
                        map<string, Bead *> atomistic_beads, Bead *cg_bead) {
 
   assert(matrix_.size() == atomistic_beads.size() &&
@@ -179,7 +207,7 @@ void Map_Sphere::Apply(BoundaryCondition *boundaries,
 }
 
 /// Warning the atomistic beads must be a map they cannot be an unordered_map
-void Map_Ellipsoid::Apply(BoundaryCondition *boundaries,
+void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
                           std::map<string, Bead *> atomistic_beads,
                           Bead *cg_bead) {
   assert(matrix_.size() == atomistic_beads.size() &&
