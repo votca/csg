@@ -15,17 +15,14 @@
  *
  */
 
-#ifndef VOTCA_CSG_CGMOLECULEDEF_H
-#define VOTCA_CSG_CGMOLECULEDEF_H
+#ifndef VOTCA_CSG_CGMOLECULESTENCIL_H
+#define VOTCA_CSG_CGMOLECULESTENCIL_H
 
-#include <list>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
-#include "exclusionlist.h"
-#include "map.h"
-#include "molecule.h"
+#include "cgbeadinfo.h"
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
 
@@ -35,29 +32,8 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
-
-class BoundaryCondition;
-
-struct CGBeadInfo {
-  std::string cg_name_;
-  std::string cg_bead_type_;
-  byte_t cg_symmetry_;
-  std::string mapping_;
-  vector<string> atomic_subbeads_;
-  vector<double> subbead_weights_;
-  vector<double> subbead_d_;
-};
-
-struct CGInteractionInfo {
-  std::string type_;
-  std::string group_;
-  std::vector<std::string> bead_names_;
-};
-
-typedef boost::bimap<bimaps::set_of<std::string>,
-                     bimaps::multiset_of<std::string>>
-    multi_bimap;
+  
+typedef boost::bimap<boost::bimaps::set_of<std::string>,boost::bimaps::multiset_of<std::string>> multi_bimap;
 /**
  * @brief Definition of coarse grained molecule
  *
@@ -66,7 +42,7 @@ typedef boost::bimap<bimaps::set_of<std::string>,
  */
 class CGMoleculeStencil {
  public:
-  CGMoleculeStencil(string cg_molecule_type, string atomistic_molecule_type)
+  CGMoleculeStencil(std::string cg_molecule_type, std::string atomistic_molecule_type)
       : cg_molecule_type_(cg_molecule_type),
         atomistic_molecule_type_(atomistic_molecule_type){};
 
@@ -77,67 +53,31 @@ class CGMoleculeStencil {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  AddBeadInfo(vector<CGBeadInfo> bead_info) {
-    bead_info_ = bead_info;
-
-    for (CGBeadInfo &info : bead_info_) {
-      string cg_bead_name = info.cg_name_;
-      for (string &atomic_name : info.subbeads_) {
-        cg_and_atom_names(multi_bimap::value_type(cg_bead_name, atomic_name));
-      }
-    }
-  }
+  void AddBeadInfo(std::vector<CGBeadInfo> bead_info);
 
   // Assumes that the bead_ids when sorted line up with the CGBeadInfo vector
-  unordered_map<int, string> MapAtomicBeadIdsToAtomicBeadNames(
-      vector<int> bead_ids) {
-    assert(bead_ids.size() == cg_and_atom_names.right.size() &&
-           "number of bead_ids is not consistent with the number of atomic "
-           "beads stored in the atomic molecule.");
-    sort(bead_ids.begin(), bead_ids.end());
-    unordered_map<int, string> id_and_bead_name;
-    int index = 0;
-    for (CGBeadInfo &bead_info : bead_info_) {
-      for (string &atom_name : bead_info.subbeads_) {
-        id_and_bead_name[bead_ids.at(index)] = atom_name;
-        ++index;
-      }
-    }
-  }
+  std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
+      std::vector<int> bead_ids);
+  
+  std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name);
 
-  vector<string> getAtomicBeadNames(string cg_bead_name) {
-    vector<string> atom_names;
-    std::pair<multi_bimap::left_const_iteractor,
-              multi_bimap::left_const_iterator>
-        begin_and_end = cg_and_atom_names.left.equal_range(cg_bead_name);
-    for (multi_bimap::left_const_iteractor iter = begin_and_end.first;
-         iter != begin_and_end.second; ++iter) {
-      atom_names.push_back(iter->second);
-    }
-  }
+  std::string getCGBeadName(std::string atom_bead_name);
 
-  string getCGBeadName(string atom_bead_name) {
-    return multi_bimap.left.at(atom_bead_name);
-  }
+  void AddInteractionInfo(std::vector<CGInteractionInfo> interaction_info);
 
-  AddInteractionInfo(vector<CGInteractionInfo> interaction_info) {
-    interaction_info_ = interaction_info;
-  }
+  const std::vector<CGBeadInfo> &getBeadInfo();
 
-  const vector<CGBeadInfo> &getBeadInfo() { return bead_info_; }
+  const std::vector<CGInteractionInfo> &getInteractionInfo();
 
-  const vector<CGInteractionInfo> &getInteractionInfo() {
-    return interaction_info_;
-  }
+  const std::string &getCGMoleculeType() const;
 
-  const std::string &getCGMoleculeType() const { return cg_molecule_type_; }
-
-  const std::string &getAtomisticMoleculeType() const {
-    return atomistic_molecule_type_;
-  }
+  const std::string &getAtomisticMoleculeType() const;
 
  private:
-  multi_bimap cg_and_atom_names;
+  std::string cg_molecule_type_;
+  std::string atomistic_molecule_type_;
+  multi_bimap cg_and_atom_names_;
+  // Must appear in the order it is read in from the .xml file
   std::vector<CGBeadInfo> bead_info_;
   std::vector<CGInteractionInfo> interaction_info_;
 };
@@ -145,4 +85,4 @@ class CGMoleculeStencil {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // VOTCA_CSG_CGMOLECULEDEF_H
+#endif  // VOTCA_CSG_CGMOLECULESTENCIL_H

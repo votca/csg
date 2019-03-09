@@ -128,8 +128,7 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
   for (size_t i = 0; i < weights.size(); ++i) {
     if (weights[i] == 0 && ds[i] != 0) {
       throw runtime_error(
-          "A d coefficient is nonzero while weights is zero in mapping " +
-          opts_map->get("name").as<string>());
+          "A d coefficient is nonzero while weights is zero in mapping ");
     }
     if (weights[i] != 0) {
       fweights[i] = ds[i] / weights[i];
@@ -146,13 +145,13 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
 }
 
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
-                       map<string, Bead *> atomistic_beads, Bead *cg_bead) {
+                       map<string, Bead *> atomic_beads, Bead *cg_bead) {
 
-  assert(matrix_.size() == atomistic_beads.size() &&
+  assert(matrix_.size() == atomic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads");
   assert(matrix_.size() > 0 &&
          "Cannot apply mapping no atomistic beads have been specified.");
-    Bead *atom = atomistic_beads.begin()->second;
+    Bead *atom = atomic_beads.begin()->second;
   assert(atom->HasPos() &&
          "Cannot apply mapping atomistic beads do not have position.");
   
@@ -168,8 +167,8 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
   vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
   double max_dist = 0.5 * boundaries->getShortestBoxDimension();
-  for (pair<string, element_t> &name_and_element : matrix_) {
-    atom = atomisitic_beads[name_and_element.first];
+  for (pair<const string, element_t> &name_and_element : matrix_) {
+    atom = atomic_beads[name_and_element.first];
     sum_of_atomistic_mass += atom->getMass();
     assert(atom->HasPos() &&
            "Cannot apply mapping atomistic beads do not have position.");

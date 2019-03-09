@@ -15,20 +15,21 @@
  *
  */
 
-#ifndef _VOTCA_CSG_APPLICATION_H
-#define _VOTCA_CSG_APPLICATION_H
+#ifndef VOTCA_CSG_APPLICATION_H
+#define VOTCA_CSG_APPLICATION_H
 
 #include "cgobserver.h"
 #include "csgtopology.h"
-#include "topologymap.h"
+#include "atomcgconverter.h"
 #include "trajectoryreader.h"
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>
 #include <votca/tools/thread.h>
 
+namespace TOOLS = votca::tools;
+
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 class CsgApplication : public Application {
  public:
@@ -115,7 +116,7 @@ class CsgApplication : public Application {
     CsgApplication *_app;
     CSG_Topology _top, _top_cg;
     //TopologyMap *_map;
-    unique_ptr<AtomToCGConverter> converter_;
+    std::unique_ptr<AtomCGConverter> converter_;
     int _id;
 
     void Run(void);
@@ -176,4 +177,4 @@ inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_APPLICATION_H */
+#endif // VOTCA_CSG_APPLICATION_H 

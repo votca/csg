@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
+#include "map.h"
 #include "cgmoleculestencil.h"
 #include "exclusionlist.h"
-#include "map.h"
 #include "molecule.h"
 #include <boost/bimap.hpp>
 #include <votca/tools/property.h>
@@ -33,9 +33,7 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
-class BoundaryCondition;
 /**
  * @brief Converter class provides methods for converting a atomistic molecule
  * to a coarse grained molecule
@@ -73,7 +71,7 @@ class AtomCGConverter {
    *
    * @return cg molecule type as a string
    */
-  const std::string &getCGMoleculeType(string atomistic_molecule_type) const;
+  const std::string &getCGMoleculeType(std::string atomistic_molecule_type) const;
 
   /**
    * @brief Provided the cg type of the molecule returns the atomic type of the
@@ -83,7 +81,7 @@ class AtomCGConverter {
    *
    * @return atomistic molecule type as a string
    */
-  const std::string &getAtomisticMoleculeType(string cg_molecule_type) const;
+  const std::string &getAtomisticMoleculeType(std::string cg_molecule_type) const;
 
   /**
    * @brief Converts a atomic topology to a coarsegrained topology
@@ -104,15 +102,17 @@ class AtomCGConverter {
    */
   void Map(CSG_Topology & atomic_top_in, CSG_Topology & cg_top_out);
     
-  std::vector<std::string> getAtomicBeadNamesOfCGBead(string cg_molecule_type,
-                                                      string cg_bead_type);
+  std::vector<std::string> getAtomicBeadNamesOfCGBead(std::string cg_molecule_type,
+                                                      std::string cg_bead_type);
 
   bool AtomisticMoleculeTypeExist(std::string atomistic_molecule_type);
  private:
 
   std::unordered_set<std::string> file_names_;
 
-  std::unordered_set<std::string> atomistic_molecular_types_to_ignore_;
+  std::map<int,std::map<int,std::vector<std::pair<std::string,int>>>> cgmolid_cgbeadid_atomicbeadnames_and_ids_;
+
+  std::unordered_set<std::string> atomic_mol_types_to_ignore_;
   /**
    * @brief Atomic and cg bimap stores the relationship between the two types
    * of molecules
@@ -124,13 +124,12 @@ class AtomCGConverter {
    *
    * string is the cg_molecule_type
    */
-  std::unordered_map<std::string, CGMoleculeStencil> cg_molecule_and_stencil;
+  std::unordered_map<std::string, CGMoleculeStencil> cg_molecule_and_stencil_;
 
   // First string atomic_molecule_type 
   // Second string cg_molecule_type 
   // The molecule map
-  std::unordered_map<std::string,std::unordered_map<std::string,AtomisticToCGMoleculeMapper>>
-     molecule_names_and_maps_;
+  std::unordered_map<std::string,std::unordered_map<std::string,AtomisticToCGMoleculeMapper>> mol_names_and_maps_;
 
   /**
    * @brief Maps a atomistic molecule to a cg molecule and adds it to the cg
@@ -158,15 +157,18 @@ class AtomCGConverter {
    * @return
    */
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames_(
-      string cg_or_atomic_molecule_type, vector<int> atomic_bead_ids);
+      std::string cg_or_atomic_molecule_type, std::vector<int> atomic_bead_ids);
 
 
   void CheckThatBeadCountAndInteractionTypeAreConsistent_(
-      string interaction_type, size_t bead_count) const;
+      std::string interaction_type, size_t bead_count) const;
 
-  void ParseBeads_(Property &options);
+  std::vector<CGBeadInfo> ParseBeads_(Property &options);
 
-  void ParseBonded_(Property &options);
+  std::vector<CGInteractionInfo> ParseBonded_(Property &options);
+
+  void ParseMaps_(Property * options_in, 
+      std::unordered_map<std::string,CGBeadInfo> & bead_maps_info);
 
   std::unordered_map<std::string, int> CreateBeads_(Molecule *cg_mol,
                                                     CGMoleculeStencil stencil,
@@ -176,7 +178,7 @@ class AtomCGConverter {
       Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
       std::unordered_map<std::string, int> bead_name_to_id);
 
-  Molecule *CreateMolecule_(std::string cg_molecule_type, int molecule_id,
+  std::map<int, std::vector<std::pair<std::string,int>>> CreateMolecule_(std::string cg_molecule_type, int molecule_id,
                             CSG_Topology &cg_top_out);
 };
 

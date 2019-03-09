@@ -58,7 +58,7 @@ class TemplateTopology {
  public:
   /// constructor
   TemplateTopology() : time_(0.0), has_vel_(false), has_force_(false) {
-    bc_ = OpenBox().clone();
+    bc_ = OpenBox().Clone();
   }
   ~TemplateTopology();
 
@@ -459,7 +459,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
   molecules_.clear();
   type_container_.Clear();
   interactions_.clear();
-  bc_ = OpenBox().clone();
+  bc_ = OpenBox().Clone();
 }
 
 template <class Bead_T, class Molecule_T>
@@ -470,7 +470,7 @@ TemplateTopology<Bead_T, Molecule_T>::~TemplateTopology() {
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::CopyBoundaryConditions(
     const TemplateTopology<Bead_T, Molecule_T> &top) {
-  bc_ = top.bc_->clone();
+  bc_ = top.bc_->Clone();
 }
 
 template <class Bead_T, class Molecule_T>
@@ -482,7 +482,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
   has_force_ = top.has_force_;
   beads_ = top.beads_;
   molecules_ = top.molecules_;
-  bc_ = top.bc_->clone();
+  bc_ = top.bc_->Clone();
   type_container_ = top.type_container_;
   particle_group_ = top.particle_group_;
 
@@ -516,15 +516,15 @@ void TemplateTopology<Bead_T, Molecule_T>::setBox(
   switch (boxtype) {
     case BoundaryCondition::typeTriclinic:
       std::cout << "Box is triclinic" << std::endl;
-      bc_ = TriclinicBox().clone();
+      bc_ = TriclinicBox().Clone();
       break;
     case BoundaryCondition::typeOrthorhombic:
-      bc_ = OrthorhombicBox().clone();
+      bc_ = OrthorhombicBox().Clone();
       std::cout << "Box is OrthoRhombic" << std::endl;
       break;
     default:
       std::cout << "Box is Open" << std::endl;
-      bc_ = OpenBox().clone();
+      bc_ = OpenBox().Clone();
       break;
   }
 
