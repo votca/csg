@@ -188,7 +188,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
 
   // Create a mapper to map from the atom to the cg molecule
   mol_names_and_maps_.at(atom_mol_type).insert(std::make_pair(cg_mol_type,move(
-    AtomisticToCGMoleculeMapper(atom_mol_type,cg_mol_type))));
+    AtomToCGMoleculeMapper(atom_mol_type,cg_mol_type))));
   
   // Initialize the mapper
   mol_names_and_maps_.at(atom_mol_type).at(cg_mol_type).Initialize( map_and_beads_info);

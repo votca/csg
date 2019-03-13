@@ -129,7 +129,7 @@ class AtomCGConverter {
   // First string atomic_molecule_type 
   // Second string cg_molecule_type 
   // The molecule map
-  std::unordered_map<std::string,std::unordered_map<std::string,AtomisticToCGMoleculeMapper>> mol_names_and_maps_;
+  std::unordered_map<std::string,std::unordered_map<std::string,AtomToCGMoleculeMapper>> mol_names_and_maps_;
 
   /**
    * @brief Maps a atomistic molecule to a cg molecule and adds it to the cg

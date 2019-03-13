@@ -41,11 +41,11 @@ vector<string> BeadMap::getAtomicBeadNames(){
   return bead_names;
 }
 
-AtomisticToCGMoleculeMapper::~AtomisticToCGMoleculeMapper() {
+AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
   bead_type_and_maps_.clear();
 }
 
-void AtomisticToCGMoleculeMapper::Initialize(
+void AtomToCGMoleculeMapper::Initialize(
     unordered_map<string, CGBeadStencil> bead_maps_info) {
 
   for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
@@ -65,7 +65,7 @@ void AtomisticToCGMoleculeMapper::Initialize(
   }
 }
 
-void AtomisticToCGMoleculeMapper::Apply(
+void AtomToCGMoleculeMapper::Apply(
     CSG_Topology &atom_top, 
     CSG_Topology& cg_top, 
     pair<int,map<int,vector<pair<string,int>>>> cg_mol_id_cg_bead_id_atomic_bead_ids ){

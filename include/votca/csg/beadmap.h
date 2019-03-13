@@ -59,7 +59,7 @@ class BeadMap {
     double force_weight_;
   };
   std::unordered_map<std::string, element_t> matrix_;
-  friend class AtomisticToCGMoleculeMapper;
+  friend class AtomToCGMoleculeMapper;
 };
 
 /*******************************************************
@@ -79,7 +79,7 @@ class Map_Sphere : public BeadMap {
   Map_Sphere() {}
   void AddElem(std::string atomic_bead_name, double weight, double force_weight);
 
-  friend class AtomisticToCGMoleculeMapper;
+  friend class AtomToCGMoleculeMapper;
 };
 
 inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
@@ -103,20 +103,20 @@ class Map_Ellipsoid : public Map_Sphere {
   }
  protected:
   Map_Ellipsoid() {}
-  friend class AtomisticToCGMoleculeMapper;
+  friend class AtomToCGMoleculeMapper;
 };
 
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
-class AtomisticToCGMoleculeMapper {
+class AtomToCGMoleculeMapper {
  public:
-  AtomisticToCGMoleculeMapper() {};
-  AtomisticToCGMoleculeMapper(std::string atom_molecule_type,
+  AtomToCGMoleculeMapper() {};
+  AtomToCGMoleculeMapper(std::string atom_molecule_type,
                               std::string cg_molecule_type)
       : atom_molecule_type_(atom_molecule_type),
         cg_molecule_type_(cg_molecule_type){};
-  ~AtomisticToCGMoleculeMapper();
+  ~AtomToCGMoleculeMapper();
 
   void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info);
 
@@ -127,7 +127,7 @@ class AtomisticToCGMoleculeMapper {
 
 
   // Copy Constructor
-  AtomisticToCGMoleculeMapper(const AtomisticToCGMoleculeMapper & other) :
+  AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other) :
      atom_molecule_type_(other.atom_molecule_type_),
     cg_molecule_type_(other.cg_molecule_type_){
 
@@ -138,7 +138,7 @@ class AtomisticToCGMoleculeMapper {
     };
 
   // Move assignment
-  AtomisticToCGMoleculeMapper & operator=(AtomisticToCGMoleculeMapper&& other){
+  AtomToCGMoleculeMapper & operator=(AtomToCGMoleculeMapper&& other){
     if(this!=&other){
       bead_type_and_maps_.clear();
       for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.bead_type_and_maps_){
@@ -152,7 +152,7 @@ class AtomisticToCGMoleculeMapper {
   }
 
   // Copy assignment
-  AtomisticToCGMoleculeMapper & operator=(const AtomisticToCGMoleculeMapper other){
+  AtomToCGMoleculeMapper & operator=(const AtomToCGMoleculeMapper other){
     if(this!=&other){
       bead_type_and_maps_.clear();
       for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.bead_type_and_maps_){
