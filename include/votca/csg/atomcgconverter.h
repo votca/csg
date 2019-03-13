@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "map.h"
+#include "beadmap.h"
 #include "cgmoleculestencil.h"
 #include "exclusionlist.h"
 #include "molecule.h"

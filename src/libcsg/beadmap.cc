@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/map.h>
+#include <votca/csg/beadmap.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/vec.h>

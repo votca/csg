@@ -26,7 +26,7 @@
 #include <votca/csg/atomcgconverter.h>
 #include <votca/csg/bead.h>
 #include <votca/csg/interaction.h>
-#include <votca/csg/map.h>
+#include "../../include/votca/csg/beadmap.h"
 
 #include <votca/tools/constants.h>
 #include <votca/tools/property.h>
@@ -57,7 +57,7 @@ AtomCGConverter::AtomCGConverter(vector<string> ignore_molecule_types){
 
 const std::string &AtomCGConverter::getCGMoleculeType(
     string atom_mol_type) const {
-  assert(atomic_and_cg_molecule_types.left.count(atom_mol_type) &&
+  assert(atomic_and_cg_molecule_types_.left.count(atom_mol_type) &&
          "atomistic molecule is not known");
   return atomic_and_cg_molecule_types_.left.at(atom_mol_type);
 }

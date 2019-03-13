@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef VOTCA_CSG_MAP_H
-#define VOTCA_CSG_MAP_H
+#ifndef VOTCA_CSG_BEADMAP_H
+#define VOTCA_CSG_BEADMAP_H
 
 #include "cgbeadstencil.h"
 #include "csgtopology.h"
@@ -179,4 +179,4 @@ class AtomisticToCGMoleculeMapper {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // VOTCA_CSG_MAP_H
+#endif  // VOTCA_CSG_BEADMAP_H
