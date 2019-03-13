@@ -123,7 +123,7 @@ class AtomToCGMoleculeMapper {
   // Pass in a map containing the names of all the atomistic beads in the molecule and pointers to them
   void Apply(CSG_Topology &atom_top,                                                     
      CSG_Topology& cg_top,                                                       
-     pair<int,map<int,vector<pair<string,int>>>> cg_mol_id_cg_bead_id_atomic_bead_names_ids);
+     pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadnames_ids);
 
 
   // Copy Constructor
@@ -131,8 +131,8 @@ class AtomToCGMoleculeMapper {
      atom_molecule_type_(other.atom_molecule_type_),
     cg_molecule_type_(other.cg_molecule_type_){
 
-      for( const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.bead_type_and_maps_){
-        bead_type_and_maps_.at(pr.first) = pr.second->Clone();
+      for( const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
+        cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
       }
 
     };
@@ -140,9 +140,9 @@ class AtomToCGMoleculeMapper {
   // Move assignment
   AtomToCGMoleculeMapper & operator=(AtomToCGMoleculeMapper&& other){
     if(this!=&other){
-      bead_type_and_maps_.clear();
-      for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.bead_type_and_maps_){
-        bead_type_and_maps_.at(pr.first) = std::move(pr.second);
+      cg_bead_name_and_maps_.clear();
+      for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
+        cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);
       }
       atom_molecule_type_ = other.atom_molecule_type_;
       cg_molecule_type_ = other.cg_molecule_type_;
@@ -154,9 +154,9 @@ class AtomToCGMoleculeMapper {
   // Copy assignment
   AtomToCGMoleculeMapper & operator=(const AtomToCGMoleculeMapper other){
     if(this!=&other){
-      bead_type_and_maps_.clear();
-      for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.bead_type_and_maps_){
-        bead_type_and_maps_.at(pr.first) = pr.second->Clone();
+      cg_bead_name_and_maps_.clear();
+      for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
+        cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
       }
       atom_molecule_type_ = other.atom_molecule_type_;
       cg_molecule_type_ = other.cg_molecule_type_;
@@ -171,8 +171,10 @@ class AtomToCGMoleculeMapper {
   std::string atom_molecule_type_;
   std::string cg_molecule_type_;
 
+  // contains each bead types and a vector of all the bead names of that type
+  std::unordered_map<std::string,set<string>> bead_type_and_names_;
   // Needs to be a unique_ptr to take advantage of polymorphism
-  std::unordered_map<string, std::unique_ptr<BeadMap>> bead_type_and_maps_;
+  std::unordered_map<string, std::unique_ptr<BeadMap>> cg_bead_name_and_maps_;
 };
 
 
