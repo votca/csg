@@ -103,7 +103,7 @@ class CsgApplication : public Application {
   class Worker : public Thread {
    public:
     Worker();
-    ~Worker();
+    ~Worker() {};
 
     /// \brief overload with the actual computation
     virtual void EvalConfiguration(CSG_Topology *top,

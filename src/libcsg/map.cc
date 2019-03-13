@@ -43,16 +43,16 @@ void AtomisticToCGMoleculeMapper::Initialize(
   for (pair<const string, CGBeadInfo> & bead_info : bead_maps_info) {
     switch (bead_info.second.cg_symmetry_) {
       case 1:
-        bead_type_and_maps_[bead_info.second.cg_bead_type_] =
+        bead_type_and_maps_.at(bead_info.second.cg_bead_type_) =
             unique_ptr<Map_Sphere>(new Map_Sphere());
       case 3:
-        bead_type_and_maps_[bead_info.second.cg_bead_type_] =
+        bead_type_and_maps_.at(bead_info.second.cg_bead_type_) =
             unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid());
       default:
         throw runtime_error("unknown symmetry in bead definition!");
     }
 
-    bead_type_and_maps_[bead_info.second.cg_bead_type_]->Initialize(
+    bead_type_and_maps_.at(bead_info.second.cg_bead_type_)->Initialize(
         bead_info.second.atomic_subbeads_, bead_info.second.subbead_weights_);
   }
 }
@@ -91,7 +91,7 @@ void AtomisticToCGMoleculeMapper::Apply(
       atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
     }
     // Grab the correct map
-    bead_type_and_maps_[cg_bead_type]->Apply(cg_top.getBoundaryCondition(),
+    bead_type_and_maps_.at(cg_bead_type)->Apply(cg_top.getBoundaryCondition(),
         atomic_names_and_beads,cg_bead);
   } 
 }
@@ -232,7 +232,7 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   vec sum_of_atomistic_pos(0., 0., 0.);
   vec weighted_sum_of_atomistic_pos(0., 0., 0.);
   vec weighted_sum_of_atomistic_forces(0., 0., 0.);
-  vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
+  vec weighted_sum_of_atomistic_vel(0., 0., 0.);
   for (pair<string, element_t> name_and_element : matrix_) {
     const Bead *atom = atomistic_beads[name_and_element.first];
     assert(atom->HasPos() &&
@@ -247,30 +247,30 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
         name_and_element.second.weight_ *
         (shortest_distance_beween_beads + reference_position);
     if (atom->HasVel() == true) {
-      weighted_sum_of_atomisitc_vel +=
+      weighted_sum_of_atomistic_vel +=
           name_and_element.second.weight_ * atom->getVel();
       bVel = true;
     }
     if (atom->HasF()) {
-      weighted_sum_of_atomisitc_forces +=
+      weighted_sum_of_atomistic_forces +=
           name_and_element.second.force_weight_ * atom->getF();
       bF = true;
     }
 
     if (name_and_element.second.weight_ > 0 && atom->HasPos()) {
-      sum_of_atomisitc_pos += atom->getPos();
+      weighted_sum_of_atomistic_pos += atom->getPos();
       n++;
     }
   }
 
   cg_bead->setPos(weighted_sum_of_atomistic_pos);
-  if (bVel) cg_bead->setVel(weighted_sum_of_atomisitc_vel);
-  if (bF) cg_bead->setF(weighted_sum_of_atomisitc_forces);
+  if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_vel);
+  if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
 
   // calculate the tensor of gyration
   matrix tensor_of_gyration(0.);
-  vec average_pos = sum_of_atomisitc_pos / (double)n;
-  double number_of_atomistic_beads = static_cast<double>(matrix_.size());
+  vec average_pos = weighted_sum_of_atomistic_pos / (double)n;
+  double number_of_atom_beads = static_cast<double>(matrix_.size());
   for (pair<string, element_t> name_and_element : matrix_) {
     if (name_and_element.second.weight_ == 0) continue;
     const Bead *atom = atomistic_beads[name_and_element.first];
@@ -278,17 +278,17 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
     tensor_of_gyration[0][0] +=
-        pos.getX() * pos.getX() / number_of_atomisitic_beads;
+        pos.getX() * pos.getX() / number_of_atom_beads;
     tensor_of_gyration[0][1] +=
-        pos.getX() * pos.getY() / number_of_atomisitic_beads;
+        pos.getX() * pos.getY() / number_of_atom_beads;
     tensor_of_gyration[0][2] +=
-        pos.getX() * pos.getZ() / number_of_atomisitic_beads;
+        pos.getX() * pos.getZ() / number_of_atom_beads;
     tensor_of_gyration[1][1] +=
-        pos.getY() * pos.getY() / number_of_atomisitic_beads;
+        pos.getY() * pos.getY() / number_of_atom_beads;
     tensor_of_gyration[1][2] +=
-        pos.getY() * pos.getZ() / number_of_atomisitic_beads;
+        pos.getY() * pos.getZ() / number_of_atom_beads;
     tensor_of_gyration[2][2] +=
-        pos.getZ() * pos.getZ() / number_of_atomisitic_beads;
+        pos.getZ() * pos.getZ() / number_of_atom_beads;
   }
   tensor_of_gyration[1][0] = tensor_of_gyration[0][1];
   tensor_of_gyration[2][0] = tensor_of_gyration[0][2];
@@ -311,8 +311,7 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   cg_bead->setV(v);
 
   // vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
-  vec w = reference_position3 - reference_position;
-  w.normalize();
+  vec w = reference_position3 - reference_position; w.normalize();
 
   if ((v ^ w) * u < 0) u = vec(0., 0., 0.) - u;
   cg_bead->setU(u);

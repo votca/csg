@@ -17,9 +17,9 @@
 
 #define BOOST_TEST_MAIN
 
-#define BOOST_TEST_MODULE map_test
+#define BOOST_TEST_MODULE atomcgconverter_test
 #include "../../include/votca/csg/csgtopology.h"
-#include "../../include/votca/csg/map.h"
+#include "../../include/votca/csg/atomcgconverter.h"
 #include "../../include/votca/csg/molecule.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
@@ -28,14 +28,10 @@
 using namespace std;
 using namespace votca::csg;
 
-BOOST_AUTO_TEST_SUITE(map_test)
+BOOST_AUTO_TEST_SUITE(atomcgconverter_test)
 
-BOOST_AUTO_TEST_CASE(test_map_constructor) {
-
-  Molecule mol_in;
-  Molecule mol_out;
-
-  Map maptest(mol_in, mol_out);
+BOOST_AUTO_TEST_CASE(test_atomcgconverter_constructor) {
+  AtomCGConverter converter;
 }
 
 BOOST_AUTO_TEST_CASE(test_load) {

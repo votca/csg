@@ -16,9 +16,9 @@
  */
 
 #include <boost/algorithm/string/trim.hpp>
-#include <votca/csg/cgengine.h>
-#include <votca/csg/csgapplication.h>
-#include <votca/csg/topologymap.h>
+#include "../../include/votca/csg/cgengine.h"
+#include "../../include/votca/csg/csgapplication.h"
+//#include <votca/csg/topologymap.h>
 #include <votca/csg/topologyreader.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/csg/trajectorywriter.h>

@@ -30,7 +30,7 @@ namespace votca {
 namespace csg {
 
   using namespace std;
-
+  
   // This assumes that the vector is ordered according to the creation of the
   // beads in the molecule Such the the first cg_bead points to the atoms in the
   // atomistic molecule with the smallest ids And the second cg_bead in the
@@ -42,7 +42,7 @@ namespace csg {
     for (CGBeadInfo &info : bead_info_) {
       string cg_bead_name = info.cg_name_;
       for (string &atomic_name : info.atomic_subbeads_) {
-        cg_and_atom_names_(multi_bimap::value_type(cg_bead_name, atomic_name));
+        cg_and_atom_names_.insert(multi_bimap::value_type(cg_bead_name, atomic_name));
       }
     }
   }

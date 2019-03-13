@@ -20,7 +20,7 @@
 
 #include "cgobserver.h"
 #include "csgtopology.h"
-#include "topologymap.h"
+//#include "topologymap.h"
 #include "atomcgconverter.h"
 #include <boost/program_options.hpp>
 #include <list>
@@ -44,8 +44,8 @@ namespace TOOLS = votca::tools;
 
 class CGEngine {
  public:
-  CGEngine();
-  ~CGEngine();
+  CGEngine() {};
+  ~CGEngine() {};
 
   /**
    * @brief Loads .xml files containing coarse graining stencils and mapping information

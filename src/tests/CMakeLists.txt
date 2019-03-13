@@ -1,6 +1,7 @@
 find_package(Boost 1.53.0 REQUIRED COMPONENTS unit_test_framework)
 
 foreach(PROG
+	test_atomcgconverter
   test_bead
   test_beadtriple
   test_basebead
@@ -10,12 +11,11 @@ foreach(PROG
   test_beadstructure_base
   test_beadstructure_algorithms
   test_bondedstatistics
-	test_cgmoleculedef
+	test_cgmoleculestencil
 	test_csg_topology
   test_interaction
   test_lammpsdatareader 
   test_lammpsdumpreaderwriter
-	test_map
 	test_nblist_3body
   test_nblistgrid_3body
   test_pdbreader

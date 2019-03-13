@@ -143,7 +143,7 @@ class AtomCGConverter {
    * @param[in,out] cg_top_out
    */
   void ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-      const Molecule &atomistic_molecule, CSG_Topology &cg_top_out);
+      const Molecule &atomistic_molecule, CSG_Topology &cg_top_out, CSG_Topology & atom_top);
 
   /**
    * @brief
@@ -167,19 +167,21 @@ class AtomCGConverter {
 
   std::vector<CGInteractionInfo> ParseBonded_(Property &options);
 
-  void ParseMaps_(Property * options_in, 
+  void ParseMaps_(Property & options_in, 
       std::unordered_map<std::string,CGBeadInfo> & bead_maps_info);
 
-  std::unordered_map<std::string, int> CreateBeads_(Molecule *cg_mol,
+  std::map<int,std::vector<std::pair<std::string,int>>> CreateBeads_(Molecule *cg_mol,
                                                     CGMoleculeStencil stencil,
-                                                    CSG_Topology &cg_top_out);
+                                                    CSG_Topology &cg_top_out,
+                                                    CSG_Topology & atom_top);
 
   void CreateInteractions_(
       Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
-      std::unordered_map<std::string, int> bead_name_to_id);
+      std::map<int,vector<pair<std::string, int>>> bead_name_to_id);
 
   std::map<int, std::vector<std::pair<std::string,int>>> CreateMolecule_(std::string cg_molecule_type, int molecule_id,
-                            CSG_Topology &cg_top_out);
+                            CSG_Topology &cg_top_out,
+                            CSG_Topology & atom_top);
 };
 
 }  // namespace csg
