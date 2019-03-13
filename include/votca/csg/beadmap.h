@@ -42,9 +42,9 @@ class BeadMap {
   virtual void Initialize(std::vector<string> subbeads,
                           std::vector<double> weights,
                           std::vector<double> ds) = 0;
-  virtual void Initialize(std::vector<string> subbeads,
+  
+  void Initialize(std::vector<string> subbeads,
                           std::vector<double> weights){
-
     std::vector<double> empty;
     Initialize(subbeads,weights,empty);
   }

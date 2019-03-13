@@ -33,6 +33,14 @@ using namespace std;
 namespace votca {
 namespace csg {
 
+vector<string> BeadMap::getAtomicBeadNames(){
+  vector<string> bead_names;
+  for( pair<string,element_t> pr : matrix_){
+    bead_names.push_back(pr.first);
+  }
+  return bead_names;
+}
+
 AtomisticToCGMoleculeMapper::~AtomisticToCGMoleculeMapper() {
   bead_type_and_maps_.clear();
 }
@@ -147,6 +155,8 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
                        map<string, Bead *> atomic_beads, Bead *cg_bead) {
 
+  assert(cg_bead->getSymmetry()==1 && "Applying spherical bead map on a non spherical corase grained bead");
+
   assert(matrix_.size() == atomic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads");
   assert(matrix_.size() > 0 &&
@@ -209,6 +219,9 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
 void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
                           std::map<string, Bead *> atomistic_beads,
                           Bead *cg_bead) {
+
+
+  assert(cg_bead->getSymmetry()==3 && "Applying ellipsoidal bead map on a non ellipsoidal corase grained bead");
   assert(matrix_.size() == atomistic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads in "
          "Map_Ellipsoid");
@@ -225,16 +238,16 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   vec reference_position = name_and_bead_iter->second->getPos();
   ++name_and_bead_iter;
 
-  int n;
-  n = 0;
   bool bVel, bF;
   bVel = bF = false;
+  double sum_of_atomistic_mass = 0;
   vec sum_of_atomistic_pos(0., 0., 0.);
   vec weighted_sum_of_atomistic_pos(0., 0., 0.);
   vec weighted_sum_of_atomistic_forces(0., 0., 0.);
   vec weighted_sum_of_atomistic_vel(0., 0., 0.);
   for (pair<string, element_t> name_and_element : matrix_) {
     const Bead *atom = atomistic_beads[name_and_element.first];
+    sum_of_atomistic_mass += atom->getMass();
     assert(atom->HasPos() &&
            "Cannot apply mapping atomistic beads do not have position.");
     vec shortest_distance_beween_beads =
@@ -243,9 +256,11 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
       throw std::runtime_error(
           "coarse-grained atom is bigger than half the box");
     }
+    assert(atom->HasPos() && "Cannot map to coarse grained bead as atomic beads are missing positions");
+    assert(name_and_element.second.weight_ && "Cannot map to coarse grained beads with weights of 0.0");
     weighted_sum_of_atomistic_pos +=
-        name_and_element.second.weight_ *
-        (shortest_distance_beween_beads + reference_position);
+      name_and_element.second.weight_ *
+      (shortest_distance_beween_beads + reference_position);
     if (atom->HasVel() == true) {
       weighted_sum_of_atomistic_vel +=
           name_and_element.second.weight_ * atom->getVel();
@@ -256,21 +271,17 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
           name_and_element.second.force_weight_ * atom->getF();
       bF = true;
     }
-
-    if (name_and_element.second.weight_ > 0 && atom->HasPos()) {
-      weighted_sum_of_atomistic_pos += atom->getPos();
-      n++;
-    }
   }
 
+  cg_bead->setMass(sum_of_atomistic_mass);
   cg_bead->setPos(weighted_sum_of_atomistic_pos);
   if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_vel);
   if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
 
   // calculate the tensor of gyration
   matrix tensor_of_gyration(0.);
-  vec average_pos = weighted_sum_of_atomistic_pos / (double)n;
   double number_of_atom_beads = static_cast<double>(matrix_.size());
+  vec average_pos = weighted_sum_of_atomistic_pos / number_of_atom_beads;
   for (pair<string, element_t> name_and_element : matrix_) {
     if (name_and_element.second.weight_ == 0) continue;
     const Bead *atom = atomistic_beads[name_and_element.first];
@@ -313,7 +324,7 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   // vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
   vec w = reference_position3 - reference_position; w.normalize();
 
-  if ((v ^ w) * u < 0) u = vec(0., 0., 0.) - u;
+  if ((v ^ w) * u < 0) { u = vec(0., 0., 0.) - u;}
   cg_bead->setU(u);
 
   // write out w
