@@ -38,9 +38,9 @@ AtomisticToCGMoleculeMapper::~AtomisticToCGMoleculeMapper() {
 }
 
 void AtomisticToCGMoleculeMapper::Initialize(
-    unordered_map<string, CGBeadInfo> bead_maps_info) {
+    unordered_map<string, CGBeadStencil> bead_maps_info) {
 
-  for (pair<const string, CGBeadInfo> & bead_info : bead_maps_info) {
+  for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
     switch (bead_info.second.cg_symmetry_) {
       case 1:
         bead_type_and_maps_.at(bead_info.second.cg_bead_type_) =

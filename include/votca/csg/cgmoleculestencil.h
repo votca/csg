@@ -22,7 +22,8 @@
 #include <string>
 #include <vector>
 
-#include "cgbeadinfo.h"
+#include "cgbeadstencil.h"
+#include "cginteractionstencil.h"
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
 
@@ -53,9 +54,9 @@ class CGMoleculeStencil {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  void AddBeadInfo(std::vector<CGBeadInfo> bead_info);
+  void AddBeadInfo(std::vector<CGBeadStencil> bead_info);
 
-  // Assumes that the bead_ids when sorted line up with the CGBeadInfo vector
+  // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
       std::vector<int> bead_ids);
   
@@ -63,11 +64,11 @@ class CGMoleculeStencil {
 
   std::string getCGBeadName(std::string atom_bead_name);
 
-  void AddInteractionInfo(std::vector<CGInteractionInfo> interaction_info);
+  void AddInteractionInfo(std::vector<CGInteractionStencil> interaction_info);
 
-  const std::vector<CGBeadInfo> &getBeadInfo();
+  const std::vector<CGBeadStencil> &getBeadInfo();
 
-  const std::vector<CGInteractionInfo> &getInteractionInfo();
+  const std::vector<CGInteractionStencil> &getInteractionInfo();
 
   const std::string &getCGMoleculeType() const;
 
@@ -78,8 +79,8 @@ class CGMoleculeStencil {
   std::string atomistic_molecule_type_;
   multi_bimap cg_and_atom_names_;
   // Must appear in the order it is read in from the .xml file
-  std::vector<CGBeadInfo> bead_info_;
-  std::vector<CGInteractionInfo> interaction_info_;
+  std::vector<CGBeadStencil> bead_info_;
+  std::vector<CGInteractionStencil> interaction_info_;
 };
 
 }  // namespace csg

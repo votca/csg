@@ -1,6 +1,6 @@
 
-#ifndef VOTCA_CSG_CGBEADINFO
-#define VOTCA_CSG_CGBEADINFO
+#ifndef VOTCA_CSG_CGBEADSTENCIL
+#define VOTCA_CSG_CGBEADSTENCIL
 #include <string>
 #include <vector>
 #include <votca/tools/types.h>
@@ -10,7 +10,7 @@ namespace votca {
 
   namespace csg {
 
-  struct CGBeadInfo {
+  struct CGBeadStencil {
     std::string cg_name_;
     std::string cg_bead_type_;
     TOOLS::byte_t cg_symmetry_;
@@ -20,12 +20,6 @@ namespace votca {
     std::vector<double> subbead_d_;
   };
 
-  struct CGInteractionInfo {
-    std::string type_;
-    std::string group_;
-    std::vector<std::string> bead_names_;
-  };
-
   }
 }
-#endif // VOTCA_CSG_CGBEADINFO
+#endif // VOTCA_CSG_CGBEADSTENCIL

@@ -170,13 +170,13 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   cg_molecule_and_stencil_.at(cg_mol_type) =
       CGMoleculeStencil(cg_mol_type, atom_mol_type);
 
-  vector<CGBeadInfo> beads_info = ParseBeads_(options->get("cg_molecule.topology"));
+  vector<CGBeadStencil> beads_info = ParseBeads_(options->get("cg_molecule.topology"));
   // Update the stencil with the bead info
   cg_molecule_and_stencil_.at(cg_mol_type).AddBeadInfo(beads_info);
 
   // Convert vector to map to be used with ParseMaps
-  unordered_map<string,CGBeadInfo> map_and_beads_info;
-  for( CGBeadInfo & bead_info : beads_info ){
+  unordered_map<string,CGBeadStencil> map_and_beads_info;
+  for( CGBeadStencil & bead_info : beads_info ){
     map_and_beads_info.at(bead_info.mapping_) = bead_info;
   }
 
@@ -225,17 +225,17 @@ vector<string> AtomCGConverter::getAtomicBeadNamesOfCGBead(
 /*****************************************************************************
  * Private Internal Methods
  *****************************************************************************/
-vector<CGBeadInfo> AtomCGConverter::ParseBeads_(Property &options_in) {
+vector<CGBeadStencil> AtomCGConverter::ParseBeads_(Property &options_in) {
 
   Property options = options_in.get("cg_beads");
   list<Property *> beads = options.Select("cg_bead");
 
   unordered_set<string> bead_cg_names;
-  vector<CGBeadInfo> beads_info;
+  vector<CGBeadStencil> beads_info;
   for (list<Property *>::iterator bead_iter = beads.begin();
        bead_iter != beads.end(); ++bead_iter) {
     Property *p = *bead_iter;
-    CGBeadInfo bead_info;
+    CGBeadStencil bead_info;
     bead_info.cg_name_ = p->get("name").as<string>();
     bead_info.cg_bead_type_ = p->get("type").as<string>();
     bead_info.mapping_ = p->get("mapping").as<string>();
@@ -263,7 +263,7 @@ vector<CGBeadInfo> AtomCGConverter::ParseBeads_(Property &options_in) {
 }
 
  void AtomCGConverter::ParseMaps_(Property &options_in,                              
-                          unordered_map<string, CGBeadInfo> &bead_maps_info) {   
+                          unordered_map<string, CGBeadStencil> &bead_maps_info) {   
                                                                                   
     Property maps_prop = options_in.get("cg_molecule.maps");                      
     list<Property *> all_maps = maps_prop.Select("map");                          
@@ -346,9 +346,9 @@ void AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
   }
 }
 
-vector<CGInteractionInfo> AtomCGConverter::ParseBonded_(Property &options_in) {
+vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in) {
 
-  vector<CGInteractionInfo> all_interactions_info;
+  vector<CGInteractionStencil> all_interactions_info;
   if (options_in.exists("cg_bonded")) {
     Property options = options_in.get("cg_bonded");
     std::list<Property *> bonded = options.Select("*");
@@ -369,7 +369,7 @@ vector<CGInteractionInfo> AtomCGConverter::ParseBonded_(Property &options_in) {
       for (Tokenizer::iterator line = section.begin(); line != section.end();
            ++line) {
 
-        CGInteractionInfo interaction_info;
+        CGInteractionStencil interaction_info;
         Tokenizer tok_atoms(*line, " \t");
         for (Tokenizer::iterator atom = tok_atoms.begin();
              atom != tok_atoms.end(); ++atom) {
@@ -402,7 +402,7 @@ vector<CGInteractionInfo> AtomCGConverter::ParseBonded_(Property &options_in) {
     CSG_Topology & atom_top) {
 
   map<string,int> cg_bead_name_and_id;
-    for (const CGBeadInfo &bead_info : stencil.getBeadInfo()) {
+    for (const CGBeadStencil &bead_info : stencil.getBeadInfo()) {
     Bead *bead;
 
     string bead_type = bead_info.cg_bead_type_;
@@ -433,7 +433,7 @@ vector<CGInteractionInfo> AtomCGConverter::ParseBonded_(Property &options_in) {
 
   int min_index = 0;
   int max_index = 0;
-  for (const CGBeadInfo &bead_info : stencil.getBeadInfo()) {
+  for (const CGBeadStencil &bead_info : stencil.getBeadInfo()) {
 
     vector<pair<string,int>> atom_bead_names_ids;
     max_index += bead_info.atomic_subbeads_.size();
@@ -467,7 +467,7 @@ void AtomCGConverter::CreateInteractions_(
     }
   }
 
-  for (const CGInteractionInfo &interaction_info : stencil.getInteractionInfo()) {
+  for (const CGInteractionStencil &interaction_info : stencil.getInteractionInfo()) {
     // Convert atoms to vector of ints using the map
     size_t interaction_id = cg_top_out.InteractionCount();
     vector<int> atoms;

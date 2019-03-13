@@ -18,7 +18,7 @@
 #ifndef VOTCA_CSG_MAP_H
 #define VOTCA_CSG_MAP_H
 
-#include "cgbeadinfo.h"
+#include "cgbeadstencil.h"
 #include "csgtopology.h"
 #include "molecule.h"
 #include <vector>
@@ -118,7 +118,7 @@ class AtomisticToCGMoleculeMapper {
         cg_molecule_type_(cg_molecule_type){};
   ~AtomisticToCGMoleculeMapper();
 
-  void Initialize(std::unordered_map<std::string, CGBeadInfo> bead_maps_info);
+  void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info);
 
   // Pass in a map containing the names of all the atomistic beads in the molecule and pointers to them
   void Apply(CSG_Topology &atom_top,                                                     

@@ -36,10 +36,10 @@ namespace csg {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  void CGMoleculeStencil::AddBeadInfo(vector<CGBeadInfo> bead_info) {
+  void CGMoleculeStencil::AddBeadInfo(vector<CGBeadStencil> bead_info) {
     bead_info_ = bead_info;
 
-    for (CGBeadInfo &info : bead_info_) {
+    for (CGBeadStencil &info : bead_info_) {
       string cg_bead_name = info.cg_name_;
       for (string &atomic_name : info.atomic_subbeads_) {
         cg_and_atom_names_.insert(multi_bimap::value_type(cg_bead_name, atomic_name));
@@ -47,7 +47,7 @@ namespace csg {
     }
   }
 
-  // Assumes that the bead_ids when sorted line up with the CGBeadInfo vector
+  // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
   unordered_map<int, string> CGMoleculeStencil::MapAtomicBeadIdsToAtomicBeadNames(
       vector<int> bead_ids) {
     assert(bead_ids.size() == cg_and_atom_names.right.size() &&
@@ -56,7 +56,7 @@ namespace csg {
     sort(bead_ids.begin(), bead_ids.end());
     unordered_map<int, string> id_and_bead_name;
     int index = 0;
-    for (CGBeadInfo &bead_info : bead_info_) {
+    for (CGBeadStencil &bead_info : bead_info_) {
       for (string &atom_name : bead_info.atomic_subbeads_) {
         id_and_bead_name[bead_ids.at(index)] = atom_name;
         ++index;
@@ -79,13 +79,13 @@ namespace csg {
     return cg_and_atom_names_.left.at(atom_bead_name);
   }
 
-  void CGMoleculeStencil::AddInteractionInfo(vector<CGInteractionInfo> interaction_info) {
+  void CGMoleculeStencil::AddInteractionInfo(vector<CGInteractionStencil> interaction_info) {
     interaction_info_ = interaction_info;
   }
 
-  const vector<CGBeadInfo> &CGMoleculeStencil::getBeadInfo() { return bead_info_; }
+  const vector<CGBeadStencil> &CGMoleculeStencil::getBeadInfo() { return bead_info_; }
 
-  const vector<CGInteractionInfo> &CGMoleculeStencil::getInteractionInfo() {
+  const vector<CGInteractionStencil> &CGMoleculeStencil::getInteractionInfo() {
     return interaction_info_;
   }
 
