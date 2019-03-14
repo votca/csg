@@ -270,15 +270,15 @@ void CsgApplication::Run(void) {
     }
     // open the trajectory
     _traj_reader->Open(_op_vm["trj"].as<string>());
-  }
 
-  //////////////////////////////////////////////////
-  // Consolidate differences between first trajectory files and topology file
-  /////////////////verbose/////////////////////////////////
-  // Note that the trajectory files will contain the boundary information
-  // which may otherwise not be stored in the _top object
-  _traj_reader->FirstFrame(master->_top);
-  master->_top_cg.CopyBoundaryConditions(master->_top);
+    //////////////////////////////////////////////////
+    // Consolidate differences between first trajectory files and topology file
+    /////////////////verbose/////////////////////////////////
+    // Note that the trajectory files will contain the boundary information
+    // which may otherwise not be stored in the _top object
+    _traj_reader->FirstFrame(master->_top);
+    master->_top_cg.CopyBoundaryConditions(master->_top);
+  }
 
   if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
     cout << "NOTE: You are using OpenBox boundary conditions. Check if this "

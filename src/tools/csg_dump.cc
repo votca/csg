@@ -87,45 +87,25 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
         cout << " id: " << id_and_type.first << endl;
       }
     }
-    /*
-cout << "\nList of residues:\n";
-map<int, set<pair<int, string>>> molecule_id_residue_ids_and_names =
-top->getResidueIdsAndNames();
-//    for (pair<const int, string> &id_and_name : residue_ids_and_names) {
-//      cout << id_and_name.first << " name: " << id_and_name.second
-//           << " id: " << id_and_name.first << endl;
-//    }
-for (const pair<const int, set<pair<int, string>>>
- &id_and_res_num_and_res_name : molecule_id_residue_ids_and_names) {
-int molecular_type_id = id_and_res_num_and_res_name.first;
-for (const pair<int, string> &res_num_and_res_name :
-id_and_res_num_and_res_name.second) {
-cout << molecular_type_id - 1
- << " name: " << res_num_and_res_name.second
- << " id: " << res_num_and_res_name.first << endl;
-}
-}
-*/
+
     cout << "\nList of molecules:\n";
-    //    MoleculeContainer::iterator mol;
-    //    for (mol = top->Molecules().begin(); mol != top->Molecules().end();
-    //    ++mol) {
-    for (const int &molecule_id : molecule_ids) {
-      const Molecule *mol = top->getMoleculeConst(molecule_id);
-      cout << "molecule: " << (mol)->getId() + 1 << " " << (mol)->getType()
-           << " beads: " << (mol)->BeadCount() << endl;
+    for( const int & molecule_id : molecule_ids){
+      Molecule * mol = top->getMolecule(molecule_id);
+      cout << "molecule: " << molecule_id+1  << " " << mol->getType();
+      cout <<  " beads: " << mol->BeadCount() << endl;
 
-      vector<int> bead_ids = (mol)->getBeadIds();
-
-      // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-      for (const int &bead_id : bead_ids) {
-        const Bead *bead = mol->getBeadConst(bead_id);
+      vector<int> bead_ids = mol->getBeadIds();
+      sort(bead_ids.begin(),bead_ids.end());
+      for( const int & bead_id : bead_ids ){
+        Bead * bead = top->getBead(bead_id);
         cout << bead_id << " Type " << bead->getType() << " Mass "
              << bead->getMass() << " Resnr " << bead->getResidueId()
              << " Resname " << bead->getResidueType() << " Charge "
              << bead->getQ() << endl;
+
       }
     }
+
   } else {
     cout << "\nList of exclusions:\n" << top->getExclusions();
   }

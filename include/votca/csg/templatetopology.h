@@ -405,6 +405,9 @@ class TemplateTopology {
     return type_container_.getBeadTypes();
   }
 
+  std::vector<std::string> getResidueTypes() const{
+    return type_container_.getResidueTypes();
+  }
   /**
    * @brief Returns the available molecule types and their type ids
    *

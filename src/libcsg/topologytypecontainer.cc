@@ -30,6 +30,14 @@ void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {
   }
 }
 
+vector<string> TopologyTypeContainer::getResidueTypes() const {
+  vector<string> residue_types;
+  for( pair<string,int> residue_type_and_id : residue_types_){
+    residue_types.push_back(residue_type_and_id.first);
+  }
+  return residue_types;
+}
+
 vector<string> TopologyTypeContainer::getBeadTypes() const {
   vector<string> bead_types;
   for( pair<string, int> bead_type_and_id : bead_types_){

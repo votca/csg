@@ -46,6 +46,8 @@ class TopologyTypeContainer {
     return molecule_types_;
   }
 
+  std::vector<std::string> getResidueTypes() const;
+
   bool ResidueTypeExist(const std::string residue_type) const;
 
   void AddResidueType(std::string residue_type);
