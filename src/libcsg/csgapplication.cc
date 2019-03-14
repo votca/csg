@@ -180,7 +180,7 @@ bool CsgApplication::ProcessData(Worker *worker) {
   // evaluate
   if (_do_mapping) {
     //worker->_map->Apply();
-    worker->converter_->Map(worker->_top_cg,worker->_top);
+    worker->converter_->Map(worker->_top,worker->_top_cg);
     worker->EvalConfiguration(&worker->_top_cg, &worker->_top);
   } else
     worker->EvalConfiguration(&worker->_top);
@@ -350,7 +350,7 @@ void CsgApplication::Run(void) {
     // notify all observers that coarse graining has begun
     if (_do_mapping) {
       //master->_map->Apply();
-      master->converter_->Map(master->_top_cg,master->_top);
+      master->converter_->Map(master->_top,master->_top_cg);
       BeginEvaluate(&master->_top_cg, &master->_top);
     } else
       BeginEvaluate(&master->_top);

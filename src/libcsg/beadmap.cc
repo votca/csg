@@ -128,6 +128,7 @@ void AtomToCGMoleculeMapper::Apply(
       cout << "Passing in atom names and ids " << atom_name_id.first << endl;
     }
     // Grab the correct map
+    cout << "Bead name is " << bead_name << endl;
     assert(cg_bead_name_and_maps_.count(bead_name) && "Map for the coarse grained bead type is not known.");
     cout << "Applying to bead name " << bead_name << " found " << cg_bead_name_and_maps_.count(bead_name) << endl;
     cg_bead_name_and_maps_.at(bead_name)->Apply(cg_top.getBoundaryCondition(),
