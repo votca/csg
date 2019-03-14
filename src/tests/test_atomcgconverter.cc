@@ -250,6 +250,21 @@ BOOST_AUTO_TEST_CASE(test_load) {
   CSG_Topology cg_top;
 
   converter.Convert(atom_top,cg_top);
+
+  vector<int> molecule_ids = cg_top.getMoleculeIds();
+  sort(molecule_ids.begin(),molecule_ids.end());
+  BOOST_CHECK_EQUAL(molecule_ids.at(0),1);
+  BOOST_CHECK_EQUAL(molecule_ids.at(1),2);
+
+  vector<int> cg_bead_ids = cg_top.getBeadIds();
+  BOOST_CHECK_EQUAL(cg_bead_ids.size(),6);
+
+  vector<string> bead_types = cg_top.getBeadTypes();
+  // Should be CH3 and CH2
+  BOOST_CHECK_EQUAL(bead_types.size(),2);
+  sort(bead_types.begin(),bead_types.end());
+  BOOST_CHECK_EQUAL(bead_types.at(0),"CH2");
+  BOOST_CHECK_EQUAL(bead_types.at(1),"CH3");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

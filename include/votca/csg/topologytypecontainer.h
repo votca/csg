@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <string>
+#include <vector>
 #include <unordered_map>
 
 namespace votca {
@@ -52,6 +53,8 @@ class TopologyTypeContainer {
   size_t ResidueTypeCount() const { return residue_types_.size(); }
 
   bool BeadTypeExist(const std::string bead_type) const;
+
+  std::vector<std::string> getBeadTypes() const;
 
   void AddBeadType(std::string bead_type);
 

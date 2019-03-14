@@ -19,6 +19,8 @@
 namespace votca {
 namespace csg {
 
+  using namespace std;
+
 bool TopologyTypeContainer::MoleculeTypeExist(const std::string molecule_type) const {
   return molecule_types_.count(molecule_type);
 }
@@ -26,6 +28,14 @@ void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {
   if (molecule_types_.count(molecule_type) == 0) {
     molecule_types_[molecule_type] = molecule_types_.size();
   }
+}
+
+vector<string> TopologyTypeContainer::getBeadTypes() const {
+  vector<string> bead_types;
+  for( pair<string, int> bead_type_and_id : bead_types_){
+    bead_types.push_back(bead_type_and_id.first);
+  } 
+  return bead_types;
 }
 
 bool TopologyTypeContainer::ResidueTypeExist(const std::string residue_type) const {
