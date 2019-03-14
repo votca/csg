@@ -118,7 +118,8 @@ class AtomToCGMoleculeMapper {
         cg_molecule_type_(cg_molecule_type){};
   ~AtomToCGMoleculeMapper();
 
-  void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info);
+  void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info,
+      vector<string> bead_order);
 
   // Pass in a map containing the names of all the atomistic beads in the molecule and pointers to them
   void Apply(CSG_Topology &atom_top,                                                     
@@ -172,7 +173,7 @@ class AtomToCGMoleculeMapper {
   std::string cg_molecule_type_;
 
   // contains each bead types and a vector of all the bead names of that type
-  std::unordered_map<std::string,set<string>> bead_type_and_names_;
+  std::unordered_map<std::string,vector<string>> bead_type_and_names_;
   // Needs to be a unique_ptr to take advantage of polymorphism
   std::unordered_map<string, std::unique_ptr<BeadMap>> cg_bead_name_and_maps_;
 };

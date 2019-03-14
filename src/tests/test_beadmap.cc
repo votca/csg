@@ -37,6 +37,9 @@ class TestBead : public Bead {
     void setSymmetry(byte_t sym){
       symmetry_ = sym;
     }
+    void setElement(string element){
+      element_symbol_.setName(element);
+    } 
 };
 
 class TestBeadSphere : public Map_Sphere {
@@ -94,6 +97,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   boundaries.setBox(box);
   
   TestBead beadC2;
+
   vec vel(0.0,1.3,-0.1);
   beadC2.setVel(vel);
   vec pos(3.4,2.4,4.5);
@@ -101,6 +105,8 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   vec force(0.3,-0.4,0.2);
   beadC2.setF(force);
   beadC2.setMass(12.0);
+  beadC2.setType("C");
+  beadC2.setId(2);
 
   TestBead beadH7;
   vec velH7(0.3,0.3,0.1);
@@ -110,6 +116,8 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   vec forceH7(-0.1,-0.2,-0.1);
   beadH7.setF(forceH7);
   beadH7.setMass(1.0);
+  beadH7.setType("H");
+  beadH7.setId(7);
 
   TestBead beadH8;
   vec velH8(-0.2,0.4,0.1);
@@ -119,6 +127,8 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   vec forceH8(0.1,-0.2,-0.1);
   beadH8.setF(forceH8);
   beadH8.setMass(1.0);
+  beadH8.setType("H");
+  beadH8.setId(8);
 
   map<string,Bead*> atomic_beads;
   atomic_beads[subbeads.at(0)] = &beadC2;
@@ -127,6 +137,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
 
   TestBead cg_bead;
   vec initialize(0.0);
+  cg_bead.setType("CH2");
   cg_bead.setF(initialize);
   cg_bead.setVel(initialize);
   cg_bead.setPos(initialize);
@@ -135,8 +146,9 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   cg_bead.setW(initialize);
   cg_bead.setMass(0.0);
   cg_bead.setSymmetry(1); // For sphere
-  
+ 
   test_sphere.Apply(&boundaries,atomic_beads,&cg_bead);
+
 
   cout << cg_bead.getF() << endl; 
   cout << cg_bead.getVel() << endl; 
@@ -145,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   cout << cg_bead.getV() << endl; 
   cout << cg_bead.getW() << endl; 
   cout << cg_bead.getMass() << endl;
-
+  
   BOOST_CHECK_CLOSE(cg_bead.getF().getX(), 0.3, 1E-5);
   BOOST_CHECK_CLOSE(cg_bead.getF().getY(), -0.8, 1E-5);
   BOOST_CHECK_CLOSE(cg_bead.getF().getZ(), 0.0, 1E-5);
@@ -158,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   BOOST_CHECK_CLOSE(cg_bead.getPos().getY(),2.4714285714285711,1E-5);
   BOOST_CHECK_CLOSE(cg_bead.getPos().getZ(),4.3785714285714281,1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getMass(),14.0,1E-5); 
+  BOOST_CHECK_CLOSE(cg_bead.getMass(),14.0,1E-5);
 }
 
 /** @brief Will test that the ellipsoidal mapping works
@@ -516,7 +528,8 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
 
   AtomToCGMoleculeMapper mapper(atomic_mol_type,cg_mol_type);
 
-  mapper.Initialize(all_molecule_bead_stencils);
+  vector<string> bead_stencil_order = {"A1","B1","A2"};
+  mapper.Initialize(all_molecule_bead_stencils,bead_stencil_order);
 
   pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomname_and_id;
 

@@ -179,9 +179,11 @@ class AtomCGConverter {
       Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
       std::map<int,vector<pair<std::string, int>>> bead_name_to_id);
 
-  std::map<int, std::vector<std::pair<std::string,int>>> CreateMolecule_(std::string cg_molecule_type, int molecule_id,
-                            CSG_Topology &cg_top_out,
-                            CSG_Topology & atom_top);
+  std::map<int, std::vector<std::pair<std::string,int>>> CreateMolecule_(
+      std::string cg_molecule_type, 
+      int molecule_id,
+      CSG_Topology &cg_top_out,
+      CSG_Topology & atom_top);
 };
 
 }  // namespace csg

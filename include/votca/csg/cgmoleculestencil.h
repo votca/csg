@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-
+#include <unordered_set>
 #include "cgbeadstencil.h"
 #include "cginteractionstencil.h"
 #include <votca/tools/property.h>
@@ -34,7 +34,7 @@
 namespace votca {
 namespace csg {
   
-typedef boost::bimap<boost::bimaps::set_of<std::string>,boost::bimaps::multiset_of<std::string>> multi_bimap;
+typedef boost::bimap<boost::bimaps::multiset_of<std::string>,boost::bimaps::set_of<std::string>> multi_bimap;
 /**
  * @brief Definition of coarse grained molecule
  *
@@ -60,7 +60,12 @@ class CGMoleculeStencil {
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
       std::vector<int> bead_ids);
   
+  std::unordered_map<int, std::string> MapCGBeadIdsToCGBeadNames(
+      std::vector<int> bead_ids);
+  
   std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name);
+
+  std::vector<std::string> getCGBeadNames();
 
   std::string getCGBeadName(std::string atom_bead_name);
 

@@ -45,13 +45,16 @@ AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
   cg_bead_name_and_maps_.clear();
 }
 
+// cg_bead_order contains the order of beads names
 void AtomToCGMoleculeMapper::Initialize(
-    unordered_map<string, CGBeadStencil> bead_maps_info) {
+    unordered_map<string, CGBeadStencil> bead_maps_info,vector<string> cg_bead_order) {
 
-  for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
-    cout << "Symmetry " << static_cast<int>(bead_info.second.cg_symmetry_) << endl;
-    int symmetry = static_cast<int>(bead_info.second.cg_symmetry_);
-    string cg_bead_name = bead_info.second.cg_name_;
+  for( string & cg_bead_name : cg_bead_order ){
+  //for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
+    CGBeadStencil & bead_info = bead_maps_info[cg_bead_name];
+    cout << "Symmetry " << static_cast<int>(bead_info.cg_symmetry_) << endl;
+    int symmetry = static_cast<int>(bead_info.cg_symmetry_);
+    //string cg_bead_name = bead_info.cg_name_;
     switch (symmetry) {
       case 1:
         cg_bead_name_and_maps_.insert(make_pair(cg_bead_name, 
@@ -65,14 +68,14 @@ void AtomToCGMoleculeMapper::Initialize(
         throw runtime_error("unknown symmetry in bead definition!");
     }
 
-    cout << "cycle " << bead_info.first << endl;
-    for (const string & subbead : bead_info.second.atomic_subbeads_){
+    //cout << "cycle " << bead_info.first << endl;
+    for (const string & subbead : bead_info.atomic_subbeads_){
       cout << subbead << " "; 
     }
     cout << endl;
-    bead_type_and_names_[bead_info.second.cg_bead_type_].insert(cg_bead_name);
+    bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
     cg_bead_name_and_maps_.at(cg_bead_name)->Initialize(
-        bead_info.second.atomic_subbeads_, bead_info.second.subbead_weights_);
+        bead_info.atomic_subbeads_, bead_info.subbead_weights_);
   }
 }
 
@@ -94,9 +97,7 @@ void AtomToCGMoleculeMapper::Apply(
   Molecule * cg_mol = cg_top.getMolecule(cg_mol_id);
  
   // Ensure that the type molecule type is correct
-  assert(cg_mol->getType() == cg_molecule_type_ && string("Cannot convert to ")
-        + string("the molecule with id ") + to_string(cg_mol_id)+
-        string(" as it is not of the correct type"));
+  assert(cg_mol->getType() == cg_molecule_type_ && "Cannot convert to the molecule  is not of the correct type");
   
   // Cycle throught the cg beads in a cg molecule
   vector<int> bead_ids = cg_mol->getBeadIds();
@@ -109,10 +110,11 @@ void AtomToCGMoleculeMapper::Apply(
     // get the cg bead type
     string cg_bead_type = cg_bead->getType();
     cout << "Grabbed bead type " << cg_bead_type << endl;
-    set<string> bead_names = bead_type_and_names_[cg_bead_type];
+    vector<string> bead_names = bead_type_and_names_[cg_bead_type];
     string bead_name;
     for( const string & name : bead_names){
       if(expired_beads.count(name)==false)  {
+        cout << "Chosen name " << name << endl;
         bead_name = name;
         break;
       }
