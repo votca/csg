@@ -257,6 +257,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
   BOOST_CHECK_EQUAL(molecule_ids.at(1),2);
 
   vector<int> cg_bead_ids = cg_top.getBeadIds();
+  sort(cg_bead_ids.begin(),cg_bead_ids.end());
   BOOST_CHECK_EQUAL(cg_bead_ids.size(),6);
 
   vector<string> bead_types = cg_top.getBeadTypes();
@@ -265,6 +266,48 @@ BOOST_AUTO_TEST_CASE(test_load) {
   sort(bead_types.begin(),bead_types.end());
   BOOST_CHECK_EQUAL(bead_types.at(0),"CH2");
   BOOST_CHECK_EQUAL(bead_types.at(1),"CH3");
+
+  Bead * bead = cg_top.getBead(cg_bead_ids.at(0));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH3");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),1.1333333333333333,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),6.0,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
+
+  bead = cg_top.getBead(cg_bead_ids.at(1));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH2");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),1.0714285714285714,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),6.85714,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
+
+  bead = cg_top.getBead(cg_bead_ids.at(2));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH3");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),2.2666666666666671,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),5.2,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
+
+  bead = cg_top.getBead(cg_bead_ids.at(3));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH3");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),1.1333333333333333,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),1.0,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
+  
+  bead = cg_top.getBead(cg_bead_ids.at(4));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH2");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),1.0714285714285714,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),1.857142857142857,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
+
+  bead = cg_top.getBead(cg_bead_ids.at(5));
+  BOOST_CHECK_EQUAL(bead->getType(),"CH3");
+  cout << bead->getPos() << endl;
+  BOOST_CHECK_CLOSE(bead->getPos().getX(),2.2666666666666671,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getY(),0.2,1E-4);
+  BOOST_CHECK_CLOSE(bead->getPos().getZ(),0.0,1E-4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
