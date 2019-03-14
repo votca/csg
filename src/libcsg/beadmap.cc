@@ -41,101 +41,6 @@ vector<string> BeadMap::getAtomicBeadNames(){
   return bead_names;
 }
 
-AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
-  cg_bead_name_and_maps_.clear();
-}
-
-// cg_bead_order contains the order of beads names
-void AtomToCGMoleculeMapper::Initialize(
-    unordered_map<string, CGBeadStencil> bead_maps_info,vector<string> cg_bead_order) {
-
-  for( string & cg_bead_name : cg_bead_order ){
-  //for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
-    CGBeadStencil & bead_info = bead_maps_info[cg_bead_name];
-    cout << "Symmetry " << static_cast<int>(bead_info.cg_symmetry_) << endl;
-    int symmetry = static_cast<int>(bead_info.cg_symmetry_);
-    //string cg_bead_name = bead_info.cg_name_;
-    switch (symmetry) {
-      case 1:
-        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name, 
-            unique_ptr<Map_Sphere>(new Map_Sphere())));
-        break;
-      case 3:
-        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name,
-           unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid())));
-        break;
-      default:
-        throw runtime_error("unknown symmetry in bead definition!");
-    }
-
-    //cout << "cycle " << bead_info.first << endl;
-    for (const string & subbead : bead_info.atomic_subbeads_){
-      cout << subbead << " "; 
-    }
-    cout << endl;
-    bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
-    cg_bead_name_and_maps_.at(cg_bead_name)->Initialize(
-        bead_info.atomic_subbeads_, bead_info.subbead_weights_);
-  }
-}
-
-void AtomToCGMoleculeMapper::Apply(
-    CSG_Topology &atom_top, 
-    CSG_Topology& cg_top, 
-    pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadids ){
-
-  // First int cg_molecule id
-  // map
-  //   first int - the cg_bead_id 
-  //   vector pair
-  //       string - atomic name 
-  //       int - global atomic bead id
-
-
-  // Grab the correct cg molecule
-  int cg_mol_id = cgmolid_cgbeadid_atomicbeadids.first;
-  Molecule * cg_mol = cg_top.getMolecule(cg_mol_id);
- 
-  // Ensure that the type molecule type is correct
-  assert(cg_mol->getType() == cg_molecule_type_ && "Cannot convert to the molecule  is not of the correct type");
-  
-  // Cycle throught the cg beads in a cg molecule
-  vector<int> bead_ids = cg_mol->getBeadIds();
-  sort(bead_ids.begin(),bead_ids.end());
-  cout << "Grabbed bead_ids of molecule " << bead_ids.size() << endl;
-  // Beads that have already been applied
-  unordered_set<string> expired_beads;
-  for ( int &cg_bead_id : bead_ids ){ 
-    Bead * cg_bead = cg_top.getBead(cg_bead_id);
-    // get the cg bead type
-    string cg_bead_type = cg_bead->getType();
-    cout << "Grabbed bead type " << cg_bead_type << endl;
-    vector<string> bead_names = bead_type_and_names_[cg_bead_type];
-    string bead_name;
-    for( const string & name : bead_names){
-      if(expired_beads.count(name)==false)  {
-        cout << "Chosen name " << name << endl;
-        bead_name = name;
-        break;
-      }
-    } 
-    expired_beads.insert(bead_name);
-
-    map<string,Bead *> atomic_names_and_beads;
-    cout << "bead id is " << cg_bead_id << endl;
-    for ( pair<string,int> & atom_name_id : cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]){
-      atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
-      cout << "Passing in atom names and ids " << atom_name_id.first << endl;
-    }
-    // Grab the correct map
-    cout << "Bead name is " << bead_name << endl;
-    assert(cg_bead_name_and_maps_.count(bead_name) && "Map for the coarse grained bead type is not known.");
-    cout << "Applying to bead name " << bead_name << " found " << cg_bead_name_and_maps_.count(bead_name) << endl;
-    cg_bead_name_and_maps_.at(bead_name)->Apply(cg_top.getBoundaryCondition(),
-        atomic_names_and_beads,cg_bead);
-  } 
-}
-
 void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
                             vector<double> ds) {
 
@@ -372,6 +277,140 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   w.normalize();
   cg_bead->setW(w);
 }
+
+AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
+  cg_bead_name_and_maps_.clear();
+}
+
+// cg_bead_order contains the order of beads names
+void AtomToCGMoleculeMapper::Initialize(
+    unordered_map<string, CGBeadStencil> bead_maps_info,vector<string> cg_bead_order) {
+
+  for( string & cg_bead_name : cg_bead_order ){
+  //for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
+    CGBeadStencil & bead_info = bead_maps_info[cg_bead_name];
+    cout << "Symmetry " << static_cast<int>(bead_info.cg_symmetry_) << endl;
+    int symmetry = static_cast<int>(bead_info.cg_symmetry_);
+    //string cg_bead_name = bead_info.cg_name_;
+    switch (symmetry) {
+      case 1:
+        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name, 
+            unique_ptr<Map_Sphere>(new Map_Sphere())));
+        break;
+      case 3:
+        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name,
+           unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid())));
+        break;
+      default:
+        throw runtime_error("unknown symmetry in bead definition!");
+    }
+
+    //cout << "cycle " << bead_info.first << endl;
+    for (const string & subbead : bead_info.atomic_subbeads_){
+      cout << subbead << " "; 
+    }
+    cout << endl;
+    bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
+    cg_bead_name_and_maps_.at(cg_bead_name)->Initialize(
+        bead_info.atomic_subbeads_, bead_info.subbead_weights_);
+  }
+}
+
+/// Copy Constructor                                                          
+AtomToCGMoleculeMapper::AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other){ 
+  atom_molecule_type_ = other.atom_molecule_type_;                            
+  cg_molecule_type_ = other.cg_molecule_type_;                                 
+
+  for( const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){    
+    cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();               
+  }                                                                         
+}                                                                          
+
+// Move assignment                                                            
+AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(AtomToCGMoleculeMapper&& other){           
+  if(this!=&other){                                                           
+    cg_bead_name_and_maps_.clear();                                           
+    for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
+      cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);             
+    }                                                                         
+    atom_molecule_type_ = other.atom_molecule_type_;                          
+    cg_molecule_type_ = other.cg_molecule_type_;                              
+  }                                                                           
+  return *this;                                                               
+}                                                                             
+
++                                                                                 
+// Copy assignment                                                            
+AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(const AtomToCGMoleculeMapper other){       
+  if(this!=&other){                                                           
+    cg_bead_name_and_maps_.clear();                                           
+    for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
+      cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();               
+    }                                                                         
+    atom_molecule_type_ = other.atom_molecule_type_;                          
+    cg_molecule_type_ = other.cg_molecule_type_;                              
+  }                                                                           
+  return *this;                                                               
+}           
+
+
+void AtomToCGMoleculeMapper::Apply(
+    CSG_Topology &atom_top, 
+    CSG_Topology& cg_top, 
+    pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadids ){
+
+  // First int cg_molecule id
+  // map
+  //   first int - the cg_bead_id 
+  //   vector pair
+  //       string - atomic name 
+  //       int - global atomic bead id
+
+
+  // Grab the correct cg molecule
+  int cg_mol_id = cgmolid_cgbeadid_atomicbeadids.first;
+  Molecule * cg_mol = cg_top.getMolecule(cg_mol_id);
+ 
+  // Ensure that the type molecule type is correct
+  assert(cg_mol->getType() == cg_molecule_type_ && "Cannot convert to the molecule  is not of the correct type");
+  
+  // Cycle throught the cg beads in a cg molecule
+  vector<int> bead_ids = cg_mol->getBeadIds();
+  sort(bead_ids.begin(),bead_ids.end());
+  cout << "Grabbed bead_ids of molecule " << bead_ids.size() << endl;
+  // Beads that have already been applied
+  unordered_set<string> expired_beads;
+  for ( int &cg_bead_id : bead_ids ){ 
+    Bead * cg_bead = cg_top.getBead(cg_bead_id);
+    // get the cg bead type
+    string cg_bead_type = cg_bead->getType();
+    cout << "Grabbed bead type " << cg_bead_type << endl;
+    vector<string> bead_names = bead_type_and_names_[cg_bead_type];
+    string bead_name;
+    for( const string & name : bead_names){
+      if(expired_beads.count(name)==false)  {
+        cout << "Chosen name " << name << endl;
+        bead_name = name;
+        break;
+      }
+    } 
+    expired_beads.insert(bead_name);
+
+    map<string,Bead *> atomic_names_and_beads;
+    cout << "bead id is " << cg_bead_id << endl;
+    for ( pair<string,int> & atom_name_id : cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]){
+      atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
+      cout << "Passing in atom names and ids " << atom_name_id.first << endl;
+    }
+    // Grab the correct map
+    cout << "Bead name is " << bead_name << endl;
+    assert(cg_bead_name_and_maps_.count(bead_name) && "Map for the coarse grained bead type is not known.");
+    cout << "Applying to bead name " << bead_name << " found " << cg_bead_name_and_maps_.count(bead_name) << endl;
+    cg_bead_name_and_maps_.at(bead_name)->Apply(cg_top.getBoundaryCondition(),
+        atomic_names_and_beads,cg_bead);
+  } 
+}
+
 
 }  // namespace csg
 }  // namespace votca

@@ -31,9 +31,32 @@ using namespace votca::tools;
 
 class BoundaryCondition;
 
-/*******************************************************
-    Interface for all maps
-*******************************************************/
+/**
+ * @brief BeadMap for coarse graining an atomistic representation to a coarser representation
+ *
+ * This abstract interface class that sets the requirements for creating other classes that
+ * define how a set of atomistic beads could be used to update a coarse grained
+ * representation. For instance if one was to use H2O as an example we could
+ * create a single bead to determine how a water molecule behaves as opposed to
+ * using 3 separate atomic particles. Though this class does not create the
+ * coarse grained representation of water it does store the relationship
+ * between a coarse grained and atomistic representation. 
+ *
+ * The relationship defined by the map allows one to update the positions,
+ * velocities, forces, masses and orientations of a coarse grained bead with
+ * its atomistic pieces. 
+ *
+ * Atomistic Representation          Coarse Grained Representation
+ *
+ *  H - O                                   H2O
+ *      | 
+ *      H
+ *
+ * Note that the bead map does not have ownership over either coarse grained
+ * representation or atomisitic representation it can only manipulate them
+ * when they are passed in, it does not and should not have responsibility for
+ * their memory managment. 
+ */
 class BeadMap {
  public:
   virtual ~BeadMap(){};
@@ -65,6 +88,7 @@ class BeadMap {
 /*******************************************************
     Linear map for spherical beads
 *******************************************************/
+
 class Map_Sphere : public BeadMap {
  public:
   void Apply(const BoundaryCondition *boundaries,
@@ -109,6 +133,26 @@ class Map_Ellipsoid : public Map_Sphere {
 /*******************************************************
     Mapper class, collection of maps
 *******************************************************/
+
+/**
+ * @brief Bead Mapper for a whole molecule
+ *
+ * Unlike the BeadMap class which is responsible for the relationship of a few
+ * atomistic bead to a single coarse grained bead, the AtomToMoleculeMapper is
+ * a container for the beadmaps used to describe a full molecule. Using propane
+ * as an illustration, where -- indicate where one coarse grained bead starts
+ * and another begins:
+ *
+ *          H6       H7      H8
+ *           |       |       |
+ *      H1 - C2  --  C3  --  C4 - H5 
+ *           |       |       |
+ *          H9       H10     H11
+ *
+ * Bead Map 1   Bead Map 2   Bead Map 3
+ *
+ * Here all three bead maps would be stored in this class.
+ */
 class AtomToCGMoleculeMapper {
  public:
   AtomToCGMoleculeMapper() {};
@@ -121,51 +165,24 @@ class AtomToCGMoleculeMapper {
   void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info,
       vector<string> bead_order);
 
-  // Pass in a map containing the names of all the atomistic beads in the molecule and pointers to them
+  // Pass in a map containing the names of all the atomistic beads in the
+  // molecule and pointers to them
   void Apply(CSG_Topology &atom_top,                                                     
      CSG_Topology& cg_top,                                                       
      pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadnames_ids);
 
 
-  // Copy Constructor
-  AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other) :
-     atom_molecule_type_(other.atom_molecule_type_),
-    cg_molecule_type_(other.cg_molecule_type_){
-
-      for( const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
-        cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
-      }
-
-    };
-
-  // Move assignment
-  AtomToCGMoleculeMapper & operator=(AtomToCGMoleculeMapper&& other){
-    if(this!=&other){
-      cg_bead_name_and_maps_.clear();
-      for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
-        cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);
-      }
-      atom_molecule_type_ = other.atom_molecule_type_;
-      cg_molecule_type_ = other.cg_molecule_type_;
-    }
-
-    return *this;
-  }
-
-  // Copy assignment
-  AtomToCGMoleculeMapper & operator=(const AtomToCGMoleculeMapper other){
-    if(this!=&other){
-      cg_bead_name_and_maps_.clear();
-      for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
-        cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
-      }
-      atom_molecule_type_ = other.atom_molecule_type_;
-      cg_molecule_type_ = other.cg_molecule_type_;
-    }
-
-    return *this;
-
-  }
+  /***************************
+   * Gang of 3  
+   **************************/
+  /**
+   * @brief Note that the gang of 3 must be explicity defined because the bead
+   * maps are stored as unique_ptrs, unique pointers are used so that the
+   * BeadMaps can be treated polymorphically. 
+   */
+  AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other);
+  AtomToCGMoleculeMapper & operator=(AtomToCGMoleculeMapper&& other);
+  AtomToCGMoleculeMapper & operator=(const AtomToCGMoleculeMapper other);
 
  protected:
   // Molecule atomistic_molecule_, cg_molecule_;
