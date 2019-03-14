@@ -34,12 +34,29 @@
 namespace votca {
 namespace csg {
   
-typedef boost::bimap<boost::bimaps::multiset_of<std::string>,boost::bimaps::set_of<std::string>> multi_bimap;
-/**
+typedef
+  boost::bimap<boost::bimaps::multiset_of<std::string>,boost::bimaps::set_of<std::string>>
+  multi_bimap;
+
+/** 
  * @brief Definition of coarse grained molecule
  *
- * This class is to define a coarse grained molecule, which includes the
- * topology, mapping, ...
+ * This class is to define a stencil which can be used to create a coarse
+ * grained molecule, by itself the stencil can furnish a Molecule class
+ * instance with enough information to create a shell of the coarse grained
+ * molecule. The stencil however, does not contain positions, velocities, force
+ * and orientation data.
+ *
+ * The reason for this design choice is that a stencil can be reused to create
+ * multiple coarse grained molecules of a given type. To create a stencil the
+ * atomistic representation of a molecule and the coarse grained representation
+ * of the same molecule type must be known. This is why the constructor 
+ * requires that both the atomistic and coarse grained types be provided on 
+ * instantiation.  
+ *
+ * This class also provides functionality for understanding how the beads in
+ * a coarse grained representation is related to it atomic version. 
+ *
  */
 class CGMoleculeStencil {
  public:
@@ -60,6 +77,40 @@ class CGMoleculeStencil {
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
       std::vector<int> bead_ids);
   
+  /** 
+   * @brief This function attempts to map the bead ids of a specific coarse
+   * grained instantation to its bead names. 
+   *
+   * To be clear bead names are not the same a bead types below. For instance
+   * if I have 10 propane molecules in my system and I want to know how the
+   * coarse grained bead names of propane number 3 than I could provide the
+   * bead ids associated with propane 3, lets assume the ids are as follows,
+   * where -- indicate where the coarse grained beads have been split up. 
+   *
+   *                               H2         H5      H8
+   *                                |         |        |
+   *                           H1 - C0   --   C4   --  C7 - H10
+   *                                |         |        | 
+   *                               H3         H6      H9
+   *
+   * Coarse Grained Bead Id:       9         10        11
+   *
+   * Coarse Grained Type:          A          B        A
+   *
+   * Coarse Grained Bead Name:     A1         B2       A3
+   *
+   * The input would be the bead ids { 9, 10 , 13 }, and the output would be a
+   * map of pairs of the form:
+   *
+   * {{ 9, A1 }
+   *  {10, B2 }
+   *  {11, A2 }}
+   *
+   * @param[in] bead_ids to coarse grained beads, to work correctly all the
+   * beads ids for a particular molecule instance must be provided. 
+   *
+   * @return map to the names of the coarse grained beads 
+   */
   std::unordered_map<int, std::string> MapCGBeadIdsToCGBeadNames(
       std::vector<int> bead_ids);
   
