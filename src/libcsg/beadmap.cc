@@ -339,7 +339,6 @@ AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(AtomToCGMoleculeMappe
   return *this;                                                               
 }                                                                             
 
-+                                                                                 
 // Copy assignment                                                            
 AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(const AtomToCGMoleculeMapper other){       
   if(this!=&other){                                                           
