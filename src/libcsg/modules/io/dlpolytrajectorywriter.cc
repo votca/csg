@@ -122,7 +122,7 @@ void DLPOLYTrajectoryWriter::Write(CSG_Topology *conf) {
           << m[i][1] * scale << setw(20) << m[i][2] * scale << endl;
   }
 
-  for (int i = 0; i < conf->BeadCount(); i++) {
+  for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); i++) {
     Bead *bead = conf->getBead(i);
 
     // AB: DL_POLY needs bead TYPE, not name!
