@@ -16,6 +16,7 @@
  */
 
 #include "growriter.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
 #include <string>
 
@@ -55,7 +56,7 @@ void GROWriter::Write(CSG_Topology *conf) {
   else
     sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
 
-  for (i = 0; i < top->BeadCount(); i++) {
+  for (i = 0; static_cast<size_t>(i) < top->BeadCount(); i++) {
     resnr = top->getBead(i)->getResidueId();
     string resname =
         top->getBead(i)

@@ -69,7 +69,7 @@ bool GROReader::NextFrame(CSG_Topology &top) {
   }
   getline(_fl, tmp);  // number atoms
   int natoms = atoi(tmp.c_str());
-  if (!_topology && natoms != top.BeadCount())
+  if (!_topology && static_cast<size_t>(natoms) != top.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
 
