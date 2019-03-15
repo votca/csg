@@ -147,7 +147,7 @@ bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
          << endl;
 #endif
 
-    if (matoms != conf.BeadCount())
+    if (static_cast<size_t>(matoms) != conf.BeadCount())
       throw std::runtime_error("Number of atoms/beads in '" + _fname +
                                "' header differs from that read with topology");
 
@@ -233,7 +233,7 @@ bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
       cout << ", dt = " << fields[5] << ", time = " << stime << endl;
 #endif
 
-      if (natoms != conf.BeadCount())
+      if (static_cast<size_t>(natoms) != conf.BeadCount())
         throw std::runtime_error(
             "Error: N of atoms/beads in '" + _fname +
             "' header differs from that found in topology");
