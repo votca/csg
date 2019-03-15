@@ -71,7 +71,7 @@ class CGMoleculeStencil {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  void AddBeadInfo(const std::vector<CGBeadStencil> & bead_info);
+  void AddBeadStencil(const std::vector<CGBeadStencil> & bead_info);
 
   // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
@@ -120,11 +120,11 @@ class CGMoleculeStencil {
 
   std::string getCGBeadName(std::string atom_bead_name) const;
 
-  void AddInteractionInfo(const std::vector<CGInteractionStencil> & interaction_info);
+  void AddInteractionStencil(const std::vector<CGInteractionStencil> & interaction_info);
 
-  const std::vector<CGBeadStencil> &getBeadInfo() const;
+  const std::vector<CGBeadStencil> &getBeadStencil() const;
 
-  const std::vector<CGInteractionStencil> &getInteractionInfo() const;
+  const std::vector<CGInteractionStencil> &getInteractionStencil() const;
 
   const std::string &getCGMoleculeType() const;
 

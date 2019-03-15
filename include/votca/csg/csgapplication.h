@@ -171,7 +171,6 @@ inline void CsgApplication::AddObserver(CGObserver *observer) {
   _observers.push_back(observer);
 }
 
-//inline CsgApplication::Worker::Worker() : _app(NULL), _map(NULL), _id(-1) {}
 inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 
 }  // namespace csg

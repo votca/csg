@@ -169,7 +169,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
 
   vector<CGBeadStencil> beads_info = ParseBeads_(options.get("cg_molecule.topology"));
   // Update the stencil with the bead info
-  cg_molecule_and_stencil_.at(cg_mol_type).AddBeadInfo(beads_info);
+  cg_molecule_and_stencil_.at(cg_mol_type).AddBeadStencil(beads_info);
   
   // Convert vector to map to be used with ParseMaps
   unordered_map<string,CGBeadStencil> name_and_beads_info;
@@ -180,7 +180,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   ParseMaps_(options,name_and_beads_info);
 
   // Update the stencil the relevant interactions
-  cg_molecule_and_stencil_.at(cg_mol_type).AddInteractionInfo(
+  cg_molecule_and_stencil_.at(cg_mol_type).AddInteractionStencil(
       ParseBonded_(options.get("cg_molecule.topology")));
 
   // Create a mapper to map from the atom to the cg molecule
@@ -396,7 +396,7 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
     CSG_Topology & atom_top) {
 
   map<string,int> cg_bead_name_and_id;
-    for (const CGBeadStencil &bead_info : stencil.getBeadInfo()) {
+    for (const CGBeadStencil &bead_info : stencil.getBeadStencil()) {
     Bead *bead;
 
     string bead_type = bead_info.cg_bead_type_;
@@ -426,7 +426,7 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
 
   int min_index = 0;
   int max_index = 0;
-  for (const CGBeadStencil &bead_info : stencil.getBeadInfo()) {
+  for (const CGBeadStencil &bead_info : stencil.getBeadStencil()) {
 
     vector<pair<string,int>> atom_bead_names_ids;
     max_index += bead_info.atomic_subbeads_.size();
@@ -460,7 +460,7 @@ void AtomCGConverter::CreateInteractions_(
     bead_name_to_id[value.second] = value.first;
   }
 
-  for (const CGInteractionStencil &interaction_info : stencil.getInteractionInfo()) {
+  for (const CGInteractionStencil &interaction_info : stencil.getInteractionStencil()) {
     // Convert atoms to vector of ints using the map
     size_t interaction_id = cg_top_out.InteractionCount();
     vector<int> atoms;

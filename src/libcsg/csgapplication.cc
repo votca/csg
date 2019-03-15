@@ -27,8 +27,8 @@ namespace votca {
 namespace csg {
 
 CsgApplication::CsgApplication(void) {
-  _traj_reader = nullptr;
   _nthreads = 1;
+  _traj_reader = nullptr;
 }
 
 CsgApplication::~CsgApplication(void) {}
