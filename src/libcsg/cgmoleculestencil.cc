@@ -36,7 +36,7 @@ namespace csg {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  void CGMoleculeStencil::AddBeadInfo(vector<CGBeadStencil> bead_info) {
+  void CGMoleculeStencil::AddBeadInfo(const & vector<CGBeadStencil> bead_info) {
     bead_info_ = bead_info;
 
     for (CGBeadStencil &info : bead_info_) {
@@ -107,7 +107,7 @@ namespace csg {
     return cg_and_atom_names_.right.at(atom_bead_name);
   }
 
-  void CGMoleculeStencil::AddInteractionInfo(vector<CGInteractionStencil> interaction_info) {
+  void CGMoleculeStencil::AddInteractionInfo(const & vector<CGInteractionStencil> interaction_info) {
     interaction_info_ = interaction_info;
   }
 
