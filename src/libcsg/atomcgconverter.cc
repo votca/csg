@@ -232,7 +232,7 @@ vector<string> AtomCGConverter::getAtomicBeadNamesOfCGBead(
     string cg_mol_type, string cg_bead_name) {
   assert(cg_molecule_and_stencil_.count(cg_mol_type) &&
          "cg molecule type is not known to the atom-to-cg converter");
-  cg_molecule_and_stencil_.at(cg_mol_type).getAtomicBeadNames(cg_bead_name);
+  return cg_molecule_and_stencil_.at(cg_mol_type).getAtomicBeadNames(cg_bead_name);
 }
 /*****************************************************************************
  * Private Internal Methods
