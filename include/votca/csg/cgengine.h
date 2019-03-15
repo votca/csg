@@ -53,6 +53,14 @@ class CGEngine {
    */
   void LoadFiles(string filenames);
 
+  /**
+   * @brief Takes the atomisitic topology and populates the coarse grained topology with a coarse grained represenation
+   *
+   * @param[in] atomistic_top_in
+   * @param[in,out] cg_top
+   *
+   * @return return an atom to cg converter which can be used to update the positions vectors and forces of the coarse grained representation 
+   */
   std::unique_ptr<AtomCGConverter> PopulateCGTopology(
       CSG_Topology & atomistic_top_in,CSG_Topology & cg_top);
 
