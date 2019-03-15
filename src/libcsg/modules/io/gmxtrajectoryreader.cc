@@ -53,9 +53,6 @@ bool GMXTrajectoryReader::FirstFrame(CSG_Topology &conf) {
     throw std::runtime_error(
         "number of beads in trajectory do not match topology");
 
-  // conf.HasPos(true);
-  // conf.HasF(_gmx_frame.bF);
-
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     double r[3] = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],
                    _gmx_frame.x[i][ZZ]};
@@ -86,8 +83,6 @@ bool GMXTrajectoryReader::NextFrame(CSG_Topology &conf) {
   conf.setTime(_gmx_frame.time);
   conf.setStep(_gmx_frame.step);
   conf.setBox(m);
-
-  // conf.HasF(_gmx_frame.bF);
 
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     double r[3] = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],
