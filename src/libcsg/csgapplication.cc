@@ -29,7 +29,10 @@ namespace csg {
 using namespace std;
 using namespace votca::tools;
 
-CsgApplication::CsgApplication(void) : _nthreads(1) { _traj_reader = nullptr; }
+CsgApplication::CsgApplication(void)
+    : _do_mapping(false), _nframes(-1), _is_first_frame(true), _nthreads(1) {
+  _traj_reader = nullptr;
+}
 
 CsgApplication::~CsgApplication(void) {}
 
