@@ -26,8 +26,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
-// namespace po = boost::program_options;
+using namespace votca::tools;
 
 void CGEngine::LoadFiles(string filename) {
   Tokenizer tok(filename, ";");

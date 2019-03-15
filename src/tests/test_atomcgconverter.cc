@@ -28,6 +28,7 @@
 #include <votca/tools/property.h>
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 BOOST_AUTO_TEST_SUITE(atomcgconverter_test)
 

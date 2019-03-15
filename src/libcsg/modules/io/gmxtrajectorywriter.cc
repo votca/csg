@@ -17,11 +17,13 @@
 
 #include "gmxtrajectorywriter.h"
 #include <string>
-
+#include <votca/tools/matrix.h>
+#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void GMXTrajectoryWriter::Open(string file, bool bAppend) {
   // char c[1] = bAppend ? "a" : "w";

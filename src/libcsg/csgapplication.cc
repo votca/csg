@@ -26,10 +26,10 @@
 namespace votca {
 namespace csg {
 
-CsgApplication::CsgApplication(void) {
-  _nthreads = 1;
-  _traj_reader = nullptr;
-}
+using namespace std;
+using namespace votca::tools;
+
+CsgApplication::CsgApplication(void) : _nthreads(1) { _traj_reader = nullptr; }
 
 CsgApplication::~CsgApplication(void) {}
 

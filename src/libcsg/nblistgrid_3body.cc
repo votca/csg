@@ -21,6 +21,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
                                 BeadList &list3, bool do_exclusions) {

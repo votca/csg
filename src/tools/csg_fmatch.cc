@@ -28,6 +28,10 @@
 #include <votca/tools/linalg.h>
 #include <votca/tools/table.h>
 
+using namespace std;
+using namespace votca::tools;
+using namespace votca::csg;
+
 int main(int argc, char **argv) {
   CGForceMatching app;
   return app.Exec(argc, argv);

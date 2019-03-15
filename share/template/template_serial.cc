@@ -25,6 +25,7 @@
 // using namespace votca::tools;
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgTestApp : public CsgApplication {
   string ProgramName() { return "template_nblist"; }

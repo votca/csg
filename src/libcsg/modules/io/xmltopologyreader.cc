@@ -33,6 +33,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 bool XMLTopologyReader::ReadTopology(string filename, CSG_Topology &top) {
   _top = &top;

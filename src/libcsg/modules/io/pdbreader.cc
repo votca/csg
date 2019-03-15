@@ -29,7 +29,7 @@ namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
+using namespace votca::tools;
 bool PDBReader::ReadTopology(string file, CSG_Topology &top) {
   _topology = true;
   top.Cleanup();

@@ -27,6 +27,9 @@
 namespace votca {
 namespace csg {
 
+using namespace std;
+using namespace votca::tools;
+
 void StdAnalysis::Register(map<string, AnalysisTool *> &lib) {
   lib["list"] = this;
   lib["vals"] = this;

@@ -168,12 +168,12 @@ class AtomCGConverter {
   void CheckThatBeadCountAndInteractionTypeAreConsistent_(
       std::string interaction_type, size_t bead_count) const;
 
-  std::vector<CGBeadStencil> ParseBeads_(Property &options);
+  std::vector<CGBeadStencil> ParseBeads_(TOOLS::Property &options);
 
-  std::vector<CGInteractionStencil> ParseBonded_(Property &options);
+  std::vector<CGInteractionStencil> ParseBonded_(TOOLS::Property &options);
 
   void ParseMaps_(
-      Property &options_in,
+      TOOLS::Property &options_in,
       std::unordered_map<std::string, CGBeadStencil> &bead_maps_info);
 
   std::map<int, std::vector<std::pair<std::string, int>>> CreateBeads_(
@@ -182,7 +182,7 @@ class AtomCGConverter {
 
   void CreateInteractions_(
       Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
-      std::map<int, vector<pair<std::string, int>>> bead_name_to_id);
+      std::map<int, std::vector<std::pair<std::string, int>>> bead_name_to_id);
 
   std::map<int, std::vector<std::pair<std::string, int>>> CreateMolecule_(
       std::string cg_molecule_type, int molecule_id, CSG_Topology &cg_top_out,

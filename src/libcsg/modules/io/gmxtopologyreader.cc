@@ -23,10 +23,10 @@
 #include <iostream>
 #include <string>
 
+#include <boost/algorithm/string.hpp>
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
-
-#include <boost/algorithm/string.hpp>
+#include <votca/tools/matrix.h>
 
 #include <gromacs/fileio/tpxio.h>
 #include <gromacs/mdtypes/inputrec.h>
@@ -36,16 +36,16 @@
 // by gmx
 #undef bool
 
-using namespace std;
-using namespace votca::tools;
-
 namespace votca {
 namespace csg {
+
+using namespace std;
+namespace TOOLS = votca::tools;
 
 bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
   gmx_mtop_t mtop;
 
-  Elements elements;
+  TOOLS::Elements elements;
 
   int natoms;
   // cleanup topology to store new data
@@ -90,7 +90,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 
         string bead_type = *(atoms->atomtype[iatom]);
 
-        string element = topology_constants::unassigned_element;
+        string element = TOOLS::topology_constants::unassigned_element;
         if (elements.isEleShort(bead_type)) {
           element = bead_type;
         }
@@ -99,7 +99,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
           element = elements.getEleShort(name_all_caps);
         }
 
-        byte_t symmetry = 1;
+        TOOLS::byte_t symmetry = 1;
         Bead *bead =
             top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
                            a->resind, residue_name, element, a->m, a->q);
@@ -121,7 +121,7 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
     }
   }
 
-  matrix m;
+  TOOLS::matrix m;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) m[i][j] = gbox[j][i];
   top.setBox(m);

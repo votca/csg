@@ -21,6 +21,8 @@
 namespace votca {
 namespace csg {
 
+using namespace votca::tools;
+
 NBList_3Body::NBList_3Body() : _do_exclusions(false), _match_function(0) {
   setTripleType<BeadTriple>();
   SetMatchFunction(NBList_3Body::match_always);

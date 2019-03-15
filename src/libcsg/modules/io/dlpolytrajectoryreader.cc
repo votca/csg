@@ -28,6 +28,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 bool DLPOLYTrajectoryReader::Open(const string &file)
 // open the original dlpoly configuration or trajectory file

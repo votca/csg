@@ -24,11 +24,9 @@
 #include <stdio.h>
 #include <votca/csg/nblistgrid.h>
 #include <votca/tools/linalg.h>
-/*
- *
- */
 
 using namespace std;
+using namespace votca::tools;
 
 int main(int argc, char **argv) {
   CsgREupdate app;

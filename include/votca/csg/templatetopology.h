@@ -328,7 +328,7 @@ class TemplateTopology {
    *
    * @return returns a list of Interactions
    */
-  std::list<Interaction *> InteractionsInGroup(const string &group) const;
+  std::list<Interaction *> InteractionsInGroup(const std::string &group) const;
 
   /**
    * access exclusion list
@@ -501,7 +501,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
 
   for (const std::pair<std::string, std::list<Interaction *>>
            &interaction_name_and_list : top.interactions_by_group_) {
-    string interaction_name = interaction_name_and_list.first;
+    std::string interaction_name = interaction_name_and_list.first;
     for (const Interaction *interaction : interaction_name_and_list.second) {
       int index_of_interaction = interaction->getIndex();
       interactions_by_group_[interaction_name].push_back(
@@ -558,9 +558,9 @@ void TemplateTopology<Bead_T, Molecule_T>::RenameMoleculesType(
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::RenameBeadsType(
     const std::string old_type, std::string new_type) {
-  for (pair<const int, Bead_T> &id_and_bead : beads_) {
-    string bead_type = id_and_bead.second.getType();
-    if (wildcmp(bead_type.c_str(), old_type.c_str())) {
+  for (std::pair<const int, Bead_T> &id_and_bead : beads_) {
+    std::string bead_type = id_and_bead.second.getType();
+    if (TOOLS::wildcmp(bead_type.c_str(), old_type.c_str())) {
       id_and_bead.second.setType(new_type);
     }
   }
@@ -568,11 +568,11 @@ void TemplateTopology<Bead_T, Molecule_T>::RenameBeadsType(
 
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::setBeadOfGivenTypeToNewMass(
-    string type, double mass) {
+    std::string type, double mass) {
 
   for (std::pair<const int, Bead_T> &id_and_bead : beads_) {
     std::string bead_type = id_and_bead.second.getType();
-    if (wildcmp(bead_type.c_str(), type.c_str())) {
+    if (TOOLS::wildcmp(bead_type.c_str(), type.c_str())) {
       id_and_bead.second.setMass(mass);
     }
   }
@@ -602,7 +602,7 @@ void TemplateTopology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
 template <class Bead_T, class Molecule_T>
 std::list<Interaction *>
     TemplateTopology<Bead_T, Molecule_T>::InteractionsInGroup(
-        const string &group) const {
+        const std::string &group) const {
   auto iter = interactions_by_group_.find(group);
   if (iter == interactions_by_group_.end()) return std::list<Interaction *>();
   return iter->second;
@@ -648,7 +648,7 @@ double TemplateTopology<Bead_T, Molecule_T>::getShortestBoxDimension() const {
 
 template <class Bead_T, class Molecule_T>
 std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getBeadIds() const {
-  vector<int> bead_ids;
+  std::vector<int> bead_ids;
   for (const std::pair<const int, Bead_T> id_and_bead : beads_) {
     bead_ids.push_back(id_and_bead.first);
   }
@@ -657,7 +657,7 @@ std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getBeadIds() const {
 
 template <class Bead_T, class Molecule_T>
 std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getMoleculeIds() const {
-  vector<int> molecule_ids;
+  std::vector<int> molecule_ids;
   for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
     molecule_ids.push_back(id_and_molecule.first);
   }
@@ -672,7 +672,7 @@ std::map<int, std::string>
   assert(molecules_.count(molecule_id) &&
          "Molecule id does not exist in topology object");
   std::map<int, std::string> id_and_residue_type;
-  vector<int> bead_ids = molecules_.at(molecule_id).getBeadIds();
+  std::vector<int> bead_ids = molecules_.at(molecule_id).getBeadIds();
   for (const int &bead_id : bead_ids) {
     id_and_residue_type[beads_.at(bead_id).getResidueId()] =
         beads_.at(bead_id).getResidueType();
@@ -683,9 +683,9 @@ std::map<int, std::string>
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::RebuildExclusions() {
 
-  vector<Bead *> beads;
+  std::vector<Bead *> beads;
   for (std::unique_ptr<Interaction> &interaction : interactions_) {
-    vector<int> bead_ids = interaction->getBeadIds();
+    std::vector<int> bead_ids = interaction->getBeadIds();
     for (const int &bead_id : bead_ids) {
       beads.push_back(&beads_[bead_id]);
     }

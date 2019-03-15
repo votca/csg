@@ -25,6 +25,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgMapApp : public CsgApplication {
  public:

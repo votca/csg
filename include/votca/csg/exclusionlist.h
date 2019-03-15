@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_EXCLUSIONLIST_H
-#define _VOTCA_CSG_EXCLUSIONLIST_H
+#ifndef VOTCA_CSG_EXCLUSIONLIST_H
+#define VOTCA_CSG_EXCLUSIONLIST_H
 
 #include "bead.h"
 #include <iostream>
@@ -25,7 +25,7 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
+namespace TOOLS = votca::tools;
 
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList
@@ -153,7 +153,6 @@ inline void ExclusionList::RemoveExclusion(Bead *bead1, Bead *bead2) {
     (*ex) = NULL;
     _exclusions.erase(ex);
   }
-  //_exclusions.remove(NULL);
 }
 
 std::ostream &operator<<(std::ostream &out, ExclusionList &ex);
@@ -161,4 +160,4 @@ std::ostream &operator<<(std::ostream &out, ExclusionList &ex);
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_EXCLUSIONLIST_H */
+#endif  // VOTCA_CSG_EXCLUSIONLIST_H

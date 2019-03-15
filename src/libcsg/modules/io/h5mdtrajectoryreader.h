@@ -18,19 +18,19 @@
 #ifndef SRC_LIBCSG_MODULES_IO_H5MDTRAJECTORYREADER_H_
 #define SRC_LIBCSG_MODULES_IO_H5MDTRAJECTORYREADER_H_
 
-#include <votca/csg/topologyreader.h>
-#include <votca/csg/trajectoryreader.h>
-
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <votca/csg/topologyreader.h>
+#include <votca/csg/trajectoryreader.h>
+#include <votca/tools/matrix.h>
 
 #include "hdf5.h"
 
 namespace votca {  // NOLINT
 namespace csg {
-
+namespace TOOLS = votca::tools;
 /**
     \brief class for reading H5MD trajectory.
 
@@ -170,7 +170,7 @@ class H5MDTrajectoryReader : public TrajectoryReader {
   int vec_components_;
 
   // Box matrix.
-  matrix m;
+  TOOLS::matrix m;
 };
 
 }  // namespace csg

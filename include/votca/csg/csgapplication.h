@@ -31,7 +31,7 @@ namespace TOOLS = votca::tools;
 namespace votca {
 namespace csg {
 
-class CsgApplication : public Application {
+class CsgApplication : public TOOLS::Application {
  public:
   CsgApplication();
   ~CsgApplication();
@@ -100,7 +100,7 @@ class CsgApplication : public Application {
    * the correct order of frames for in/output.
    *
    */
-  class Worker : public Thread {
+  class Worker : public TOOLS::Thread {
    public:
     Worker();
     ~Worker(){};
@@ -157,13 +157,13 @@ class CsgApplication : public Application {
   int _nframes;
   bool _is_first_frame;
   int _nthreads;
-  Mutex _nframesMutex;
-  Mutex _traj_readerMutex;
+  TOOLS::Mutex _nframesMutex;
+  TOOLS::Mutex _traj_readerMutex;
 
   /// \brief stores Mutexes used to impose order for input
-  std::vector<Mutex *> _threadsMutexesIn;
+  std::vector<TOOLS::Mutex *> _threadsMutexesIn;
   /// \brief stores Mutexes used to impose order for output
-  std::vector<Mutex *> _threadsMutexesOut;
+  std::vector<TOOLS::Mutex *> _threadsMutexesOut;
   TrajectoryReader *_traj_reader;
 };
 

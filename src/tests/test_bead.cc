@@ -35,6 +35,7 @@ class Molecule;
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 BOOST_AUTO_TEST_SUITE(bead_test)
 

@@ -26,7 +26,7 @@ namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
+using namespace votca::tools;
 bool LAMMPSDumpReader::ReadTopology(string file, CSG_Topology &top) {
   read_topology_data_ = true;
   top.Cleanup();

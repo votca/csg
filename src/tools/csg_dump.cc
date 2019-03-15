@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace votca::csg;
-
+using namespace votca::tools;
 class CsgDumpApp : public CsgApplication {
   string ProgramName() { return "csg_dump"; }
   void HelpText(ostream &out) {
@@ -89,20 +89,19 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
     }
 
     cout << "\nList of molecules:\n";
-    for( const int & molecule_id : molecule_ids){
-      Molecule * mol = top->getMolecule(molecule_id);
-      cout << "molecule: " << molecule_id+1  << " " << mol->getType();
-      cout <<  " beads: " << mol->BeadCount() << endl;
+    for (const int &molecule_id : molecule_ids) {
+      Molecule *mol = top->getMolecule(molecule_id);
+      cout << "molecule: " << molecule_id + 1 << " " << mol->getType();
+      cout << " beads: " << mol->BeadCount() << endl;
 
       vector<int> bead_ids = mol->getBeadIds();
-      sort(bead_ids.begin(),bead_ids.end());
-      for( const int & bead_id : bead_ids ){
-        Bead * bead = top->getBead(bead_id);
+      sort(bead_ids.begin(), bead_ids.end());
+      for (const int &bead_id : bead_ids) {
+        Bead *bead = top->getBead(bead_id);
         cout << bead_id << " Type " << bead->getType() << " Mass "
              << bead->getMass() << " Resnr " << bead->getResidueId()
              << " Resname " << bead->getResidueType() << " Charge "
              << bead->getQ() << endl;
-
       }
     }
 

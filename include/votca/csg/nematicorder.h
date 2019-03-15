@@ -15,15 +15,15 @@
  *
  */
 
-#ifndef _VOTCA_CSG_NEMATICORDER_H
-#define _VOTCA_CSG_NEMATICORDER_H
+#ifndef VOTCA_CSG_NEMATICORDER_H
+#define VOTCA_CSG_NEMATICORDER_H
 
 #include "csgtopology.h"
 #include <votca/tools/matrix.h>
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
+namespace TOOLS = votca::tools;
 
 class NematicOrder {
  public:
@@ -32,16 +32,16 @@ class NematicOrder {
 
   void Process(CSG_Topology &top, const std::string &filter = "*");
 
-  matrix::eigensystem_t &NematicU() { return _nemat_u; }
-  matrix::eigensystem_t &NematicV() { return _nemat_v; }
-  matrix::eigensystem_t &NematicW() { return _nemat_w; }
+  TOOLS::matrix::eigensystem_t &NematicU() { return _nemat_u; }
+  TOOLS::matrix::eigensystem_t &NematicV() { return _nemat_v; }
+  TOOLS::matrix::eigensystem_t &NematicW() { return _nemat_w; }
 
  private:
-  matrix _mu, _mv, _mw;
-  matrix::eigensystem_t _nemat_u, _nemat_v, _nemat_w;
+  TOOLS::matrix _mu, _mv, _mw;
+  TOOLS::matrix::eigensystem_t _nemat_u, _nemat_v, _nemat_w;
 };
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_NEMATICORDER_H */
+#endif  // VOTCA_CSG_NEMATICORDER_H

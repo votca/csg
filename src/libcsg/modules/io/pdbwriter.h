@@ -20,17 +20,21 @@
 
 #include "../../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
+#include <string>
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
 namespace csg {
+
+namespace TOOLS = votca::tools;
 
 class PDBWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void RegisteredAt(ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+  void RegisteredAt(
+      TOOLS::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
   void Write(CSG_Topology *conf);
 

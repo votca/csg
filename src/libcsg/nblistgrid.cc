@@ -23,6 +23,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void NBListGrid::Generate(BeadList &list1, BeadList &list2,
                           bool do_exclusions) {

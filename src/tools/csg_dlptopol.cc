@@ -23,6 +23,7 @@
 using namespace votca::csg;
 using namespace std;
 using boost::format;
+using namespace votca::tools;
 
 /**
     \brief class for writing dlpoly topology files

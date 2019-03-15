@@ -24,6 +24,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void GROWriter::Open(string file, bool bAppend) {
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");

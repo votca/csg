@@ -26,7 +26,7 @@ namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
+using namespace votca::tools;
 /*****************************************************************************
  * Internal Helper Functions                                                 *
  *****************************************************************************/

@@ -21,13 +21,13 @@
 #include "cgbeadstencil.h"
 #include "csgtopology.h"
 #include "molecule.h"
+#include <string>
 #include <vector>
 #include <votca/tools/property.h>
 #include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 class BoundaryCondition;
 
@@ -64,16 +64,17 @@ class BeadMap {
   virtual void Apply(const BoundaryCondition *boundaries,
                      std::map<std::string, Bead *> atomistic_beads,
                      Bead *cg_bead) = 0;
-  virtual void Initialize(const std::vector<string> subbeads,
+  virtual void Initialize(const std::vector<std::string> subbeads,
                           std::vector<double> weights,
                           std::vector<double> ds) = 0;
 
-  void Initialize(std::vector<string> subbeads, std::vector<double> weights) {
+  void Initialize(std::vector<std::string> subbeads,
+                  std::vector<double> weights) {
     std::vector<double> empty;
     Initialize(subbeads, weights, empty);
   }
 
-  std::vector<string> getAtomicBeadNames() const;
+  std::vector<std::string> getAtomicBeadNames() const;
 
   virtual std::unique_ptr<BeadMap> Clone() const = 0;
 
@@ -171,13 +172,14 @@ class AtomToCGMoleculeMapper {
   ~AtomToCGMoleculeMapper();
 
   void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info,
-                  vector<string> bead_order);
+                  std::vector<std::string> bead_order);
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
-             pair<int, map<int, vector<pair<string, int>>>>
-                 cgmolid_cgbeadid_atomicbeadnames_ids);
+  void Apply(
+      CSG_Topology &atom_top, CSG_Topology &cg_top,
+      std::pair<int, std::map<int, std::vector<std::pair<std::string, int>>>>
+          cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
    * Gang of 3
@@ -197,9 +199,11 @@ class AtomToCGMoleculeMapper {
   std::string cg_molecule_type_;
 
   // contains each bead types and a vector of all the bead names of that type
-  std::unordered_map<std::string, vector<string>> bead_type_and_names_;
+  std::unordered_map<std::string, std::vector<std::string>>
+      bead_type_and_names_;
   // Needs to be a unique_ptr to take advantage of polymorphism
-  std::unordered_map<string, std::unique_ptr<BeadMap>> cg_bead_name_and_maps_;
+  std::unordered_map<std::string, std::unique_ptr<BeadMap>>
+      cg_bead_name_and_maps_;
 };
 
 }  // namespace csg

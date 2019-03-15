@@ -45,7 +45,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     return &molecules_[id];
   }
 
-  Bead* CreateBead(byte_t symmetry, std::string bead_type, int bead_id,
+  Bead* CreateBead(TOOLS::byte_t symmetry, std::string bead_type, int bead_id,
                    int molecule_id, int residue_id, std::string residue_type,
                    std::string element_symbol, double mass, double charge) {
 

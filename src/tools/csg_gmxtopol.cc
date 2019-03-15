@@ -24,6 +24,7 @@
 using namespace votca::csg;
 using namespace std;
 using boost::format;
+using namespace votca::tools;
 
 class GmxTopolApp : public CsgApplication {
  public:

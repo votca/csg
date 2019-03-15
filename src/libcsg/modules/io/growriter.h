@@ -20,6 +20,7 @@
 
 #include "../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
+#include <string>
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
@@ -27,7 +28,7 @@ namespace csg {
 
 class GROWriter : public TrajectoryWriter {
  public:
-  void Open(string file, bool bAppend = false);
+  void Open(std::string file, bool bAppend = false);
   void Close();
 
   void Write(CSG_Topology *conf);

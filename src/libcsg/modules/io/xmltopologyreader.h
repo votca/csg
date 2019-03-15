@@ -24,10 +24,10 @@
 #include <votca/csg/topologyreader.h>
 #include <votca/tools/parsexml.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
+
+namespace TOOLS = votca::tools;
 
 class BondBead {
  public:
@@ -95,19 +95,19 @@ class XMLTopologyReader : public TopologyReader {
 
   void ReadTopolFile(std::string file);
 
-  void ParseRoot(Property &el);
-  void ParseMolecules(Property &el);
-  void ParseBeadTypes(Property &el);
-  void ParseBonded(Property &el);
-  void ParseBox(Property &p);
-  void ParseMolecule(Property &p, std::string molecule_type_, int nbeads,
+  void ParseRoot(TOOLS::Property &el);
+  void ParseMolecules(TOOLS::Property &el);
+  void ParseBeadTypes(TOOLS::Property &el);
+  void ParseBonded(TOOLS::Property &el);
+  void ParseBox(TOOLS::Property &p);
+  void ParseMolecule(TOOLS::Property &p, std::string molecule_type_, int nbeads,
                      int nmols);
-  void ParseBond(Property &p);
-  void ParseAngle(Property &p);
-  void ParseDihedral(Property &p);
+  void ParseBond(TOOLS::Property &p);
+  void ParseAngle(TOOLS::Property &p);
+  void ParseDihedral(TOOLS::Property &p);
 
  private:
-  ParseXML _parser;
+  TOOLS::ParseXML _parser;
 
   CSG_Topology *_top;
   MoleculesMap _molecules;

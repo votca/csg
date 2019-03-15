@@ -15,14 +15,13 @@
  *
  */
 
-#ifndef _VOTCA_CSG_CGOBSERVER_H
-#define _VOTCA_CSG_CGOBSERVER_H
+#ifndef VOTCA_CSG_CGOBSERVER_H
+#define VOTCA_CSG_CGOBSERVER_H
 
 #include "csgtopology.h"
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 /**
    \brief Observer class for analysis hook
@@ -48,4 +47,4 @@ class CGObserver {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_CGOBSERVER_H */
+#endif  // VOTCA_CSG_CGOBSERVER_H

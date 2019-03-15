@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 // comments were mainly added to explain the "overhead" needed for threaded
 // calculations/analyzations

@@ -53,7 +53,7 @@ class CGEngine {
    * @param[in] filenames - a string of with .xml files, can be a single file or
    * multiple file names separated by ';'
    */
-  void LoadFiles(string filenames);
+  void LoadFiles(std::string filenames);
 
   /**
    * @brief Takes the atomisitic topology and populates the coarse grained
@@ -84,7 +84,7 @@ class CGEngine {
   bool IsIgnored(std::string molecule_type);
 
  private:
-  unordered_set<std::string> file_names_;
+  std::unordered_set<std::string> file_names_;
 
   std::list<std::string> _ignores;
 };
@@ -92,7 +92,7 @@ class CGEngine {
 inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();
        iter != _ignores.end(); ++iter) {
-    if (wildcmp(iter->c_str(), molecule_type.c_str())) return true;
+    if (TOOLS::wildcmp(iter->c_str(), molecule_type.c_str())) return true;
   }
   return false;
 }

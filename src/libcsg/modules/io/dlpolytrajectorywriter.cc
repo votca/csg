@@ -24,6 +24,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void DLPOLYTrajectoryWriter::Open(string file, bool bAppend)
 // open/create a dlpoly configuration or trajectory file

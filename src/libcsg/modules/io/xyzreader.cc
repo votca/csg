@@ -27,7 +27,7 @@ namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
+using namespace votca::tools;
 bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   top.Cleanup();
 
