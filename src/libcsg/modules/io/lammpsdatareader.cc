@@ -401,7 +401,7 @@ void LAMMPSDataReader::ReadNumTypes_(vector<string> fields, string type) {
 void LAMMPSDataReader::ReadNumOfAtoms_(vector<string> fields,
                                        CSG_Topology &top) {
   numberOf_["atoms"] = stoi(fields.at(0));
-  if (!topology_ && numberOf_["atoms"] != top.BeadCount())
+  if (!topology_ && static_cast<size_t>(numberOf_["atoms"]) != top.BeadCount())
     std::runtime_error("Number of beads in topology and trajectory differ");
 }
 
