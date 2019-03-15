@@ -18,8 +18,8 @@
 #include "../../include/votca/csg/boundarycondition.h"
 #include <boost/lexical_cast.hpp>
 #include <iostream>
-#include <numeric>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadmap.h>
@@ -33,16 +33,16 @@ using namespace std;
 namespace votca {
 namespace csg {
 
-vector<string> BeadMap::getAtomicBeadNames(){
+vector<string> BeadMap::getAtomicBeadNames() const {
   vector<string> bead_names;
-  for( pair<string,element_t> pr : matrix_){
+  for (pair<string, element_t> pr : matrix_) {
     bead_names.push_back(pr.first);
   }
   return bead_names;
 }
 
-void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
-                            vector<double> ds) {
+void Map_Sphere::Initialize(const vector<string> subbeads,
+                            vector<double> weights, vector<double> ds) {
 
   assert(subbeads.size() == weights.size() &&
          "subbeads and weights are not matched in bead map sphere.");
@@ -83,26 +83,26 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
   }
 
   int index = 0;
-  for (string &name : subbeads) {
+  for (string name : subbeads) {
     AddElem(name, weights.at(index), fweights.at(index));
     ++index;
   }
-  
 }
 
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
                        map<string, Bead *> atomic_beads, Bead *cg_bead) {
 
-  assert(cg_bead->getSymmetry()==1 && "Applying spherical bead map on a non spherical corase grained bead");
+  assert(cg_bead->getSymmetry() == 1 &&
+         "Applying spherical bead map on a non spherical corase grained bead");
 
   assert(matrix_.size() == atomic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads");
   assert(matrix_.size() > 0 &&
          "Cannot apply mapping no atomistic beads have been specified.");
-    Bead *atom = atomic_beads.begin()->second;
+  Bead *atom = atomic_beads.begin()->second;
   assert(atom->HasPos() &&
          "Cannot apply mapping atomistic beads do not have position.");
-  
+
   vec reference_position = atom->getPos();
   string bead_type = atom->getType();
   int bead_id = atom->getId();
@@ -122,13 +122,13 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
     vec shortest_distance_beween_beads =
         boundaries->BCShortestConnection(reference_position, atom->getPos());
 
-    if(boundaries->getBoxType()!=BoundaryCondition::eBoxtype::typeOpen){
+    if (boundaries->getBoxType() != BoundaryCondition::eBoxtype::typeOpen) {
       double max_dist = 0.5 * boundaries->getShortestBoxDimension();
       if (abs(shortest_distance_beween_beads) > max_dist) {
         throw std::runtime_error(
             "coarse-grained atom is bigger than half the box \n (atoms " +
-            bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) + ")" +
-            ", " + atom->getType() + " (id " +
+            bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) +
+            ")" + ", " + atom->getType() + " (id " +
             boost::lexical_cast<string>(atom->getId() + 1) + ")" +
             +" , molecule " +
             boost::lexical_cast<string>(atom->getMoleculeId() + 1) + ")");
@@ -159,8 +159,9 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
                           std::map<string, Bead *> atomistic_beads,
                           Bead *cg_bead) {
 
-
-  assert(cg_bead->getSymmetry()==3 && "Applying ellipsoidal bead map on a non ellipsoidal corase grained bead");
+  assert(
+      cg_bead->getSymmetry() == 3 &&
+      "Applying ellipsoidal bead map on a non ellipsoidal corase grained bead");
   assert(matrix_.size() == atomistic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads in "
          "Map_Ellipsoid");
@@ -189,18 +190,21 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
            "Cannot apply mapping atomistic beads do not have position.");
     vec shortest_distance_beween_beads =
         boundaries->BCShortestConnection(reference_position, atom->getPos());
-    if(boundaries->getBoxType()!=BoundaryCondition::eBoxtype::typeOpen){
+    if (boundaries->getBoxType() != BoundaryCondition::eBoxtype::typeOpen) {
       double max_dist = 0.5 * boundaries->getShortestBoxDimension();
       if (abs(shortest_distance_beween_beads) > max_dist) {
         throw std::runtime_error(
             "coarse-grained atom is bigger than half the box");
       }
     }
-    assert(atom->HasPos() && "Cannot map to coarse grained bead as atomic beads are missing positions");
-    assert(name_and_element.second.weight_ && "Cannot map to coarse grained beads with weights of 0.0");
+    assert(atom->HasPos() &&
+           "Cannot map to coarse grained bead as atomic beads are missing "
+           "positions");
+    assert(name_and_element.second.weight_ &&
+           "Cannot map to coarse grained beads with weights of 0.0");
     weighted_sum_of_atomistic_pos +=
-      name_and_element.second.weight_ *
-      (shortest_distance_beween_beads + reference_position);
+        name_and_element.second.weight_ *
+        (shortest_distance_beween_beads + reference_position);
     if (atom->HasVel() == true) {
       weighted_sum_of_atomistic_vel +=
           name_and_element.second.weight_ * atom->getVel();
@@ -228,18 +232,12 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
     vec pos = atom->getPos() - average_pos;
 
     // Normalize the tensor with 1/number_of_atoms_per_bead
-    tensor_of_gyration[0][0] +=
-        pos.getX() * pos.getX() / number_of_atom_beads;
-    tensor_of_gyration[0][1] +=
-        pos.getX() * pos.getY() / number_of_atom_beads;
-    tensor_of_gyration[0][2] +=
-        pos.getX() * pos.getZ() / number_of_atom_beads;
-    tensor_of_gyration[1][1] +=
-        pos.getY() * pos.getY() / number_of_atom_beads;
-    tensor_of_gyration[1][2] +=
-        pos.getY() * pos.getZ() / number_of_atom_beads;
-    tensor_of_gyration[2][2] +=
-        pos.getZ() * pos.getZ() / number_of_atom_beads;
+    tensor_of_gyration[0][0] += pos.getX() * pos.getX() / number_of_atom_beads;
+    tensor_of_gyration[0][1] += pos.getX() * pos.getY() / number_of_atom_beads;
+    tensor_of_gyration[0][2] += pos.getX() * pos.getZ() / number_of_atom_beads;
+    tensor_of_gyration[1][1] += pos.getY() * pos.getY() / number_of_atom_beads;
+    tensor_of_gyration[1][2] += pos.getY() * pos.getZ() / number_of_atom_beads;
+    tensor_of_gyration[2][2] += pos.getZ() * pos.getZ() / number_of_atom_beads;
   }
   tensor_of_gyration[1][0] = tensor_of_gyration[0][1];
   tensor_of_gyration[2][0] = tensor_of_gyration[0][2];
@@ -262,9 +260,12 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   cg_bead->setV(v);
 
   // vec w = matrix_[2].bead_in_->getPos() - matrix_[0].bead_in_->getPos();
-  vec w = reference_position3 - reference_position; w.normalize();
+  vec w = reference_position3 - reference_position;
+  w.normalize();
 
-  if ((v ^ w) * u < 0) { u = vec(0., 0., 0.) - u;}
+  if ((v ^ w) * u < 0) {
+    u = vec(0., 0., 0.) - u;
+  }
   cg_bead->setU(u);
 
   // write out w
@@ -279,119 +280,127 @@ AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
 
 // cg_bead_order contains the order of beads names
 void AtomToCGMoleculeMapper::Initialize(
-    unordered_map<string, CGBeadStencil> bead_maps_info,vector<string> cg_bead_order) {
+    unordered_map<string, CGBeadStencil> bead_maps_info,
+    vector<string> cg_bead_order) {
 
-  for( string & cg_bead_name : cg_bead_order ){
-  //for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
-    CGBeadStencil & bead_info = bead_maps_info[cg_bead_name];
+  for (string &cg_bead_name : cg_bead_order) {
+    // for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
+    CGBeadStencil &bead_info = bead_maps_info[cg_bead_name];
     int symmetry = static_cast<int>(bead_info.cg_symmetry_);
-    //string cg_bead_name = bead_info.cg_name_;
+    // string cg_bead_name = bead_info.cg_name_;
     switch (symmetry) {
       case 1:
-        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name, 
-            unique_ptr<Map_Sphere>(new Map_Sphere())));
+        cg_bead_name_and_maps_.insert(
+            make_pair(cg_bead_name, unique_ptr<Map_Sphere>(new Map_Sphere())));
         break;
       case 3:
-        cg_bead_name_and_maps_.insert(make_pair(cg_bead_name,
-           unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid())));
+        cg_bead_name_and_maps_.insert(make_pair(
+            cg_bead_name, unique_ptr<Map_Ellipsoid>(new Map_Ellipsoid())));
         break;
       default:
         throw runtime_error("unknown symmetry in bead definition!");
     }
 
     bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
-    cg_bead_name_and_maps_.at(cg_bead_name)->Initialize(
-        bead_info.atomic_subbeads_, bead_info.subbead_weights_);
+    cg_bead_name_and_maps_.at(cg_bead_name)
+        ->Initialize(bead_info.atomic_subbeads_, bead_info.subbead_weights_);
   }
 }
 
-/// Copy Constructor                                                          
-AtomToCGMoleculeMapper::AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other){ 
-  atom_molecule_type_ = other.atom_molecule_type_;                            
-  cg_molecule_type_ = other.cg_molecule_type_;                                 
+/// Copy Constructor
+AtomToCGMoleculeMapper::AtomToCGMoleculeMapper(
+    const AtomToCGMoleculeMapper &other) {
+  atom_molecule_type_ = other.atom_molecule_type_;
+  cg_molecule_type_ = other.cg_molecule_type_;
 
-  for( const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){    
-    cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();               
-  }                                                                         
-}                                                                          
+  for (const std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
+       other.cg_bead_name_and_maps_) {
+    cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
+  }
+}
 
-// Move assignment                                                            
-AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(AtomToCGMoleculeMapper&& other){           
-  if(this!=&other){                                                           
-    cg_bead_name_and_maps_.clear();                                           
-    for( std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
-      cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);             
-    }                                                                         
-    atom_molecule_type_ = other.atom_molecule_type_;                          
-    cg_molecule_type_ = other.cg_molecule_type_;                              
-  }                                                                           
-  return *this;                                                               
-}                                                                             
+// Move assignment
+AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
+    AtomToCGMoleculeMapper &&other) {
+  if (this != &other) {
+    cg_bead_name_and_maps_.clear();
+    for (std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
+         other.cg_bead_name_and_maps_) {
+      cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);
+    }
+    atom_molecule_type_ = other.atom_molecule_type_;
+    cg_molecule_type_ = other.cg_molecule_type_;
+  }
+  return *this;
+}
 
-// Copy assignment                                                            
-AtomToCGMoleculeMapper & AtomToCGMoleculeMapper::operator=(const AtomToCGMoleculeMapper other){       
-  if(this!=&other){                                                           
-    cg_bead_name_and_maps_.clear();                                           
-    for(const std::pair<const std::string,std::unique_ptr<BeadMap>> & pr  : other.cg_bead_name_and_maps_){
-      cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();               
-    }                                                                         
-    atom_molecule_type_ = other.atom_molecule_type_;                          
-    cg_molecule_type_ = other.cg_molecule_type_;                              
-  }                                                                           
-  return *this;                                                               
-}           
-
+// Copy assignment
+AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
+    const AtomToCGMoleculeMapper other) {
+  if (this != &other) {
+    cg_bead_name_and_maps_.clear();
+    for (const std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
+         other.cg_bead_name_and_maps_) {
+      cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
+    }
+    atom_molecule_type_ = other.atom_molecule_type_;
+    cg_molecule_type_ = other.cg_molecule_type_;
+  }
+  return *this;
+}
 
 void AtomToCGMoleculeMapper::Apply(
-    CSG_Topology &atom_top, 
-    CSG_Topology& cg_top, 
-    pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadids ){
+    CSG_Topology &atom_top, CSG_Topology &cg_top,
+    pair<int, map<int, vector<pair<string, int>>>>
+        cgmolid_cgbeadid_atomicbeadids) {
 
   // First int cg_molecule id
   // map
-  //   first int - the cg_bead_id 
+  //   first int - the cg_bead_id
   //   vector pair
-  //       string - atomic name 
+  //       string - atomic name
   //       int - global atomic bead id
-
 
   // Grab the correct cg molecule
   int cg_mol_id = cgmolid_cgbeadid_atomicbeadids.first;
-  Molecule * cg_mol = cg_top.getMolecule(cg_mol_id);
- 
+  Molecule *cg_mol = cg_top.getMolecule(cg_mol_id);
+
   // Ensure that the type molecule type is correct
-  assert(cg_mol->getType() == cg_molecule_type_ && "Cannot convert to the molecule  is not of the correct type");
-  
+  assert(cg_mol->getType() == cg_molecule_type_ &&
+         "Cannot convert to the molecule  is not of the correct type");
+
   // Cycle throught the cg beads in a cg molecule
   vector<int> bead_ids = cg_mol->getBeadIds();
-  sort(bead_ids.begin(),bead_ids.end());
+  sort(bead_ids.begin(), bead_ids.end());
   // Beads that have already been applied
   unordered_set<string> expired_beads;
-  for ( int &cg_bead_id : bead_ids ){ 
-    Bead * cg_bead = cg_top.getBead(cg_bead_id);
+  for (int &cg_bead_id : bead_ids) {
+    Bead *cg_bead = cg_top.getBead(cg_bead_id);
     // get the cg bead type
     string cg_bead_type = cg_bead->getType();
     vector<string> bead_names = bead_type_and_names_[cg_bead_type];
     string bead_name;
-    for( const string & name : bead_names){
-      if(expired_beads.count(name)==false)  {
+    for (const string &name : bead_names) {
+      if (expired_beads.count(name) == false) {
         bead_name = name;
         break;
       }
-    } 
+    }
     expired_beads.insert(bead_name);
 
-    map<string,Bead *> atomic_names_and_beads;
-    for ( pair<string,int> & atom_name_id : cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]){
-      atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
+    map<string, Bead *> atomic_names_and_beads;
+    for (pair<string, int> &atom_name_id :
+         cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]) {
+      atomic_names_and_beads[atom_name_id.first] =
+          atom_top.getBead(atom_name_id.second);
     }
     // Grab the correct map
-    assert(cg_bead_name_and_maps_.count(bead_name) && "Map for the coarse grained bead type is not known.");
-    cg_bead_name_and_maps_.at(bead_name)->Apply(cg_top.getBoundaryCondition(),
-        atomic_names_and_beads,cg_bead);
-  } 
+    assert(cg_bead_name_and_maps_.count(bead_name) &&
+           "Map for the coarse grained bead type is not known.");
+    cg_bead_name_and_maps_.at(bead_name)->Apply(
+        cg_top.getBoundaryCondition(), atomic_names_and_beads, cg_bead);
+  }
 }
-
 
 }  // namespace csg
 }  // namespace votca

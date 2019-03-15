@@ -32,49 +32,51 @@ using namespace votca::tools;
 class BoundaryCondition;
 
 /**
- * @brief BeadMap for coarse graining an atomistic representation to a coarser representation
+ * @brief BeadMap for coarse graining an atomistic representation to a coarser
+ * representation
  *
- * This abstract interface class that sets the requirements for creating other classes that
- * define how a set of atomistic beads could be used to update a coarse grained
- * representation. For instance if one was to use H2O as an example we could
- * create a single bead to determine how a water molecule behaves as opposed to
- * using 3 separate atomic particles. Though this class does not create the
- * coarse grained representation of water it does store the relationship
- * between a coarse grained and atomistic representation. 
+ * This abstract interface class that sets the requirements for creating other
+ * classes that define how a set of atomistic beads could be used to update a
+ * coarse grained representation. For instance if one was to use H2O as an
+ * example we could create a single bead to determine how a water molecule
+ * behaves as opposed to using 3 separate atomic particles. Though this class
+ * does not create the coarse grained representation of water it does store the
+ * relationship between a coarse grained and atomistic representation.
  *
  * The relationship defined by the map allows one to update the positions,
  * velocities, forces, masses and orientations of a coarse grained bead with
- * its atomistic pieces. 
+ * its atomistic pieces.
  *
  * Atomistic Representation          Coarse Grained Representation
  *
  *  H - O                                   H2O
- *      | 
+ *      |
  *      H
  *
  * Note that the bead map does not have ownership over either coarse grained
  * representation or atomisitic representation it can only manipulate them
  * when they are passed in, it does not and should not have responsibility for
- * their memory managment. 
+ * their memory managment.
  */
 class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply(const BoundaryCondition *boundaries,
-                     std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead) = 0;
-  virtual void Initialize(std::vector<string> subbeads,
+                     std::map<std::string, Bead *> atomistic_beads,
+                     Bead *cg_bead) = 0;
+  virtual void Initialize(const std::vector<string> subbeads,
                           std::vector<double> weights,
                           std::vector<double> ds) = 0;
-  
-  void Initialize(std::vector<string> subbeads,
-                          std::vector<double> weights){
+
+  void Initialize(std::vector<string> subbeads, std::vector<double> weights) {
     std::vector<double> empty;
-    Initialize(subbeads,weights,empty);
+    Initialize(subbeads, weights, empty);
   }
 
-  std::vector<string> getAtomicBeadNames();
+  std::vector<string> getAtomicBeadNames() const;
 
   virtual std::unique_ptr<BeadMap> Clone() const = 0;
+
  protected:
   BeadMap(){};
   struct element_t {
@@ -92,16 +94,20 @@ class BeadMap {
 class Map_Sphere : public BeadMap {
  public:
   void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead) override;
+             std::map<std::string, Bead *> atomistic_beads,
+             Bead *cg_bead) override;
 
-  void Initialize(std::vector<std::string> subbeads, std::vector<double> weights, std::vector<double> ds) override;
+  void Initialize(const std::vector<std::string> subbeads,
+                  std::vector<double> weights, std::vector<double> ds) override;
 
-  virtual std::unique_ptr<BeadMap> Clone() const override  {
-    return std::unique_ptr<BeadMap>( new Map_Sphere(*this));
+  virtual std::unique_ptr<BeadMap> Clone() const override {
+    return std::unique_ptr<BeadMap>(new Map_Sphere(*this));
   }
+
  protected:
   Map_Sphere() {}
-  void AddElem(std::string atomic_bead_name, double weight, double force_weight);
+  void AddElem(std::string atomic_bead_name, double weight,
+               double force_weight);
 
   friend class AtomToCGMoleculeMapper;
 };
@@ -120,11 +126,13 @@ inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
 class Map_Ellipsoid : public Map_Sphere {
  public:
   void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, Bead *> atomistic_beads, Bead *cg_bead) override;
+             std::map<std::string, Bead *> atomistic_beads,
+             Bead *cg_bead) override;
 
-  virtual std::unique_ptr<BeadMap> Clone() const override  {
-    return std::unique_ptr<BeadMap>( new Map_Ellipsoid(*this));
+  virtual std::unique_ptr<BeadMap> Clone() const override {
+    return std::unique_ptr<BeadMap>(new Map_Ellipsoid(*this));
   }
+
  protected:
   Map_Ellipsoid() {}
   friend class AtomToCGMoleculeMapper;
@@ -145,7 +153,7 @@ class Map_Ellipsoid : public Map_Sphere {
  *
  *          H6       H7      H8
  *           |       |       |
- *      H1 - C2  --  C3  --  C4 - H5 
+ *      H1 - C2  --  C3  --  C4 - H5
  *           |       |       |
  *          H9       H10     H11
  *
@@ -155,34 +163,33 @@ class Map_Ellipsoid : public Map_Sphere {
  */
 class AtomToCGMoleculeMapper {
  public:
-  AtomToCGMoleculeMapper() {};
+  AtomToCGMoleculeMapper(){};
   AtomToCGMoleculeMapper(std::string atom_molecule_type,
-                              std::string cg_molecule_type)
+                         std::string cg_molecule_type)
       : atom_molecule_type_(atom_molecule_type),
         cg_molecule_type_(cg_molecule_type){};
   ~AtomToCGMoleculeMapper();
 
   void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info,
-      vector<string> bead_order);
+                  vector<string> bead_order);
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void Apply(CSG_Topology &atom_top,                                                     
-     CSG_Topology& cg_top,                                                       
-     pair<int,map<int,vector<pair<string,int>>>> cgmolid_cgbeadid_atomicbeadnames_ids);
-
+  void Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
+             pair<int, map<int, vector<pair<string, int>>>>
+                 cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
-   * Gang of 3  
+   * Gang of 3
    **************************/
   /**
    * @brief Note that the gang of 3 must be explicity defined because the bead
    * maps are stored as unique_ptrs, unique pointers are used so that the
-   * BeadMaps can be treated polymorphically. 
+   * BeadMaps can be treated polymorphically.
    */
-  AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper & other);
-  AtomToCGMoleculeMapper & operator=(AtomToCGMoleculeMapper&& other);
-  AtomToCGMoleculeMapper & operator=(const AtomToCGMoleculeMapper other);
+  AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper &other);
+  AtomToCGMoleculeMapper &operator=(AtomToCGMoleculeMapper &&other);
+  AtomToCGMoleculeMapper &operator=(const AtomToCGMoleculeMapper other);
 
  protected:
   // Molecule atomistic_molecule_, cg_molecule_;
@@ -190,11 +197,10 @@ class AtomToCGMoleculeMapper {
   std::string cg_molecule_type_;
 
   // contains each bead types and a vector of all the bead names of that type
-  std::unordered_map<std::string,vector<string>> bead_type_and_names_;
+  std::unordered_map<std::string, vector<string>> bead_type_and_names_;
   // Needs to be a unique_ptr to take advantage of polymorphism
   std::unordered_map<string, std::unique_ptr<BeadMap>> cg_bead_name_and_maps_;
 };
-
 
 }  // namespace csg
 }  // namespace votca

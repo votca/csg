@@ -550,7 +550,7 @@ void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
     b->setPos(xyz_pos);
   }
 
-  if (top.BeadCount() != numberOf_["atoms"]) {
+  if (top.BeadCount() != static_cast<size_t>(numberOf_["atoms"])) {
     string err =
         "The number of atoms read in is not equivalent to the "
         "number of atoms indicated to exist in the lammps data file. \n"
