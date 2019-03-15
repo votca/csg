@@ -93,7 +93,6 @@ void Map_Sphere::Initialize(vector<string> subbeads, vector<double> weights,
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
                        map<string, Bead *> atomic_beads, Bead *cg_bead) {
 
-  cout << "Applying sphere" << endl;
   assert(cg_bead->getSymmetry()==1 && "Applying spherical bead map on a non spherical corase grained bead");
 
   assert(matrix_.size() == atomic_beads.size() &&
@@ -116,8 +115,6 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
   vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
   for (pair<const string, element_t> &name_and_element : matrix_) {
-    cout << "Bead name mapping " << name_and_element.first << " exists " << atomic_beads.count(name_and_element.first)<< endl;
-    cout << " weight " << name_and_element.second.weight_ << endl;
     atom = atomic_beads[name_and_element.first];
     sum_of_atomistic_mass += atom->getMass();
     assert(atom->HasPos() &&
@@ -125,11 +122,9 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
     vec shortest_distance_beween_beads =
         boundaries->BCShortestConnection(reference_position, atom->getPos());
 
-    cout << "Boundary type " << boundaries->getBoxType() << endl;
     if(boundaries->getBoxType()!=BoundaryCondition::eBoxtype::typeOpen){
       double max_dist = 0.5 * boundaries->getShortestBoxDimension();
       if (abs(shortest_distance_beween_beads) > max_dist) {
-        cout << reference_position << " " << atom->getPos() << endl;
         throw std::runtime_error(
             "coarse-grained atom is bigger than half the box \n (atoms " +
             bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) + ")" +
@@ -289,7 +284,6 @@ void AtomToCGMoleculeMapper::Initialize(
   for( string & cg_bead_name : cg_bead_order ){
   //for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
     CGBeadStencil & bead_info = bead_maps_info[cg_bead_name];
-    cout << "Symmetry " << static_cast<int>(bead_info.cg_symmetry_) << endl;
     int symmetry = static_cast<int>(bead_info.cg_symmetry_);
     //string cg_bead_name = bead_info.cg_name_;
     switch (symmetry) {
@@ -305,11 +299,6 @@ void AtomToCGMoleculeMapper::Initialize(
         throw runtime_error("unknown symmetry in bead definition!");
     }
 
-    //cout << "cycle " << bead_info.first << endl;
-    for (const string & subbead : bead_info.atomic_subbeads_){
-      cout << subbead << " "; 
-    }
-    cout << endl;
     bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
     cg_bead_name_and_maps_.at(cg_bead_name)->Initialize(
         bead_info.atomic_subbeads_, bead_info.subbead_weights_);
@@ -376,19 +365,16 @@ void AtomToCGMoleculeMapper::Apply(
   // Cycle throught the cg beads in a cg molecule
   vector<int> bead_ids = cg_mol->getBeadIds();
   sort(bead_ids.begin(),bead_ids.end());
-  cout << "Grabbed bead_ids of molecule " << bead_ids.size() << endl;
   // Beads that have already been applied
   unordered_set<string> expired_beads;
   for ( int &cg_bead_id : bead_ids ){ 
     Bead * cg_bead = cg_top.getBead(cg_bead_id);
     // get the cg bead type
     string cg_bead_type = cg_bead->getType();
-    cout << "Grabbed bead type " << cg_bead_type << endl;
     vector<string> bead_names = bead_type_and_names_[cg_bead_type];
     string bead_name;
     for( const string & name : bead_names){
       if(expired_beads.count(name)==false)  {
-        cout << "Chosen name " << name << endl;
         bead_name = name;
         break;
       }
@@ -396,15 +382,11 @@ void AtomToCGMoleculeMapper::Apply(
     expired_beads.insert(bead_name);
 
     map<string,Bead *> atomic_names_and_beads;
-    cout << "bead id is " << cg_bead_id << endl;
     for ( pair<string,int> & atom_name_id : cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]){
       atomic_names_and_beads[atom_name_id.first] = atom_top.getBead(atom_name_id.second);
-      cout << "Passing in atom names and ids " << atom_name_id.first << endl;
     }
     // Grab the correct map
-    cout << "Bead name is " << bead_name << endl;
     assert(cg_bead_name_and_maps_.count(bead_name) && "Map for the coarse grained bead type is not known.");
-    cout << "Applying to bead name " << bead_name << " found " << cg_bead_name_and_maps_.count(bead_name) << endl;
     cg_bead_name_and_maps_.at(bead_name)->Apply(cg_top.getBoundaryCondition(),
         atomic_names_and_beads,cg_bead);
   } 
