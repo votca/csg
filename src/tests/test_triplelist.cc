@@ -42,12 +42,11 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
 
   CSG_Topology top;
 
-  string bead_type_name = "CG";
+  string bead_type = "CG";
 
   byte_t symmetry = 1;
   int molecule_id = 1;
   int bead_id1 = 1;
-  string bead_type = "dummy1";
   string residue_type = "Residue";
   int residue_id = 0;
   double mass = 1.0;
@@ -59,7 +58,6 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
 
   int bead_id2 = 2;
   symmetry = 1;
-  bead_type = "dummy2";
   residue_id = 0;
   mass = 2.0;
   charge = -2.0;
@@ -70,7 +68,6 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
 
   int bead_id3 = 3;
   symmetry = 1;
-  bead_type = "dummy3";
   residue_id = 0;
   mass = 3.0;
   charge = -3.0;
