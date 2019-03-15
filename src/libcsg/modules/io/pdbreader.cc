@@ -72,7 +72,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
   ////////////////////////////////////////////////////////////////////////////////
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
-  int bead_count = 0;
+  size_t bead_count = 0;
   while (std::getline(_fl, line)) {
     cout << line << endl;
     if (wildcmp("CRYST1*", line.c_str())) {
@@ -244,7 +244,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       // Atom number is stored internally starting at 0 but .pdb files start at
       // ids of 1
       int atom_number = boost::lexical_cast<int>(atom_id_pdb) - 1;
-      bead_count++;
+      ++bead_count;
 
       Bead *b;
       // Only read the CONECT keyword if the topology is set too true
