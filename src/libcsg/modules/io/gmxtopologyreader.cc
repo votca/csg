@@ -103,10 +103,6 @@ bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
         Bead *bead =
             top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
                            a->resind, residue_name, element, a->m, a->q);
-        // Bead *bead =
-        //    top.CreateBead(symmetry, *(atoms->atomname[iatom]), bead_type,
-        //                         a->resind, residue_name, molname, a->m,
-        //                         a->q);
         mi->AddBead(bead);
       }
 
