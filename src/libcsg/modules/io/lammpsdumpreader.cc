@@ -121,7 +121,7 @@ void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top, string itemline) {
   string s;
   getline(_fl, s);
   number_of_atoms_ = boost::lexical_cast<int>(s);
-  if (!read_topology_data_ && number_of_atoms_ != top.BeadCount()) {
+  if (!read_topology_data_ && static_cast<size_t>(number_of_atoms_) != top.BeadCount()) {
     std::runtime_error("number of beads in topology and trajectory differ");
   }
 }
