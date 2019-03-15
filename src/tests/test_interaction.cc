@@ -64,11 +64,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   int bond_id = 1;
   Interaction* bond1 = top.CreateInteraction(
       InteractionType::bond, "BONDS", bond_id, molecule_id, vector<int>{1, 2});
-  // IBond bond1(1, 2);
-  // bond1->setGroup("BONDS");
   bond1->setGroupId(1);
-  // bond1->setIndex(1);
-  // bond1->setMoleculeId(1);
 
   string label = bond1->getLabel();
   cout << label << endl;
@@ -90,11 +86,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   Interaction* angle1 =
       top.CreateInteraction(InteractionType::angle, "ANGLES", bond_id,
                             molecule_id, vector<int>{1, 2, 3});
-  // IAngle angle1(1, 2, 3);
-  // angle1->setGroup("ANGLES");
   angle1->setGroupId(1);
-  // angle1->setIndex(1);
-  // angle1->setMoleculeId(1);
 
   label = angle1->getLabel();
   cout << label << endl;
@@ -115,11 +107,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   Interaction* dihedral1 =
       top.CreateInteraction(InteractionType::dihedral, "DIHEDRAL", bond_id,
                             molecule_id, vector<int>{1, 2, 3, 4});
-  // IDihedral dihedral1(1, 2, 3, 4);
-  // dihedral1->setGroup("DIHEDRAL");
   dihedral1->setGroupId(1);
-  // dihedral1->setIndex(1);
-  // dihedral1->setMoleculeId(1);
 
   label = dihedral1->getLabel();
   cout << label << endl;
@@ -136,7 +124,6 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   BOOST_CHECK_EQUAL(dihedral1->getBeadId(2), 3);
   BOOST_CHECK_EQUAL(dihedral1->getBeadId(3), 4);
   groupName = dihedral1->getGroup();
-  correct_label = groupName.compare("DIHEDRAL") == 0;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
