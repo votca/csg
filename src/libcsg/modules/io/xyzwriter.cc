@@ -37,8 +37,6 @@ void XYZWriter::Write(CSG_Topology *conf) {
 
   vector<int> bead_ids = conf->getBeadIds();
   for (const int bead_id : bead_ids) {
-    // for (BeadContainer::iterator iter = conf->Beads().begin();
-    //     iter != conf->Beads().end(); ++iter) {
     Bead *bi = conf->getBead(bead_id);
     vec r = bi->getPos();
     // truncate strings if necessary
