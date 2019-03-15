@@ -37,8 +37,7 @@ void PDBWriter::Write(CSG_Topology *conf) {
     Bead *bi = conf->getBead(bead_id);
     vec r = bi->getPos();
     // truncate strings if necessary
-    string residue_type = "";
-    residue_type = bi->getResidueType();
+    string residue_type = bi->getResidueType();
     string atom_type = bi->getType();
     if (residue_type.size() > 3) {
       residue_type = residue_type.substr(0, 3);
