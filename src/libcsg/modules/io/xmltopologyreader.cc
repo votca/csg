@@ -292,15 +292,10 @@ void XMLTopologyReader::ParseBond(Property &p) {
         XMLMolecule &xmlMolecule = *itm->second;
         XMLBead &xmlBead1 = *xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = *xmlMolecule.name2beads[b2.atom_type_];
-        // ic = new IBond(xmlBead1.pid, xmlBead2.pid);
         ic = _top->CreateInteraction(InteractionType::bond, interaction_group,
                                      bond_index, xmlMolecule.pid,
                                      vector<int>{xmlBead1.pid, xmlBead2.pid});
-        // ic->setGroup(interaction_group);
-        // ic->setIndex(bond_index);
-        // ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        //_top->AddBondedInteraction(ic);
         bond_index++;
       }
     } else {
@@ -340,12 +335,7 @@ void XMLTopologyReader::ParseAngle(Property &p) {
             InteractionType::angle, interaction_group, bond_index,
             xmlMolecule.pid,
             vector<int>{xmlBead1.pid, xmlBead2.pid, xmlBead3.pid});
-        // ic = new IAngle(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid);
-        // ic->setGroup(interaction_group);
-        // ic->setIndex(bond_index);
-        // ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        //_top->AddBondedInteraction(ic);
         bond_index++;
       }
     } else {
@@ -389,13 +379,7 @@ void XMLTopologyReader::ParseDihedral(Property &p) {
                                      xmlMolecule.pid,
                                      vector<int>{xmlBead1.pid, xmlBead2.pid,
                                                  xmlBead3.pid, xmlBead4.pid});
-        // ic = new IDihedral(xmlBead1.pid, xmlBead2.pid, xmlBead3.pid,
-        //                  xmlBead4.pid);
-        // ic->setGroup(interaction_group);
-        // ic->setIndex(bond_index);
-        // ic->setMoleculeId(xmlMolecule.pid);
         xmlMolecule.mi->AddInteraction(ic);
-        //_top->AddBondedInteraction(ic);
         bond_index++;
       }
     } else {
