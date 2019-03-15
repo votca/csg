@@ -527,10 +527,6 @@ void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
       double mass =
           boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
 
-      /*string bead_type_name = to_string(atomTypeId + 1);
-      if (!top.BeadTypeExist(bead_type_name)) {
-        top.RegisterBeadType(bead_type_name);
-      }*/
       if (atomtypes_.count(atomTypeId) == 0) {
         string err =
             "Unrecognized atomTypeId, the atomtypes map "
@@ -599,9 +595,6 @@ void LAMMPSDataReader::ReadBonds_(CSG_Topology &top) {
       Interaction *ic = top.CreateInteraction(
           InteractionType::bond, "BONDS", bondId, mi->getId(),
           vector<int>{atom1Index, atom2Index});
-      // ic->setGroup("BONDS");
-      // ic->setIndex(bondId);
-      // ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
       mi->AddInteraction(ic);
     }
 
@@ -659,10 +652,6 @@ void LAMMPSDataReader::ReadAngles_(CSG_Topology &top) {
       Interaction *ic = top.CreateInteraction(
           InteractionType::angle, "ANGLES", angleId, mi->getId(),
           vector<int>{atom1Index, atom2Index, atom3Index});
-      // ic->setGroup("ANGLES");
-      // ic->setIndex(angleId);
-      // ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
-      // top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
     }
 
@@ -722,10 +711,6 @@ void LAMMPSDataReader::ReadDihedrals_(CSG_Topology &top) {
       Interaction *ic = top.CreateInteraction(
           InteractionType::dihedral, "DIHEDRALS", dihedralId, mi->getId(),
           vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});
-      // ic->setGroup("DIHEDRALS");
-      // ic->setIndex(dihedralId);
-      // ic->setMoleculeId(atomIdToMoleculeId_[atom1Index]);
-      // top.AddBondedInteraction(ic);
       mi->AddInteraction(ic);
     }
     ++dihedral_count;
