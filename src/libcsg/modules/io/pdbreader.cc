@@ -415,26 +415,17 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
     // Molecule* - is a pointer to the Molecule object
     map<int, Molecule *> mol_map;
 
-    // Used to reindex the molecules so that they start at 0 and progress
-    // with out gaps in their ids.
-    // First int  - is the index of the old molecule
-    // Second int - is the new index
-    map<int, int> mol_reInd_map;
-
-    int ind = 0;
     for (const pair<const int, list<int>> &mol_and_atom_ids : molecule_atms) {
 
       int molecule_id = mol_and_atom_ids.first;
       Molecule *mi = top.CreateMolecule(
           molecule_id, topology_constants::unassigned_molecule_type);
       mol_map[molecule_id] = mi;
-      mol_reInd_map[molecule_id] = ind;
 
       // Add all the atoms to the appropriate molecule object
       for (const int &atm_temp : mol_and_atom_ids.second) {
         mi->AddBead(top.getBead(atm_temp));
       }
-      ind++;
     }
 
     // Cyle through the bonds and add them to the appropriate molecule
@@ -454,15 +445,10 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       int bead_id2 = atm_id2;
       mi->ConnectBeads(bead_id1, bead_id2);
 
-      // Interaction *ic = new IBond(bead_id1, bead_id2);
       Interaction *ic =
           top.CreateInteraction(InteractionType::bond, "BONDS", bond_index,
                                 mi->getId(), vector<int>{bead_id1, bead_id2});
-      // ic->setGroup("Bonds");
-      // ic->setIndex(bond_index);
-      // ic->setMoleculeId(mi->getId());
       mi->AddInteraction(ic);
-      // top.AddBondedInteraction(ic);
       ++bond_index;
     }
 
