@@ -123,7 +123,6 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
   BOOST_CHECK_EQUAL(dihedral1->getBeadId(1), 2);
   BOOST_CHECK_EQUAL(dihedral1->getBeadId(2), 3);
   BOOST_CHECK_EQUAL(dihedral1->getBeadId(3), 4);
-  groupName = dihedral1->getGroup();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

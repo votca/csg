@@ -155,8 +155,7 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   // Create two bonded interactions
   int bond_id = 0;
   string interaction_group = "BONDS";
-  Interaction* bond1 =
-      top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+  top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
                             molecule_id, vector<int>{0, 1});
 
   ++bond_id;

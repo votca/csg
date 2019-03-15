@@ -28,6 +28,7 @@ namespace csg {
 
 CsgApplication::CsgApplication(void) {
   _traj_reader = nullptr;
+  _nthreads = 1;
 }
 
 CsgApplication::~CsgApplication(void) {}

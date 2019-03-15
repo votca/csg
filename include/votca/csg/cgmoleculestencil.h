@@ -75,7 +75,7 @@ class CGMoleculeStencil {
 
   // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
-      std::vector<int> bead_ids);
+      std::vector<int> bead_ids) const;
   
   /** 
    * @brief This function attempts to map the bead ids of a specific coarse
@@ -112,19 +112,19 @@ class CGMoleculeStencil {
    * @return map to the names of the coarse grained beads 
    */
   std::unordered_map<int, std::string> MapCGBeadIdsToCGBeadNames(
-      std::vector<int> bead_ids);
+      std::vector<int> bead_ids) const;
   
-  std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name);
+  std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name) const;
 
-  std::vector<std::string> getCGBeadNames();
+  std::vector<std::string> getCGBeadNames() const;
 
-  std::string getCGBeadName(std::string atom_bead_name);
+  std::string getCGBeadName(std::string atom_bead_name) const;
 
   void AddInteractionInfo(const std::vector<CGInteractionStencil> & interaction_info);
 
-  const std::vector<CGBeadStencil> &getBeadInfo();
+  const std::vector<CGBeadStencil> &getBeadInfo() const;
 
-  const std::vector<CGInteractionStencil> &getInteractionInfo();
+  const std::vector<CGInteractionStencil> &getInteractionInfo() const;
 
   const std::string &getCGMoleculeType() const;
 

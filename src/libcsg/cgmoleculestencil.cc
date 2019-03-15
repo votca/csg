@@ -42,7 +42,6 @@ namespace csg {
     for (CGBeadStencil &info : bead_info_) {
       string cg_bead_name = info.cg_name_;
       for (string &atomic_name : info.atomic_subbeads_) {
-        cout << "adding the following elements " << cg_bead_name << " " << atomic_name << endl;
         cg_and_atom_names_.insert(multi_bimap::value_type(cg_bead_name, atomic_name));
       }
     }
@@ -50,17 +49,15 @@ namespace csg {
 
   // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
   unordered_map<int, string> CGMoleculeStencil::MapAtomicBeadIdsToAtomicBeadNames(
-      vector<int> bead_ids) {
-    cout << "bead ids " << bead_ids.size() << " " << cg_and_atom_names_.right.size() << endl; 
+      vector<int> bead_ids) const {
     assert(bead_ids.size() == cg_and_atom_names_.right.size() &&
            "number of bead_ids is not consistent with the number of atomic "
            "beads stored in the atomic molecule.");
     sort(bead_ids.begin(), bead_ids.end());
     unordered_map<int, string> id_and_bead_name;
     int index = 0;
-    for (CGBeadStencil &bead_info : bead_info_) {
-      for (string &atom_name : bead_info.atomic_subbeads_) {
-        cout << "bead id " << bead_ids.at(index) << " index " << index << " name " << atom_name << endl;
+    for (const CGBeadStencil & bead_info : bead_info_) {
+      for (string atom_name : bead_info.atomic_subbeads_) {
         id_and_bead_name[bead_ids.at(index)] = atom_name;
         ++index;
       }
@@ -69,7 +66,7 @@ namespace csg {
   }
 
   unordered_map<int, string> CGMoleculeStencil::MapCGBeadIdsToCGBeadNames(
-      vector<int> bead_ids) {
+      vector<int> bead_ids) const {
 
     assert(bead_ids.size() == bead_info_.size() && "when mapping cg bead ids to cg bead names you must have the same number of beads in the molcule as in the stencil"); 
     sort(bead_ids.begin(),bead_ids.end());
@@ -82,16 +79,15 @@ namespace csg {
     return cg_id_and_names;
   }
 
-  vector<string> CGMoleculeStencil::getCGBeadNames(){
+  vector<string> CGMoleculeStencil::getCGBeadNames() const{
     vector<string> cg_bead_names;
-    cout << "Getting beads from stencil" << endl;
     for( const CGBeadStencil & stencil : bead_info_ ){
       cg_bead_names.push_back(stencil.cg_name_); 
     }
     return cg_bead_names;
   }
 
-  vector<string> CGMoleculeStencil::getAtomicBeadNames(string cg_bead_name) {
+  vector<string> CGMoleculeStencil::getAtomicBeadNames(string cg_bead_name) const {
     vector<string> atom_names;
     std::pair<multi_bimap::left_const_iterator,
               multi_bimap::left_const_iterator>
@@ -103,7 +99,7 @@ namespace csg {
     return atom_names;
   }
 
-  string CGMoleculeStencil::getCGBeadName(string atom_bead_name) {
+  string CGMoleculeStencil::getCGBeadName(string atom_bead_name) const {
     return cg_and_atom_names_.right.at(atom_bead_name);
   }
 
@@ -111,9 +107,9 @@ namespace csg {
     interaction_info_ = interaction_info;
   }
 
-  const vector<CGBeadStencil> &CGMoleculeStencil::getBeadInfo() { return bead_info_; }
+  const vector<CGBeadStencil> &CGMoleculeStencil::getBeadInfo() const { return bead_info_; }
 
-  const vector<CGInteractionStencil> &CGMoleculeStencil::getInteractionInfo() {
+  const vector<CGInteractionStencil> &CGMoleculeStencil::getInteractionInfo()const {
     return interaction_info_;
   }
 
