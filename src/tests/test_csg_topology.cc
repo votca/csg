@@ -160,15 +160,8 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
                             molecule_id, vector<int>{0, 1});
 
   ++bond_id;
-  // bond1->setGroup(interaction_group);
-  // auto bond2 = new IBond(1, 2);
-  Interaction* bond2 =
-      top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+  top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
                             molecule_id, vector<int>{1, 2});
-  // bond2->setGroup(interaction_group);
-
-  // top.AddBondedInteraction(bond1);
-  // top.AddBondedInteraction(bond2);
 
   const vector<unique_ptr<Interaction>>& interaction_container =
       top.BondedInteractions();

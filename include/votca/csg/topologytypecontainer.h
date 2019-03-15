@@ -49,7 +49,7 @@ namespace csg {
    *
    * @return bool value indicating if a molecule of the specified type has been registered or not, true it has been registered false it has not.
    */
-  bool MoleculeTypeExist(const std::string molecule_type) const;
+  bool MoleculeTypeExist(const std::string & molecule_type) const;
 
   /**
    * @brief Register a particular molecule type
@@ -73,7 +73,7 @@ namespace csg {
 
   std::vector<std::string> getResidueTypes() const;
 
-  bool ResidueTypeExist(const std::string residue_type) const;
+  bool ResidueTypeExist(const std::string & residue_type) const;
 
   void AddResidueType(std::string residue_type);
 
@@ -91,7 +91,7 @@ namespace csg {
    *
    * @return bool true if the bead type has been registered false otherwise. 
    */
-  bool BeadTypeExist(const std::string bead_type) const;
+  bool BeadTypeExist(const std::string & bead_type) const;
 
   std::vector<std::string> getBeadTypes() const;
 
