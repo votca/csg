@@ -118,7 +118,6 @@ void XMLTopologyReader::ParseMolecules(Property &p) {
             "Attribute nmols is suppose to be > 0, but found " +
             boost::lexical_cast<string>(it->getAttribute<string>("nmols")));
       if (it->name() == "define") {
-        //_top->CreateMoleculesByRange(molecule_type_, first, nbeads, nmols);
       } else {
         if (_has_base_topology)
           throw std::runtime_error(
@@ -184,18 +183,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
     throw std::runtime_error(
         "Number of elements in bead-vector and residue-vector are not "
         "identical");
-  // Create molecule in topology. Replicate data.
-  // int resnr = _top->getMaxResidueId() + 1;
-  /*  int max_residue_id = _top->getMaxResidueId();
-    if (!xmlResidues.empty()) {
-      if (xmlResidues.front() != max_residue_id + 1 &&
-          xmlResidues.front() != -1) {
-        throw std::runtime_error(
-            "Residue count for beads in topology.molecules.molecule has to be "
-            "greater than the number of residues already in the topology");
-      }
-    }*/
-
+  
   Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
     Molecule *mi = _top->CreateMolecule(_top->MoleculeCount(), molecule_type_);
@@ -203,10 +191,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
     xmlMolecule->pid = mi->getId();
     xmlMolecule->mi = mi;
     _molecules.insert(make_pair(molecule_type_, xmlMolecule));
-    vector<int>::iterator resit = xmlResidues.begin();
     unordered_map<string, int> residuename_residuenumber;
-    //    for (vector<XMLBead *>::iterator itb = xmlBeads.begin();
-    //         itb != xmlBeads.end(); ++itb, ++resit) {
     for (XMLBead *xml_bead : xmlBeads) {
       XMLBead &b = *xml_bead;
 
@@ -215,10 +200,6 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
       } else {
         ++residuename_residuenumber[molecule_type_];
       }
-      // Bead *bead = _top->CreateBead(1, b.name, b.type,
-      //                                    residuename_residuenumber[molecule_type_],
-      //                                    molecule_type_, molecule_type_,
-      //                                    b.mass, b.q);
       byte_t symmetry = 1;
 
       string element = topology_constants::unassigned_element;
@@ -245,7 +226,6 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
       xmlMolecule->name2beads.insert(make_pair(b.name, b_rep));
       _bead_index++;
     }
-    // resnr++;
   }
   _mol_index++;
 
