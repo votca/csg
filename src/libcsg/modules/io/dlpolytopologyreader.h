@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _DLPTOPOLOGYREADER_H
-#define _DLPTOPOLOGYREADER_H
+#ifndef VOTCA_CSG_DLPTOPOLOGYREADER_H
+#define VOTCA_CSG_DLPTOPOLOGYREADER_H
 
 #include "../../../../include/votca/csg/csgtopology.h"
 #include <string>
@@ -66,4 +66,5 @@ class DLPOLYTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _DLPTOPOLOGYREADER_H */
+#endif // VOTCA_CSG_DLPTOPOLOGYREADER_H
+ 
