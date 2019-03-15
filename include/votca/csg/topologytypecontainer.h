@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
-#define _VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
+#ifndef VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
+#define VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
 
 #include <cassert>
 #include <string>
@@ -119,4 +119,4 @@ namespace csg {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
+#endif  // VOTCA_CSG_TOPOLOGYTYPECONTAINER_H
