@@ -16,13 +16,11 @@
  */
 
 
-//#include <iostream>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <numeric>
 #include <unordered_map>
-//#include "../../include/votca/csg/csgtopology.h"
 #include <votca/csg/atomcgconverter.h>
 #include <votca/csg/bead.h>
 #include <votca/csg/interaction.h>
@@ -111,13 +109,11 @@ void AtomCGConverter::Convert(CSG_Topology & atomic_top_in, CSG_Topology & cg_to
     }                                                                             
     cg_top_out.RebuildExclusions();   
 
-    cout << "Now mapping " << endl;
     Map(atomic_top_in, cg_top_out);
 }
 
 void AtomCGConverter::Map(CSG_Topology & atomic_top, CSG_Topology & cg_top){
 
-  cout << "Checking box types " << endl;
   assert(atomic_top.getBoxType() == cg_top.getBoxType() &&            
       "box types of topology in and out differ");
   cg_top.setStep(atomic_top.getStep());                                  
@@ -132,7 +128,6 @@ void AtomCGConverter::Map(CSG_Topology & atomic_top, CSG_Topology & cg_top){
     string cg_mol_type = cg_top.getMolecule(molecule_id)->getType();
     string atomic_mol_type = atomic_top.getMolecule(molecule_id)->getType();
     // Call the appropriate molecule mapper
-    cout << "Calling apply on molecule mappers " << endl; 
     mol_names_and_maps_.at(atomic_mol_type).at(cg_mol_type).Apply(atomic_top,cg_top,cg_mol_with_info);
 
   }
@@ -157,46 +152,37 @@ void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
 
 void AtomCGConverter::LoadMoleculeStencil(string filename) {
 
-  cout << "Loading file " << filename << endl;
   Property options;
   load_property_from_xml(options, filename);
-  cout << "Load success " << endl;
   // Grab the type of the coarse grained molecule
   string cg_mol_type = options.get("cg_molecule.name").as<string>();
   // Grab the type of the atomistic molecule
   string atom_mol_type =
       options.get("cg_molecule.ident").as<string>();
-  cout << "Names " << cg_mol_type << " " << atom_mol_type << endl;
   // Store the types in the bimap
   atomic_and_cg_molecule_types_.insert(boost::bimap<string,string>::value_type(
       atom_mol_type,cg_mol_type));
 
-  cout << "Creating stencil" << endl;
   // Create the stencil
   cg_molecule_and_stencil_.insert(make_pair(cg_mol_type,
       CGMoleculeStencil(cg_mol_type, atom_mol_type)));
 
-  cout << "Parseing beads" << endl;
   vector<CGBeadStencil> beads_info = ParseBeads_(options.get("cg_molecule.topology"));
   // Update the stencil with the bead info
-  cout << "Adding bead info" << endl;
   cg_molecule_and_stencil_.at(cg_mol_type).AddBeadInfo(beads_info);
   
-  cout << "Update map and bead info" << endl;
   // Convert vector to map to be used with ParseMaps
   unordered_map<string,CGBeadStencil> name_and_beads_info;
   for( CGBeadStencil & bead_info : beads_info ){
     name_and_beads_info[bead_info.cg_name_] = bead_info;
   }
 
-  cout << "Parsing maps" << endl;
   ParseMaps_(options,name_and_beads_info);
 
   // Update the stencil the relevant interactions
   cg_molecule_and_stencil_.at(cg_mol_type).AddInteractionInfo(
       ParseBonded_(options.get("cg_molecule.topology")));
 
-  cout << "Creating Mapper" << endl;
   // Create a mapper to map from the atom to the cg molecule
   mol_names_and_maps_[atom_mol_type].insert(std::make_pair(cg_mol_type,move(
     AtomToCGMoleculeMapper(atom_mol_type,cg_mol_type))));
@@ -285,37 +271,17 @@ vector<CGBeadStencil> AtomCGConverter::ParseBeads_(Property &options_in) {
                                                                                   
       Property *p = *bead_map_iter;                                               
       string map_type = p->get("name").as<string>();                              
-      // Ensure that the map is known                                             
-      /*if (bead_maps_info.count(map_type) == 0) {                                  
-        throw invalid_argument(                                                   
-            "Map name " + map_type +                                              
-            " is not known because there are no cg_beads using it.");             
-      }*/                                                                           
+                                                                          
       // get vector of weights                                                    
       vector<double> weights;                                                     
       Tokenizer tok_weights(p->get("weights").value(), " \n\t");                  
       tok_weights.ConvertToVector<double>(weights);                               
-                                                                                  
-      /*if (weights.size() != bead_maps_info.at(map_type).atomic_subbeads_.size()) {   
-        string error_msg =                                                        
-            accumulate(bead_maps_info.at(map_type).atomic_subbeads_.begin(),         
-                       bead_maps_info.at(map_type).atomic_subbeads_.end(), string(" "));
-        throw invalid_argument(string("The beads in the cg_bead are ") + error_msg +
-                               string(" beads the weights are ") + p->get("weights").value());
-      }*/
                                                                                   
       // get vector of d values used for non-spherical beads                      
       vector<double> d;                                                         
       if (p->exists("d")) {                                                       
         Tokenizer tok_d(p->get("d").value(), " \n\t");                            
         tok_d.ConvertToVector(d);                                                 
-        /*if (d.size() != bead_maps_info.at(map_type).atomic_subbeads_.size()) {       
-          string error_msg = accumulate(                                          
-              bead_maps_info.at(map_type).atomic_subbeads_.begin(),                  
-              bead_maps_info.at(map_type).atomic_subbeads_.end(), string(" "));      
-          throw invalid_argument(string("The beads in the cg_bead are ") + error_msg +
-                                 string(" beads the d values are ") +p->get("d").value());
-        }*/                                                                         
       }                                                                           
       
       for( pair<const string,CGBeadStencil> & pr : bead_maps_info ){
@@ -332,7 +298,6 @@ void AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
     string interaction_type, size_t bead_count) const {
 
   if (interaction_type == "bond") {
-    cout << "Bead count is " << bead_count << endl;
     if (bead_count != 2) {
       throw runtime_error(
           "Error interaction type is specified as bond but"
@@ -386,19 +351,16 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
       for (Tokenizer::iterator line = section.begin(); line != section.end();
            ++line) {
 
-        cout << "Line : " << *line << endl;
         CGInteractionStencil interaction_info;
        
         Tokenizer tok_atoms(*line, " \t");
         int atom_count = 0;
         for (Tokenizer::iterator atom = tok_atoms.begin();
              atom != tok_atoms.end(); ++atom) {
-          cout << "Bead name for interaction " << *atom << " ";
           interaction_info.bead_names_.push_back(*atom);
           ++atom_count;
         }
         if(interaction_info.bead_names_.size()==0) continue;
-        cout << endl;
         interaction_info.group_ = interaction_group;
         if( atom_count==2){
           interaction_info.type_ = "bond";
@@ -449,12 +411,11 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
     
   }
 
-    // cg_bead_id, vector< atom_name, atom_bead_id >
+  // cg_bead_id, vector< atom_name, atom_bead_id >
   Molecule * atom_mol = atom_top.getMolecule(cg_mol->getId()); 
   vector<int> atom_bead_ids = atom_mol->getBeadIds();
   sort(atom_bead_ids.begin(),atom_bead_ids.end());
   unordered_map<int,string> atom_ids_and_names = MapAtomicBeadIdsToAtomicBeadNames_(atom_mol->getType(),atom_bead_ids);
-  cout << "Success mapping atomic bead ids to atomic names" << endl;
   vector<int> atom_ids;
   for ( auto id_and_name : atom_ids_and_names ){
     atom_ids.push_back(id_and_name.first);
@@ -471,11 +432,10 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
     max_index += bead_info.atomic_subbeads_.size();
     for ( int index = min_index; index<max_index;++index){
 
-      assert(index< atom_ids.size() && "ERROR there is a problem in the conversion of the atomic molecule to the coarse grained molecule, there is a conflict with the number of beads needed by the coarse grained description and the number of atoms that are in the atomic molecule");
+      assert(static_cast<size_t>(index)< atom_ids.size() && "ERROR there is a problem in the conversion of the atomic molecule to the coarse grained molecule, there is a conflict with the number of beads needed by the coarse grained description and the number of atoms that are in the atomic molecule");
 
       int atom_id = atom_ids.at(index); 
       string atom_name = atom_ids_and_names.at(atom_id);
-      cout << "Associating atom id with atom name " << atom_name << " " << atom_id << endl; 
       atom_bead_names_ids.push_back(pair<string,int>(atom_name,atom_id));
     }
     min_index=max_index;
@@ -485,7 +445,6 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(Property &options_in)
     cg_beads_and_atoms[cg_bead_id] = atom_bead_names_ids; 
   }
 
-  cout << "Success " << endl;
   return cg_beads_and_atoms;
 }
 
@@ -493,37 +452,24 @@ void AtomCGConverter::CreateInteractions_(
     Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
     map<int,vector<pair<std::string, int>>> cg_id_and_bead_name_to_id) {
 
-  /*vector<string> cg_bead_names = stencil.getCGBeadNames();
-  for ( const string & bead_n : cg_bead_names) {
-    cout << "bead name " << bead_n << endl;
-  }*/
   // Convert to a map of the atomic bead names and their ids
   vector<int> cg_bead_ids = cg_mol->getBeadIds();
   unordered_map<int,string> bead_ids_and_names = stencil.MapCGBeadIdsToCGBeadNames(cg_bead_ids);
   unordered_map<string,int> bead_name_to_id;
   for( pair<const int,string> & value : bead_ids_and_names){
-  //j  for( pair<string,int> name_and_id : value.second ){
-      cout << "Name and id of bead " << value.first << " " << value.second << endl;
-      bead_name_to_id[value.second] = value.first;
-   // }
+    bead_name_to_id[value.second] = value.first;
   }
 
   for (const CGInteractionStencil &interaction_info : stencil.getInteractionInfo()) {
     // Convert atoms to vector of ints using the map
     size_t interaction_id = cg_top_out.InteractionCount();
-    cout << "Getting interaction id " << interaction_id << endl;
     vector<int> atoms;
-      cout << "Atoms in interaction " << interaction_info.bead_names_.size() << endl;
     for (const string & atom_name : interaction_info.bead_names_) {
-      cout << atom_name << " " ;
-      cout << bead_name_to_id[atom_name] << " ";
       atoms.push_back(bead_name_to_id.at(atom_name));
     }
-    cout << endl;
 
     if (!atoms.empty()) {
       Interaction *ic;
-      cout << interaction_info.type_<< endl;
       if (interaction_info.type_ == "bond") {
         ic = cg_top_out.CreateInteraction(
             InteractionType::bond, interaction_info.group_, interaction_id,
@@ -559,10 +505,8 @@ map<int, vector<pair<string,int>>> AtomCGConverter::CreateMolecule_(string cg_mo
   map<int, vector<pair<std::string, int>>> bead_name_to_id =
       CreateBeads_(cg_mol, cg_mol_stencil, cg_top_out,atom_top);
  
-  cout << "Creating interactions " << endl; 
   CreateInteractions_(cg_mol, cg_mol_stencil, cg_top_out, bead_name_to_id);
 
-  cout << "Success with inter" << endl;
   return bead_name_to_id;
 }
 
