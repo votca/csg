@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _DLPOLYTRAJECTORYWRITER_H
-#define _DLPOLYTRAJECTORYWRITER_H
+#ifndef VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
+#define VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
 
 #include "../../../../include/votca/csg/csgtopology.h"
 #include <votca/csg/trajectorywriter.h>
@@ -67,4 +67,4 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _DLPOLYTRAJECTORYWRITER_H */
+#endif // VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
