@@ -67,4 +67,4 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
+#endif  // VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H

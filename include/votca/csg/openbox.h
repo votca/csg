@@ -42,4 +42,4 @@ class OpenBox : public BoundaryCondition {
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_OPENBOX_H 
+#endif  // VOTCA_CSG_OPENBOX_H

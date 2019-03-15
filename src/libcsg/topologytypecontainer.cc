@@ -19,9 +19,10 @@
 namespace votca {
 namespace csg {
 
-  using namespace std;
+using namespace std;
 
-bool TopologyTypeContainer::MoleculeTypeExist(const std::string & molecule_type) const {
+bool TopologyTypeContainer::MoleculeTypeExist(
+    const std::string &molecule_type) const {
   return molecule_types_.count(molecule_type);
 }
 void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {
@@ -32,7 +33,7 @@ void TopologyTypeContainer::AddMoleculeType(std::string molecule_type) {
 
 vector<string> TopologyTypeContainer::getResidueTypes() const {
   vector<string> residue_types;
-  for( pair<string,int> residue_type_and_id : residue_types_){
+  for (pair<string, int> residue_type_and_id : residue_types_) {
     residue_types.push_back(residue_type_and_id.first);
   }
   return residue_types;
@@ -40,13 +41,14 @@ vector<string> TopologyTypeContainer::getResidueTypes() const {
 
 vector<string> TopologyTypeContainer::getBeadTypes() const {
   vector<string> bead_types;
-  for( pair<string, int> bead_type_and_id : bead_types_){
+  for (pair<string, int> bead_type_and_id : bead_types_) {
     bead_types.push_back(bead_type_and_id.first);
-  } 
+  }
   return bead_types;
 }
 
-bool TopologyTypeContainer::ResidueTypeExist(const std::string &residue_type) const {
+bool TopologyTypeContainer::ResidueTypeExist(
+    const std::string &residue_type) const {
   return residue_types_.count(residue_type);
 }
 void TopologyTypeContainer::AddResidueType(std::string residue_type) {
@@ -54,7 +56,7 @@ void TopologyTypeContainer::AddResidueType(std::string residue_type) {
     residue_types_[residue_type] = residue_types_.size();
   }
 }
-bool TopologyTypeContainer::BeadTypeExist(const std::string & bead_type) const {
+bool TopologyTypeContainer::BeadTypeExist(const std::string &bead_type) const {
   return bead_types_.count(bead_type);
 }
 void TopologyTypeContainer::AddBeadType(std::string bead_type) {

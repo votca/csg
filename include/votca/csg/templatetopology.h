@@ -400,12 +400,11 @@ class TemplateTopology {
     return type_container_.getBeadTypeId(beads_.at(bead_id).getType());
   }
 
-
-  std::vector<std::string> getBeadTypes() const{
+  std::vector<std::string> getBeadTypes() const {
     return type_container_.getBeadTypes();
   }
 
-  std::vector<std::string> getResidueTypes() const{
+  std::vector<std::string> getResidueTypes() const {
     return type_container_.getResidueTypes();
   }
   /**

@@ -92,14 +92,14 @@ bool LAMMPSDumpReader::NextFrame(CSG_Topology &top) {
   ;
 }
 
-void LAMMPSDumpReader::ReadTimestep(CSG_Topology &top, const string & itemline) {
+void LAMMPSDumpReader::ReadTimestep(CSG_Topology &top, const string &itemline) {
   string s;
   getline(_fl, s);
   top.setStep(boost::lexical_cast<int>(s));
   cout << "Reading frame, timestep " << top.getStep() << endl;
 }
 
-void LAMMPSDumpReader::ReadBox(CSG_Topology &top, const string & itemline) {
+void LAMMPSDumpReader::ReadBox(CSG_Topology &top, const string &itemline) {
   string s;
 
   matrix m;
@@ -117,11 +117,12 @@ void LAMMPSDumpReader::ReadBox(CSG_Topology &top, const string & itemline) {
   top.setBox(m);
 }
 
-void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top,const string & itemline) {
+void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top, const string &itemline) {
   string s;
   getline(_fl, s);
   number_of_atoms_ = boost::lexical_cast<int>(s);
-  if (!read_topology_data_ && static_cast<size_t>(number_of_atoms_) != top.BeadCount()) {
+  if (!read_topology_data_ &&
+      static_cast<size_t>(number_of_atoms_) != top.BeadCount()) {
     std::runtime_error("number of beads in topology and trajectory differ");
   }
 }

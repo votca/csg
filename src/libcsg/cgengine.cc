@@ -15,21 +15,21 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <cassert>
-#include <unordered_map>
 #include <fstream>
+#include <unordered_map>
 #include <votca/csg/cgengine.h>
 #include <votca/csg/version.h>
 #include <votca/tools/tokenizer.h>
-#include "../../include/votca/csg/csgtopology.h"
 namespace votca {
 namespace csg {
 
 using namespace std;
 
-//namespace po = boost::program_options;
+// namespace po = boost::program_options;
 
-void CGEngine::LoadFiles(string filename){
+void CGEngine::LoadFiles(string filename) {
   Tokenizer tok(filename, ";");
   Tokenizer::iterator iter;
 
@@ -41,19 +41,17 @@ void CGEngine::LoadFiles(string filename){
 }
 
 unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
-    CSG_Topology &atomistic_top_in,
-    CSG_Topology &cg_top_out
-     ) {
+    CSG_Topology &atomistic_top_in, CSG_Topology &cg_top_out) {
 
-  unique_ptr<AtomCGConverter> converter = unique_ptr<AtomCGConverter>(new AtomCGConverter);
-  for ( string file : file_names_ ){
-    converter->LoadMoleculeStencil(file); 
+  unique_ptr<AtomCGConverter> converter =
+      unique_ptr<AtomCGConverter>(new AtomCGConverter);
+  for (string file : file_names_) {
+    converter->LoadMoleculeStencil(file);
   }
-  converter->Convert(atomistic_top_in,cg_top_out);
+  converter->Convert(atomistic_top_in, cg_top_out);
 
   return converter;
 }
-
 
 }  // namespace csg
 }  // namespace votca

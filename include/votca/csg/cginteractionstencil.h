@@ -5,14 +5,14 @@
 #include <vector>
 
 namespace votca {
-  namespace csg {
+namespace csg {
 
-  struct CGInteractionStencil {
-    std::string type_;
-    std::string group_;
-    std::vector<std::string> bead_names_;
-  };
+struct CGInteractionStencil {
+  std::string type_;
+  std::string group_;
+  std::vector<std::string> bead_names_;
+};
 
-  }
-}
-#endif // VOTCA_CSG_CGINTERACTIONSTENCIL
+}  // namespace csg
+}  // namespace votca
+#endif  // VOTCA_CSG_CGINTERACTIONSTENCIL

@@ -66,5 +66,4 @@ class DLPOLYTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_DLPTOPOLOGYREADER_H
- 
+#endif  // VOTCA_CSG_DLPTOPOLOGYREADER_H

@@ -18,7 +18,6 @@
 #ifndef VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
 #define VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
 
-
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -72,5 +71,4 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
-
+#endif  // VOTCA_CSG_DLPOLYTRAJECTORYREADER_H

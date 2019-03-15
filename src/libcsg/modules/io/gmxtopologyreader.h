@@ -44,4 +44,4 @@ class GMXTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_GMXTOPOLOGYREADER_H
+#endif  // VOTCA_CSG_GMXTOPOLOGYREADER_H

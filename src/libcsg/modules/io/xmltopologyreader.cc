@@ -183,7 +183,7 @@ void XMLTopologyReader::ParseMolecule(Property &p, string molecule_type_,
     throw std::runtime_error(
         "Number of elements in bead-vector and residue-vector are not "
         "identical");
-  
+
   Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
     Molecule *mi = _top->CreateMolecule(_top->MoleculeCount(), molecule_type_);

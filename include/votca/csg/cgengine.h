@@ -18,9 +18,9 @@
 #ifndef VOTCA_CSG_CGENGINE_H
 #define VOTCA_CSG_CGENGINE_H
 
+#include "atomcgconverter.h"
 #include "cgobserver.h"
 #include "csgtopology.h"
-#include "atomcgconverter.h"
 #include <boost/program_options.hpp>
 #include <list>
 #include <map>
@@ -43,26 +43,30 @@ namespace TOOLS = votca::tools;
 
 class CGEngine {
  public:
-  CGEngine() {};
-  ~CGEngine() {};
+  CGEngine(){};
+  ~CGEngine(){};
 
   /**
-   * @brief Loads .xml files containing coarse graining stencils and mapping information
+   * @brief Loads .xml files containing coarse graining stencils and mapping
+   * information
    *
-   * @param[in] filenames - a string of with .xml files, can be a single file or multiple file names separated by ';'
+   * @param[in] filenames - a string of with .xml files, can be a single file or
+   * multiple file names separated by ';'
    */
   void LoadFiles(string filenames);
 
   /**
-   * @brief Takes the atomisitic topology and populates the coarse grained topology with a coarse grained represenation
+   * @brief Takes the atomisitic topology and populates the coarse grained
+   * topology with a coarse grained represenation
    *
    * @param[in] atomistic_top_in
    * @param[in,out] cg_top
    *
-   * @return return an atom to cg converter which can be used to update the positions vectors and forces of the coarse grained representation 
+   * @return return an atom to cg converter which can be used to update the
+   * positions vectors and forces of the coarse grained representation
    */
   std::unique_ptr<AtomCGConverter> PopulateCGTopology(
-      CSG_Topology & atomistic_top_in,CSG_Topology & cg_top);
+      CSG_Topology& atomistic_top_in, CSG_Topology& cg_top);
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process
@@ -80,7 +84,6 @@ class CGEngine {
   bool IsIgnored(std::string molecule_type);
 
  private:
-
   unordered_set<std::string> file_names_;
 
   std::list<std::string> _ignores;

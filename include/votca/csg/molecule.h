@@ -88,4 +88,4 @@ inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_MOLECULE_H 
+#endif  // VOTCA_CSG_MOLECULE_H

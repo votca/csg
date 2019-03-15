@@ -18,9 +18,9 @@
 #ifndef VOTCA_CSG_APPLICATION_H
 #define VOTCA_CSG_APPLICATION_H
 
+#include "atomcgconverter.h"
 #include "cgobserver.h"
 #include "csgtopology.h"
-#include "atomcgconverter.h"
 #include "trajectoryreader.h"
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>
@@ -103,7 +103,7 @@ class CsgApplication : public Application {
   class Worker : public Thread {
    public:
     Worker();
-    ~Worker() {};
+    ~Worker(){};
 
     /// \brief overload with the actual computation
     virtual void EvalConfiguration(CSG_Topology *top,
@@ -115,7 +115,7 @@ class CsgApplication : public Application {
    protected:
     CsgApplication *_app;
     CSG_Topology _top, _top_cg;
-    //TopologyMap *_map;
+    // TopologyMap *_map;
     std::unique_ptr<AtomCGConverter> converter_;
     int _id;
 
@@ -176,4 +176,4 @@ inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 }  // namespace csg
 }  // namespace votca
 
-#endif // VOTCA_CSG_APPLICATION_H 
+#endif  // VOTCA_CSG_APPLICATION_H
