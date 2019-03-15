@@ -20,7 +20,6 @@
 
 #include "cgobserver.h"
 #include "csgtopology.h"
-//#include "topologymap.h"
 #include "atomcgconverter.h"
 #include <boost/program_options.hpp>
 #include <list>
@@ -56,7 +55,6 @@ class CGEngine {
 
   std::unique_ptr<AtomCGConverter> PopulateCGTopology(
       CSG_Topology & atomistic_top_in,CSG_Topology & cg_top);
-
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process
