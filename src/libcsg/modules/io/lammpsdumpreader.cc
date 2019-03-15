@@ -92,14 +92,14 @@ bool LAMMPSDumpReader::NextFrame(CSG_Topology &top) {
   ;
 }
 
-void LAMMPSDumpReader::ReadTimestep(CSG_Topology &top, string itemline) {
+void LAMMPSDumpReader::ReadTimestep(CSG_Topology &top, const string & itemline) {
   string s;
   getline(_fl, s);
   top.setStep(boost::lexical_cast<int>(s));
   cout << "Reading frame, timestep " << top.getStep() << endl;
 }
 
-void LAMMPSDumpReader::ReadBox(CSG_Topology &top, string itemline) {
+void LAMMPSDumpReader::ReadBox(CSG_Topology &top, const string & itemline) {
   string s;
 
   matrix m;
@@ -117,7 +117,7 @@ void LAMMPSDumpReader::ReadBox(CSG_Topology &top, string itemline) {
   top.setBox(m);
 }
 
-void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top, string itemline) {
+void LAMMPSDumpReader::ReadNumAtoms(CSG_Topology &top,const string & itemline) {
   string s;
   getline(_fl, s);
   number_of_atoms_ = boost::lexical_cast<int>(s);
