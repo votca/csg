@@ -69,7 +69,7 @@ bool XYZReader::ReadFrame(CSG_Topology &top) {
   if (!_fl.eof()) {
     // read the number of atoms
     int natoms = boost::lexical_cast<int>(line);
-    if (!topology && natoms != top.BeadCount())
+    if (!topology && static_cast<size_t>(natoms) != top.BeadCount())
       throw std::runtime_error(
           "number of beads in topology and trajectory differ");
 
