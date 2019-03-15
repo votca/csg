@@ -18,7 +18,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include "../../include/votca/csg/cgengine.h"
 #include "../../include/votca/csg/csgapplication.h"
-//#include <votca/csg/topologymap.h>
 #include <votca/csg/topologyreader.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/csg/trajectorywriter.h>
@@ -27,7 +26,9 @@
 namespace votca {
 namespace csg {
 
-CsgApplication::CsgApplication(void) {}
+CsgApplication::CsgApplication(void) {
+  _traj_reader = nullptr;
+}
 
 CsgApplication::~CsgApplication(void) {}
 
