@@ -258,8 +258,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
 
         for (int j = 0; j < repeater; j++) {
 
-          // string beadname = beadtype + "#" + boost::lexical_cast<string>(i +
-          // 1);
           byte_t symmetry = 1;
 
           Bead *bead =
