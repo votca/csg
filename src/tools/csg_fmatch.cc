@@ -392,7 +392,7 @@ void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
     if (conf->BeadCount() != _top_force.BeadCount())
       throw std::runtime_error(
           "number of beads in topology and force topology does not match");
-    for (int i = 0; i < conf->BeadCount(); ++i) {
+    for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); ++i) {
       conf->getBead(i)->F() -= _top_force.getBead(i)->getF();
       vec d = conf->getBead(i)->getPos() - _top_force.getBead(i)->getPos();
       if (abs(d) > _dist) {  // default is 1e-5, otherwise it can be a too
