@@ -74,7 +74,75 @@ class CGMoleculeStencil {
   // ids etc...
   void AddBeadStencil(const std::vector<CGBeadStencil> &bead_info);
 
-  // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
+  /**
+   * @brief Maps a vector of atomic bead id to their names
+   *
+   * Note this method makes several imporant assumptions.
+   * 1. It assumes when the bead ids passed in are sorted in order that they
+   * will line up with the atomic bead names that were passed in when calling
+   * the AddBeadStencil method.
+   *
+   * E.g. If I had a propane molecule
+   *
+   * cg_bead_name "A1"
+   * atomic_beads "C1" "H4" "H5" "H6"
+   *
+   * cg_bead_name "B1"
+   * atomic_beads "C2" "H7" "H8"
+   *
+   * cg_bead_name "A2"
+   * atomic_beads "C3" "H9" "H10" "H11"
+   *
+   * And I passed them to the CGMoleculeStencil in a vector in the depicted
+   * order, and then were to pass in some atomic ids of a propane molecule, it
+   * would not matter what the ids were as long as they belonged to the same
+   * propane molecule. As an example we will consider two separate examples
+   *
+   * propane molecule 1 has the following bead ids in a vector
+   *
+   * 11 1 2 10 3 4 5 6 8 7 9
+   *
+   * Notice that they are not in order. The method will return them as follows:
+   *
+   * 1 C1
+   * 2 H4
+   * 3 H5
+   * 4 H6
+   * 5 C2
+   * 6 H7
+   * 7 H8
+   * 8 C3
+   * 9 H9
+   * 10 H10
+   * 11 H11
+   *
+   * Notice this matches the order in which the CGBeadStencils were passed in
+   *
+   * Now if I were to pass in a second propane molecule with the following
+   * bead ids:
+   *
+   * 23 24 33 25 32 30 31 26 27 28 29
+   *
+   * The method would return them as follows:
+   *
+   * 23 C1
+   * 24 H4
+   * 25 H5
+   * 26 H6
+   * 27 C2
+   * 28 H7
+   * 29 H8
+   * 30 C3
+   * 31 H9
+   * 32 H10
+   * 33 H11
+   *
+   * @param[in] bead_ids - the number of bead ids passed in must be equal to the
+   * number of atomic beads in the molecule.
+   *
+   * @return an unordered map containing the bead ids with their matched atomic
+   * name
+   */
   std::unordered_map<int, std::string> MapAtomicBeadIdsToAtomicBeadNames(
       std::vector<int> bead_ids) const;
 
