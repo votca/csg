@@ -183,7 +183,8 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
       data_collection.Data();
 
   for (auto data_collection : vector_of_arrays) {
-    for (int index = 0; index < data_collection->size(); ++index) {
+    for (int index = 0; static_cast<size_t>(index) < data_collection->size();
+         ++index) {
       cout << data_collection->at(index) << " ";
     }
     cout << endl;

@@ -35,13 +35,10 @@ void NematicOrder::Process(CSG_Topology &top, const string &filter) {
   bU = bV = bW = false;
 
   vector<int> bead_ids = top.getBeadIds();
-  // for (BeadContainer::iterator iter = top.Beads().begin();
-  //     iter != top.Beads().end(); ++iter) {
 
   for (int bead_id : bead_ids) {
     Bead *bead = top.getBead(bead_id);
 
-    //    if (!wildcmp(filter.c_str(), bead->getName().c_str())) continue;
     if (!wildcmp(filter.c_str(), bead->getType().c_str())) continue;
 
     if (bead->getSymmetry() == 1) continue;
