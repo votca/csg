@@ -32,13 +32,6 @@
 using namespace votca::tools;
 using namespace std;
 
-/*namespace votca {
-namespace csg {
-class Molecule;
-class Residue;
-}  // namespace csg
-}  // namespace votca
-*/
 namespace votca {
 namespace csg {
 
