@@ -23,8 +23,8 @@
 #include "modules/io/lammpsdatareader.h"
 #include "modules/io/lammpsdumpreader.h"
 #include "modules/io/xmltopologyreader.h"
-#include "modules/io/xyzreader.h"
 #include <votca/csg/topologyreader.h>
+#include <votca/csg/xyzreader.h>
 #ifdef GMX_DOUBLE
 #include "modules/io/gmxtopologyreader.h"
 #endif

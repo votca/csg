@@ -137,16 +137,12 @@ bool GROReader::NextFrame(CSG_Topology &top) {
       b = top.getBead(i);
     }
 
-    b->setPos(vec(boost::lexical_cast<double>(x),
-                  boost::lexical_cast<double>(y),
-                  boost::lexical_cast<double>(z)));
+    b->setPos(vec(stod(x), stod(y), stod(z)));
     if (hasVel) {
       boost::algorithm::trim(vx);
       boost::algorithm::trim(vy);
       boost::algorithm::trim(vz);
-      b->setVel(vec(boost::lexical_cast<double>(vx),
-                    boost::lexical_cast<double>(vy),
-                    boost::lexical_cast<double>(vz)));
+      b->setVel(vec(stod(vx), stod(vy), stod(vz)));
     }
   }
 

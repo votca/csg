@@ -15,9 +15,9 @@
  *
  */
 
+#include "../../include/votca/csg/csgapplication.h"
 #include <boost/program_options.hpp>
 #include <iostream>
-#include "../../include/votca/csg/csgapplication.h"
 #include <votca/csg/version.h>
 #include <votca/tools/akimaspline.h>
 #include <votca/tools/cubicspline.h>
@@ -115,9 +115,9 @@ int main(int argc, char **argv) {
         cout << "wrong range format, use min:step:max\n";
         return 1;
       }
-      min = boost::lexical_cast<double>(toks[0]);
-      step = boost::lexical_cast<double>(toks[1]);
-      max = boost::lexical_cast<double>(toks[2]);
+      min = stod(toks[0]);
+      step = stod(toks[1]);
+      max = stod(toks[2]);
     }
 
     in.Load(in_file);
@@ -155,9 +155,9 @@ int main(int argc, char **argv) {
         return 1;
       }
       double sp_min, sp_max, sp_step;
-      sp_min = boost::lexical_cast<double>(toks[0]);
-      sp_step = boost::lexical_cast<double>(toks[1]);
-      sp_max = boost::lexical_cast<double>(toks[2]);
+      sp_min = stod(toks[0]);
+      sp_step = stod(toks[1]);
+      sp_max = stod(toks[2]);
       cout << "doing " << type << " fit " << sp_min << ":" << sp_step << ":"
            << sp_max << endl;
 

@@ -26,7 +26,7 @@ using namespace votca::tools;
 namespace votca {
 namespace csg {
 
-PotentialFunction::PotentialFunction(const string& name_, const int nlam_,
+PotentialFunction::PotentialFunction(const string &name_, const int nlam_,
                                      const double min_, const double max_) {
 
   _name = name_;
@@ -53,7 +53,7 @@ void PotentialFunction::setParam(string filename) {
   }
 }
 
-void PotentialFunction::SaveParam(const string& filename) {
+void PotentialFunction::SaveParam(const string &filename) {
 
   Table param;
   param.SetHasYErr(false);
@@ -64,7 +64,7 @@ void PotentialFunction::SaveParam(const string& filename) {
   param.Save(filename);
 }
 
-void PotentialFunction::SavePotTab(const string& filename, const double step) {
+void PotentialFunction::SavePotTab(const string &filename, const double step) {
   int ngrid = (int)((_cut_off - _min) / step + 1.00000001);
   Table pot_tab;
   pot_tab.SetHasYErr(false);
@@ -79,7 +79,7 @@ void PotentialFunction::SavePotTab(const string& filename, const double step) {
   pot_tab.Save(filename);
 }
 
-void PotentialFunction::SavePotTab(const string& filename, const double step,
+void PotentialFunction::SavePotTab(const string &filename, const double step,
                                    const double rmin, const double rcut) {
   int ngrid = (int)((rcut - rmin) / step + 1.00000001);
   Table pot_tab;

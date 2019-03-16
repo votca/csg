@@ -167,8 +167,8 @@ bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
     if (pbc_type != conf.getBoxType())
       cout << "WARNING: PBC type in dlpoly file '" << _fname
            << "' header differs from that read with topology" << endl;
-      // throw std::runtime_error("Error: Boundary conditions in '"+_fname+"'
-      // header differs from that read with topology");
+// throw std::runtime_error("Error: Boundary conditions in '"+_fname+"'
+// header differs from that read with topology");
 #endif
   } else if (_isConfig) {
 
@@ -222,11 +222,10 @@ bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
       natoms = boost::lexical_cast<int>(fields[2]);
       navecs = boost::lexical_cast<int>(fields[3]);
       npbct = boost::lexical_cast<int>(fields[4]);
-      dtime = boost::lexical_cast<double>(
-          fields[5]);  // normally it is the 5-th column in 'timestep' line
-      stime = boost::lexical_cast<double>(
-          fields[fields.size() - 1]);  // normally it is the last column in
-                                       // 'timestep' line
+      dtime =
+          stod(fields[5]);  // normally it is the 5-th column in 'timestep' line
+      stime = stod(fields[fields.size() - 1]);  // normally it is the last
+                                                // column in 'timestep' line
 
 #ifdef DEBUG
       cout << "Read from dlpoly file '" << _fname << "' : natoms = " << natoms

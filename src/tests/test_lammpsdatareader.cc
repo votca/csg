@@ -67,18 +67,18 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   CSG_Topology top;
 
   TopologyReader::RegisterPlugins();
-  TopologyReader* lammpsDataReader;
+  TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("data");
   lammpsDataReader->ReadTopology(lammpsdatafilename, top);
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
   vec first_bead_correct_pos(62.806, 52.5127, 49.8873);
-  Bead* firstBead = top.getBead(0);
+  Bead *firstBead = top.getBead(0);
   auto first_bead_pos = firstBead->getPos();
   BOOST_CHECK(first_bead_correct_pos.isClose(first_bead_pos, 0.01));
 
   vec last_bead_correct_pos(102.78495, 78.0388, 59.9629);
-  Bead* lastBead = top.getBead(99);
+  Bead *lastBead = top.getBead(99);
   auto last_bead_pos = lastBead->getPos();
   BOOST_CHECK(last_bead_correct_pos.isClose(last_bead_pos, 0.01));
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   BOOST_CHECK_EQUAL(top.getStep(), 961);
 
-  const vector<unique_ptr<Interaction>>& interaction_cont =
+  const vector<unique_ptr<Interaction>> &interaction_cont =
       top.BondedInteractions();
   int numBondInter = 99;
   int numAngleInter = 98;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   CSG_Topology top;
 
   TopologyReader::RegisterPlugins();
-  TopologyReader* lammpsDataReader;
+  TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("data");
   lammpsDataReader->ReadTopology(lammpsdatafilename, top);
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   printTestFile2_(lammpsdatafilename2);
 
   TrajectoryReader::RegisterPlugins();
-  TrajectoryReader* lammpsDataReaderTrj;
+  TrajectoryReader *lammpsDataReaderTrj;
   lammpsDataReaderTrj = TrjReaderFactory().Create("data");
 
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
 
   vec first_bead_correct_pos(65.7991, 51.04235, 58.480193);
-  Bead* firstBead = top.getBead(0);
+  Bead *firstBead = top.getBead(0);
   auto first_bead_pos = firstBead->getPos();
 
   cout << first_bead_correct_pos << endl;
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   BOOST_CHECK(first_bead_correct_pos.isClose(first_bead_pos, 0.01));
   vec last_bead_correct_pos(108.431, 83.94695, 68.5254);
-  Bead* lastBead = top.getBead(99);
+  Bead *lastBead = top.getBead(99);
   auto last_bead_pos = lastBead->getPos();
 
   cout << last_bead_correct_pos << endl;
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   BOOST_CHECK_EQUAL(top.getStep(), 1010);
 
-  const vector<unique_ptr<Interaction>>& interaction_cont =
+  const vector<unique_ptr<Interaction>> &interaction_cont =
       top.BondedInteractions();
   int numBondInter = 99;
   int numAngleInter = 98;

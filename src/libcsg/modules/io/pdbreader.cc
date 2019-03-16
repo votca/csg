@@ -64,7 +64,7 @@ bool PDBReader::FirstFrame(CSG_Topology &top) {
 
 bool PDBReader::NextFrame(CSG_Topology &top) {
   string line;
-  Elements elements;
+  tools::Elements elements;
   // Two column vector for storing all bonds
   // 1 - id of first atom
   // 2 - id of second atom
@@ -108,9 +108,9 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         throw std::runtime_error(
             "Non cubical box in pdb file not implemented, yet!");
       }
-      double aa = boost::lexical_cast<double>(a) / 10.0;
-      double bb = boost::lexical_cast<double>(b) / 10.0;
-      double cc = boost::lexical_cast<double>(c) / 10.0;
+      double aa = stod(a) / 10.0;
+      double bb = stod(b) / 10.0;
+      double cc = stod(c) / 10.0;
       top.setBox(matrix(vec(aa, 0, 0), vec(0, bb, 0), vec(0, 0, cc)));
     }
     // Only read the CONECT keyword if the topology is set too true
@@ -282,14 +282,14 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         b = top.CreateBead(symmetry, atom_type, atom_number,
                            topology_constants::unassigned_molecule_id,
                            residue_id, residue_type, element_symbol,
-                           _elements.getMass(element_symbol), charge);
+                           elements.getMass(element_symbol), charge);
       } else {
         b = top.getBead(atom_number);
       }
       // convert to nm from A
-      b->setPos(vec(boost::lexical_cast<double>(x) / 10.0,
-                    boost::lexical_cast<double>(y) / 10.0,
-                    boost::lexical_cast<double>(z) / 10.0));
+      b->setPos(vec(stod(x) * tools::conv::ang2nm,
+                    stod(y) * tools::conv::ang2nm,
+                    stod(z) * tools::conv::ang2nm));
     }
 
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {

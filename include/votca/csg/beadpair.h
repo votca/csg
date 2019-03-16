@@ -22,7 +22,10 @@
 
 namespace votca {
 namespace csg {
+<<<<<<< HEAD
 namespace TOOLS = votca::tools;
+=======
+>>>>>>> master
 
 class Bead;
 /**
@@ -36,18 +39,30 @@ class Bead;
 class BeadPair : public std::pair<Bead *, Bead *> {
  public:
   BeadPair() {}
+<<<<<<< HEAD
   BeadPair(Bead *bead1, Bead *bead2, TOOLS::vec r)
+=======
+  BeadPair(Bead *bead1, Bead *bead2, tools::vec r)
+>>>>>>> master
       : std::pair<Bead *, Bead *>(bead1, bead2), _r(r), _dist(abs(r)) {}
 
   virtual ~BeadPair() {}
 
   /// \brief the vector connecting two beads
+<<<<<<< HEAD
   TOOLS::vec &r() { return _r; }
+=======
+  tools::vec &r() { return _r; }
+>>>>>>> master
   /// \brief the distance of the beads
   double &dist() { return _dist; }
 
  protected:
+<<<<<<< HEAD
   TOOLS::vec _r;
+=======
+  tools::vec _r;
+>>>>>>> master
   double _dist;
 };
 

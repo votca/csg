@@ -27,7 +27,7 @@ namespace csg {
 
 class PotentialFunctionCBSPL : public PotentialFunction {
  public:
-  PotentialFunctionCBSPL(const std::string& name_, const int nlam_,
+  PotentialFunctionCBSPL(const std::string &name_, const int nlam_,
                          const double min_ = 0.0, const double max_ = 10.0);
   ~PotentialFunctionCBSPL() {}
   // calculate function value for given r
@@ -41,11 +41,11 @@ class PotentialFunctionCBSPL : public PotentialFunction {
 
   void setParam(std::string filename);
 
-  void SaveParam(const std::string& filename);
+  void SaveParam(const std::string &filename);
 
-  void SavePotTab(const std::string& filename, const double step);
+  void SavePotTab(const std::string &filename, const double step);
 
-  void SavePotTab(const std::string& filename, const double step,
+  void SavePotTab(const std::string &filename, const double step,
                   const double rmin, const double rcut);
   void setOptParam(const int i, const double val);
 

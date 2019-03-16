@@ -15,19 +15,20 @@
  *
  */
 
-#include "xyzreader.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
+#include <votca/csg/xyzreader.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
-using namespace votca::tools;
 namespace votca {
 namespace csg {
+
 using namespace boost;
 using namespace std;
 using namespace votca::tools;
+
 bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   top.Cleanup();
 
@@ -36,7 +37,7 @@ bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
     throw std::ios_base::failure("Error on open topology file: " + file);
   }
 
-  ReadFrame<true>(top);
+  ReadFrame<true, CSG_Topology>(top);
 
   _fl.close();
 
@@ -57,75 +58,8 @@ void XYZReader::Close() { _fl.close(); }
 bool XYZReader::FirstFrame(CSG_Topology &top) { return NextFrame(top); }
 
 bool XYZReader::NextFrame(CSG_Topology &top) {
-  bool success = ReadFrame<false>(top);
+  bool success = ReadFrame<false, CSG_Topology>(top);
   return success;
 }
-
-template <bool topology>
-bool XYZReader::ReadFrame(CSG_Topology &top) {
-  string line;
-  getline(_fl, line);
-  ++_line;
-  if (!_fl.eof()) {
-    // read the number of atoms
-    int natoms = boost::lexical_cast<int>(line);
-    if (!topology && static_cast<size_t>(natoms) != top.BeadCount())
-      throw std::runtime_error(
-          "number of beads in topology and trajectory differ");
-
-    // the title line
-    getline(_fl, line);
-    ++_line;
-
-    // read atoms
-    Elements elements;
-    for (int i = 0; i < natoms; ++i) {
-      getline(_fl, line);
-      ++_line;
-      if (_fl.eof()) {
-        throw std::runtime_error("unexpected end of file in xyz file");
-      }
-
-      vector<string> fields;
-      Tokenizer tok(line, " ");
-      tok.ToVector(fields);
-
-      if (fields.size() != 4) {
-        throw std::runtime_error("invalide line " +
-                                 boost::lexical_cast<string>(_line) +
-                                 " in xyz file\n" + line);
-      }
-
-      Bead *b;
-      if (topology) {
-        string bead_type = fields[0];
-
-        string element = topology_constants::unassigned_element;
-        string name_upper_case = boost::to_upper_copy<string>(bead_type);
-        if (elements.isEleFull(name_upper_case)) {
-          element = elements.getEleShort(name_upper_case);
-        } else if (elements.isEleShort(bead_type)) {
-          element = bead_type;
-        }
-        byte_t symmetry = 1;
-        b = top.CreateBead(
-            symmetry, bead_type, i, topology_constants::unassigned_molecule_id,
-            topology_constants::unassigned_residue_id,
-            topology_constants::unassigned_residue_type, element, 0.0, 0.0);
-
-      } else {
-        b = top.getBead(i);
-      }
-
-      // convert to nm from A
-      b->setPos(vec(boost::lexical_cast<double>(fields[1]) / 10.0,
-                    boost::lexical_cast<double>(fields[2]) / 10.0,
-                    boost::lexical_cast<double>(fields[3]) / 10.0));
-
-    }  // for(int i=0; i<natoms; ++i)
-  }    // if(!_fl.eof())
-  return !_fl.eof();
-}
-
 }  // namespace csg
 }  // namespace votca

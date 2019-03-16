@@ -36,11 +36,11 @@ namespace csg {
  * @return - a container of beadmotifs
  **/
 template <class T>
-T breakIntoMotifs(BeadStructure<BaseBead>& beadstructure) {
+T breakIntoMotifs(BeadStructure<BaseBead> &beadstructure) {
   T bead_motifs;
-  std::vector<BeadStructure<BaseBead> > structures =
+  std::vector<BeadStructure<BaseBead>> structures =
       breakIntoStructures(beadstructure);
-  for (BeadStructure<BaseBead>& structure : structures) {
+  for (BeadStructure<BaseBead> &structure : structures) {
     bead_motifs.push_back(BeadMotif(structure));
   }
   return bead_motifs;

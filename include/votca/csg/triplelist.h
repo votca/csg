@@ -54,7 +54,7 @@ class TripleList {
   std::vector<triple_type *> _triples;
 
   std::map<element_type,
-           std::map<element_type, std::map<element_type, triple_type *> > >
+           std::map<element_type, std::map<element_type, triple_type *>>>
       _triple_map;
 };
 
@@ -82,13 +82,13 @@ inline triple_type *TripleList<element_type, triple_type>::FindTriple(
     element_type e1, element_type e2, element_type e3) {
   typename std::map<
       element_type,
-      std::map<element_type, std::map<element_type, triple_type *> > >::iterator
+      std::map<element_type, std::map<element_type, triple_type *>>>::iterator
       iter1;
   iter1 = _triple_map.find(e1);
   if (iter1 == _triple_map.end()) return NULL;
 
   typename std::map<element_type,
-                    std::map<element_type, triple_type *> >::iterator iter2;
+                    std::map<element_type, triple_type *>>::iterator iter2;
   iter2 = iter1->second.find(e2);
   if (iter2 == iter1->second.end()) return NULL;
 

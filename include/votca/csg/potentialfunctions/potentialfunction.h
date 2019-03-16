@@ -29,14 +29,14 @@ class PotentialFunction {
   // read parameters from the input file
   virtual void setParam(std::string filename);
   // save parameters to the file
-  virtual void SaveParam(const std::string& filename);
+  virtual void SaveParam(const std::string &filename);
   // write potential table
-  virtual void SavePotTab(const std::string& filename, const double step);
+  virtual void SavePotTab(const std::string &filename, const double step);
   // write potential table for specified interval
-  virtual void SavePotTab(const std::string& filename, const double step,
+  virtual void SavePotTab(const std::string &filename, const double step,
                           const double rmin, const double rcut);
   // set all parameters
-  void setParam(const Eigen::VectorXd& param) { _lam = param; }
+  void setParam(const Eigen::VectorXd &param) { _lam = param; }
   // set ith parameter
   void setParam(const int i, const double val) { _lam(i) = val; }
   // set ith parameter among those to be optimized
@@ -53,7 +53,7 @@ class PotentialFunction {
   virtual double CalculateD2F(const int i, const int j,
                               const double r) const = 0;
   // return parameter
-  Eigen::VectorXd& Params() { return _lam; }
+  Eigen::VectorXd &Params() { return _lam; }
   // return ith parameter
   double getParam(const int i) const { return _lam(i); }
   // return ith parameter among those to be optimized
@@ -67,7 +67,7 @@ class PotentialFunction {
   double getMinDist() const { return _min; }
 
  protected:
-  PotentialFunction(const std::string& name_, const int nlam_,
+  PotentialFunction(const std::string &name_, const int nlam_,
                     const double min_, const double max_);
 
   std::string _name;

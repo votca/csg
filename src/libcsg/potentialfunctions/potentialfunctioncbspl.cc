@@ -26,7 +26,7 @@ using namespace votca::tools;
 namespace votca {
 namespace csg {
 
-PotentialFunctionCBSPL::PotentialFunctionCBSPL(const string& name_,
+PotentialFunctionCBSPL::PotentialFunctionCBSPL(const string &name_,
                                                const int nlam_,
                                                const double min_,
                                                const double max_)
@@ -129,7 +129,7 @@ void PotentialFunctionCBSPL::setParam(string filename) {
   }
 }
 
-void PotentialFunctionCBSPL::SaveParam(const string& filename) {
+void PotentialFunctionCBSPL::SaveParam(const string &filename) {
 
   extrapolExclParam();
 
@@ -148,14 +148,14 @@ void PotentialFunctionCBSPL::SaveParam(const string& filename) {
   param.Save(filename);
 }
 
-void PotentialFunctionCBSPL::SavePotTab(const string& filename,
+void PotentialFunctionCBSPL::SavePotTab(const string &filename,
                                         const double step, const double rmin,
                                         const double rcut) {
   extrapolExclParam();
   PotentialFunction::SavePotTab(filename, step, rmin, rcut);
 }
 
-void PotentialFunctionCBSPL::SavePotTab(const string& filename,
+void PotentialFunctionCBSPL::SavePotTab(const string &filename,
                                         const double step) {
   extrapolExclParam();
   PotentialFunction::SavePotTab(filename, step);

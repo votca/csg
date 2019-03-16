@@ -29,8 +29,8 @@
 
 extern "C" {
 void VotcaCsgFromC() {
-  // do nothing - this is just that we have a c function for autotools/cmake
-  // sanity check if GMX is the write precision
+// do nothing - this is just that we have a c function for autotools/cmake
+// sanity check if GMX is the write precision
 #ifdef GMX_DOUBLE
 #if (GMX_DOUBLE == 1)
   gmx_is_double_precision();

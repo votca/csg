@@ -121,7 +121,7 @@ class BeadMotif : public BeadStructure<BaseBead> {
 
   BeadMotif(){};
 
-  BeadMotif(const BeadStructure& structure) : BeadStructure(structure){};
+  BeadMotif(const BeadStructure &structure) : BeadStructure(structure){};
 
   /// Gets the motif type, calculates it first if it is not yet known
   MotifType getType();
@@ -144,7 +144,7 @@ class BeadMotif : public BeadStructure<BaseBead> {
    *
    * @param[in] basebead pointer
    **/
-  void AddBead(BaseBead* basebead);
+  void AddBead(BaseBead *basebead);
 
   /**
    * \brief Adds a new connection to the motif

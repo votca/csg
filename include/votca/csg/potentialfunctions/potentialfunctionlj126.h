@@ -28,7 +28,7 @@ namespace csg {
 // with c12,c6 parameters
 class PotentialFunctionLJ126 : public PotentialFunction {
  public:
-  PotentialFunctionLJ126(const std::string& name_, const double min_ = 0.0,
+  PotentialFunctionLJ126(const std::string &name_, const double min_ = 0.0,
                          const double max_ = 10.0);
   ~PotentialFunctionLJ126(){};
   // calculate function value for given r
