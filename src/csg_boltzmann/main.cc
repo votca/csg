@@ -88,21 +88,13 @@ bool CsgBoltzmann::EvaluateTopology(CSG_Topology *top_cg,
     Molecule *mol_atomistic = top_atomistic->getMolecule(molecule_ids.at(0));
     Molecule *mol_cg = top_cg->getMolecule(molecule_ids.at(0));
     cout << "Writing exclusion list for atomistic molecule "
-         //<< top_atomistic->MoleculeByIndex(0)->getName()
          << mol_atomistic->getType() << " in coarse grained representation "
          << mol_cg->getType() << endl;
-    //<< top_atomistic->MoleculeByIndex(0)->getName() << endl;
-
-    // ex = CreateExclusionList(*top_atomistic->MoleculeByIndex(0),
-    //                         *top_cg->MoleculeByIndex(0));
 
     ex = CreateExclusionList(*top_atomistic, *top_cg, *mol_atomistic, *mol_cg);
 
     ofstream fl;
     fl.open(OptionsMap()["excl"].as<string>().c_str());
-    //    fl << "# atomistic: " << top_atomistic->MoleculeByIndex(0)->getName()
-    //       << " cg: " << top_atomistic->MoleculeByIndex(0)->getName()
-    //       << " cgmap: " << OptionsMap()["cg"].as<string>() << endl;
     fl << "# atomistic: " << mol_atomistic->getType()
        << " cg: " << mol_cg->getType()
        << " cgmap: " << OptionsMap()["cg"].as<string>() << endl;
