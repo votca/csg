@@ -1,25 +1,33 @@
-#!/ usr / bin / env python3
+#!/usr/bin/env python3
 #
-#Copyright 2009 - 2019 The VOTCA Development Team(http:  // www.votca.org)
+# Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
 #
-#Licensed under the Apache License, Version 2.0(the "License");
-#you may not use this file except in compliance with the License.
-#You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#http:  // www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#Unless required by applicable law or agreed to in writing, software
-#distributed under the License is distributed on an "AS IS" BASIS,
-#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#See the License for the specific language governing permissions and
-#limitations under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-from optparse import OptionParser from sys import exit import sys import os from
-    re import match import pickle
+from optparse 
+import OptionParser 
+from sys import exit 
+import sys 
+import os 
+from re 
+import match 
+import pickle
 
-    try : import numpy except:
-  exit("Could not import numpy modules used by cma")
+try : 
+    import numpy 
+except:
+    exit("Could not import numpy modules used by cma")
 
 class state:
   """state class"""
@@ -72,7 +80,6 @@ try:
 except:
   exit("cma module could not be imported, please make sure to cma.py in your PYTHONPATH.")
 
-
 usage = "usage: %prog [options] statefile-in statefile-out"
 parser = OptionParser(usage=usage)
 parser.add_option("--eps", dest="eps", metavar="EPS",
@@ -103,7 +110,6 @@ new_state.solutions=[ 0 for i in range(len(new_state.parameters))]
 new_state.comments=current_state.comments
 print("We going to State '",new_state.state, "' with parameters\n",new_state.parameters,"solutions: ",new_state.solutions)
 new_state.write(args[1])
-#we need to pickle parameters as well as they are saved in a dict( \
-    string compare)
+#we need to pickle parameters as well as they are saved in a dict string compare)
 #and internal precission is float64
 pickle.dump([es,new_state.parameters],open("cma.internal_state.new", 'wb'))
