@@ -18,7 +18,6 @@
 #ifndef VOTCA_CSG_BEAD_H
 #define VOTCA_CSG_BEAD_H
 
-#include <assert.h>
 #include <cassert>
 #include <sstream>
 #include <string>
