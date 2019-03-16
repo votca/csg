@@ -268,7 +268,6 @@ BOOST_AUTO_TEST_CASE(dihedral_test) {
 
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
   // Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
   Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
                                residue_id, residue_type, element, mass, charge);
