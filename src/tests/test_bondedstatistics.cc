@@ -162,20 +162,13 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
 
     // Create two bonded interactions
     string interaction_group = "covalent_bond1";
-    // auto bond1 = new IBond(0, 1);
     int bond_id = 0;
-    auto bond1 = top.CreateInteraction(InteractionType::bond, interaction_group,
-                                       bond_id, molecule_id, vector<int>{0, 1});
-    // bond1->setGroup(interaction_group);
+    top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+                          molecule_id, vector<int>{0, 1});
     ++bond_id;
     string interaction_group2 = "covalent_bond2";
-    auto bond2 =
-        top.CreateInteraction(InteractionType::bond, interaction_group2,
-                              bond_id, molecule_id, vector<int>{1, 2});
-    // bond2->setGroup(interaction_group2);
-
-    // top.AddBondedInteraction(bond1);
-    // top.AddBondedInteraction(bond2);
+    top.CreateInteraction(InteractionType::bond, interaction_group2, bond_id,
+                          molecule_id, vector<int>{1, 2});
   }
 
   BondedStatistics bonded_statistics;
