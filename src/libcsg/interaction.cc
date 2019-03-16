@@ -44,28 +44,6 @@ string Interaction::getLabel() const {
   label << ":index " << index_;
   return label.str();
 }
-/*		if (mol_id_ != -1) s << "molecule " << mol_id_;
-if (!_group.empty()) {
-        s << ":" << _group;
-        if (_group_id != -1) {
-                s << " " << _group_id;
-        }
-}*/
-/*		if (_index != -1) s << ":index " << _index;
-if ( s.str() == "unassigned" ) {
-        interaction_type_ = InteractionType::unassigned;
-} if ( s.str() == "bond" ) {
-        interaction_type_ = InteractionType::bond;
-}else if( s.str() == "angle" ) {
-        interaction_type_ = InteractionType::angle;
-}else if( s.str() == "dihedral" ){
-        interaction_type_ = InteractionType::dihedral;
-}else if( s.str() == "improper" ){
-        throw invalid_argument("Currently improper interactions are not
-supported"); }else { throw invalid_argument("Bond type is not supported,
-supported types include:\nunassigned\nbond\nangle\ndihedral.\n");
-}
-}*/
 
 }  // namespace csg
 }  // namespace votca
