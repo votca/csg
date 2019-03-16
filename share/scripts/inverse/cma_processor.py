@@ -19,8 +19,7 @@ from optparse import OptionParser
 from sys import exit
 import sys
 import os
-from re
-import match
+from re import match
 import pickle
 
 try:

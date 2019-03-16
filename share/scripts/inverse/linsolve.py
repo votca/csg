@@ -15,8 +15,7 @@
 # limitations under the License.                                                
 #        
 
-from optparse 
-import OptionParser 
+from optparse import OptionParser 
 import numpy as np 
 import numpy.linalg as la
 
