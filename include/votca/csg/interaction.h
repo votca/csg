@@ -136,32 +136,18 @@ class Interaction {
 */
 class IBond : public Interaction {
  public:
-  /*  IBond(int bead1, int bead2) {
-      bead_ids_.resize(2);
-      bead_ids_[0] = bead1;
-      bead_ids_[1] = bead2;
-    }
-
-    IBond(std::list<int> &bead_ids) {
-      assert(bead_ids.size() >= 2);
-      bead_ids_.resize(2);
-      for (int i = 0; i < 2; ++i) {
-        bead_ids_[i] = bead_ids.front();
-        bead_ids.pop_front();
-      }
-    }*/
-  // SHOULD ONLY BE CALLED BY Topology Object
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
 
   std::unique_ptr<Interaction> Clone() const override {
     return std::unique_ptr<Interaction>(new IBond(*this));
   }
 
-  double EvaluateVar(
-      const BoundaryCondition &bc,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
-  TOOLS::vec Grad(
-      const BoundaryCondition &bc, int bead_id,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
   IBond(std::vector<int> bead_ids) {
@@ -177,31 +163,17 @@ class IBond : public Interaction {
 */
 class IAngle : public Interaction {
  public:
-  /*  IAngle(int bead1, int bead2, int bead3) {
-      bead_ids_.resize(3);
-      bead_ids_[0] = bead1;
-      bead_ids_[1] = bead2;
-      bead_ids_[2] = bead3;
-    }*/
-  /*  IAngle(std::list<int> &bead_ids) {
-      assert(bead_ids.size() >= 3);
-      bead_ids_.resize(3);
-      for (int i = 0; i < 3; ++i) {
-        bead_ids_[i] = bead_ids.front();
-        bead_ids.pop_front();
-      }
-    }*/
-  // SHOULD ONLY BE CALLED BY Topology Object
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
 
   std::unique_ptr<Interaction> Clone() const override {
     return std::unique_ptr<Interaction>(new IAngle(*this));
   }
-  double EvaluateVar(
-      const BoundaryCondition &bc,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
-  TOOLS::vec Grad(
-      const BoundaryCondition &bc, int bead_id,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
   IAngle(std::vector<int> bead_ids) {
@@ -218,32 +190,17 @@ class IAngle : public Interaction {
 */
 class IDihedral : public Interaction {
  public:
-  /*  IDihedral(int bead1, int bead2, int bead3, int bead4) {
-      bead_ids_.resize(4);
-      bead_ids_[0] = bead1;
-      bead_ids_[1] = bead2;
-      bead_ids_[2] = bead3;
-      bead_ids_[3] = bead4;
-    }
-    IDihedral(std::list<int> &bead_ids) {
-      assert(bead_ids.size() >= 4);
-      bead_ids_.resize(4);
-      for (int i = 0; i < 4; ++i) {
-        bead_ids_[i] = bead_ids.front();
-        bead_ids.pop_front();
-      }
-    }*/
-  // SHOULD ONLY BE CALLED BY Topology Object
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
   std::unique_ptr<Interaction> Clone() const override {
     return std::unique_ptr<Interaction>(new IDihedral(*this));
   }
 
-  double EvaluateVar(
-      const BoundaryCondition &bc,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
-  TOOLS::vec Grad(
-      const BoundaryCondition &bc, int bead_id,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const;
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
   IDihedral(std::vector<int> bead_ids) {
@@ -258,9 +215,6 @@ class IDihedral : public Interaction {
 inline double IBond::EvaluateVar(
     const BoundaryCondition &bc,
     std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  //  std::cout << "Shortest distance between bead_ids " << bead_ids_[0] << "
-  //  and "
-  //            << bead_ids_[1] << std::endl;
   return abs(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
                                      *bead_positions.at(bead_ids_.at(1))));
 }
