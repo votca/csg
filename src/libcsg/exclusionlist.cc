@@ -31,22 +31,6 @@ void ExclusionList::Clear(void) {
     delete *iter;
   _exclusions.clear();
 }
-/*
-//void ExclusionList::CreateExclusions(Topology *top) {
-  InteractionContainer &ic = top->BondedInteractions();
-  InteractionContainer::iterator ia;
-
-  for (ia = ic.begin(); ia != ic.end(); ++ia) {
-    int beads_in_int = (*ia)->BeadCount();
-    list<Bead *> l;
-
-    for (int ibead = 0; ibead < beads_in_int; ibead++) {
-      int ii = (*ia)->getBeadId(ibead);
-      l.push_back(top->getBead(ii));
-    }
-    ExcludeList(l);
-  }
-}*/
 
 bool ExclusionList::IsExcluded(const Bead *bead1, const Bead *bead2) const {
   if (bead1->getMoleculeId() != bead2->getMoleculeId()) return false;

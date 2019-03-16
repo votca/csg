@@ -51,7 +51,6 @@ class ExclusionList {
     std::list<Bead *> _exclude;
   };
 
-  void CreateExclusions(CSG_Topology *top);
   exclusion_t *GetExclusions(Bead *bead);
 
   typedef std::vector<exclusion_t *>::iterator iterator;
