@@ -42,7 +42,6 @@ void CGMoleculeStencil::AddBeadStencil(const vector<CGBeadStencil> &bead_info) {
   for (CGBeadStencil &info : bead_info_) {
     string cg_bead_name = info.cg_name_;
     for (string &atomic_name : info.atomic_subbeads_) {
-      cout << "Adding " << cg_bead_name << " and " << atomic_name << endl;
       cg_and_atom_names_.insert(
           multi_bimap::value_type(cg_bead_name, atomic_name));
     }

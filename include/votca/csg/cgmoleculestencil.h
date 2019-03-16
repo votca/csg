@@ -183,10 +183,29 @@ class CGMoleculeStencil {
   std::unordered_map<int, std::string> MapCGBeadIdsToCGBeadNames(
       std::vector<int> bead_ids) const;
 
+  /**
+   * @brief Returns the atomic bead names associated with the coarse grained
+   * bead
+   *
+   * @param[in] cg_bead_name string indicating the coarse grained bead
+   *
+   * @return vector of strings containing the atomic bead names
+   */
   std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name) const;
 
+  /**
+   * @brief Returns the cg bead names in the molecule
+   */
   std::vector<std::string> getCGBeadNames() const;
 
+  /**
+   * @brief Returns the coarse grained bead name that the atomic bead is
+   * attached to
+   *
+   * @param[in] atom_bead_name
+   *
+   * @return coarse grained bead name
+   */
   std::string getCGBeadName(std::string atom_bead_name) const;
 
   void AddInteractionStencil(
