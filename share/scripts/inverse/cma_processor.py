@@ -15,8 +15,7 @@
 # limitations under the License.
 #
 
-from optparse
-import OptionParser
+from optparse import OptionParser
 from sys import exit
 import sys
 import os
