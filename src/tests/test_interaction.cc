@@ -128,20 +128,43 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
 
 BOOST_AUTO_TEST_CASE(bond_test) {
 
-  Topology top;
+  CSG_Topology top;
+
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H2";
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+
+  //  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos1 = votca::tools::vec(1, 0, 0);
   bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  //  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos2 = votca::tools::vec(0, 0, 0);
   bead2->setPos(pos2);
-  IBond bond1(0, 1);
-  double length = bond1.EvaluateVar(top);
-  votca::tools::vec grad0 = bond1.Grad(top, 0);
-  votca::tools::vec grad1 = bond1.Grad(top, 1);
+  // IBond bond1(0, 1);
+  InteractionType interaction_type = InteractionType::bond;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1};
+  Interaction* bond1 = top.CreateInteraction(interaction_type, group, bond_id,
+                                             molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+  double length = bond1->EvaluateVar(*boundaries, bead_positions);
+  votca::tools::vec grad0 = bond1->Grad(*boundaries, 0, bead_positions);
+  votca::tools::vec grad1 = bond1->Grad(*boundaries, 1, bead_positions);
   votca::tools::vec grad0_ref(1, 0, 0);
   votca::tools::vec grad1_ref(-1, 0, 0);
   BOOST_CHECK_CLOSE(length, 1.0, 1e-5);
@@ -165,26 +188,50 @@ BOOST_AUTO_TEST_CASE(bond_test) {
 
 BOOST_AUTO_TEST_CASE(angle_test) {
 
-  Topology top;
+  CSG_Topology top;
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H3";
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  // Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos1 = votca::tools::vec(1, 0, 0);
   bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  // Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos2 = votca::tools::vec(0, 0, 0);
   bead2->setPos(pos2);
 
-  Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  // Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  bead_id = 2;
+  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos3 = votca::tools::vec(0, 1, 0);
   bead3->setPos(pos3);
 
-  IAngle angle(0, 1, 2);
-  double angle1 = angle.EvaluateVar(top);
-  votca::tools::vec grad0 = angle.Grad(top, 0);
-  votca::tools::vec grad1 = angle.Grad(top, 1);
-  votca::tools::vec grad2 = angle.Grad(top, 2);
+  InteractionType interaction_type = InteractionType::angle;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1, 2};
+  Interaction* angle = top.CreateInteraction(interaction_type, group, bond_id,
+                                             molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+  // IAngle angle(0, 1, 2);
+  double angle1 = angle->EvaluateVar(*boundaries, bead_positions);
+  votca::tools::vec grad0 = angle->Grad(*boundaries, 0, bead_positions);
+  votca::tools::vec grad1 = angle->Grad(*boundaries, 1, bead_positions);
+  votca::tools::vec grad2 = angle->Grad(*boundaries, 2, bead_positions);
   votca::tools::vec grad0_ref(0, -1, 0);
   votca::tools::vec grad1_ref(1, 1, 0);
   votca::tools::vec grad2_ref(-1, 0, 0);
@@ -217,31 +264,61 @@ BOOST_AUTO_TEST_CASE(angle_test) {
 
 BOOST_AUTO_TEST_CASE(dihedral_test) {
 
-  Topology top;
+  CSG_Topology top;
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H4";
+
   double mass = 1.0;
   double charge = 1.0;
   int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  // Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos1 = votca::tools::vec(1, 0, 0);
   bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  // Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos2 = votca::tools::vec(0, 0, 0);
   bead2->setPos(pos2);
 
-  Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  // Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  bead_id = 2;
+  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos3 = votca::tools::vec(0, 1, 0);
   bead3->setPos(pos3);
 
-  Bead* bead4 = top.CreateBead(0, "a4", "C", resid, mass, charge);
+  // Bead* bead4 = top.CreateBead(0, "a4", "C", resid, mass, charge);
+  bead_id = 3;
+  Bead* bead4 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   votca::tools::vec pos4 = votca::tools::vec(-1, 1, 1);
   bead4->setPos(pos4);
 
-  IDihedral dihedral(0, 1, 2, 3);
-  double dihedral1 = dihedral.EvaluateVar(top);
-  votca::tools::vec grad0 = dihedral.Grad(top, 0);
-  votca::tools::vec grad1 = dihedral.Grad(top, 1);
-  votca::tools::vec grad2 = dihedral.Grad(top, 2);
-  votca::tools::vec grad3 = dihedral.Grad(top, 3);
+  InteractionType interaction_type = InteractionType::dihedral;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1, 2, 3};
+  Interaction* dihedral = top.CreateInteraction(
+      interaction_type, group, bond_id, molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+
+  // IDihedral dihedral(0, 1, 2, 3);
+  double dihedral1 = dihedral->EvaluateVar(*boundaries, bead_positions);
+  votca::tools::vec grad0 = dihedral->Grad(*boundaries, 0, bead_positions);
+  votca::tools::vec grad1 = dihedral->Grad(*boundaries, 1, bead_positions);
+  votca::tools::vec grad2 = dihedral->Grad(*boundaries, 2, bead_positions);
+  votca::tools::vec grad3 = dihedral->Grad(*boundaries, 3, bead_positions);
   votca::tools::vec grad0_ref(0, 0, 1);
   votca::tools::vec grad1_ref(0, 0, -1);
   votca::tools::vec grad2_ref(-0.5, 0, -0.5);

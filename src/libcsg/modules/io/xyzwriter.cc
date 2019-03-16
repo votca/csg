@@ -38,7 +38,7 @@ void XYZWriter::Write(CSG_Topology *conf) {
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
                         (conf->getStep() + 1) % conf->getTime())
                            .str();
-  Write<CSG_Topology>(*conf, header);
+  Write<CSG_Topology>(*conf, *conf, header);
 }
 }  // namespace csg
 }  // namespace votca

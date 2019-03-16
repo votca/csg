@@ -106,7 +106,7 @@ class PDBWriter : public TrajectoryWriter {
   }
   // int getId(Bead *bead) { return bead->getId(); }
 
-  template <class T, class Atom>
+  template <class Atom>
   int getResId(Atom &atom) {
     return atom.getResidueId() + 1;
   }
@@ -154,7 +154,8 @@ inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
       "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f           "
       "           %9$+2s\n");
 
-  for (auto &atom : getIterable(conf, container)) {
+  std::vector<Bead *> atoms = getIterable(*conf, container);
+  for (auto &atom : atoms) {
     int atomid = getId(*atom);
     std::string resname = getResidueType(*atom);
     int residueid = getResId(*atom);

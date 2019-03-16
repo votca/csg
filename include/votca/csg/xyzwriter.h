@@ -42,10 +42,10 @@ class XYZWriter : public TrajectoryWriter {
   void Write(CSG_Topology &top, T &container, std::string header);
 
  private:
-  template <class T>
-  int getSize(T &container) {
-    return getIterable(container).size();
-  }
+  //  template <class T>
+  /*  int getSize(T &container) {
+      return getIterable(container).size();
+    }*/
 
   template <class Atom>
   std::string getType(Atom &atom) {
@@ -81,12 +81,14 @@ class XYZWriter : public TrajectoryWriter {
 template <class T>
 inline void XYZWriter::Write(CSG_Topology &top, T &container,
                              std::string header) {
-  _out << getSize(container) << "\n";
+
+  std::vector<Bead *> atoms = getIterable(top, container);
+  _out << atoms.size() << "\n";
   _out << header << "\n";
 
   boost::format fmter("%1$s%2$10.5f%3$10.5f%4$10.5f\n");
 
-  for (auto &atom : getIterable(top, container)) {
+  for (auto &atom : atoms) {
     Eigen::Vector3d r = getPos(atom);
     // truncate strings if necessary
     std::string atomtype = getType(atom);
