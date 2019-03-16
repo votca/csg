@@ -34,7 +34,7 @@ class GROWriter : public TrajectoryWriter {
   void Write(CSG_Topology *conf);
 
  private:
-  FILE *_out;
+  FILE *_out = nullptr;
 };
 
 }  // namespace csg

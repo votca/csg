@@ -17,6 +17,7 @@
 
 #include "growriter.h"
 #include "../../../../include/votca/csg/csgtopology.h"
+#include <stdexcept>
 #include <stdio.h>
 #include <string>
 
@@ -27,10 +28,18 @@ using namespace std;
 using namespace votca::tools;
 
 void GROWriter::Open(string file, bool bAppend) {
+  if (_out != nullptr) {
+    throw runtime_error(
+        "Cannot open file until you have closed the previously opend gro "
+        "file.");
+  }
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
-void GROWriter::Close() { fclose(_out); }
+void GROWriter::Close() {
+  fclose(_out);
+  _out = nullptr;
+}
 
 void GROWriter::Write(CSG_Topology *conf) {
   char format[100];
