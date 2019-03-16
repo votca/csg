@@ -15,134 +15,147 @@
  *
  */
 
-#ifndef _VOTCA_CSG_INTERACTION_H
-#define _VOTCA_CSG_INTERACTION_H
+#ifndef VOTCA_CSG_INTERACTION_H
+#define VOTCA_CSG_INTERACTION_H
 
-#include "bead.h"
-#include "topology.h"
+#include "boundarycondition.h"
+
+#include <cassert>
 #include <sstream>
 #include <string>
-
+#include <unordered_map>
+#include <vector>
+#include <votca/tools/constants.h>
+#include <votca/tools/vec.h>
 namespace TOOLS = votca::tools;
 
 namespace votca {
 namespace csg {
 
+enum InteractionType { unassigned, bond, angle, dihedral };
+
+std::string InteractionTypeToString(const InteractionType interaction_type);
 /**
-    \brief base calss for all interactions
+\brief base calss for all interactions
 
-    This is the base class for all interactions.
+This is the base class for all interactions.
 
-    \todo double names/groups right, add molecules!!
+\todo double names/groups right, add molecules!!
 */
 class Interaction {
  public:
-  Interaction() : _index(-1), _group(""), _group_id(-1), _name(""), _mol(-1){};
+  Interaction()
+      : index_(-1),
+        group_(""),
+        group_id_(-1),
+        interaction_type_(InteractionType::unassigned),
+        mol_id_(TOOLS::topology_constants::unassigned_molecule_id){};
 
   virtual ~Interaction() {}
-  virtual double EvaluateVar(const Topology &top) = 0;
 
-  std::string getName() const { return _name; }
+  virtual std::unique_ptr<Interaction> Clone() const = 0;
 
-  void setGroup(const std::string &group) {
-    _group = group;
-    RebuildName();
-  }
+  virtual double EvaluateVar(
+      const BoundaryCondition &bc,
+      std::unordered_map<int, const TOOLS::vec *> bead_positions) const = 0;
+
+  InteractionType getType() const { return interaction_type_; }
+
+  void setGroup(const std::string &group) { group_ = group; }
   const std::string &getGroup() const {
-    assert(_group.compare("") != 0);
-    return _group;
+    assert(group_.compare("") != 0);
+    return group_;
   }
 
-  // the group id is set by topology, when interaction is added to it
-  // \todo if the group name is changed later, group id should be updated by
-  // topology
-  int getGroupId() {
-    assert(_group_id != -1);
-    return _group_id;
+  int getGroupId() const {
+    assert(group_id_ != -1 && "Cannot access group id as it has not been set");
+    return group_id_;
   }
-  void setGroupId(int id) { _group_id = id; }
+  void setGroupId(int id) { group_id_ = id; }
 
-  void setIndex(const int &index) {
-    _index = index;
-    RebuildName();
-  }
+  void setIndex(const int &index) { index_ = index; }
   const int &getIndex() const {
-    assert(_index != -1);
-    return _index;
+    assert(index_ != -1 &&
+           "Cannot access interaction index as it has not been set");
+    return index_;
   }
 
-  void setMolecule(const int &mol) {
-    _mol = mol;
-    RebuildName();
-  }
+  void setMoleculeId(const int &mol_id) { mol_id_ = mol_id; }
   const int &getMolecule() const {
-    assert(_mol != -1);
-    return _mol;
+    assert(mol_id_ != TOOLS::topology_constants::unassigned_molecule_id &&
+           "Cannot access interaction molecule id as it has not been set");
+    return mol_id_;
   }
 
-  virtual vec Grad(const Topology &top, int bead) = 0;
-  int BeadCount() { return _beads.size(); }
+  virtual TOOLS::vec Grad(
+      const BoundaryCondition &bc, int bead_id,
+      std::unordered_map<int, const TOOLS::vec *> bead_positions) const = 0;
+  int BeadCount() { return bead_ids_.size(); }
 
   /**
-   * @brief Given the bead index in the interaction vector return the id
+   * @brief Given the bead_id index in the interaction vector return the id
    *
    * @param[in] bead_index value between 0 < BeadCount()
    *
-   * @return the beads id
+   * @return the bead_ids id
    */
   int getBeadId(const int &bead_index) const {
     assert(bead_index > -1 &&
-           boost::lexical_cast<size_t>(bead_index) < _beads.size());
-    return _beads[bead_index];
+           boost::lexical_cast<size_t>(bead_index) < bead_ids_.size() &&
+           "Cannot access interaction bead_id id as it has not been set");
+    return bead_ids_.at(bead_index);
   }
+
+  std::vector<int> getBeadIds() const { return bead_ids_; }
+
+  /**
+   * @brief Label returns a comprehensive descrition of the interaction
+   *
+   * The returned string is of the following form:
+   * molecule id id:group name name:group id id:interaction type type:index
+   * index
+   *
+   * So it might look like this
+   * molcule id 1:group name Non-Bonded:group id 2:interaction type angle:index
+   * 12
+   * @return
+   */
+  std::string getLabel() const;
 
  protected:
-  int _index;
-  std::string _group;
-  int _group_id;
-  std::string _name;
-  int _mol;
-  std::vector<int> _beads;
-
-  void RebuildName();
+  int index_;
+  std::string group_;
+  int group_id_;
+  InteractionType interaction_type_;
+  int mol_id_;
+  std::vector<int> bead_ids_;
 };
-
-inline void Interaction::RebuildName() {
-  std::stringstream s;
-  if (_mol != -1) s << "molecule " << _mol;
-  if (!_group.empty()) {
-    s << ":" << _group;
-    if (_group_id != -1) {
-      s << " " << _group_id;
-    }
-  }
-  if (_index != -1) s << ":index " << _index;
-  _name = s.str();
-}
 
 /**
     \brief bond interaction
 */
 class IBond : public Interaction {
  public:
-  IBond(int bead1, int bead2) {
-    _beads.resize(2);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
+
+  std::unique_ptr<Interaction> Clone() const override {
+    return std::unique_ptr<Interaction>(new IBond(*this));
   }
 
-  IBond(std::list<int> &beads) {
-    assert(beads.size() >= 2);
-    _beads.resize(2);
-    for (int i = 0; i < 2; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
-    }
-  }
-  double EvaluateVar(const Topology &top);
-  vec Grad(const Topology &top, int bead);
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
+  IBond(std::vector<int> bead_ids) {
+    assert(bead_ids.size() == 2 && "IBond must be called with 2 bead_ids.");
+    bead_ids_ = bead_ids;
+    interaction_type_ = InteractionType::bond;
+  }
+  friend class CSG_Topology;
 };
 
 /**
@@ -150,25 +163,26 @@ class IBond : public Interaction {
 */
 class IAngle : public Interaction {
  public:
-  IAngle(int bead1, int bead2, int bead3) {
-    _beads.resize(3);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
-    _beads[2] = bead3;
-  }
-  IAngle(std::list<int> &beads) {
-    assert(beads.size() >= 3);
-    _beads.resize(3);
-    for (int i = 0; i < 3; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
-    }
-  }
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
 
-  double EvaluateVar(const Topology &top);
-  vec Grad(const Topology &top, int bead);
+  std::unique_ptr<Interaction> Clone() const override {
+    return std::unique_ptr<Interaction>(new IAngle(*this));
+  }
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
+  IAngle(std::vector<int> bead_ids) {
+    assert(bead_ids.size() == 3 &&
+           "Cannot create an IAngle with more or less than 3 bead_ids.");
+    bead_ids_ = bead_ids;
+    interaction_type_ = InteractionType::angle;
+  }
+  friend class CSG_Topology;
 };
 
 /**
@@ -176,52 +190,66 @@ class IAngle : public Interaction {
 */
 class IDihedral : public Interaction {
  public:
-  IDihedral(int bead1, int bead2, int bead3, int bead4) {
-    _beads.resize(4);
-    _beads[0] = bead1;
-    _beads[1] = bead2;
-    _beads[2] = bead3;
-    _beads[3] = bead4;
-  }
-  IDihedral(std::list<int> &beads) {
-    assert(beads.size() >= 4);
-    _beads.resize(4);
-    for (int i = 0; i < 4; ++i) {
-      _beads[i] = beads.front();
-      beads.pop_front();
-    }
+  // Constructors SHOULD ONLY BE CALLED BY Topology Object
+  std::unique_ptr<Interaction> Clone() const override {
+    return std::unique_ptr<Interaction>(new IDihedral(*this));
   }
 
-  double EvaluateVar(const Topology &top);
-  vec Grad(const Topology &top, int bead);
+  double EvaluateVar(const BoundaryCondition &bc,
+                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
+  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+      const override;
 
  private:
+  IDihedral(std::vector<int> bead_ids) {
+    assert(bead_ids.size() == 4 &&
+           "Cannot create a Dihedral with more or less than three bead_ids");
+    bead_ids_ = bead_ids;
+    interaction_type_ = InteractionType::dihedral;
+  }
+  friend class CSG_Topology;
 };
 
-inline double IBond::EvaluateVar(const Topology &top) {
-  return abs(top.getDist(_beads[0], _beads[1]));
+inline double IBond::EvaluateVar(
+    const BoundaryCondition &bc,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  return abs(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+                                     *bead_positions.at(bead_ids_.at(1))));
 }
 
-inline vec IBond::Grad(const Topology &top, int bead) {
-  vec r = top.getDist(_beads[0], _beads[1]);
+inline TOOLS::vec IBond::Grad(
+    const BoundaryCondition &bc, int bead_id,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  TOOLS::vec r = bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+                                         *bead_positions.at(bead_ids_.at(1)));
   r.normalize();
-  return (bead == 0) ? -r : r;
+  return (bead_id == 0) ? -r : r;
 }
 
-inline double IAngle::EvaluateVar(const Topology &top) {
-  vec v1(top.getDist(_beads[1], _beads[0]));
-  vec v2(top.getDist(_beads[1], _beads[2]));
+inline double IAngle::EvaluateVar(
+    const BoundaryCondition &bc,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(0))));
+  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(2))));
   return acos(v1 * v2 / sqrt((v1 * v1) * (v2 * v2)));
 }
 
-inline vec IAngle::Grad(const Topology &top, int bead) {
-  vec v1(top.getDist(_beads[1], _beads[0]));
-  vec v2(top.getDist(_beads[1], _beads[2]));
+inline TOOLS::vec IAngle::Grad(
+    const BoundaryCondition &bc, int bead_id,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(0))));
+  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(2))));
 
   double acos_prime =
       1.0 / (sqrt(1 - (v1 * v2) * (v1 * v2) /
                           (abs(v1) * abs(v2) * abs(v1) * abs(v2))));
-  switch (bead) {
+  switch (bead_id) {
     case (0):
       return acos_prime *
              (-v2 / (abs(v1) * abs(v2)) +
@@ -241,39 +269,48 @@ inline vec IAngle::Grad(const Topology &top, int bead) {
   }
   // should never reach this
   assert(false);
-  return vec(0, 0, 0);
+  return TOOLS::vec(0, 0, 0);
 }
-
-inline double IDihedral::EvaluateVar(const Topology &top) {
-  vec v1(top.getDist(_beads[0], _beads[1]));
-  vec v2(top.getDist(_beads[1], _beads[2]));
-  vec v3(top.getDist(_beads[2], _beads[3]));
-  vec n1, n2;
+inline double IDihedral::EvaluateVar(
+    const BoundaryCondition &bc,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+                                        *bead_positions.at(bead_ids_.at(1))));
+  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(2))));
+  TOOLS::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
+                                        *bead_positions.at(bead_ids_.at(3))));
+  TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
   double sign = (v1 * n2 < 0) ? -1 : 1;
   return sign * acos(n1 * n2 / sqrt((n1 * n1) * (n2 * n2)));
 }
 
-inline vec IDihedral::Grad(const Topology &top, int bead) {
-  vec v1(top.getDist(_beads[0], _beads[1]));
-  vec v2(top.getDist(_beads[1], _beads[2]));
-  vec v3(top.getDist(_beads[2], _beads[3]));
-  vec n1, n2;
+inline TOOLS::vec IDihedral::Grad(
+    const BoundaryCondition &bc, int bead_id,
+    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+                                        *bead_positions.at(bead_ids_.at(1))));
+  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+                                        *bead_positions.at(bead_ids_.at(2))));
+  TOOLS::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
+                                        *bead_positions.at(bead_ids_.at(3))));
+  TOOLS::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
   double sign = (v1 * n2 < 0) ? -1 : 1;
-  vec returnvec;                              // vector to return
+  TOOLS::vec returnvec;                       // vector to return
   double returnvec0, returnvec1, returnvec2;  // components of the return vector
-  vec e0(1, 0, 0);  // unit vector pointing in x-direction
-  vec e1(0, 1, 0);  // unit vector pointing in y-direction
-  vec e2(0, 0, 1);  // unit vector pointing in z-direction
+  TOOLS::vec e0(1, 0, 0);  // unit vector pointing in x-direction
+  TOOLS::vec e1(0, 1, 0);  // unit vector pointing in y-direction
+  TOOLS::vec e2(0, 0, 1);  // unit vector pointing in z-direction
 
   double acos_prime =
       (-1.0 / (sqrt(1 - (n1 * n2) * (n1 * n2) /
                             (abs(n1) * abs(n2) * abs(n1) * abs(n2))))) *
       sign;
-  switch (bead) {
+  switch (bead_id) {
     case (0): {  //
       returnvec0 = acos_prime * ((n2 * (v2 ^ e0)) / (abs(n1) * abs(n2)) -
                                  ((n1 * n2) * (n1 * (v2 ^ e0))) /
@@ -371,9 +408,9 @@ inline vec IDihedral::Grad(const Topology &top, int bead) {
   }
   // should never reach this
   assert(false);
-  return vec(0, 0, 0);
+  return TOOLS::vec(0, 0, 0);
 }
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_INTERACTION_H
+#endif  // VOTCA_CSG_INTERACTION_H

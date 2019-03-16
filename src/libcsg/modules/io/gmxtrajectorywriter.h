@@ -22,7 +22,7 @@
 #include <votca_config.h>
 #endif
 
-#include <votca/csg/topology.h>
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <votca/csg/trajectorywriter.h>
 
 #include <gromacs/fileio/trxio.h>
@@ -40,7 +40,7 @@ class GMXTrajectoryWriter : public TrajectoryWriter {
 
   void Open(std::string file, bool bAppend = false);
   void Close();
-  void Write(Topology* conf);
+  void Write(CSG_Topology* conf);
 
  private:
   t_trxstatus* _file;

@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   outfile.close();
 
-  Topology top;
+  CSG_Topology top;
 
   // Make square box
   matrix box;
@@ -193,20 +193,22 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
       {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}, {0.2, 0.2, 0.2}};
 
   Elements elements;
-  int residue_num = 1;
-  string residue_name = "DNA";
+  int residue_id = 1;
+  string residue_type = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     string atom_type = atom_types.at(ind);
-    if (!top.BeadTypeExist(atom_type)) {
-      top.RegisterBeadType(atom_type);
+    string element_symbol = topology_constants::unassigned_element;
+    int atom_id = static_cast<int>(ind);
+    if (elements.isEleShort(atom_type)) {
+      element_symbol = atom_type;
     }
-    Bead *b = top.CreateBead<Bead>(
-        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
-        molecule_constants::molecule_name_unassigned,
-        elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
+                             topology_constants::unassigned_molecule_id,
+                             residue_id, residue_type, element_symbol,
+                             elements.getMass(atom_type), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));
@@ -229,7 +231,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   reader->Close();
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
-    Bead *b = top.getBead(ind);
+    int bead_id = static_cast<int>(ind);
+    Bead *b = top.getBead(bead_id);
     BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz_file.at(ind).at(0), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz_file.at(ind).at(1), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz_file.at(ind).at(2), 0.01);
@@ -250,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   // Create a topology object with a simple system (2-bonded thiophene monomers)
   // and write it to a lammps dump file
-  Topology top;
+  CSG_Topology top;
 
   // Make square box
   matrix box;
@@ -308,21 +311,23 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}};
 
   Elements elements;
-  int residue_num = 1;
-  string residue_name = "DNA";
+  int residue_id = 1;
+  string residue_type = "DNA";
   double charge = 0.0;
   byte_t symmetry = 1;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
 
     string atom_type = atom_types.at(ind);
-    if (!top.BeadTypeExist(atom_type)) {
-      top.RegisterBeadType(atom_type);
+    int atom_id = static_cast<int>(ind);
+    string element_symbol = topology_constants::unassigned_element;
+    if (elements.isEleShort(atom_type)) {
+      element_symbol = atom_type;
     }
-    Bead *b = top.CreateBead<Bead>(
-        symmetry, atom_types.at(ind), atom_type, residue_num, residue_name,
-        molecule_constants::molecule_name_unassigned,
-        elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
+                             topology_constants::unassigned_molecule_id,
+                             residue_id, residue_type, element_symbol,
+                             elements.getMass(atom_types.at(ind)), charge);
 
     vec xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
             atom_xyz.at(ind).at(2));
@@ -361,7 +366,8 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   reader->Close();
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
-    Bead *b = top.getBead(ind);
+    int bead_id = static_cast<int>(ind);
+    Bead *b = top.getBead(bead_id);
     BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz.at(ind).at(0), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz.at(ind).at(1), 0.01);
     BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz.at(ind).at(2), 0.01);

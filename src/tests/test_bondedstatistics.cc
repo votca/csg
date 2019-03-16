@@ -25,6 +25,7 @@
 #include <map>
 #include <string>
 #include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
 
 using namespace std;
 using namespace votca::csg;
@@ -37,20 +38,50 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_constructor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
-  Topology top;
+  CSG_Topology top;
+
+  byte_t symmetry = 1;
+  string bead_type = "C";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 0;
+  string residue_type = "GYC";
+  string element = "C";
+  double mass = 12.01;
+  double charge = 0.0;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, element, mass, charge);
+  ++bead_id;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, element, mass, charge);
+  ++bead_id;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, element, mass, charge);
   // Create two bonded interactions
   string interaction_group = "covalent_bond1";
-  string interaction_group_compare = ":covalent_bond1";
-  auto bond1 = new IBond(0, 1);
-  bond1->setGroup(interaction_group);
+  int bond_id = 0;
+  int group_id = 3;
+  string interaction_group_compare = "molecule id " + to_string(molecule_id) +
+                                     ":group name covalent_bond1:group id " +
+                                     to_string(group_id) + ":index " +
+                                     to_string(bond_id);
+  auto bond1 = top.CreateInteraction(InteractionType::bond, interaction_group,
+                                     bond_id, molecule_id, vector<int>{0, 1});
+  bond1->setGroupId(group_id);
+  // bond1->setGroup(interaction_group);
 
+  ++bond_id;
   string interaction_group2 = "covalent_bond2";
-  string interaction_group_compare2 = ":covalent_bond2";
-  auto bond2 = new IBond(1, 2);
-  bond2->setGroup(interaction_group2);
+  string interaction_group_compare2 =
+      "molecule id " + to_string(molecule_id) + ":group name covalent_bond2" +
+      ":group id " + to_string(group_id) + ":index " + to_string(bond_id);
+  auto bond2 = top.CreateInteraction(InteractionType::bond, interaction_group2,
+                                     bond_id, molecule_id, vector<int>{1, 2});
+  bond2->setGroupId(group_id);
+  // bond2->setGroup(interaction_group2);
 
-  top.AddBondedInteraction(bond1);
-  top.AddBondedInteraction(bond2);
+  // top.AddBondedInteraction(bond1);
+  // top.AddBondedInteraction(bond2);
 
   BondedStatistics bonded_statistics;
   bonded_statistics.BeginCG(&top, nullptr);
@@ -70,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
 }
 
 BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
-  Topology top;
+  CSG_Topology top;
 
   // Setup topology class
   {
@@ -97,49 +128,47 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     // Create three beads
     byte_t symmetry = 1;
 
-    string bead_type_name = "type1";
-    top.RegisterBeadType(bead_type_name);
+    string bead_type = "type1";
 
-    int residue_number = 1;
-    string residue_name = "protein";
+    int bead_id = 0;
+    int residue_id = 1;
+    int molecule_id = 1;
+    string residue_type = "protein";
     double mass = 1.1;
     double charge = 0.3;
 
     // Create 3 beads
-    string bead_name = "bead_test";
     vec pos_bead1(5.0, 3.0, 5.0);
-    auto bead_ptr = top.CreateBead<Bead>(
-        symmetry, bead_name, bead_type_name, residue_number, residue_name,
-        molecule_constants::molecule_name_unassigned, mass, charge);
-    bead_ptr->setId(0);
+    auto bead_ptr = top.CreateBead(
+        symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr->setPos(pos_bead1);
 
-    string bead_name2 = "bead_test2";
+    bead_id = 1;
+    string bead_type2 = "bead_test2";
     vec pos_bead2(5.0, 4.0, 5.0);
-    auto bead_ptr2 = top.CreateBead<Bead>(
-        symmetry, bead_name2, bead_type_name, residue_number, residue_name,
-        molecule_constants::molecule_name_unassigned, mass, charge);
-    bead_ptr2->setId(1);
+    auto bead_ptr2 = top.CreateBead(
+        symmetry, bead_type2, bead_id, molecule_id, residue_id, residue_type,
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr2->setPos(pos_bead2);
 
-    string bead_name3 = "bead_test3";
+    bead_id = 2;
+    string bead_type3 = "bead_test3";
     vec pos_bead3(5.0, 6.0, 5.0);
-    auto bead_ptr3 = top.CreateBead<Bead>(
-        symmetry, bead_name3, bead_type_name, residue_number, residue_name,
-        molecule_constants::molecule_name_unassigned, mass, charge);
-    bead_ptr3->setId(2);
+    auto bead_ptr3 = top.CreateBead(
+        symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
+        topology_constants::unassigned_element, mass, charge);
     bead_ptr3->setPos(pos_bead3);
 
     // Create two bonded interactions
     string interaction_group = "covalent_bond1";
-    auto bond1 = new IBond(0, 1);
-    bond1->setGroup(interaction_group);
+    int bond_id = 0;
+    top.CreateInteraction(InteractionType::bond, interaction_group, bond_id,
+                          molecule_id, vector<int>{0, 1});
+    ++bond_id;
     string interaction_group2 = "covalent_bond2";
-    auto bond2 = new IBond(1, 2);
-    bond2->setGroup(interaction_group2);
-
-    top.AddBondedInteraction(bond1);
-    top.AddBondedInteraction(bond2);
+    top.CreateInteraction(InteractionType::bond, interaction_group2, bond_id,
+                          molecule_id, vector<int>{1, 2});
   }
 
   BondedStatistics bonded_statistics;
@@ -153,6 +182,13 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
   vector<DataCollection<double>::array*>& vector_of_arrays =
       data_collection.Data();
 
+  for (auto data_collection : vector_of_arrays) {
+    for (int index = 0; static_cast<size_t>(index) < data_collection->size();
+         ++index) {
+      cout << data_collection->at(index) << " ";
+    }
+    cout << endl;
+  }
   // Distance between bead 0 and bead 1
   BOOST_CHECK_EQUAL(vector_of_arrays.at(0)->at(0), 1.0);
   // Distance between bead 1 and bead 2

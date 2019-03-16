@@ -18,10 +18,13 @@
 #ifndef _VOTCA_CSG_BEADPAIR_H
 #define _VOTCA_CSG_BEADPAIR_H
 
+#include <votca/tools/vec.h>
+
 namespace votca {
 namespace csg {
-using namespace votca::tools;
+namespace TOOLS = votca::tools;
 
+class Bead;
 /**
    \brief A particle pair
 
@@ -33,18 +36,18 @@ using namespace votca::tools;
 class BeadPair : public std::pair<Bead *, Bead *> {
  public:
   BeadPair() {}
-  BeadPair(Bead *bead1, Bead *bead2, vec r)
+  BeadPair(Bead *bead1, Bead *bead2, TOOLS::vec r)
       : std::pair<Bead *, Bead *>(bead1, bead2), _r(r), _dist(abs(r)) {}
 
   virtual ~BeadPair() {}
 
   /// \brief the vector connecting two beads
-  vec &r() { return _r; }
+  TOOLS::vec &r() { return _r; }
   /// \brief the distance of the beads
   double &dist() { return _dist; }
 
  protected:
-  vec _r;
+  TOOLS::vec _r;
   double _dist;
 };
 

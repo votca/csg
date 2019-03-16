@@ -14,41 +14,20 @@
  * limitations under the License.
  *
  */
-
-#ifndef _VOTCA_CSG_TOPOLOGYMAP_H
-#define _VOTCA_CSG_TOPOLOGYMAP_H
-
-#include "map.h"
-#include "topology.h"
+#ifndef VOTCA_CSG_CGINTERACTIONSTENCIL
+#define VOTCA_CSG_CGINTERACTIONSTENCIL
+#include <string>
 #include <vector>
 
 namespace votca {
 namespace csg {
 
-class TopologyMap {
- public:
-  ~TopologyMap();
-
-  TopologyMap(Topology *in, Topology *out);
-
-  void AddMoleculeMap(Map *map);
-
-  void Apply();
-
- private:
-  Topology *_in;
-  Topology *_out;
-
-  typedef std::vector<Map *> MapContainer;
-  MapContainer _maps;
+struct CGInteractionStencil {
+  std::string type_;
+  std::string group_;
+  std::vector<std::string> bead_names_;
 };
-
-inline TopologyMap::TopologyMap(Topology *in, Topology *out)
-    : _in(in), _out(out) {}
-
-inline void TopologyMap::AddMoleculeMap(Map *map) { _maps.push_back(map); }
 
 }  // namespace csg
 }  // namespace votca
-
-#endif /* _VOTCA_CSG_TOPOLOGYMAP_H */
+#endif  // VOTCA_CSG_CGINTERACTIONSTENCIL

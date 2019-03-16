@@ -15,10 +15,10 @@
  *
  */
 
-#ifndef _DLPOLYTRAJECTORYWRITER_H
-#define _DLPOLYTRAJECTORYWRITER_H
+#ifndef VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
+#define VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
 
-#include <votca/csg/topology.h>
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
@@ -39,7 +39,7 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
   // close transformed trajectory file
   void Close();
   // write a frame into transformed trajectory file
-  void Write(Topology *conf);
+  void Write(CSG_Topology *conf);
 
   /// set/get the created configuration or trajectory file name:
   /// <name>.dlpc or <name>.dlph (convention: ".dlpc"="CONFIG_CGV",
@@ -67,4 +67,4 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _DLPOLYTRAJECTORYWRITER_H */
+#endif  // VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H

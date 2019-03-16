@@ -16,18 +16,19 @@
  */
 
 #include "dlpolytrajectoryreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <boost/filesystem/convenience.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <votca/csg/boundarycondition.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/getline.h>
 
 namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 bool DLPOLYTrajectoryReader::Open(const string &file)
 // open the original dlpoly configuration or trajectory file
@@ -76,14 +77,14 @@ bool DLPOLYTrajectoryReader::Open(const string &file)
 
 void DLPOLYTrajectoryReader::Close() { _fl.close(); }
 
-bool DLPOLYTrajectoryReader::FirstFrame(Topology &conf) {
+bool DLPOLYTrajectoryReader::FirstFrame(CSG_Topology &conf) {
   _first_frame = true;
   bool res = NextFrame(conf);
   _first_frame = false;
   return res;
 }
 
-bool DLPOLYTrajectoryReader::NextFrame(Topology &conf) {
+bool DLPOLYTrajectoryReader::NextFrame(CSG_Topology &conf) {
   static bool hasVs = false;
   static bool hasFs = false;
   static int mavecs =
@@ -147,7 +148,7 @@ bool DLPOLYTrajectoryReader::NextFrame(Topology &conf) {
          << endl;
 #endif
 
-    if (matoms != conf.BeadCount())
+    if (static_cast<size_t>(matoms) != conf.BeadCount())
       throw std::runtime_error("Number of atoms/beads in '" + _fname +
                                "' header differs from that read with topology");
 
@@ -233,7 +234,7 @@ bool DLPOLYTrajectoryReader::NextFrame(Topology &conf) {
       cout << ", dt = " << fields[5] << ", time = " << stime << endl;
 #endif
 
-      if (natoms != conf.BeadCount())
+      if (static_cast<size_t>(natoms) != conf.BeadCount())
         throw std::runtime_error(
             "Error: N of atoms/beads in '" + _fname +
             "' header differs from that found in topology");

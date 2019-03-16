@@ -15,22 +15,23 @@
  *
  */
 
-#ifndef _VOTCA_CSG_APPLICATION_H
-#define _VOTCA_CSG_APPLICATION_H
+#ifndef VOTCA_CSG_APPLICATION_H
+#define VOTCA_CSG_APPLICATION_H
 
+#include "atomcgconverter.h"
 #include "cgobserver.h"
-#include "topology.h"
-#include "topologymap.h"
+#include "csgtopology.h"
 #include "trajectoryreader.h"
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>
 #include <votca/tools/thread.h>
 
+namespace TOOLS = votca::tools;
+
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
-class CsgApplication : public Application {
+class CsgApplication : public TOOLS::Application {
  public:
   CsgApplication();
   ~CsgApplication();
@@ -69,18 +70,18 @@ class CsgApplication : public Application {
 
   /// \brief called after topology was loaded
 
-  virtual bool EvaluateTopology(Topology *top, Topology *top_ref = 0) {
+  virtual bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref = 0) {
     return true;
   }
 
   void AddObserver(CGObserver *observer);
 
   /// \brief called before the first frame
-  virtual void BeginEvaluate(Topology *top, Topology *top_ref = 0);
+  virtual void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref = 0);
   /// \brief called after the last frame
   virtual void EndEvaluate();
   // \brief called for each frame which is mapped
-  virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0);
+  virtual void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref = 0);
 
   // thread related stuff follows
 
@@ -88,7 +89,8 @@ class CsgApplication : public Application {
    \brief Worker, derived from Thread, does the work.
    *
    * Worker holds the information about the current frame, either in its
-   * own copy (e.g. Topology), or, by reference, from the parent CsgApplication.
+   * own copy (e.g. CSG_Topology), or, by reference, from the parent
+   CsgApplication.
    * The computation is shifted from Run() into EvalConfiguration. The
    * user is required to overload ForkWorker and Mergeworker and thereby
    * define the initialization and merging of workers. By default, workers
@@ -98,21 +100,23 @@ class CsgApplication : public Application {
    * the correct order of frames for in/output.
    *
    */
-  class Worker : public Thread {
+  class Worker : public TOOLS::Thread {
    public:
     Worker();
-    ~Worker();
+    ~Worker(){};
 
     /// \brief overload with the actual computation
-    virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0) = 0;
+    virtual void EvalConfiguration(CSG_Topology *top,
+                                   CSG_Topology *top_ref = 0) = 0;
 
     /// \brief returns worker id
     int getId() { return _id; }
 
    protected:
     CsgApplication *_app;
-    Topology _top, _top_cg;
-    TopologyMap *_map;
+    CSG_Topology _top, _top_cg;
+    // TopologyMap *_map;
+    std::unique_ptr<AtomCGConverter> converter_;
     int _id;
 
     void Run(void);
@@ -153,13 +157,13 @@ class CsgApplication : public Application {
   int _nframes;
   bool _is_first_frame;
   int _nthreads;
-  Mutex _nframesMutex;
-  Mutex _traj_readerMutex;
+  TOOLS::Mutex _nframesMutex;
+  TOOLS::Mutex _traj_readerMutex;
 
   /// \brief stores Mutexes used to impose order for input
-  std::vector<Mutex *> _threadsMutexesIn;
+  std::vector<TOOLS::Mutex *> _threadsMutexesIn;
   /// \brief stores Mutexes used to impose order for output
-  std::vector<Mutex *> _threadsMutexesOut;
+  std::vector<TOOLS::Mutex *> _threadsMutexesOut;
   TrajectoryReader *_traj_reader;
 };
 
@@ -167,9 +171,9 @@ inline void CsgApplication::AddObserver(CGObserver *observer) {
   _observers.push_back(observer);
 }
 
-inline CsgApplication::Worker::Worker() : _app(NULL), _map(NULL), _id(-1) {}
+inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_APPLICATION_H */
+#endif  // VOTCA_CSG_APPLICATION_H

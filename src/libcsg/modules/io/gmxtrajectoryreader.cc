@@ -16,15 +16,16 @@
  */
 
 #include "gmxtrajectoryreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <cstdlib>
 #include <gromacs/utility/programcontext.h>
-#include <iostream>
-#include <votca/csg/topology.h>
+#include <votca/tools/matrix.h>
 
 namespace votca {
 namespace csg {
 
 using namespace std;
+namespace TOOLS = votca::tools;
 
 bool GMXTrajectoryReader::Open(const string &file) {
   _filename = file;
@@ -33,7 +34,7 @@ bool GMXTrajectoryReader::Open(const string &file) {
 
 void GMXTrajectoryReader::Close() { close_trx(_gmx_status); }
 
-bool GMXTrajectoryReader::FirstFrame(Topology &conf) {
+bool GMXTrajectoryReader::FirstFrame(CSG_Topology &conf) {
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_first_frame(oenv, &_gmx_status, (char *)_filename.c_str(),
@@ -41,20 +42,16 @@ bool GMXTrajectoryReader::FirstFrame(Topology &conf) {
     throw std::runtime_error(string("cannot open ") + _filename);
   output_env_done(oenv);
 
-  matrix m;
+  TOOLS::matrix m;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) m[i][j] = _gmx_frame.box[j][i];
   conf.setBox(m);
   conf.setTime(_gmx_frame.time);
   conf.setStep(_gmx_frame.step);
-  cout << endl;
 
-  if (_gmx_frame.natoms != (int)conf.Beads().size())
+  if (_gmx_frame.natoms != (int)conf.BeadCount())
     throw std::runtime_error(
         "number of beads in trajectory do not match topology");
-
-  // conf.HasPos(true);
-  // conf.HasF(_gmx_frame.bF);
 
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     double r[3] = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],
@@ -74,20 +71,18 @@ bool GMXTrajectoryReader::FirstFrame(Topology &conf) {
   return true;
 }
 
-bool GMXTrajectoryReader::NextFrame(Topology &conf) {
+bool GMXTrajectoryReader::NextFrame(CSG_Topology &conf) {
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_next_frame(oenv, _gmx_status, &_gmx_frame)) return false;
   output_env_done(oenv);
 
-  matrix m;
+  TOOLS::matrix m;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) m[i][j] = _gmx_frame.box[j][i];
   conf.setTime(_gmx_frame.time);
   conf.setStep(_gmx_frame.step);
   conf.setBox(m);
-
-  // conf.HasF(_gmx_frame.bF);
 
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     double r[3] = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],

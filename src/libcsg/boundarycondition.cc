@@ -21,11 +21,37 @@
 namespace votca {
 namespace csg {
 
-double BoundaryCondition::BoxVolume() {
-  vec a = _box.getCol(0);
-  vec b = _box.getCol(1);
-  vec c = _box.getCol(2);
+using namespace votca::tools;
+
+double BoundaryCondition::BoxVolume() const {
+  vec a = box_.getCol(0);
+  vec b = box_.getCol(1);
+  vec c = box_.getCol(2);
   return (a ^ b) * c;
+}
+
+double BoundaryCondition::getShortestBoxDimension() const {
+  cout << "Getting box columns" << endl;
+  assert(getBoxType() != eBoxtype::typeOpen &&
+         "Cannot get the shortest dimension of the box because it is open");
+  TOOLS::vec _box_a = box_.getCol(0);
+  TOOLS::vec _box_b = box_.getCol(1);
+  TOOLS::vec _box_c = box_.getCol(2);
+
+  // create plane normals
+  TOOLS::vec _norm_a = _box_b ^ _box_c;
+  TOOLS::vec _norm_b = _box_c ^ _box_a;
+  TOOLS::vec _norm_c = _box_a ^ _box_b;
+
+  _norm_a.normalize();
+  _norm_b.normalize();
+  _norm_c.normalize();
+
+  double la = _box_a * _norm_a;
+  double lb = _box_b * _norm_b;
+  double lc = _box_c * _norm_c;
+
+  return std::min(la, std::min(lb, lc));
 }
 
 }  // namespace csg

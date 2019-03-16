@@ -23,24 +23,24 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
+using namespace votca::tools;
 void XYZWriter::Open(string file, bool bAppend) {
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
 void XYZWriter::Close() { fclose(_out); }
 
-void XYZWriter::Write(Topology *conf) {
-  Topology *top = conf;
-  fprintf(_out, "%d\n", (int)top->Beads().size());
+void XYZWriter::Write(CSG_Topology *conf) {
+  CSG_Topology *top = conf;
+  fprintf(_out, "%d\n", (int)top->BeadCount());
   fprintf(_out, "frame: %d time: %f\n", top->getStep() + 1, top->getTime());
 
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bi = *iter;
+  vector<int> bead_ids = conf->getBeadIds();
+  for (const int bead_id : bead_ids) {
+    Bead *bi = conf->getBead(bead_id);
     vec r = bi->getPos();
     // truncate strings if necessary
-    string atomname = bi->getName();
+    string atomname = bi->getType();
     if (atomname.size() > 3) {
       atomname = atomname.substr(0, 3);
     }

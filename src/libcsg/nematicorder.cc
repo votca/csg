@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  */
-
+#include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/csgtopology.h"
 #include <votca/csg/nematicorder.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
 
@@ -24,8 +24,9 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
-void NematicOrder::Process(Topology &top, const string &filter) {
+void NematicOrder::Process(CSG_Topology &top, const string &filter) {
   _mu.ZeroMatrix();
   _mv.ZeroMatrix();
   _mw.ZeroMatrix();
@@ -33,12 +34,12 @@ void NematicOrder::Process(Topology &top, const string &filter) {
   bool bU, bV, bW;
   bU = bV = bW = false;
 
-  for (BeadContainer::iterator iter = top.Beads().begin();
-       iter != top.Beads().end(); ++iter) {
+  vector<int> bead_ids = top.getBeadIds();
 
-    Bead *bead = *iter;
+  for (int bead_id : bead_ids) {
+    Bead *bead = top.getBead(bead_id);
 
-    if (!wildcmp(filter.c_str(), bead->getName().c_str())) continue;
+    if (!wildcmp(filter.c_str(), bead->getType().c_str())) continue;
 
     if (bead->getSymmetry() == 1) continue;
 

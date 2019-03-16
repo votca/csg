@@ -15,12 +15,11 @@
  *
  */
 
-#ifndef _VOTCA_CSG_MOLECULE_H
-#define _VOTCA_CSG_MOLECULE_H
+#ifndef VOTCA_CSG_MOLECULE_H
+#define VOTCA_CSG_MOLECULE_H
 
 #include "basemolecule.h"
 #include "bead.h"
-#include "topologyitem.h"
 #include <assert.h>
 #include <map>
 #include <string>
@@ -33,9 +32,6 @@ namespace TOOLS = votca::tools;
 
 class Interaction;
 
-namespace molecule_constants {
-const std::string molecule_name_unassigned = "unassigned";
-}
 /**
     \brief Information about molecules.
 
@@ -45,8 +41,9 @@ const std::string molecule_name_unassigned = "unassigned";
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem, public BaseMolecule<Bead> {
+class Molecule : public BaseMolecule<Bead> {
  public:
+  Molecule(){};
   /**
    * @brief Grabs all beads that have the label given by `label`
    *
@@ -54,27 +51,29 @@ class Molecule : public TopologyItem, public BaseMolecule<Bead> {
    *
    * @return an unordered set with the ids of the beads that match the label
    */
-  std::unordered_set<int> getBeadIdsByLabel(const std::string &label);
+  std::unordered_set<int> getBeadIdsByLabel(const std::string &label) const;
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
 
-  std::vector<Interaction *> Interactions() { return _interactions; }
+  const std::vector<Interaction *> Interactions() const {
+    return _interactions;
+  }
 
  private:
   std::vector<Interaction *> _interactions;
 
   /// constructor
-  Molecule(Topology *parent, int id, std::string name) : TopologyItem(parent) {
+  Molecule(int id, std::string molecule_type) {
     id_.setId(id);
-    name_.setName(name);
+    type_.setName(molecule_type);
   }
 
-  friend class Topology;
+  friend class CSG_Topology;
 };
 
 inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
-    const std::string &label) {
+    const std::string &label) const {
   std::unordered_set<int> bead_ids;
   for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
     std::cout << "Label of bead " << id_and_bead.second->getLabel()
@@ -89,4 +88,4 @@ inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_MOLECULE_H */
+#endif  // VOTCA_CSG_MOLECULE_H

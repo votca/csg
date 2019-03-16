@@ -16,32 +16,42 @@
  */
 
 #include "bondedstatistics.h"
+#include "../../include/votca/csg/interaction.h"
 
 using namespace votca::tools;
 
 namespace votca {
 namespace csg {
 
-void BondedStatistics::BeginCG(Topology *top, Topology *top_atom) {
-  InteractionContainer &ic = top->BondedInteractions();
-  InteractionContainer::iterator ia;
+void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
+  const vector<unique_ptr<Interaction>> &interactions =
+      top->BondedInteractions();
+  vector<unique_ptr<Interaction>>::const_iterator ia;
 
   _bonded_values.clear();
-  for (ia = ic.begin(); ia != ic.end(); ++ia) {
-    _bonded_values.CreateArray((*ia)->getName());
+  for (ia = interactions.begin(); ia != interactions.end(); ++ia) {
+    _bonded_values.CreateArray((*ia)->getLabel());
   }
 }
 
 void BondedStatistics::EndCG() {}
 
-void BondedStatistics::EvalConfiguration(Topology *conf, Topology *conv_atom) {
-  InteractionContainer &ic = conf->BondedInteractions();
-  InteractionContainer::iterator ia;
+void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
+                                         CSG_Topology *conv_atom) {
+  const vector<unique_ptr<Interaction>> &interactions =
+      conf->BondedInteractions();
+  vector<unique_ptr<Interaction>>::const_iterator ia;
 
   DataCollection<double>::container::iterator is;
-  for (ia = ic.begin(), is = _bonded_values.begin(); ia != ic.end();
-       ++ia, ++is) {
-    (*is)->push_back((*ia)->EvaluateVar(*conf));
+  for (ia = interactions.begin(), is = _bonded_values.begin();
+       ia != interactions.end(); ++ia, ++is) {
+    vector<int> bead_ids = (*ia)->getBeadIds();
+    unordered_map<int, const TOOLS::vec *> bead_positions =
+        conf->getBeadPositions(bead_ids);
+    double value =
+        (*ia)->EvaluateVar(*(conf->getBoundaryCondition()), bead_positions);
+    cout << value << endl;
+    (*is)->push_back(value);
   }
 }
 

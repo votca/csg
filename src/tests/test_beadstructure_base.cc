@@ -25,6 +25,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class TestBead : public BaseBead {
  public:
@@ -56,10 +57,10 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {
   BeadStructure<TestBead> beadstructure;
   TestBead testbead1;
   testbead1.setId(1);
-  testbead1.setName("Carbon");
+  testbead1.setType("Carbon");
   TestBead testbead2;
   testbead2.setId(2);
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   beadstructure.AddBead(&testbead1);
   beadstructure.AddBead(&testbead2);
   beadstructure.ConnectBeads(1, 2);
@@ -69,23 +70,23 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleStructure) {
   BeadStructure<TestBead> beadstructure;
 
   TestBead testbead1;
-  testbead1.setName("Carbon");
+  testbead1.setType("Carbon");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Oxygen");
+  testbead3.setType("Oxygen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   beadstructure.AddBead(&testbead1);
@@ -117,44 +118,44 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isStructureEquivalent) {
 
   // Beads for bead structure 1
   TestBead testbead1;
-  testbead1.setName("Carbon");
+  testbead1.setType("Carbon");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Oxygen");
+  testbead3.setType("Oxygen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   // Beads for bead structure 2
   TestBead testbead6;
-  testbead6.setName("Carbon");
+  testbead6.setType("Carbon");
   testbead6.setId(6);
 
   TestBead testbead7;
-  testbead7.setName("Carbon");
+  testbead7.setType("Carbon");
   testbead7.setId(7);
 
   TestBead testbead8;
-  testbead8.setName("Oxygen");
+  testbead8.setType("Oxygen");
   testbead8.setId(8);
 
   TestBead testbead9;
-  testbead9.setName("Hydrogen");
+  testbead9.setType("Hydrogen");
   testbead9.setId(9);
 
   TestBead testbead10;
-  testbead10.setName("Hydrogen");
+  testbead10.setType("Hydrogen");
   testbead10.setId(10);
 
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
@@ -198,23 +199,23 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_getNeighBeads) {
   //     H
   //
   TestBead testbead1;
-  testbead1.setName("Hydrogen");
+  testbead1.setType("Hydrogen");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Hydrogen");
+  testbead3.setType("Hydrogen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   // Make a Water molecule
@@ -223,15 +224,15 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_getNeighBeads) {
   //
 
   TestBead testbead6;
-  testbead6.setName("Hydrogen");
+  testbead6.setType("Hydrogen");
   testbead6.setId(6);
 
   TestBead testbead7;
-  testbead7.setName("Oxygen");
+  testbead7.setType("Oxygen");
   testbead7.setId(7);
 
   TestBead testbead8;
-  testbead8.setName("Hydrogen");
+  testbead8.setType("Hydrogen");
   testbead8.setId(8);
 
   beadstructure1.AddBead(&testbead1);
@@ -292,27 +293,27 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_catchError) {
 
   {
     TestBead testbead1;
-    testbead1.setName("Hydrogen");
+    testbead1.setType("Hydrogen");
     testbead1.setId(1);
 
     TestBead testbead2;
-    testbead2.setName("Carbon");
+    testbead2.setType("Carbon");
     testbead2.setId(2);
 
     TestBead testbead3;
-    testbead3.setName("Hydrogen");
+    testbead3.setType("Hydrogen");
     testbead3.setId(3);
 
     TestBead testbead4;
-    testbead4.setName("Hydrogen");
+    testbead4.setType("Hydrogen");
     testbead4.setId(4);
 
     TestBead testbead5;
-    testbead5.setName("Hydrogen");
+    testbead5.setType("Hydrogen");
     testbead5.setId(5);
 
     TestBead testbead6;
-    testbead6.setName("Hydrogen");
+    testbead6.setType("Hydrogen");
     testbead6.setId(5);
 
     BeadStructure<TestBead> beadstructure;

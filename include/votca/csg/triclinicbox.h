@@ -28,10 +28,16 @@ namespace TOOLS = votca::tools;
 class TriclinicBox : public BoundaryCondition {
 
  public:
-  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                  const TOOLS::vec &r_j) const;
+  virtual std::unique_ptr<BoundaryCondition> Clone() const override {
+    //		return std::make_unique<TriclinicBox>(*this);
+    return std::unique_ptr<BoundaryCondition>(
+        new TriclinicBox(*this));  //(std::forward<TriclinicBox>(*this)...));
+  }
 
-  eBoxtype getBoxType() { return typeTriclinic; }
+  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
+                                  const TOOLS::vec &r_j) const override;
+
+  eBoxtype getBoxType() const override { return typeTriclinic; }
 
  protected:
 };

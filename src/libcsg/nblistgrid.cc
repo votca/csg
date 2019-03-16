@@ -15,12 +15,15 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
+#include <cassert>
 #include <votca/csg/nblistgrid.h>
 
 namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void NBListGrid::Generate(BeadList &list1, BeadList &list2,
                           bool do_exclusions) {
@@ -29,8 +32,8 @@ void NBListGrid::Generate(BeadList &list1, BeadList &list2,
   if (list1.empty()) return;
   if (list2.empty()) return;
 
-  assert(list1.getTopology() == list2.getTopology());
-  Topology *top = _top = list1.getTopology();
+  assert(list1.getCSGTopology() == list2.getCSGTopology());
+  CSG_Topology *top = _top = list1.getCSGTopology();
 
   InitializeGrid(top->getBox());
 
@@ -49,7 +52,7 @@ void NBListGrid::Generate(BeadList &list, bool do_exclusions) {
   _do_exclusions = do_exclusions;
   if (list.empty()) return;
 
-  Topology *top = _top = list.getTopology();
+  CSG_Topology *top = _top = list.getCSGTopology();
 
   InitializeGrid(top->getBox());
 

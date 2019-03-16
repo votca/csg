@@ -76,6 +76,7 @@ void TabulatedPotential::Command(BondedStatistics &bs, string cmd,
     if (cmd == "hist") {
       WriteHistogram(bs, args);
     } else if (cmd == "tab") {
+      cout << "Calling Write potential" << endl;
       WritePotential(bs, args);
     }
   } else {
@@ -221,6 +222,7 @@ void TabulatedPotential::WritePotential(BondedStatistics &bs,
   // pointer given by sel
 
   for (size_t i = 1; i < args.size(); i++) {
+    cout << "Selection name " << args[i] << endl;
     sel = bs.BondedValues().select(args[i], sel);
   }
 

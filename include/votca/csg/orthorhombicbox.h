@@ -28,10 +28,16 @@ namespace TOOLS = votca::tools;
 class OrthorhombicBox : public BoundaryCondition {
 
  public:
-  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                  const TOOLS::vec &r_j) const;
+  virtual std::unique_ptr<BoundaryCondition> Clone() const override {
+    //		return std::make_unique<OrthorhombicBox>(*this);
+    return std::unique_ptr<BoundaryCondition>(new OrthorhombicBox(*this));
+    //(std::forward<OrthorhombicBox>(*this)...));
+  }
 
-  eBoxtype getBoxType() { return typeOrthorhombic; }
+  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
+                                  const TOOLS::vec &r_j) const override;
+
+  eBoxtype getBoxType() const override { return typeOrthorhombic; }
 
  protected:
 };

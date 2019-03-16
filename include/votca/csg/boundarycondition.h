@@ -15,52 +15,84 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BOUNDARYCONDITION_H
-#define _VOTCA_CSG_BOUNDARYCONDITION_H
+#ifndef VOTCA_CSG_BOUNDARYCONDITION_H
+#define VOTCA_CSG_BOUNDARYCONDITION_H
 
+#include <memory>
+#include <stdexcept>
+#include <utility>
 #include <votca/tools/matrix.h>
+#include <votca/tools/vec.h>
+
+namespace TOOLS = votca::tools;
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
+/**
+ * @brief Class keeps track of how the boundaries of the system are handled
+ *
+ * There are a total of 3 different boundaries:
+ * open - no boundaries
+ * orthorhombic - orthorombic boundaries
+ * triclinic - triclinic boundaries
+ *
+ * This class enables the correct treatement of distances beteween topology
+ * objects, such that distances accound for the periodic boundaries.
+ */
 class BoundaryCondition {
 
  public:
   virtual ~BoundaryCondition(){};
 
   /**
+   * @brief Safe way to allow child classes to be copied
+   *
+   * The child classes must use the same method and override it with their type
+   * for this to work.
+   *
+   * @return standard pointer to child class
+   */
+  virtual std::unique_ptr<BoundaryCondition> Clone() const = 0;
+  /**
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const matrix &box) { _box = box; };
+  void setBox(const TOOLS::matrix &box) { box_ = box; };
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const matrix &getBox() { return _box; };
+  const TOOLS::matrix &getBox() const { return box_; };
 
   /**
    * get the volume of the box
    * \return box volume as double
    */
-  virtual double BoxVolume();
+  virtual double BoxVolume() const;
 
   /**
    * get shortest connection vector between r_i and r_j with respect to the
    * (periodic) box \return shortest distance vector
    */
-  virtual vec BCShortestConnection(const vec &r_i, const vec &r_j) const = 0;
+  virtual TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
+                                          const TOOLS::vec &r_j) const {
+    throw std::runtime_error("BCShortestConnection is not implemented.");
+  }
+
+  double getShortestBoxDimension() const;
 
   enum eBoxtype { typeAuto = 0, typeTriclinic, typeOrthorhombic, typeOpen };
-  virtual eBoxtype getBoxType() = 0;
+  virtual eBoxtype getBoxType() const {
+    throw std::runtime_error("getBoxType is not implemented.");
+  }
 
  protected:
-  matrix _box;
+  TOOLS::matrix box_;
 };
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_BOUNDARYCONDITION_H */
+#endif  // VOTCA_CSG_BOUNDARYCONDITION_H

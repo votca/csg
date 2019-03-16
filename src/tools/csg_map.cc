@@ -15,16 +15,17 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <fstream>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <votca/csg/csgapplication.h>
-#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgMapApp : public CsgApplication {
  public:
@@ -69,8 +70,8 @@ class CsgMapApp : public CsgApplication {
     return true;
   }
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
-  void EvalConfiguration(Topology *top, Topology *top_ref) {
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
     if (!_do_hybrid) {
       // simply write the topology mapped by csgapplication class
       if (_do_vel) top->SetHasVel(true);
@@ -78,9 +79,9 @@ class CsgMapApp : public CsgApplication {
       _writer->Write(top);
     } else {
       // we want to combine atomistic and coarse-grained into one topology
-      Topology *hybtol = new Topology();
-
-      MoleculeContainer::iterator it_mol;
+      CSG_Topology *hybtol = new CSG_Topology();
+      hybtol->Copy(*top);
+      /*MoleculeContainer::iterator it_mol;
 
       hybtol->setBox(top->getBox());
       hybtol->setTime(top->getTime());
@@ -103,9 +104,9 @@ class CsgMapApp : public CsgApplication {
             hybtol->RegisterBeadType(bi->getType());
           }
 
-          Bead *bn = hybtol->CreateBead<Bead>(
+          Bead *bn = hybtol->CreateBead(
               bi->getSymmetry(), bi->getName(), bi->getType(),
-              bi->getResidueNumber(), bi->getResidueName(),
+              bi->getResidueId(), bi->getResidueType(),
               (*it_mol)->getName(), bi->getMass(), bi->getQ());
 
           bn->setPos(bi->getPos());
@@ -134,7 +135,7 @@ class CsgMapApp : public CsgApplication {
         }
       }
       hybtol->setBox(top_ref->getBox());
-
+*/
       _writer->Write(hybtol);
     }
   }
@@ -151,7 +152,7 @@ class CsgMapApp : public CsgApplication {
   bool _do_force;
 };
 
-void CsgMapApp::BeginEvaluate(Topology *top, Topology *top_atom) {
+void CsgMapApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   string out = OptionsMap()["out"].as<string>();
   cout << "writing coarse-grained trajectory to " << out << endl;
   _writer = TrjWriterFactory().Create(out);

@@ -16,6 +16,8 @@
  */
 
 #include "growriter.h"
+#include "../../../../include/votca/csg/csgtopology.h"
+#include <stdexcept>
 #include <stdio.h>
 #include <string>
 
@@ -23,20 +25,29 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void GROWriter::Open(string file, bool bAppend) {
+  if (_out != nullptr) {
+    throw runtime_error(
+        "Cannot open file until you have closed the previously opend gro "
+        "file.");
+  }
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
-void GROWriter::Close() { fclose(_out); }
+void GROWriter::Close() {
+  fclose(_out);
+  _out = nullptr;
+}
 
-void GROWriter::Write(Topology *conf) {
+void GROWriter::Write(CSG_Topology *conf) {
   char format[100];
   int i, resnr, l, vpr;
-  Topology *top = conf;
+  CSG_Topology *top = conf;
 
   fprintf(_out, "%s\n", "what a nice title");
-  fprintf(_out, "%5d\n", top->BeadCount());
+  fprintf(_out, "%5d\n", static_cast<int>(top->BeadCount()));
 
   bool v = top->HasVel();
   int pr = 3;  // precision of writeout, given by the spec
@@ -55,12 +66,12 @@ void GROWriter::Write(Topology *conf) {
   else
     sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
 
-  for (i = 0; i < top->BeadCount(); i++) {
-    resnr = top->getBead(i)->getResidueNumber();
+  for (i = 0; static_cast<size_t>(i) < top->BeadCount(); i++) {
+    resnr = top->getBead(i)->getResidueId();
     string resname =
         top->getBead(i)
-            ->getResidueName();  // top->getResidue(resnr)->getName();
-    string atomname = top->getBead(i)->getName();
+            ->getResidueType();  // top->getResidue(resnr)->getName();
+    string atomname = top->getBead(i)->getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
             atomname.c_str(), (i + 1) % 100000);

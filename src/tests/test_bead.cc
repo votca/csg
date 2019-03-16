@@ -23,7 +23,8 @@
 #include <math.h>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 namespace votca {
@@ -34,68 +35,73 @@ class Molecule;
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 BOOST_AUTO_TEST_SUITE(bead_test)
 
 BOOST_AUTO_TEST_CASE(test_bead_constructor) {
 
-  Topology top;
+  CSG_Topology top;
 
-  string bead_type_name = "C1";
+  string bead_type = "C1";
   int symmetry = 1;
-  string name = "dummy";
-  int resnr = 0;
-  string residue_name = "DNA";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 0;
+  string residue_type = "DNA";
   double mass = 1.21;
   double charge = -0.87;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 }
 
 BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
-  Topology top;
+  CSG_Topology top;
 
-  string bead_type_name = "C1";
+  string bead_type = "C1";
 
   int symmetry = 1;
-  string name = "dummy";
-  int resnr = 0;
-  string residue_name = "DNA";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 0;
+  string residue_type = "DNA";
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(
-      symmetry, name, bead_type_name, resnr, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+  Bead* b = top.CreateBead(
+      symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+      topology_constants::unassigned_element, mass, charge);
 
   BOOST_CHECK_CLOSE(b->getMass(), mass, 1e-5);
   BOOST_CHECK_CLOSE(b->getQ(), charge, 1e-5);
   BOOST_CHECK_EQUAL(b->getId(), 0);
-  BOOST_CHECK_EQUAL(b->getName(), name);
-  BOOST_CHECK_EQUAL(b->getResidueNumber(), resnr);
-  BOOST_CHECK_EQUAL(b->getResidueName(), residue_name);
+  BOOST_CHECK_EQUAL(b->getType(), bead_type);
+  BOOST_CHECK_EQUAL(b->getResidueId(), residue_id);
+  BOOST_CHECK_EQUAL(b->getResidueType(), residue_type);
+  BOOST_CHECK_EQUAL(b->getMoleculeId(), molecule_id);
   BOOST_CHECK_EQUAL(b->getSymmetry(), symmetry);
 }
 
 BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
-  Topology top;
+  CSG_Topology top;
 
-  string bead_type_name = "C1";
+  string bead_type = "C1";
 
   int symmetry = 1;
-  string name = "dummy";
-  int resnr = 0;
-  string residue_name = "DNA";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 0;
+  string residue_type = "DNA";
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead<Bead>(
-      symmetry, name, bead_type_name, resnr, residue_name,
-      molecule_constants::molecule_name_unassigned, mass, charge);
+  Bead* b = top.CreateBead(
+      symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
+      topology_constants::unassigned_element, mass, charge);
 
   double newMass = 9.4;
   double newCharge = 2.6;
@@ -109,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   vec xyz_vel(-2.0, 0.32, 32.0);
   b->setVel(xyz_vel);
 
-  int molecule_id = 1;
+  molecule_id = 2;
   b->setMoleculeId(molecule_id);
 
   BOOST_CHECK_CLOSE(b->getMass(), newMass, 1e-5);

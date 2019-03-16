@@ -23,12 +23,14 @@
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/triplelist.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 BOOST_AUTO_TEST_SUITE(triplelist_test)
 
@@ -39,50 +41,49 @@ BOOST_AUTO_TEST_CASE(triplelist_constructor) {
 BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   TripleList<Bead *, BeadTriple> triplelist;
 
-  Topology top;
+  CSG_Topology top;
 
-  string bead_type_name = "CG";
-  top.RegisterBeadType(bead_type_name);
+  string bead_type = "CG";
 
-  int symmetry = 1;
-  string name = "dummy1";
-  string residue_name = "Residue";
-  int resnr = 0;
+  byte_t symmetry = 1;
+  int molecule_id = 1;
+  int bead_id1 = 1;
+  string residue_type = "Residue";
+  int residue_id = 0;
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
+  int bead_id2 = 2;
   symmetry = 1;
-  name = "dummy2";
-  resnr = 0;
+  residue_id = 0;
   mass = 2.0;
   charge = -2.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned,
+  top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
-                       mass, charge);
-
+  int bead_id3 = 3;
   symmetry = 1;
-  name = "dummy3";
-  resnr = 0;
+  residue_id = 0;
   mass = 3.0;
   charge = -3.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned,
-
-                       mass, charge);
+  top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);
   vec dist23(0.1, 0.2, 0.0);
 
-  BeadTriple *testtriple = new BeadTriple(
-      top.getBead(0), top.getBead(1), top.getBead(2), dist12, dist13, dist23);
+  BeadTriple *testtriple =
+      new BeadTriple(top.getBead(bead_id1), top.getBead(bead_id2),
+                     top.getBead(bead_id3), dist12, dist13, dist23);
 
   triplelist.AddTriple(testtriple);
 
@@ -92,18 +93,18 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   BOOST_CHECK_CLOSE(triplefront->bead1()->getMass(), 1.0, 1e-5);
   BOOST_CHECK_CLOSE(triplefront->bead2()->getMass(), 2.0, 1e-5);
   BOOST_CHECK_CLOSE(triplefront->bead3()->getMass(), 3.0, 1e-5);
-  BOOST_CHECK_EQUAL(triplefront->bead1()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(triplefront->bead2()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(triplefront->bead3()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead1()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead2()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(triplefront->bead3()->getResidueId(), 0);
   BOOST_CHECK_EQUAL(triplelist.size(), 1);
 
   tripleback = triplelist.back();
   BOOST_CHECK_CLOSE(tripleback->bead1()->getMass(), 1.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead2()->getMass(), 2.0, 1e-5);
   BOOST_CHECK_CLOSE(tripleback->bead3()->getMass(), 3.0, 1e-5);
-  BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueNumber(), 0);
-  BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueNumber(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead1()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead2()->getResidueId(), 0);
+  BOOST_CHECK_EQUAL(tripleback->bead3()->getResidueId(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

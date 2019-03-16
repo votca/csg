@@ -40,14 +40,14 @@ class GROReader : public TrajectoryReader, public TopologyReader {
   ~GROReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
-  bool NextFrame(Topology &top);
+  bool NextFrame(CSG_Topology &top);
 
   void Close();
 

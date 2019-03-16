@@ -24,8 +24,9 @@
 #include <tuple>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
-#include <votca/csg/topology.h>
+#include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -35,47 +36,50 @@ BOOST_AUTO_TEST_SUITE(beadtriple_test)
 
 BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
 
-  Topology top;
+  CSG_Topology top;
 
-  string bead_type_name = "CG";
+  string bead_type = "CG";
 
   int symmetry = 1;
-  string name = "dummy1";
-  int resnr = 0;
-  string residue_name = "DNA";
+  int residue_id = 0;
+  int bead_id1 = 1;
+  int molecule_id = 1;
+  string residue_type = "DNA";
   double mass = 1.0;
   double charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
   symmetry = 1;
-  name = "dummy2";
-  resnr = 0;
+  int bead_id2 = 2;
+  molecule_id = 1;
+  residue_id = 0;
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
   symmetry = 1;
-  name = "dummy3";
-  resnr = 0;
+  int bead_id3 = 3;
+  molecule_id = 1;
+  residue_id = 0;
   mass = 1.0;
   charge = -1.0;
 
-  top.CreateBead<Bead>(symmetry, name, bead_type_name, resnr, residue_name,
-                       molecule_constants::molecule_name_unassigned, mass,
-                       charge);
+  top.CreateBead(symmetry, bead_type, bead_id3, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
   vec dist12(0.1, 0.2, 0.3);
   vec dist13(0.2, 0.4, 0.3);
   vec dist23(0.1, 0.2, 0.0);
 
-  BeadTriple testtriple(top.getBead(0), top.getBead(1), top.getBead(2), dist12,
-                        dist13, dist23);
+  BeadTriple testtriple(top.getBead(bead_id1), top.getBead(bead_id2),
+                        top.getBead(bead_id3), dist12, dist13, dist23);
 
   double d12ref = 0.3741657;
   double d13ref = 0.5385165;

@@ -28,6 +28,10 @@
 #include <votca/tools/linalg.h>
 #include <votca/tools/table.h>
 
+using namespace std;
+using namespace votca::tools;
+using namespace votca::csg;
+
 int main(int argc, char **argv) {
   CGForceMatching app;
   return app.Exec(argc, argv);
@@ -53,7 +57,7 @@ bool CGForceMatching::EvaluateOptions() {
   return true;
 }
 
-void CGForceMatching::BeginEvaluate(Topology *top, Topology *top_atom) {
+void CGForceMatching::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   // set counters to zero value:
   _nblocks = 0;
   _line_cntr = _col_cntr = 0;
@@ -150,7 +154,7 @@ void CGForceMatching::BeginEvaluate(Topology *top, Topology *top_atom) {
   _x = Eigen::VectorXd::Zero(_col_cntr);
 
   if (_has_existing_forces) {
-    _top_force.CopyTopologyData(top);
+    _top_force.Copy(*top);
     _trjreader_force =
         TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
     if (_trjreader_force == NULL)
@@ -378,16 +382,17 @@ void CGForceMatching::WriteOutFiles() {
   }
 }
 
-void CGForceMatching::EvalConfiguration(Topology *conf, Topology *conf_atom) {
+void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
+                                        CSG_Topology *conf_atom) {
   SplineContainer::iterator spiter;
   if (conf->BeadCount() == 0)
     throw std::runtime_error(
-        "CG Topology has 0 beads, check your mapping file!");
+        "CG CSG_Topology has 0 beads, check your mapping file!");
   if (_has_existing_forces) {
     if (conf->BeadCount() != _top_force.BeadCount())
       throw std::runtime_error(
           "number of beads in topology and force topology does not match");
-    for (int i = 0; i < conf->BeadCount(); ++i) {
+    for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); ++i) {
       conf->getBead(i)->F() -= _top_force.getBead(i)->getF();
       vec d = conf->getBead(i)->getPos() - _top_force.getBead(i)->getPos();
       if (abs(d) > _dist) {  // default is 1e-5, otherwise it can be a too
@@ -568,7 +573,7 @@ void CGForceMatching::LoadOptions(const string &file) {
   _nonbonded = _options.Select("cg.non-bonded");
 }
 
-void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) {
+void CGForceMatching::EvalBonded(CSG_Topology *conf, SplineInfo *sinfo) {
   std::list<Interaction *> interList;
   std::list<Interaction *>::iterator interListIter;
 
@@ -585,12 +590,20 @@ void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) {
 
     int &mpos = sinfo->matr_pos;
 
-    double var = (*interListIter)->EvaluateVar(*conf);  // value of bond, angle,
-                                                        // or dihedral
+    vector<int> bead_ids = (*interListIter)->getBeadIds();
+    unordered_map<int, const vec *> bead_ids_and_positions =
+        conf->getBeadPositions(bead_ids);
+    double var =
+        (*interListIter)
+            ->EvaluateVar(*(conf->getBoundaryCondition()),
+                          bead_ids_and_positions);  // value of bond,
+                                                    // angle, or dihedral
 
     for (int loop = 0; loop < beads_in_int; loop++) {
       int ii = (*interListIter)->getBeadId(loop);
-      vec gradient = (*interListIter)->Grad(*conf, loop);
+      vec gradient = (*interListIter)
+                         ->Grad(*(conf->getBoundaryCondition()), loop,
+                                bead_ids_and_positions);
 
       SP.AddToFitMatrix(_A, var,
                         _least_sq_offset + 3 * _nbeads * _frame_counter + ii,
@@ -607,7 +620,7 @@ void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) {
   }
 }
 
-void CGForceMatching::EvalNonbonded(Topology *conf, SplineInfo *sinfo) {
+void CGForceMatching::EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo) {
 
   // generate the neighbour list
   NBList *nb;
@@ -686,7 +699,7 @@ void CGForceMatching::EvalNonbonded(Topology *conf, SplineInfo *sinfo) {
   delete nb;
 }
 
-void CGForceMatching::EvalNonbonded_Threebody(Topology *conf,
+void CGForceMatching::EvalNonbonded_Threebody(CSG_Topology *conf,
                                               SplineInfo *sinfo) {
   // so far option gridsearch ignored. Only simple search
 

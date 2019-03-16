@@ -16,10 +16,10 @@
  */
 
 #include <votca/csg/openbox.h>
-
+#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
-
+using namespace votca::tools;
 vec OpenBox::BCShortestConnection(const vec &r_i, const vec &r_j) const {
   vec r_ij;
   r_ij = r_j - r_i;

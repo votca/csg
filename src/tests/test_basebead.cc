@@ -22,8 +22,8 @@
 #include <boost/test/unit_test.hpp>
 #include <string>
 #include <votca/csg/basebead.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
-#include <votca/csg/topology.h>
 #include <votca/tools/vec.h>
 
 using namespace std;
@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(test_basebead_getters_setters) {
   basebead.setId(0);
   BOOST_CHECK_EQUAL(basebead.getId(), 0);
 
-  basebead.setName("Bead1");
+  basebead.setType("Bead1");
   string name = "Bead1";
-  BOOST_CHECK(name == basebead.getName());
+  BOOST_CHECK(name == basebead.getType());
 
   basebead.setMass(1.0);
   BOOST_CHECK_CLOSE(basebead.getMass(), 1.0, 1e-5);
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_basebead_getters_setters) {
 
   BOOST_CHECK_EQUAL(xyz3.isApprox(xyz_ref, 1e-5), true);
 
-  Topology top;
+  CSG_Topology top;
   int molecule_id = 1;
   basebead.setMoleculeId(molecule_id);
   BOOST_CHECK_EQUAL(basebead.getMoleculeId(), molecule_id);

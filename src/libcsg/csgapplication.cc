@@ -15,10 +15,9 @@
  *
  */
 
+#include "../../include/votca/csg/csgapplication.h"
+#include "../../include/votca/csg/cgengine.h"
 #include <boost/algorithm/string/trim.hpp>
-#include <votca/csg/cgengine.h>
-#include <votca/csg/csgapplication.h>
-#include <votca/csg/topologymap.h>
 #include <votca/csg/topologyreader.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/csg/trajectorywriter.h>
@@ -27,7 +26,13 @@
 namespace votca {
 namespace csg {
 
-CsgApplication::CsgApplication(void) {}
+using namespace std;
+using namespace votca::tools;
+
+CsgApplication::CsgApplication(void)
+    : _do_mapping(false), _nframes(-1), _is_first_frame(true), _nthreads(1) {
+  _traj_reader = nullptr;
+}
 
 CsgApplication::~CsgApplication(void) {}
 
@@ -179,7 +184,8 @@ bool CsgApplication::ProcessData(Worker *worker) {
   }
   // evaluate
   if (_do_mapping) {
-    worker->_map->Apply();
+    // worker->_map->Apply();
+    worker->converter_->Map(worker->_top, worker->_top_cg);
     worker->EvalConfiguration(&worker->_top_cg, &worker->_top);
   } else
     worker->EvalConfiguration(&worker->_top);
@@ -197,7 +203,7 @@ void CsgApplication::Run(void) {
 
   class DummyWorker : public Worker {
    public:
-    void EvalConfiguration(Topology *top, Topology *top_ref) {
+    void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
       _app->EvalConfiguration(top, top_ref);
     }
   };
@@ -219,13 +225,16 @@ void CsgApplication::Run(void) {
   // read in the topology for master
   //////////////////////////////////////////////////
   reader->ReadTopology(_op_vm["top"].as<string>(), master->_top);
+  delete reader;
+
   cout << "I have " << master->_top.BeadCount() << " beads in "
        << master->_top.MoleculeCount() << " molecules" << endl;
   master->_top.CheckMoleculeNaming();
 
   if (_do_mapping) {
     // read in the coarse graining definitions (xml files)
-    cg.LoadMoleculeType(_op_vm["cg"].as<string>());
+    //  cg.RegisterCGMolecules(_op_vm["cg"].as<string>());
+    cg.LoadFiles(_op_vm["cg"].as<string>());
     // create the mapping + cg topology
 
     if (_op_vm.count("map-ignore") != 0) {
@@ -237,24 +246,14 @@ void CsgApplication::Run(void) {
         if (str.length() > 0) cg.AddIgnore(str);
       }
     }
-
-    master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
-
-    cout << "I have " << master->_top_cg.BeadCount() << " beads in "
-         << master->_top_cg.MoleculeCount()
-         << " molecules for the coarsegraining" << endl;
-    master->_map->Apply();
-    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
-  } else if (!EvaluateTopology(&master->_top))
-    return;
-
+  }
   //////////////////////////////////////////////////
   // Here trajectory parsing starts
   //////////////////////////////////////////////////
+  double begin = 0;
+  int first_frame;
+  bool has_begin = false;
   if (DoTrajectory() && _op_vm.count("trj")) {
-    double begin = 0;
-    int first_frame;
-    bool has_begin = false;
 
     if (_op_vm.count("begin")) {
       has_begin = true;
@@ -270,12 +269,45 @@ void CsgApplication::Run(void) {
 
     // create reader for trajectory
     _traj_reader = TrjReaderFactory().Create(_op_vm["trj"].as<string>());
-    if (_traj_reader == NULL)
+    if (_traj_reader == NULL) {
       throw runtime_error(string("input format not supported: ") +
                           _op_vm["trj"].as<string>());
+    }
     // open the trajectory
     _traj_reader->Open(_op_vm["trj"].as<string>());
 
+    //////////////////////////////////////////////////
+    // Consolidate differences between first trajectory files and topology file
+    /////////////////verbose/////////////////////////////////
+    // Note that the trajectory files will contain the boundary information
+    // which may otherwise not be stored in the _top object
+    _traj_reader->FirstFrame(master->_top);
+    master->_top_cg.CopyBoundaryConditions(master->_top);
+  }
+
+  if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
+    cout << "NOTE: You are using OpenBox boundary conditions. Check if this "
+            "is intended.\n"
+         << endl;
+  }
+
+  if (_do_mapping) {
+    // Now that the _top object boundaries are consistent with the trajectory
+    // files it is possible to create the CG topology.
+    cout << "Calling CreateCGTopology" << endl;
+    // master->_map = cg.CreateCGTopology(master->_top, master->_top_cg);
+    master->converter_ = cg.PopulateCGTopology(master->_top, master->_top_cg);
+    cout << "I have " << master->_top_cg.BeadCount() << " beads in "
+         << master->_top_cg.MoleculeCount()
+         << " molecules for the coarsegraining" << endl;
+    // master->_map->Apply();
+    master->converter_->Map(master->_top, master->_top_cg);
+    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
+  } else if (!EvaluateTopology(&master->_top)) {
+    return;
+  }
+
+  if (DoTrajectory() && _op_vm.count("trj")) {
     //////////////////////////////////////////////////
     // Create all the workers
     /////////////////verbose/////////////////////////////////
@@ -287,12 +319,16 @@ void CsgApplication::Run(void) {
 
       // this will be changed to CopyTopologyData
       // read in the topology
-      reader->ReadTopology(_op_vm["top"].as<string>(), myWorker->_top);
+      // reader->ReadTopology(_op_vm["top"].as<string>(), myWorker->_top);
+      myWorker->_top.Copy(master->_top);
       myWorker->_top.CheckMoleculeNaming();
 
       if (_do_mapping) {
         // create the mapping + cg topology
-        myWorker->_map = cg.CreateCGTopology(myWorker->_top, myWorker->_top_cg);
+        // myWorker->_map = cg.CreateCGTopology(myWorker->_top,
+        // myWorker->_top_cg);
+        myWorker->converter_ =
+            cg.PopulateCGTopology(myWorker->_top, myWorker->_top_cg);
       }
     }
 
@@ -300,12 +336,6 @@ void CsgApplication::Run(void) {
     // Proceed to first frame of interest
     //////////////////////////////////////////////////
 
-    _traj_reader->FirstFrame(master->_top);
-    if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
-      cout << "NOTE: You are using OpenBox boundary conditions. Check if this "
-              "is intended.\n"
-           << endl;
-    }
     // seek first frame, let thread0 do that
     bool bok;
     for (bok = true; bok == true; bok = _traj_reader->NextFrame(master->_top)) {
@@ -326,7 +356,8 @@ void CsgApplication::Run(void) {
 
     // notify all observers that coarse graining has begun
     if (_do_mapping) {
-      master->_map->Apply();
+      // master->_map->Apply();
+      master->converter_->Map(master->_top, master->_top_cg);
       BeginEvaluate(&master->_top_cg, &master->_top);
     } else
       BeginEvaluate(&master->_top);
@@ -386,17 +417,15 @@ void CsgApplication::Run(void) {
     _threadsMutexesOut.clear();
     _traj_reader->Close();
 
-    delete _traj_reader;
+    // delete _traj_reader;
   }
-
-  delete reader;
 }
 
-CsgApplication::Worker::~Worker() {
+/*CsgApplication::Worker::~Worker() {
   if (_map) delete _map;
-}
+}*/
 
-void CsgApplication::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgApplication::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   list<CGObserver *>::iterator iter;
   for (iter = _observers.begin(); iter != _observers.end(); ++iter)
     (*iter)->BeginCG(top, top_ref);
@@ -408,7 +437,8 @@ void CsgApplication::EndEvaluate() {
     (*iter)->EndCG();
 }
 
-void CsgApplication::EvalConfiguration(Topology *top, Topology *top_ref) {
+void CsgApplication::EvalConfiguration(CSG_Topology *top,
+                                       CSG_Topology *top_ref) {
   list<CGObserver *>::iterator iter;
   for (iter = _observers.begin(); iter != _observers.end(); ++iter)
     (*iter)->EvalConfiguration(top, top_ref);

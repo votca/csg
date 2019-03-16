@@ -69,8 +69,9 @@ class NBList : public PairList<Bead *, BeadPair> {
    * the processing in the match function.
    */
   template <typename T>
-  void SetMatchFunction(T *object, bool (T::*fkt)(Bead *, Bead *, const vec &,
-                                                  const double dist));
+  void SetMatchFunction(T *object,
+                        bool (T::*fkt)(Bead *, Bead *, const TOOLS::vec &,
+                                       const double dist));
 
   /// \brief match function for static member functions or plain functions
   void SetMatchFunction(bool (*fkt)(Bead *, Bead *, const TOOLS::vec &,

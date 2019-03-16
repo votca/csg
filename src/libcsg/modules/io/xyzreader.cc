@@ -16,16 +16,19 @@
  */
 
 #include "xyzreader.h"
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
+#include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
+using namespace votca::tools;
 namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
-bool XYZReader::ReadTopology(string file, Topology &top) {
+using namespace votca::tools;
+bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   top.Cleanup();
 
   _fl.open(file.c_str());
@@ -51,22 +54,22 @@ bool XYZReader::Open(const string &file) {
 
 void XYZReader::Close() { _fl.close(); }
 
-bool XYZReader::FirstFrame(Topology &top) { return NextFrame(top); }
+bool XYZReader::FirstFrame(CSG_Topology &top) { return NextFrame(top); }
 
-bool XYZReader::NextFrame(Topology &top) {
+bool XYZReader::NextFrame(CSG_Topology &top) {
   bool success = ReadFrame<false>(top);
   return success;
 }
 
 template <bool topology>
-bool XYZReader::ReadFrame(Topology &top) {
+bool XYZReader::ReadFrame(CSG_Topology &top) {
   string line;
   getline(_fl, line);
   ++_line;
   if (!_fl.eof()) {
     // read the number of atoms
     int natoms = boost::lexical_cast<int>(line);
-    if (!topology && natoms != top.BeadCount())
+    if (!topology && static_cast<size_t>(natoms) != top.BeadCount())
       throw std::runtime_error(
           "number of beads in topology and trajectory differ");
 
@@ -75,6 +78,7 @@ bool XYZReader::ReadFrame(Topology &top) {
     ++_line;
 
     // read atoms
+    Elements elements;
     for (int i = 0; i < natoms; ++i) {
       getline(_fl, line);
       ++_line;
@@ -95,14 +99,19 @@ bool XYZReader::ReadFrame(Topology &top) {
       Bead *b;
       if (topology) {
         string bead_type = fields[0];
-        if (!top.BeadTypeExist(bead_type)) {
-          top.RegisterBeadType(bead_type);
-        }
 
-        b = top.CreateBead<Bead>(
-            1, fields[0] + boost::lexical_cast<string>(i), bead_type, 0,
-            bead_constants::residue_name_unassigned,
-            molecule_constants::molecule_name_unassigned, 0, 0);
+        string element = topology_constants::unassigned_element;
+        string name_upper_case = boost::to_upper_copy<string>(bead_type);
+        if (elements.isEleFull(name_upper_case)) {
+          element = elements.getEleShort(name_upper_case);
+        } else if (elements.isEleShort(bead_type)) {
+          element = bead_type;
+        }
+        byte_t symmetry = 1;
+        b = top.CreateBead(
+            symmetry, bead_type, i, topology_constants::unassigned_molecule_id,
+            topology_constants::unassigned_residue_id,
+            topology_constants::unassigned_residue_type, element, 0.0, 0.0);
 
       } else {
         b = top.getBead(i);
