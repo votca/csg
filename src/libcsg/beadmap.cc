@@ -350,10 +350,8 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
   return *this;
 }
 
-void AtomToCGMoleculeMapper::Apply(
-    CSG_Topology &atom_top, CSG_Topology &cg_top,
-    pair<int, map<int, vector<pair<string, int>>>>
-        cgmolid_cgbeadid_atomicbeadids) {
+void AtomToCGMoleculeMapper::Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
+                                   CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
 
   // First int cg_molecule id
   // map
@@ -371,11 +369,11 @@ void AtomToCGMoleculeMapper::Apply(
          "Cannot convert to the molecule  is not of the correct type");
 
   // Cycle throught the cg beads in a cg molecule
-  vector<int> bead_ids = cg_mol->getBeadIds();
-  sort(bead_ids.begin(), bead_ids.end());
+  vector<int> cg_bead_ids = cg_mol->getBeadIds();
+  sort(cg_bead_ids.begin(), cg_bead_ids.end());
   // Beads that have already been applied
   unordered_set<string> expired_beads;
-  for (int &cg_bead_id : bead_ids) {
+  for (int &cg_bead_id : cg_bead_ids) {
     Bead *cg_bead = cg_top.getBead(cg_bead_id);
     // get the cg bead type
     string cg_bead_type = cg_bead->getType();
@@ -389,12 +387,9 @@ void AtomToCGMoleculeMapper::Apply(
     }
     expired_beads.insert(bead_name);
 
-    map<string, const Bead *> atomic_names_and_beads;
-    for (pair<string, int> &atom_name_id :
-         cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]) {
-      atomic_names_and_beads[atom_name_id.first] =
-          atom_top.getBead(atom_name_id.second);
-    }
+    map<string, const Bead *> atomic_names_and_beads = getAtomicNamesAndBeads_(
+        atom_top, cgmolid_cgbeadid_atomicbeadids.second.at(cg_bead_id));
+
     // Grab the correct map
     assert(cg_bead_name_and_maps_.count(bead_name) &&
            "Map for the coarse grained bead type is not known.");
@@ -402,6 +397,18 @@ void AtomToCGMoleculeMapper::Apply(
     cg_bead_name_and_maps_.at(bead_name)->Apply(
         cg_top.getBoundaryCondition(), atomic_names_and_beads, cg_bead);
   }
+}
+
+map<string, const Bead *> AtomToCGMoleculeMapper::getAtomicNamesAndBeads_(
+    const CSG_Topology &atom_top,
+    const vector<pair<string, int>> &atomic_names_and_ids) const {
+
+  map<string, const Bead *> atomic_names_and_beads;
+  for (const pair<string, int> &atom_name_id : atomic_names_and_ids) {
+    atomic_names_and_beads[atom_name_id.first] =
+        atom_top.getBeadConst(atom_name_id.second);
+  }
+  return atomic_names_and_beads;
 }
 
 }  // namespace csg

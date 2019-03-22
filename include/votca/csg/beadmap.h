@@ -144,6 +144,16 @@ class Map_Ellipsoid : public Map_Sphere {
     Mapper class, collection of maps
 *******************************************************/
 
+// Typedef is defined to reduce the verbosity of the code
+// First element of the pair
+// cg_molecule_id
+// Second element of the pair is the map with key
+// cg_bead_id
+// Finally the map stores
+// vector<int> { atom_id1,atom_id2,etc... }
+typedef std::pair<int, std::map<int, std::vector<std::pair<std::string, int>>>>
+    CGMolToAtom;
+
 /**
  * @brief Bead Mapper for a whole molecule
  *
@@ -177,10 +187,8 @@ class AtomToCGMoleculeMapper {
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void Apply(
-      CSG_Topology &atom_top, CSG_Topology &cg_top,
-      std::pair<int, std::map<int, std::vector<std::pair<std::string, int>>>>
-          cgmolid_cgbeadid_atomicbeadnames_ids);
+  void Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
+             CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
    * Gang of 3
@@ -205,6 +213,20 @@ class AtomToCGMoleculeMapper {
   // Needs to be a unique_ptr to take advantage of polymorphism
   std::unordered_map<std::string, std::unique_ptr<BeadMap>>
       cg_bead_name_and_maps_;
+
+  /**
+   * @brief Returns pointers of the atomic beads that are within the cg bead
+   *
+   * @param[in] atom_top
+   * @param[in] cgmolid_cgbeadid_atomicbeadids
+   * @param[in] cg_bead_id
+   *
+   * @return map with the atomic bead names and the pointers to them
+   */
+  std::map<std::string, const Bead *> getAtomicNamesAndBeads_(
+      const CSG_Topology &atom_top,
+      const std::vector<std::pair<std::string, int>> &atomic_names_and_ids)
+      const;
 };
 
 }  // namespace csg
