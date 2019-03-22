@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TRAJECTORYREADER_H
-#define _VOTCA_CSG_TRAJECTORYREADER_H
+#ifndef VOTCA_CSG_TRAJECTORYREADER_H
+#define VOTCA_CSG_TRAJECTORYREADER_H
 
 #include "csgtopology.h"
 #include "fileformatfactory.h"
@@ -55,4 +55,4 @@ inline FileFormatFactory<TrajectoryReader> &TrjReaderFactory() {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TRAJECTORYREADER_H */
+#endif  // VOTCA_CSG_TRAJECTORYREADER_H
