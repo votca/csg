@@ -90,7 +90,7 @@ void Map_Sphere::Initialize(const vector<string> subbeads,
 }
 
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
-                       map<string, Bead *> atomic_beads, Bead *cg_bead) {
+                       map<string, const Bead *> atomic_beads, Bead *cg_bead) {
 
   assert(cg_bead->getSymmetry() == 1 &&
          "Applying spherical bead map on a non spherical corase grained bead");
@@ -99,11 +99,12 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
          "Cannot apply mapping mismatch in the number of atomistic beads");
   assert(matrix_.size() > 0 &&
          "Cannot apply mapping no atomistic beads have been specified.");
-  Bead *atom = atomic_beads.begin()->second;
+  const Bead *atom = atomic_beads.begin()->second;
   assert(atom->HasPos() &&
          "Cannot apply mapping atomistic beads do not have position.");
 
   vec reference_position = atom->getPos();
+  cout << "Reference Position " << reference_position << endl;
   string bead_type = atom->getType();
   int bead_id = atom->getId();
 
@@ -134,6 +135,8 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
             boost::lexical_cast<string>(atom->getMoleculeId() + 1) + ")");
       }
     }
+    cout << "Calculating " << name_and_element.second.weight_ << " "
+         << reference_position << " " << shortest_distance_beween_beads << endl;
     weighted_sum_of_atomistic_pos +=
         name_and_element.second.weight_ *
         (shortest_distance_beween_beads + reference_position);
@@ -150,13 +153,15 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
   }
   cg_bead->setMass(sum_of_atomistic_mass);
   cg_bead->setPos(weighted_sum_of_atomistic_pos);
+  cout << "id " << cg_bead->getId() << " " << weighted_sum_of_atomistic_pos
+       << endl;
   if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_velocity);
   if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
 }
 
 /// Warning the atomistic beads must be a map they cannot be an unordered_map
 void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
-                          std::map<string, Bead *> atomistic_beads,
+                          std::map<string, const Bead *> atomistic_beads,
                           Bead *cg_bead) {
 
   assert(
@@ -169,7 +174,7 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
          "Cannot apply mapping no atomistic beads have been specified in "
          "Map_Ellipsoid.");
 
-  std::map<string, Bead *>::iterator name_and_bead_iter;
+  std::map<string, const Bead *>::iterator name_and_bead_iter;
   name_and_bead_iter = atomistic_beads.begin();
   assert(name_and_bead_iter->second->HasPos() &&
          "Cannot apply mapping atomistic beads do not have position.");
@@ -354,6 +359,8 @@ void AtomToCGMoleculeMapper::Apply(
     pair<int, map<int, vector<pair<string, int>>>>
         cgmolid_cgbeadid_atomicbeadids) {
 
+  cout << "Atom to cg molecule mapper " << atom_top.getBoxType() << " "
+       << cg_top.getBoxType() << endl;
   // First int cg_molecule id
   // map
   //   first int - the cg_bead_id
@@ -388,7 +395,7 @@ void AtomToCGMoleculeMapper::Apply(
     }
     expired_beads.insert(bead_name);
 
-    map<string, Bead *> atomic_names_and_beads;
+    map<string, const Bead *> atomic_names_and_beads;
     for (pair<string, int> &atom_name_id :
          cgmolid_cgbeadid_atomicbeadids.second[cg_bead_id]) {
       atomic_names_and_beads[atom_name_id.first] =
@@ -397,6 +404,10 @@ void AtomToCGMoleculeMapper::Apply(
     // Grab the correct map
     assert(cg_bead_name_and_maps_.count(bead_name) &&
            "Map for the coarse grained bead type is not known.");
+
+    cout << "Box type " << cg_top.getBoundaryCondition()->getBoxType() << endl;
+    cout << "Box type " << atom_top.getBoundaryCondition()->getBoxType()
+         << endl;
     cg_bead_name_and_maps_.at(bead_name)->Apply(
         cg_top.getBoundaryCondition(), atomic_names_and_beads, cg_bead);
   }

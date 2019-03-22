@@ -520,15 +520,12 @@ void TemplateTopology<Bead_T, Molecule_T>::setBox(
 
   switch (boxtype) {
     case BoundaryCondition::typeTriclinic:
-      std::cout << "Box is triclinic" << std::endl;
       bc_ = TriclinicBox().Clone();
       break;
     case BoundaryCondition::typeOrthorhombic:
       bc_ = OrthorhombicBox().Clone();
-      std::cout << "Box is OrthoRhombic" << std::endl;
       break;
     default:
-      std::cout << "Box is Open" << std::endl;
       bc_ = OpenBox().Clone();
       break;
   }

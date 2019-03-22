@@ -106,9 +106,10 @@ void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
 
   assert(atomic_top.getBoxType() == cg_top.getBoxType() &&
          "box types of topology in and out differ");
+
   cg_top.setStep(atomic_top.getStep());
   cg_top.setTime(atomic_top.getTime());
-  cg_top.setBox(atomic_top.getBox());
+  cg_top.setBox(atomic_top.getBox(), atomic_top.getBoxType());
 
   // Cycle the cg molecules
 

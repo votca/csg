@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   beadH8.setType("H");
   beadH8.setId(8);
 
-  map<string, Bead*> atomic_beads;
+  map<string, const Bead*> atomic_beads;
   atomic_beads[subbeads.at(0)] = &beadC2;
   atomic_beads[subbeads.at(1)] = &beadH7;
   atomic_beads[subbeads.at(2)] = &beadH8;
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
   beadH8.setF(forceH8);
   beadH8.setMass(1.0);
 
-  map<string, Bead*> atomic_beads;
+  map<string, const Bead*> atomic_beads;
   atomic_beads[subbeads.at(0)] = &beadC2;
   atomic_beads[subbeads.at(1)] = &beadH7;
   atomic_beads[subbeads.at(2)] = &beadH8;

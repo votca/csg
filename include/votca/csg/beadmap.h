@@ -62,7 +62,7 @@ class BeadMap {
  public:
   virtual ~BeadMap(){};
   virtual void Apply(const BoundaryCondition *boundaries,
-                     std::map<std::string, Bead *> atomistic_beads,
+                     std::map<std::string, const Bead *> atomistic_beads,
                      Bead *cg_bead) = 0;
   virtual void Initialize(const std::vector<std::string> subbeads,
                           std::vector<double> weights,
@@ -95,7 +95,7 @@ class BeadMap {
 class Map_Sphere : public BeadMap {
  public:
   void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, Bead *> atomistic_beads,
+             std::map<std::string, const Bead *> atomistic_beads,
              Bead *cg_bead) override;
 
   void Initialize(const std::vector<std::string> subbeads,
@@ -127,7 +127,7 @@ inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
 class Map_Ellipsoid : public Map_Sphere {
  public:
   void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, Bead *> atomistic_beads,
+             std::map<std::string, const Bead *> atomistic_beads,
              Bead *cg_bead) override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
