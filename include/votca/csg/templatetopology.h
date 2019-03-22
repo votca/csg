@@ -41,8 +41,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 /**
  * @brief Creates a template topology class
  *
@@ -121,9 +119,9 @@ class TemplateTopology {
     return &beads_.at(id);
   }
 
-  std::unordered_map<int, const TOOLS::vec *> getBeadPositions(
+  std::unordered_map<int, const tools::vec *> getBeadPositions(
       std::vector<int> bead_ids) const {
-    std::unordered_map<int, const TOOLS::vec *> bead_id_and_positions;
+    std::unordered_map<int, const tools::vec *> bead_id_and_positions;
     for (int &bead_id : bead_ids) {
       bead_id_and_positions[bead_id] = &(beads_.at(bead_id).getPos());
     }
@@ -232,14 +230,14 @@ class TemplateTopology {
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const TOOLS::matrix &box, BoundaryCondition::eBoxtype boxtype =
+  void setBox(const tools::matrix &box, BoundaryCondition::eBoxtype boxtype =
                                             BoundaryCondition::typeAuto);
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const TOOLS::matrix &getBox() const { return bc_->getBox(); }
+  const tools::matrix &getBox() const { return bc_->getBox(); }
 
   /**
    * set the time of current frame
@@ -288,7 +286,7 @@ class TemplateTopology {
    * calculates the smallest distance between two beads with correct treatment
    * of pbc
    */
-  TOOLS::vec getDist(const int bead1, const int bead2) const;
+  tools::vec getDist(const int bead1, const int bead2) const;
 
   /**
    * \brief calculate shortest vector connecting two points
@@ -299,8 +297,8 @@ class TemplateTopology {
    * calculates the smallest distance between two points with correct treatment
    * of pbc
    */
-  TOOLS::vec BCShortestConnection(const TOOLS::vec &r1,
-                                  const TOOLS::vec &r2) const;
+  tools::vec BCShortestConnection(const tools::vec &r1,
+                                  const tools::vec &r2) const;
 
   /**
    * \brief return the shortest box size
@@ -420,7 +418,7 @@ class TemplateTopology {
   std::unique_ptr<BoundaryCondition> bc_;
 
   BoundaryCondition::eBoxtype autoDetectBoxType_(
-      const TOOLS::matrix &box) const;
+      const tools::matrix &box) const;
 
   /// beads in the topology
   std::unordered_map<int, Bead_T> beads_;
@@ -514,7 +512,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
 
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::setBox(
-    const TOOLS::matrix &box, BoundaryCondition::eBoxtype boxtype) {
+    const tools::matrix &box, BoundaryCondition::eBoxtype boxtype) {
   // determine box type automatically in case boxtype==typeAuto
   if (boxtype == BoundaryCondition::typeAuto) {
     boxtype = autoDetectBoxType_(box);
@@ -541,8 +539,8 @@ void TemplateTopology<Bead_T, Molecule_T>::setBox(
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::RenameMoleculesType(
     std::string range_molecule_ids, const std::string type) {
-  TOOLS::RangeParser rp;
-  TOOLS::RangeParser::iterator molecule_id_ptr;
+  tools::RangeParser rp;
+  tools::RangeParser::iterator molecule_id_ptr;
 
   rp.Parse(range_molecule_ids);
   for (molecule_id_ptr = rp.begin(); molecule_id_ptr != rp.end();
@@ -560,7 +558,7 @@ void TemplateTopology<Bead_T, Molecule_T>::RenameBeadsType(
     const std::string old_type, std::string new_type) {
   for (std::pair<const int, Bead_T> &id_and_bead : beads_) {
     std::string bead_type = id_and_bead.second.getType();
-    if (TOOLS::wildcmp(bead_type.c_str(), old_type.c_str())) {
+    if (tools::wildcmp(bead_type.c_str(), old_type.c_str())) {
       id_and_bead.second.setType(new_type);
     }
   }
@@ -572,7 +570,7 @@ void TemplateTopology<Bead_T, Molecule_T>::setBeadOfGivenTypeToNewMass(
 
   for (std::pair<const int, Bead_T> &id_and_bead : beads_) {
     std::string bead_type = id_and_bead.second.getType();
-    if (TOOLS::wildcmp(bead_type.c_str(), type.c_str())) {
+    if (tools::wildcmp(bead_type.c_str(), type.c_str())) {
       id_and_bead.second.setMass(mass);
     }
   }
@@ -609,13 +607,13 @@ std::list<Interaction *>
 }
 
 template <class Bead_T, class Molecule_T>
-TOOLS::vec TemplateTopology<Bead_T, Molecule_T>::BCShortestConnection(
-    const TOOLS::vec &r_i, const TOOLS::vec &r_j) const {
+tools::vec TemplateTopology<Bead_T, Molecule_T>::BCShortestConnection(
+    const tools::vec &r_i, const tools::vec &r_j) const {
   return bc_->BCShortestConnection(r_i, r_j);
 }
 
 template <class Bead_T, class Molecule_T>
-TOOLS::vec TemplateTopology<Bead_T, Molecule_T>::getDist(
+tools::vec TemplateTopology<Bead_T, Molecule_T>::getDist(
     const int bead1, const int bead2) const {
   return BCShortestConnection(getBead(bead1)->getPos(),
                               getBead(bead2)->getPos());
@@ -624,7 +622,7 @@ TOOLS::vec TemplateTopology<Bead_T, Molecule_T>::getDist(
 template <class Bead_T, class Molecule_T>
 BoundaryCondition::eBoxtype
     TemplateTopology<Bead_T, Molecule_T>::autoDetectBoxType_(
-        const TOOLS::matrix &box) const {
+        const tools::matrix &box) const {
   // set the box type to OpenBox in case "box" is the zero matrix,
   // to OrthorhombicBox in case "box" is a diagonal matrix,
   // or to TriclinicBox otherwise

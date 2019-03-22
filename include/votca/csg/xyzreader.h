@@ -92,12 +92,12 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     tools::vec posnm = pos * tools::conv::ang2nm;
     if (topology) {
 
-      TOOLS::byte_t symmetry = 1;
-      std::string element = TOOLS::topology_constants::unassigned_element;
-      int molecule_id = TOOLS::topology_constants::unassigned_molecule_id;
-      int residue_id = TOOLS::topology_constants::unassigned_residue_id;
+      tools::byte_t symmetry = 1;
+      std::string element = tools::topology_constants::unassigned_element;
+      int molecule_id = tools::topology_constants::unassigned_molecule_id;
+      int residue_id = tools::topology_constants::unassigned_residue_id;
       std::string residue_type =
-          TOOLS::topology_constants::unassigned_residue_type;
+          tools::topology_constants::unassigned_residue_type;
       double mass = 0.0;
       double charge = 0.0;
 
@@ -125,7 +125,7 @@ inline bool XYZReader::ReadFrame(T &container) {
   ++_line;
   if (!_fl.eof()) {
     // read the number of atoms
-    TOOLS::Tokenizer tok1(line, " \t");
+    tools::Tokenizer tok1(line, " \t");
     std::vector<std::string> line1;
     tok1.ToVector(line1);
     if (line1.size() != 1) {
@@ -141,7 +141,7 @@ inline bool XYZReader::ReadFrame(T &container) {
     // the title line
     getline(_fl, line);
     ++_line;
-    TOOLS::Elements elements;
+    tools::Elements elements;
     // read atoms
     for (int bead_id = 0; bead_id < natoms; ++bead_id) {
       getline(_fl, line);
@@ -151,7 +151,7 @@ inline bool XYZReader::ReadFrame(T &container) {
         throw std::runtime_error("unexpected end of file in xyz file");
       }
       std::vector<std::string> fields;
-      TOOLS::Tokenizer tok(line, " ");
+      tools::Tokenizer tok(line, " ");
       tok.ToVector(fields);
       if (fields.size() != 4) {
         throw std::runtime_error("invalide line " +
@@ -161,14 +161,14 @@ inline bool XYZReader::ReadFrame(T &container) {
 
       std::string name_upper_case =
           boost::to_upper_copy<std::string>(fields[0]);
-      std::string element = TOOLS::topology_constants::unassigned_element;
+      std::string element = tools::topology_constants::unassigned_element;
       if (elements.isEleFull(name_upper_case)) {
         element = elements.getEleShort(name_upper_case);
       } else if (elements.isEleShort(fields[0])) {
         element = fields[0];
       }
 
-      tools::vec pos = TOOLS::vec(boost::lexical_cast<double>(fields[1]),
+      tools::vec pos = tools::vec(boost::lexical_cast<double>(fields[1]),
                                   boost::lexical_cast<double>(fields[2]),
                                   boost::lexical_cast<double>(fields[3]));
 

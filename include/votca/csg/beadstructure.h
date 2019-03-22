@@ -27,8 +27,6 @@
 #include <votca/tools/graphalgorithm.h>
 #include <votca/tools/graphdistvisitor.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -118,7 +116,7 @@ class BeadStructure {
    *
    * @return graph
    */
-  TOOLS::Graph getGraph();
+  tools::Graph getGraph();
 
   /**
    * \brief Compare the topology of two bead structures
@@ -138,17 +136,17 @@ class BeadStructure {
  protected:
   void InitializeGraph_();
   void CalculateStructure_();
-  TOOLS::GraphNode BaseBeadToGraphNode_(T *basebead);
+  tools::GraphNode BaseBeadToGraphNode_(T *basebead);
 
   bool structureIdUpToDate = false;
   bool graphUpToDate = false;
   bool single_structureUpToDate_ = false;
   bool single_structure_ = false;
   std::string structure_id_ = "";
-  TOOLS::Graph graph_;
-  std::set<TOOLS::Edge> connections_;
+  tools::Graph graph_;
+  std::set<tools::Edge> connections_;
   std::unordered_map<int, T *> beads_;
-  std::unordered_map<int, TOOLS::GraphNode> graphnodes_;
+  std::unordered_map<int, tools::GraphNode> graphnodes_;
 };
 
 /**********************
@@ -158,8 +156,8 @@ class BeadStructure {
 template <class T>
 void BeadStructure<T>::InitializeGraph_() {
   if (!graphUpToDate) {
-    std::vector<TOOLS::Edge> connections_vector;
-    for (const TOOLS::Edge &edge : connections_) {
+    std::vector<tools::Edge> connections_vector;
+    for (const tools::Edge &edge : connections_) {
       connections_vector.push_back(edge);
     }
 
@@ -167,7 +165,7 @@ void BeadStructure<T>::InitializeGraph_() {
       graphnodes_[id_bead_ptr_pair.first] =
           BaseBeadToGraphNode_(id_bead_ptr_pair.second);
     }
-    graph_ = TOOLS::Graph(connections_vector, graphnodes_);
+    graph_ = tools::Graph(connections_vector, graphnodes_);
     graphUpToDate = true;
   }
 }
@@ -177,13 +175,13 @@ void BeadStructure<T>::CalculateStructure_() {
 
   InitializeGraph_();
   if (!structureIdUpToDate) {
-    structure_id_ = TOOLS::findStructureId<TOOLS::GraphDistVisitor>(graph_);
+    structure_id_ = tools::findStructureId<tools::GraphDistVisitor>(graph_);
     structureIdUpToDate = true;
   }
 }
 
 template <class T>
-TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
+tools::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   std::unordered_map<std::string, double> attributes1;
   std::unordered_map<std::string, std::string> attributes2;
 
@@ -191,7 +189,7 @@ TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   attributes2["Type"] = basebead->getType();
 
   /// Add graphnodes
-  TOOLS::GraphNode graphnode;
+  tools::GraphNode graphnode;
   graphnode.setDouble(attributes1);
   graphnode.setStr(attributes2);
 
@@ -233,7 +231,7 @@ void BeadStructure<T>::ConnectBeads(int bead1_id, int bead2_id) {
     throw std::invalid_argument(err);
   }
   size_t numberOfConnections = connections_.size();
-  connections_.insert(TOOLS::Edge(bead1_id, bead2_id));
+  connections_.insert(tools::Edge(bead1_id, bead2_id));
   if (numberOfConnections != connections_.size()) {
     single_structureUpToDate_ = false;
     graphUpToDate = false;
@@ -242,7 +240,7 @@ void BeadStructure<T>::ConnectBeads(int bead1_id, int bead2_id) {
 }
 
 template <class T>
-TOOLS::Graph BeadStructure<T>::getGraph() {
+tools::Graph BeadStructure<T>::getGraph() {
   InitializeGraph_();
   return graph_;
 }
@@ -258,7 +256,7 @@ bool BeadStructure<T>::isSingleStructure() {
       return single_structure_;
     }
     // Choose first vertex that is actually in the graph as the starting vertex
-    TOOLS::Graph_BF_Visitor gv_breadth_first;
+    tools::Graph_BF_Visitor gv_breadth_first;
     gv_breadth_first.setStartingVertex(vertices.at(0));
     if (!singleNetwork(graph_, gv_breadth_first)) {
       single_structure_ = false;

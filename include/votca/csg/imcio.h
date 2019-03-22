@@ -27,19 +27,18 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
 void imcio_write_dS(const std::string &file, Eigen::VectorXd &r,
                     Eigen::VectorXd &dS, std::list<int> *list = NULL);
 void imcio_write_matrix(const std::string &file, Eigen::MatrixXd &gmc,
                         std::list<int> *list = NULL);
 void imcio_write_index(const std::string &file, std::vector<std::string> &names,
-                       std::vector<TOOLS::RangeParser> &ranges);
+                       std::vector<tools::RangeParser> &ranges);
 
 void imcio_read_dS(const std::string &file, Eigen::VectorXd &r,
                    Eigen::VectorXd &dS);
 void imcio_read_matrix(const std::string &file, Eigen::MatrixXd &gmc);
 void imcio_read_index(const std::string &file, std::vector<std::string> &names,
-                      std::vector<TOOLS::RangeParser> &ranges);
+                      std::vector<tools::RangeParser> &ranges);
 
 }  // namespace csg
 }  // namespace votca

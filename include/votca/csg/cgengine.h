@@ -39,8 +39,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class CGEngine {
  public:
   CGEngine(){};
@@ -92,7 +90,7 @@ class CGEngine {
 inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();
        iter != _ignores.end(); ++iter) {
-    if (TOOLS::wildcmp(iter->c_str(), molecule_type.c_str())) return true;
+    if (tools::wildcmp(iter->c_str(), molecule_type.c_str())) return true;
   }
   return false;
 }

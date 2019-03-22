@@ -27,8 +27,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class CSG_Topology : public TemplateTopology<Bead, Molecule> {
  public:
   ~CSG_Topology(){};
@@ -45,7 +43,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     return &molecules_[id];
   }
 
-  Bead* CreateBead(TOOLS::byte_t symmetry, std::string bead_type, int bead_id,
+  Bead* CreateBead(tools::byte_t symmetry, std::string bead_type, int bead_id,
                    int molecule_id, int residue_id, std::string residue_type,
                    std::string element_symbol, double mass, double charge) {
 

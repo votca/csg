@@ -27,7 +27,6 @@
 #include <vector>
 #include <votca/tools/constants.h>
 #include <votca/tools/vec.h>
-namespace TOOLS = votca::tools;
 
 namespace votca {
 namespace csg {
@@ -49,7 +48,7 @@ class Interaction {
         group_(""),
         group_id_(-1),
         interaction_type_(InteractionType::unassigned),
-        mol_id_(TOOLS::topology_constants::unassigned_molecule_id){};
+        mol_id_(tools::topology_constants::unassigned_molecule_id){};
 
   virtual ~Interaction() {}
 
@@ -57,7 +56,7 @@ class Interaction {
 
   virtual double EvaluateVar(
       const BoundaryCondition &bc,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const = 0;
+      std::unordered_map<int, const tools::vec *> bead_positions) const = 0;
 
   InteractionType getType() const { return interaction_type_; }
 
@@ -82,14 +81,14 @@ class Interaction {
 
   void setMoleculeId(const int &mol_id) { mol_id_ = mol_id; }
   const int &getMolecule() const {
-    assert(mol_id_ != TOOLS::topology_constants::unassigned_molecule_id &&
+    assert(mol_id_ != tools::topology_constants::unassigned_molecule_id &&
            "Cannot access interaction molecule id as it has not been set");
     return mol_id_;
   }
 
-  virtual TOOLS::vec Grad(
+  virtual tools::vec Grad(
       const BoundaryCondition &bc, int bead_id,
-      std::unordered_map<int, const TOOLS::vec *> bead_positions) const = 0;
+      std::unordered_map<int, const tools::vec *> bead_positions) const = 0;
   int BeadCount() { return bead_ids_.size(); }
 
   /**
@@ -143,10 +142,10 @@ class IBond : public Interaction {
   }
 
   double EvaluateVar(const BoundaryCondition &bc,
-                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+                     std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
-  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
-                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+  tools::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
 
  private:
@@ -169,10 +168,10 @@ class IAngle : public Interaction {
     return std::unique_ptr<Interaction>(new IAngle(*this));
   }
   double EvaluateVar(const BoundaryCondition &bc,
-                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+                     std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
-  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
-                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+  tools::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
 
  private:
@@ -196,10 +195,10 @@ class IDihedral : public Interaction {
   }
 
   double EvaluateVar(const BoundaryCondition &bc,
-                     std::unordered_map<int, const TOOLS::vec *> bead_positions)
+                     std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
-  TOOLS::vec Grad(const BoundaryCondition &bc, int bead_id,
-                  std::unordered_map<int, const TOOLS::vec *> bead_positions)
+  tools::vec Grad(const BoundaryCondition &bc, int bead_id,
+                  std::unordered_map<int, const tools::vec *> bead_positions)
       const override;
 
  private:
@@ -214,15 +213,15 @@ class IDihedral : public Interaction {
 
 inline double IBond::EvaluateVar(
     const BoundaryCondition &bc,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
   return abs(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
                                      *bead_positions.at(bead_ids_.at(1))));
 }
 
-inline TOOLS::vec IBond::Grad(
+inline tools::vec IBond::Grad(
     const BoundaryCondition &bc, int bead_id,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  TOOLS::vec r = bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
+  tools::vec r = bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
                                          *bead_positions.at(bead_ids_.at(1)));
   r.normalize();
   return (bead_id == 0) ? -r : r;
@@ -230,20 +229,20 @@ inline TOOLS::vec IBond::Grad(
 
 inline double IAngle::EvaluateVar(
     const BoundaryCondition &bc,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
+  tools::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(0))));
-  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+  tools::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(2))));
   return acos(v1 * v2 / sqrt((v1 * v1) * (v2 * v2)));
 }
 
-inline TOOLS::vec IAngle::Grad(
+inline tools::vec IAngle::Grad(
     const BoundaryCondition &bc, int bead_id,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
+  tools::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(0))));
-  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+  tools::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(2))));
 
   double acos_prime =
@@ -269,42 +268,42 @@ inline TOOLS::vec IAngle::Grad(
   }
   // should never reach this
   assert(false);
-  return TOOLS::vec(0, 0, 0);
+  return tools::vec(0, 0, 0);
 }
 inline double IDihedral::EvaluateVar(
     const BoundaryCondition &bc,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
+  tools::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
                                         *bead_positions.at(bead_ids_.at(1))));
-  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+  tools::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(2))));
-  TOOLS::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
+  tools::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
                                         *bead_positions.at(bead_ids_.at(3))));
-  TOOLS::vec n1, n2;
+  tools::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
   double sign = (v1 * n2 < 0) ? -1 : 1;
   return sign * acos(n1 * n2 / sqrt((n1 * n1) * (n2 * n2)));
 }
 
-inline TOOLS::vec IDihedral::Grad(
+inline tools::vec IDihedral::Grad(
     const BoundaryCondition &bc, int bead_id,
-    std::unordered_map<int, const TOOLS::vec *> bead_positions) const {
-  TOOLS::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
+    std::unordered_map<int, const tools::vec *> bead_positions) const {
+  tools::vec v1(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(0)),
                                         *bead_positions.at(bead_ids_.at(1))));
-  TOOLS::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
+  tools::vec v2(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(1)),
                                         *bead_positions.at(bead_ids_.at(2))));
-  TOOLS::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
+  tools::vec v3(bc.BCShortestConnection(*bead_positions.at(bead_ids_.at(2)),
                                         *bead_positions.at(bead_ids_.at(3))));
-  TOOLS::vec n1, n2;
+  tools::vec n1, n2;
   n1 = v1 ^ v2;  // calculate the normal vector
   n2 = v2 ^ v3;  // calculate the normal vector
   double sign = (v1 * n2 < 0) ? -1 : 1;
-  TOOLS::vec returnvec;                       // vector to return
+  tools::vec returnvec;                       // vector to return
   double returnvec0, returnvec1, returnvec2;  // components of the return vector
-  TOOLS::vec e0(1, 0, 0);  // unit vector pointing in x-direction
-  TOOLS::vec e1(0, 1, 0);  // unit vector pointing in y-direction
-  TOOLS::vec e2(0, 0, 1);  // unit vector pointing in z-direction
+  tools::vec e0(1, 0, 0);  // unit vector pointing in x-direction
+  tools::vec e1(0, 1, 0);  // unit vector pointing in y-direction
+  tools::vec e2(0, 0, 1);  // unit vector pointing in z-direction
 
   double acos_prime =
       (-1.0 / (sqrt(1 - (n1 * n2) * (n1 * n2) /
@@ -408,7 +407,7 @@ inline TOOLS::vec IDihedral::Grad(
   }
   // should never reach this
   assert(false);
-  return TOOLS::vec(0, 0, 0);
+  return tools::vec(0, 0, 0);
 }
 }  // namespace csg
 }  // namespace votca

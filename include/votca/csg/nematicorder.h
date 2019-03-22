@@ -23,7 +23,6 @@
 
 namespace votca {
 namespace csg {
-namespace TOOLS = votca::tools;
 
 class NematicOrder {
  public:
@@ -32,13 +31,13 @@ class NematicOrder {
 
   void Process(CSG_Topology &top, const std::string &filter = "*");
 
-  TOOLS::matrix::eigensystem_t &NematicU() { return _nemat_u; }
-  TOOLS::matrix::eigensystem_t &NematicV() { return _nemat_v; }
-  TOOLS::matrix::eigensystem_t &NematicW() { return _nemat_w; }
+  tools::matrix::eigensystem_t &NematicU() { return _nemat_u; }
+  tools::matrix::eigensystem_t &NematicV() { return _nemat_v; }
+  tools::matrix::eigensystem_t &NematicW() { return _nemat_w; }
 
  private:
-  TOOLS::matrix _mu, _mv, _mw;
-  TOOLS::matrix::eigensystem_t _nemat_u, _nemat_v, _nemat_w;
+  tools::matrix _mu, _mv, _mw;
+  tools::matrix::eigensystem_t _nemat_u, _nemat_v, _nemat_w;
 };
 
 }  // namespace csg

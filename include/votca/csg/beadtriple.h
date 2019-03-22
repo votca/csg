@@ -21,8 +21,6 @@
 #include <tuple>
 #include <votca/tools/vec.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -38,8 +36,8 @@ class Bead;
 class BeadTriple : public std::tuple<Bead *, Bead *, Bead *> {
  public:
   BeadTriple() {}
-  BeadTriple(Bead *bead1, Bead *bead2, Bead *bead3, TOOLS::vec r12,
-             TOOLS::vec r13, TOOLS::vec r23)
+  BeadTriple(Bead *bead1, Bead *bead2, Bead *bead3, tools::vec r12,
+             tools::vec r13, tools::vec r23)
       : std::tuple<Bead *, Bead *, Bead *>(bead1, bead2, bead3),
         _r12(r12),
         _r13(r13),
@@ -56,18 +54,18 @@ class BeadTriple : public std::tuple<Bead *, Bead *, Bead *> {
   const Bead *bead3() { return std::get<2>(*this); }
 
   /// \brief the vector connecting two beads
-  TOOLS::vec &r12() { return _r12; }
-  TOOLS::vec &r13() { return _r13; }
-  TOOLS::vec &r23() { return _r23; }
+  tools::vec &r12() { return _r12; }
+  tools::vec &r13() { return _r13; }
+  tools::vec &r23() { return _r23; }
   /// \brief the distance of the beads
   double &dist12() { return _dist12; }
   double &dist13() { return _dist13; }
   double &dist23() { return _dist23; }
 
  protected:
-  TOOLS::vec _r12;
-  TOOLS::vec _r13;
-  TOOLS::vec _r23;
+  tools::vec _r12;
+  tools::vec _r13;
+  tools::vec _r23;
   double _dist12;
   double _dist13;
   double _dist23;

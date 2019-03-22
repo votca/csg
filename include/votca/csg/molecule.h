@@ -28,8 +28,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class Interaction;
 
 /**

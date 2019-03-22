@@ -26,15 +26,13 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class XYZWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
   void Close();
 
   void RegisteredAt(
-      TOOLS::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
   void Write(CSG_Topology *conf);
 

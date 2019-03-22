@@ -59,12 +59,12 @@ class CGForceMatching : public CsgApplication {
   void LoadOptions(const std::string &file);
 
  protected:
-  /// \brief structure, which contains TOOLS::CubicSpline object with related
+  /// \brief structure, which contains tools::CubicSpline object with related
   /// parameters
   struct SplineInfo {
     /// \brief constructor
     SplineInfo(int index, bool bonded_, int matr_pos_,
-               TOOLS::Property *options);
+               tools::Property *options);
     /// \brief number of spline functions
     int num_splinefun;
     /// \brief number of spline grid points
@@ -84,8 +84,8 @@ class CGForceMatching : public CsgApplication {
     double a;
     double sigma;
     double gamma;
-    /// \brief TOOLS::CubicSpline object
-    TOOLS::CubicSpline Spline;
+    /// \brief tools::CubicSpline object
+    tools::CubicSpline Spline;
     /// \brief position in the _A matrix (first coloumn which is occupied with
     /// this particular spline)
     int matr_pos;
@@ -124,15 +124,15 @@ class CGForceMatching : public CsgApplication {
     /// used if threebody interaction)
     std::string type1, type2, type3;  //
 
-    /// \brief pointer to TOOLS::Property object to hande input options
-    TOOLS::Property *_options;
+    /// \brief pointer to tools::Property object to hande input options
+    tools::Property *_options;
   };
-  /// \brief TOOLS::Property object to hande input options
-  TOOLS::Property _options;
+  /// \brief tools::Property object to hande input options
+  tools::Property _options;
   /// \brief std::list of bonded interactions
-  std::list<TOOLS::Property *> _bonded;
+  std::list<tools::Property *> _bonded;
   /// \brief std::list of non-bonded interactions
-  std::list<TOOLS::Property *> _nonbonded;
+  std::list<tools::Property *> _nonbonded;
 
   typedef std::vector<SplineInfo *> SplineContainer;
   /// \brief std::vector of SplineInfo * for all interactions

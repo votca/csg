@@ -24,8 +24,6 @@
 #include <votca/tools/matrix.h>
 #include <votca/tools/vec.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -58,13 +56,13 @@ class BoundaryCondition {
    * set the simulation box
    * \param box triclinic box matrix
    */
-  void setBox(const TOOLS::matrix &box) { box_ = box; };
+  void setBox(const tools::matrix &box) { box_ = box; };
 
   /**
    * get the simulation box
    * \return triclinic box matrix
    */
-  const TOOLS::matrix &getBox() const { return box_; };
+  const tools::matrix &getBox() const { return box_; };
 
   /**
    * get the volume of the box
@@ -76,8 +74,8 @@ class BoundaryCondition {
    * get shortest connection vector between r_i and r_j with respect to the
    * (periodic) box \return shortest distance vector
    */
-  virtual TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                          const TOOLS::vec &r_j) const {
+  virtual tools::vec BCShortestConnection(const tools::vec &r_i,
+                                          const tools::vec &r_j) const {
     throw std::runtime_error("BCShortestConnection is not implemented.");
   }
 
@@ -89,7 +87,7 @@ class BoundaryCondition {
   }
 
  protected:
-  TOOLS::matrix box_;
+  tools::matrix box_;
 };
 
 }  // namespace csg

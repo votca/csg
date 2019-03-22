@@ -34,14 +34,14 @@ double BoundaryCondition::getShortestBoxDimension() const {
   cout << "Getting box columns" << endl;
   assert(getBoxType() != eBoxtype::typeOpen &&
          "Cannot get the shortest dimension of the box because it is open");
-  TOOLS::vec _box_a = box_.getCol(0);
-  TOOLS::vec _box_b = box_.getCol(1);
-  TOOLS::vec _box_c = box_.getCol(2);
+  vec _box_a = box_.getCol(0);
+  vec _box_b = box_.getCol(1);
+  vec _box_c = box_.getCol(2);
 
   // create plane normals
-  TOOLS::vec _norm_a = _box_b ^ _box_c;
-  TOOLS::vec _norm_b = _box_c ^ _box_a;
-  TOOLS::vec _norm_c = _box_a ^ _box_b;
+  vec _norm_a = _box_b ^ _box_c;
+  vec _norm_b = _box_c ^ _box_a;
+  vec _norm_c = _box_a ^ _box_b;
 
   _norm_a.normalize();
   _norm_b.normalize();

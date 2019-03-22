@@ -27,8 +27,6 @@
 
 #include "basebead.h"
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -109,19 +107,19 @@ class Bead : public BaseBead {
    *
    * \return bead symmetry
    */
-  TOOLS::byte_t getSymmetry() const { return symmetry_; }
+  tools::byte_t getSymmetry() const { return symmetry_; }
 
   /**
    * set the velocity of the bead
    * @param r bead velocity
    */
-  void setVel(const TOOLS::vec &r);
+  void setVel(const tools::vec &r);
 
   /**
    * get the velocity of the bead
    * \return bead velocity
    */
-  const TOOLS::vec &getVel() const;
+  const tools::vec &getVel() const;
 
   /**
    * \brief set first orientation (normal vector) vector of bead
@@ -130,7 +128,7 @@ class Bead : public BaseBead {
    *
    * @param u bead orientation u
    */
-  void setU(const TOOLS::vec &u);
+  void setU(const tools::vec &u);
 
   /**
    * \brief get first orientation (normal vector) vector of bead
@@ -147,7 +145,7 @@ class Bead : public BaseBead {
    *
    * \return bead orientation u
    */
-  const TOOLS::vec &getU() const;
+  const tools::vec &getU() const;
 
   /**
    * \brief set second orientation vector of bead
@@ -156,7 +154,7 @@ class Bead : public BaseBead {
    *
    * @param v bead orientation v
    */
-  void setV(const TOOLS::vec &v);
+  void setV(const tools::vec &v);
 
   /**
    * \brief get second orientation vector of bead
@@ -169,7 +167,7 @@ class Bead : public BaseBead {
    *
    * \return bead orientation u
    */
-  const TOOLS::vec &getV() const;
+  const tools::vec &getV() const;
 
   /**
    * \brief set third orientation vector of bead
@@ -178,7 +176,7 @@ class Bead : public BaseBead {
    *
    * @param w bead orientation w
    */
-  void setW(const TOOLS::vec &w);
+  void setW(const tools::vec &w);
 
   /**
    * \brief get third orientation vector of bead
@@ -190,13 +188,13 @@ class Bead : public BaseBead {
    *
    * \return bead orientation w
    */
-  const TOOLS::vec &getW() const;
+  const tools::vec &getW() const;
 
   /**
    * direct access (read/write) to the velocity of the bead
    * \return reference to velocity
    */
-  TOOLS::vec &Vel() {
+  tools::vec &Vel() {
     assert(bead_velocity_set_ &&
            "Cannot access velocity, it has not been set.");
     return velocity_;
@@ -206,7 +204,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to orientation u of the bead
    * \return reference to u
    */
-  TOOLS::vec &U() {
+  tools::vec &U() {
     assert(bU_ && "Cannot access bead orientation u, has not been set.");
     return u_;
   }
@@ -215,7 +213,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the orientation v of the bead
    * \return reference to v
    */
-  TOOLS::vec &V() {
+  tools::vec &V() {
     assert(bV_ && "Cannot access bead orientation v, has not been set.");
     return v_;
   }
@@ -224,7 +222,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the orientation w of the bead
    * \return reference to w
    */
-  TOOLS::vec &W() {
+  tools::vec &W() {
     assert(bW_ && "Cannot access bead orientation w, has not been set.");
     return w_;
   }
@@ -233,7 +231,7 @@ class Bead : public BaseBead {
    * direct access (read/write) to the force of the bead
    * \return reference to force
    */
-  TOOLS::vec &F() {
+  tools::vec &F() {
     assert(bead_force_set_ && "Cannot access bead force, has not been set.");
     return bead_force_;
   }
@@ -242,7 +240,7 @@ class Bead : public BaseBead {
    * set force acting on bead
    * @param bead_force force
    */
-  void setF(const TOOLS::vec &bead_force);
+  void setF(const tools::vec &bead_force);
 
   /**
    * \brief get the force acting on the bead
@@ -252,7 +250,7 @@ class Bead : public BaseBead {
    *
    * \return force on bead
    */
-  const TOOLS::vec &getF() const;
+  const tools::vec &getF() const;
 
   /** does this configuration store velocities? */
   bool HasVel() const { return bead_velocity_set_; }
@@ -323,17 +321,17 @@ class Bead : public BaseBead {
  protected:
   std::vector<int> parent_beads_;
 
-  TOOLS::Name residue_type_;
+  tools::Name residue_type_;
 
   // Bead label is composed of ResidueNumber:ResidueType:bead_type
-  TOOLS::Name bead_label_;
+  tools::Name bead_label_;
 
-  TOOLS::byte_t symmetry_;
+  tools::byte_t symmetry_;
   double charge_;
 
   int residue_id_ = -1;
 
-  TOOLS::vec velocity_, bead_force_, u_, v_, w_;
+  tools::vec velocity_, bead_force_, u_, v_, w_;
 
   bool bead_velocity_set_;
   bool bU_;
@@ -342,7 +340,7 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(TOOLS::byte_t symmetry, int id, std::string type, int residue_id,
+  Bead(tools::byte_t symmetry, int id, std::string type, int residue_id,
        std::string residue_type, int molecule_id, std::string element_symbol,
        double m, double q)
       : symmetry_(symmetry), charge_(q), residue_id_(residue_id) {
@@ -364,53 +362,53 @@ class Bead : public BaseBead {
   friend class Molecule;
 };
 
-inline void Bead::setVel(const TOOLS::vec &r) {
+inline void Bead::setVel(const tools::vec &r) {
   bead_velocity_set_ = true;
   velocity_ = r;
 }
 
-inline const TOOLS::vec &Bead::getVel() const {
+inline const tools::vec &Bead::getVel() const {
   assert(bead_velocity_set_ &&
          "Cannot access bead velocity, has not been set.");
   return velocity_;
 }
 
-inline void Bead::setU(const TOOLS::vec &u) {
+inline void Bead::setU(const tools::vec &u) {
   bU_ = true;
   u_ = u;
 }
 
-inline const TOOLS::vec &Bead::getU() const {
+inline const tools::vec &Bead::getU() const {
   assert(bU_ && "Cannot access bead orientation u, has not been set.");
   return u_;
 }
 
-inline void Bead::setV(const TOOLS::vec &v) {
+inline void Bead::setV(const tools::vec &v) {
   bV_ = true;
   v_ = v;
 }
 
-inline const TOOLS::vec &Bead::getV() const {
+inline const tools::vec &Bead::getV() const {
   assert(bV_);
   return v_;
 }
 
-inline void Bead::setW(const TOOLS::vec &w) {
+inline void Bead::setW(const tools::vec &w) {
   bW_ = true;
   w_ = w;
 }
 
-inline const TOOLS::vec &Bead::getW() const {
+inline const tools::vec &Bead::getW() const {
   assert(bW_ && "Cannot access bead orientation w, has not been set.");
   return w_;
 }
 
-inline void Bead::setF(const TOOLS::vec &bead_force) {
+inline void Bead::setF(const tools::vec &bead_force) {
   bead_force_set_ = true;
   bead_force_ = bead_force;
 }
 
-inline const TOOLS::vec &Bead::getF() const {
+inline const tools::vec &Bead::getF() const {
   assert(bead_force_set_ && "Cannot access bead force, has not been set.");
   return bead_force_;
 }

@@ -25,8 +25,6 @@
 #include <votca/tools/name.h>
 #include <votca/tools/vec.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -93,19 +91,19 @@ class BaseBead {
    * set the position of the base bead
    * \param - base bead position
    */
-  virtual void setPos(const TOOLS::vec &bead_position);
+  virtual void setPos(const tools::vec &bead_position);
 
   /**
    * get the position of the base bead
    * \return base bead position
    */
-  virtual const TOOLS::vec &getPos() const;
+  virtual const tools::vec &getPos() const;
 
   /**
    * direct access (read/write) to the position of the base bead
    * \return reference to position
    */
-  virtual TOOLS::vec &Pos() {
+  virtual tools::vec &Pos() {
     assert(bead_position_set_ && "Position is not set.");
     return bead_position_;
   }
@@ -119,22 +117,22 @@ class BaseBead {
  protected:
   BaseBead() : mass_(0.0), bead_position_set_(false){};
 
-  TOOLS::Identity<int> molecule_id_;
-  TOOLS::Identity<int> id_;
-  TOOLS::Name type_;
-  TOOLS::Name element_symbol_;
+  tools::Identity<int> molecule_id_;
+  tools::Identity<int> id_;
+  tools::Name type_;
+  tools::Name element_symbol_;
   double mass_;
-  TOOLS::vec bead_position_;
+  tools::vec bead_position_;
 
   bool bead_position_set_;
 };
 
-inline void BaseBead::setPos(const TOOLS::vec &bead_position) {
+inline void BaseBead::setPos(const tools::vec &bead_position) {
   bead_position_set_ = true;
   bead_position_ = bead_position;
 }
 
-inline const TOOLS::vec &BaseBead::getPos() const {
+inline const tools::vec &BaseBead::getPos() const {
   assert(bead_position_set_ &&
          "Cannot get bead position as it has not been set.");
   return bead_position_;

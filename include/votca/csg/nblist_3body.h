@@ -26,7 +26,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
 /**
  * \brief Neighbour list class for 3 body interactions
  *
@@ -85,20 +84,20 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
   template <typename T>
   void SetMatchFunction(T *object,
                         bool (T::*fkt)(Bead *, Bead *, Bead *,
-                                       const TOOLS::vec &, const TOOLS::vec &,
-                                       const TOOLS::vec &, const double dist12,
+                                       const tools::vec &, const tools::vec &,
+                                       const tools::vec &, const double dist12,
                                        const double dist13,
                                        const double dist23));
 
   /// \brief match function for static member functions or plain functions
-  void SetMatchFunction(bool (*fkt)(Bead *, Bead *, Bead *, const TOOLS::vec &,
-                                    const TOOLS::vec &, const TOOLS::vec &,
+  void SetMatchFunction(bool (*fkt)(Bead *, Bead *, Bead *, const tools::vec &,
+                                    const tools::vec &, const tools::vec &,
                                     const double dist12, const double dist13,
                                     const double dist23));
 
   /// standard match function
-  static bool match_always(Bead *b1, Bead *b2, Bead *b3, const TOOLS::vec &r12,
-                           const TOOLS::vec &r13, const TOOLS::vec &r23,
+  static bool match_always(Bead *b1, Bead *b2, Bead *b3, const tools::vec &r12,
+                           const tools::vec &r13, const tools::vec &r23,
                            const double dist12, const double dist13,
                            const double dist23) {
     return true;
@@ -118,17 +117,17 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
   template <typename triple_type>
   static BeadTriple *beadtriple_create_policy(Bead *bead1, Bead *bead2,
                                               Bead *bead3,
-                                              const TOOLS::vec &r12,
-                                              const TOOLS::vec &r13,
-                                              const TOOLS::vec &r23) {
+                                              const tools::vec &r12,
+                                              const tools::vec &r13,
+                                              const tools::vec &r23) {
     return dynamic_cast<BeadTriple *>(
         new triple_type(bead1, bead2, bead3, r12, r13, r23));
   }
 
   typedef BeadTriple *(*triple_creator_t)(Bead *bead1, Bead *bead2, Bead *bead3,
-                                          const TOOLS::vec &r12,
-                                          const TOOLS::vec &r13,
-                                          const TOOLS::vec &r23);
+                                          const tools::vec &r12,
+                                          const tools::vec &r13,
+                                          const tools::vec &r23);
   /// the current bead pair creator function
   triple_creator_t _triple_creator;
 
@@ -138,8 +137,8 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
   class Functor {
    public:
     Functor() {}
-    virtual bool operator()(Bead *, Bead *, Bead *, const TOOLS::vec &,
-                            const TOOLS::vec &, const TOOLS::vec &,
+    virtual bool operator()(Bead *, Bead *, Bead *, const tools::vec &,
+                            const tools::vec &, const tools::vec &,
                             const double dist12, const double dist13,
                             const double dist23) = 0;
     virtual ~Functor(){};
@@ -149,15 +148,15 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
   template <typename T>
   class FunctorMember : public Functor {
    public:
-    typedef bool (T::*fkt_t)(Bead *, Bead *, Bead *, const TOOLS::vec &,
-                             const TOOLS::vec &, const TOOLS::vec &,
+    typedef bool (T::*fkt_t)(Bead *, Bead *, Bead *, const tools::vec &,
+                             const tools::vec &, const tools::vec &,
                              const double dist12, const double dist13,
                              const double dist23);
 
     FunctorMember(T *cls, fkt_t fkt) : _cls(cls), _fkt(fkt) {}
 
-    bool operator()(Bead *b1, Bead *b2, Bead *b3, const TOOLS::vec &r12,
-                    const TOOLS::vec &r13, const TOOLS::vec &r23,
+    bool operator()(Bead *b1, Bead *b2, Bead *b3, const tools::vec &r12,
+                    const tools::vec &r13, const tools::vec &r23,
                     const double dist12, const double dist13,
                     const double dist23) {
       return (_cls->*_fkt)(b1, b2, b3, r12, r13, r23, dist12, dist13, dist23);
@@ -171,14 +170,14 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
   /// Functor for non-member functions
   class FunctorNonMember : public Functor {
    public:
-    typedef bool (*fkt_t)(Bead *, Bead *, Bead *, const TOOLS::vec &,
-                          const TOOLS::vec &, const TOOLS::vec &,
+    typedef bool (*fkt_t)(Bead *, Bead *, Bead *, const tools::vec &,
+                          const tools::vec &, const tools::vec &,
                           const double dist12, const double dist13,
                           const double dist23);
     FunctorNonMember(fkt_t fkt) : _fkt(fkt) {}
 
-    bool operator()(Bead *b1, Bead *b2, Bead *b3, const TOOLS::vec &r12,
-                    const TOOLS::vec &r13, const TOOLS::vec &r23,
+    bool operator()(Bead *b1, Bead *b2, Bead *b3, const tools::vec &r12,
+                    const tools::vec &r13, const tools::vec &r23,
                     const double dist12, const double dist13,
                     const double dist23) {
       return (*_fkt)(b1, b2, b3, r12, r13, r23, dist12, dist13, dist23);
@@ -199,16 +198,16 @@ void NBList_3Body::setTripleType() {
 template <typename T>
 inline void NBList_3Body::SetMatchFunction(
     T *object,
-    bool (T::*fkt)(Bead *, Bead *, Bead *, const TOOLS::vec &,
-                   const TOOLS::vec &, const TOOLS::vec &, const double dist12,
+    bool (T::*fkt)(Bead *, Bead *, Bead *, const tools::vec &,
+                   const tools::vec &, const tools::vec &, const double dist12,
                    const double dist13, const double dist23)) {
   if (_match_function) delete _match_function;
   _match_function = dynamic_cast<Functor *>(new FunctorMember<T>(object, fkt));
 }
 
 inline void NBList_3Body::SetMatchFunction(
-    bool (*fkt)(Bead *, Bead *, Bead *, const TOOLS::vec &, const TOOLS::vec &,
-                const TOOLS::vec &, const double dist12, const double dist13,
+    bool (*fkt)(Bead *, Bead *, Bead *, const tools::vec &, const tools::vec &,
+                const tools::vec &, const double dist12, const double dist13,
                 const double dist23)) {
   if (_match_function) delete _match_function;
   _match_function = dynamic_cast<Functor *>(new FunctorNonMember(fkt));

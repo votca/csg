@@ -23,8 +23,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class OrthorhombicBox : public BoundaryCondition {
 
  public:
@@ -34,8 +32,8 @@ class OrthorhombicBox : public BoundaryCondition {
     //(std::forward<OrthorhombicBox>(*this)...));
   }
 
-  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                  const TOOLS::vec &r_j) const override;
+  tools::vec BCShortestConnection(const tools::vec &r_i,
+                                  const tools::vec &r_j) const override;
 
   eBoxtype getBoxType() const override { return typeOrthorhombic; }
 

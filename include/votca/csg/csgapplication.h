@@ -26,12 +26,10 @@
 #include <votca/tools/mutex.h>
 #include <votca/tools/thread.h>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
-class CsgApplication : public TOOLS::Application {
+class CsgApplication : public tools::Application {
  public:
   CsgApplication();
   ~CsgApplication();
@@ -100,7 +98,7 @@ class CsgApplication : public TOOLS::Application {
    * the correct order of frames for in/output.
    *
    */
-  class Worker : public TOOLS::Thread {
+  class Worker : public tools::Thread {
    public:
     Worker();
     ~Worker(){};
@@ -157,13 +155,13 @@ class CsgApplication : public TOOLS::Application {
   int _nframes;
   bool _is_first_frame;
   int _nthreads;
-  TOOLS::Mutex _nframesMutex;
-  TOOLS::Mutex _traj_readerMutex;
+  tools::Mutex _nframesMutex;
+  tools::Mutex _traj_readerMutex;
 
   /// \brief stores Mutexes used to impose order for input
-  std::vector<TOOLS::Mutex *> _threadsMutexesIn;
+  std::vector<tools::Mutex *> _threadsMutexesIn;
   /// \brief stores Mutexes used to impose order for output
-  std::vector<TOOLS::Mutex *> _threadsMutexesOut;
+  std::vector<tools::Mutex *> _threadsMutexesOut;
   TrajectoryReader *_traj_reader;
 };
 

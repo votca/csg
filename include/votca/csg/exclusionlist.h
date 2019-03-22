@@ -25,7 +25,6 @@
 
 namespace votca {
 namespace csg {
-namespace TOOLS = votca::tools;
 
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList

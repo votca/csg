@@ -25,8 +25,6 @@
 #include <list>
 #include <string>
 
-namespace TOOLS = votca::tools;
-
 namespace votca {
 namespace csg {
 
@@ -47,7 +45,7 @@ class BeadList : public std::list<Bead *> {
   /// \brief Select all beads of type <select> withn a radius <radius> of
   /// reference vector <ref>
   int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
-                                   TOOLS::vec ref, double radius);
+                                   tools::vec ref, double radius);
 
   /// Get the csg topology object
   const CSG_Topology *getCSGTopologyConst() const { return topology_; }

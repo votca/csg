@@ -26,8 +26,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class NBListGrid_3Body : public NBList_3Body {
  public:
   void Generate(BeadList &list1, BeadList &list2, BeadList &list3,
@@ -43,16 +41,16 @@ class NBListGrid_3Body : public NBList_3Body {
     std::vector<cell_t *> _neighbours;
   };
 
-  TOOLS::vec _box_a, _box_b, _box_c;
-  TOOLS::vec _norm_a, _norm_b, _norm_c;
+  tools::vec _box_a, _box_b, _box_c;
+  tools::vec _norm_a, _norm_b, _norm_c;
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
   CSG_Topology *_top;
 
-  void InitializeGrid(const TOOLS::matrix &box);
+  void InitializeGrid(const tools::matrix &box);
 
-  cell_t &getCell(const TOOLS::vec &r);
+  cell_t &getCell(const tools::vec &r);
   cell_t &getCell(const int &a, const int &b, const int &c);
 
   void TestBead(cell_t &cell, Bead *bead);

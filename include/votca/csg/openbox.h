@@ -23,8 +23,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class OpenBox : public BoundaryCondition {
 
  public:
@@ -33,8 +31,8 @@ class OpenBox : public BoundaryCondition {
         new OpenBox(*this));  //(std::forward<OpenBox>(*this)...));
   }
 
-  TOOLS::vec BCShortestConnection(const TOOLS::vec &r_i,
-                                  const TOOLS::vec &r_j) const override;
+  tools::vec BCShortestConnection(const tools::vec &r_i,
+                                  const tools::vec &r_j) const override;
 
   eBoxtype getBoxType() const override { return typeOpen; }
 };

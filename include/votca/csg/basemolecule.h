@@ -31,8 +31,6 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 /**
     \brief Information about molecules
 
@@ -96,7 +94,7 @@ class BaseMolecule : public BeadStructure<T> {
    *
    * @return vector describting the position of the bead
    */
-  const TOOLS::vec &getBeadPosition(const int &id) const;
+  const tools::vec &getBeadPosition(const int &id) const;
 
   /**
    * @brief Determines the beads name provided the id
@@ -108,8 +106,8 @@ class BaseMolecule : public BeadStructure<T> {
   const std::string getBeadName(int id) const;
 
  protected:
-  TOOLS::Identity<int> id_;
-  TOOLS::Name type_;
+  tools::Identity<int> id_;
+  tools::Name type_;
 
   std::unordered_map<std::string, std::unordered_set<int>> bead_type_and_ids_;
 };
@@ -142,7 +140,7 @@ const std::string &BaseMolecule<T>::getBeadType(const int &id) const {
 }
 
 template <class T>
-const TOOLS::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
+const tools::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
   assert(BeadStructure<T>::beads_.count(id) &&
          "Cannot get bead position with id because "
          "bead is not stored in the base molecule.");
