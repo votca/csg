@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_FILEFORMATFACTORY_H
-#define _VOTCA_CSG_FILEFORMATFACTORY_H
+#ifndef VOTCA_CSG_FILEFORMATFACTORY_H
+#define VOTCA_CSG_FILEFORMATFACTORY_H
 
 #include <string>
 #include <votca/tools/objectfactory.h>
@@ -49,4 +49,4 @@ T *FileFormatFactory<T>::Create(const std::string &file) {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_FILEFORMATFACTORY_H */
+#endif  // VOTCA_CSG_FILEFORMATFACTORY_H
