@@ -43,9 +43,9 @@ include(GNUInstallDirs)
 
 option(ENABLE_TESTING "Build and enable testing stuff" OFF)
 if(ENABLE_TESTING)
-  # The include will find valgrind
-  include(CTest) 
+  include(CTest)
   enable_testing()
+  find_program(VALGRIND "valgrind")
 endif(ENABLE_TESTING)
 
 # this has to be the include specification!

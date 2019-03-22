@@ -30,4 +30,9 @@ foreach(PROG
   add_test(unit_${PROG} unit_${PROG})
   # run tests for csg (for coverage) as well
   set_tests_properties(unit_${PROG} PROPERTIES LABELS "csg;votca")
+
+  if(VALGRIND)
+    add_test(NAME memory_${PROG} COMMAND "${VALGRIND}" --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:unit_${PROG}>)
+  endif(VALGRIND)
+
 endforeach(PROG)
