@@ -43,7 +43,7 @@ T *FileFormatFactory<T>::Create(const std::string &file) {
     return tools::ObjectFactory<std::string, T>::Create(filetype);
   } catch (std::exception &error) {
   }
-  return NULL;
+  return nullptr;
 }
 
 }  // namespace csg

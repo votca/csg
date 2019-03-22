@@ -74,8 +74,6 @@ inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
     const std::string &label) const {
   std::unordered_set<int> bead_ids;
   for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
-    std::cout << "Label of bead " << id_and_bead.second->getLabel()
-              << std::endl;
     if (label.compare(id_and_bead.second->getLabel()) == 0) {
       bead_ids.insert(id_and_bead.first);
     }

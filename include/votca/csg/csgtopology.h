@@ -72,7 +72,6 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
            "Cannot create interactions before beads have been initialized");
 
     for (const int& bead_id : bead_ids) {
-      std::cout << "Bead id " << bead_id << std::endl;
       assert(beads_.count(bead_id) &&
              "Cannot add interaction as there are no beads, create the beads "
              "before the interactions.");
@@ -93,7 +92,6 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     ic->setIndex(bond_id);
     ic->setMoleculeId(molecule_id);
     // Update the interaction groups
-    std::cout << "Updateing interaction groups " << std::endl;
     std::map<std::string, int>::iterator iter;
     iter = interaction_groups_.find(ic->getGroup());
     if (iter != interaction_groups_.end()) {

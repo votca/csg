@@ -43,6 +43,8 @@ include(GNUInstallDirs)
 
 option(ENABLE_TESTING "Build and enable testing stuff" OFF)
 if(ENABLE_TESTING)
+  # The include will find valgrind
+  include(CTest) 
   enable_testing()
 endif(ENABLE_TESTING)
 
