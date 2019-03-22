@@ -90,7 +90,8 @@ void Map_Sphere::Initialize(const vector<string> subbeads,
 }
 
 void Map_Sphere::Apply(const BoundaryCondition *boundaries,
-                       map<string, const Bead *> atomic_beads, Bead *cg_bead) {
+                       map<string, const Bead *> atomic_beads,
+                       Bead *cg_bead) const {
 
   assert(cg_bead->getSymmetry() == 1 &&
          "Applying spherical bead map on a non spherical corase grained bead");
@@ -104,7 +105,6 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
          "Cannot apply mapping atomistic beads do not have position.");
 
   vec reference_position = atom->getPos();
-  cout << "Reference Position " << reference_position << endl;
   string bead_type = atom->getType();
   int bead_id = atom->getId();
 
@@ -115,7 +115,7 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
   vec weighted_sum_of_atomistic_forces(0., 0., 0.);
   vec weighted_sum_of_atomistic_velocity(0., 0., 0.);
 
-  for (pair<const string, element_t> &name_and_element : matrix_) {
+  for (const pair<const string, element_t> &name_and_element : matrix_) {
     atom = atomic_beads[name_and_element.first];
     sum_of_atomistic_mass += atom->getMass();
     assert(atom->HasPos() &&
@@ -135,8 +135,6 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
             boost::lexical_cast<string>(atom->getMoleculeId() + 1) + ")");
       }
     }
-    cout << "Calculating " << name_and_element.second.weight_ << " "
-         << reference_position << " " << shortest_distance_beween_beads << endl;
     weighted_sum_of_atomistic_pos +=
         name_and_element.second.weight_ *
         (shortest_distance_beween_beads + reference_position);
@@ -153,8 +151,6 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
   }
   cg_bead->setMass(sum_of_atomistic_mass);
   cg_bead->setPos(weighted_sum_of_atomistic_pos);
-  cout << "id " << cg_bead->getId() << " " << weighted_sum_of_atomistic_pos
-       << endl;
   if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_velocity);
   if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
 }
@@ -162,7 +158,7 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
 /// Warning the atomistic beads must be a map they cannot be an unordered_map
 void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
                           std::map<string, const Bead *> atomistic_beads,
-                          Bead *cg_bead) {
+                          Bead *cg_bead) const {
 
   assert(
       cg_bead->getSymmetry() == 3 &&
@@ -359,8 +355,6 @@ void AtomToCGMoleculeMapper::Apply(
     pair<int, map<int, vector<pair<string, int>>>>
         cgmolid_cgbeadid_atomicbeadids) {
 
-  cout << "Atom to cg molecule mapper " << atom_top.getBoxType() << " "
-       << cg_top.getBoxType() << endl;
   // First int cg_molecule id
   // map
   //   first int - the cg_bead_id
@@ -405,9 +399,6 @@ void AtomToCGMoleculeMapper::Apply(
     assert(cg_bead_name_and_maps_.count(bead_name) &&
            "Map for the coarse grained bead type is not known.");
 
-    cout << "Box type " << cg_top.getBoundaryCondition()->getBoxType() << endl;
-    cout << "Box type " << atom_top.getBoundaryCondition()->getBoxType()
-         << endl;
     cg_bead_name_and_maps_.at(bead_name)->Apply(
         cg_top.getBoundaryCondition(), atomic_names_and_beads, cg_bead);
   }
