@@ -19,9 +19,9 @@ foreach(PROG csg_reupdate csg_map csg_dump csg_property csg_resample csg_stat cs
     add_test(${PROG}Help ${PROG} --help)
     # run tests for tools (for coverage) as well
     set_tests_properties(${PROG}Help PROPERTIES LABELS "csg;tools;votca")
-    if(VALGRIND)
-      add_test(NAME memory_${PROG}Help COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:${PROG}> --help)
-    endif(VALGRIND)
+    if(VALGRIND_EXECUTABLE)
+      add_test(NAME memory_${PROG}Help COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:${PROG}> --help)
+    endif(VALGRIND_EXECUTABLE)
   endif(ENABLE_TESTING)
 endforeach(PROG)
 
@@ -32,9 +32,9 @@ if(ENABLE_TESTING)
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${REFPATH}/CG-CG.param.in_re ${RUNPATH}/CG-CG.param.cur)
   add_test(NAME Run_csg_reupdate COMMAND csg_reupdate --gentable true --options ${REFPATH}/settings_re.xml WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_reupdate PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_reupdate COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_reupdate> --help --gentable true --options ${REFPATH}/settings_re.xml WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_reupdate COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_reupdate> --help --gentable true --options ${REFPATH}/settings_re.xml WORKING_DIRECTORY ${RUNPATH})
+  endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_reupdate_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.pot.new -f2 ${REFPATH}/CG-CG.pot.re WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_reupdate_output PROPERTIES DEPENDS Run_csg_reupdate)
   set_tests_properties(Compare_csg_reupdate_output PROPERTIES LABELS "csg;tools;votca")
@@ -46,11 +46,11 @@ if(ENABLE_TESTING)
                       --cg ${REFPATH}/mapping.xml 
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_fmatch PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_fmatch COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_fmatch> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --options ${REFPATH}/settings_fmatch.xml
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_fmatch COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_fmatch> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --options ${REFPATH}/settings_fmatch.xml
                       --cg ${REFPATH}/mapping.xml 
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_fmatch_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.force -f2 ${REFPATH}/CG-CG.force.fmatch WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_fmatch_output PROPERTIES DEPENDS Run_csg_fmatch)
   set_tests_properties(Compare_csg_fmatch_output PROPERTIES LABELS "csg;tools;votca")
@@ -62,11 +62,11 @@ if(ENABLE_TESTING)
                       --cg ${REFPATH}/mapping.xml 
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_fmatch_3body PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_fmatch_3body COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_fmatch> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --options ${REFPATH}/settings_fmatch_3body.xml
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_fmatch_3body COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_fmatch> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --options ${REFPATH}/settings_fmatch_3body.xml
                       --cg ${REFPATH}/mapping.xml 
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_fmatch_3body_output1 COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.force -f2 ${REFPATH}/CG-CG.force.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
   add_test(NAME Compare_csg_fmatch_3body_output2 COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG-CG.force -f2 ${REFPATH}/CG-CG-CG.force.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
   add_test(NAME Compare_csg_fmatch_3body_output3 COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG-CG.pot -f2 ${REFPATH}/CG-CG-CG.pot.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
@@ -94,11 +94,11 @@ if(ENABLE_TESTING)
                      --options  ${REFPATH}/settings_rdf.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_stat PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_stat COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_stat COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump
                      --options  ${REFPATH}/settings_rdf.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_stat_output1 COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.dist.new -f2 ${REFPATH}/CG-CG.rdf WORKING_DIRECTORY ${RUNPATH})
   add_test(NAME Compare_csg_stat_output2 COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.force.new -f2 ${REFPATH}/CG-CG.pmf WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_stat_output1 PROPERTIES DEPENDS Run_csg_stat)
@@ -113,11 +113,11 @@ if(ENABLE_TESTING)
                      --options  ${REFPATH}/settings_angular.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_stat_angular PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_stat_angular COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_stat_angular COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump
                      --options  ${REFPATH}/settings_angular.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_stat_angular_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG-CG.dist.new -f2 ${REFPATH}/CG-CG-CG.angular WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_stat_angular_output PROPERTIES DEPENDS Run_csg_stat_angular)
   set_tests_properties(Compare_csg_stat_angular_output PROPERTIES LABELS "csg;tools;votca")
@@ -130,11 +130,11 @@ if(ENABLE_TESTING)
                      --options  ${REFPATH}/settings_imc.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_stat-imc PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_stat-imc COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat>  --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --do-imc
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_stat-imc COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_stat>  --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --do-imc
                      --options  ${REFPATH}/settings_imc.xml --cg ${REFPATH}/mapping.xml
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_stat-imc_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.imc -f2 ${REFPATH}/CG-CG.imc WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_stat-imc_output PROPERTIES DEPENDS Run_csg_stat-imc)
   set_tests_properties(Compare_csg_stat-imc_output PROPERTIES LABELS "csg;tools;votca")
@@ -149,10 +149,10 @@ if(ENABLE_TESTING)
     COMMAND csg_resample --in ${REFPATH}/table_in --out table_akima --type akima --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_resample_akima PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_resample_akima COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_akima --type akima --grid 0:0.1:3
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_resample_akima COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_akima --type akima --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_resample_akima_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 table_akima -f2 ${REFPATH}/table_akima WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_resample_akima_output PROPERTIES DEPENDS Run_csg_resample_akima)
   set_tests_properties(Compare_csg_resample_akima_output PROPERTIES LABELS "csg;tools;votca")
@@ -160,10 +160,10 @@ if(ENABLE_TESTING)
     COMMAND csg_resample --in ${REFPATH}/table_in --out table_cubic --type cubic --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_resample_cubic PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_resample_cubic COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_cubic --type cubic --grid 0:0.1:3
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_resample_cubic COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_cubic --type cubic --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_resample_cubic_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 table_cubic -f2 ${REFPATH}/table_cubic WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_resample_cubic_output PROPERTIES DEPENDS Run_csg_resample_cubic)
   set_tests_properties(Compare_csg_resample_cubic_output PROPERTIES LABELS "csg;tools;votca")
@@ -171,10 +171,10 @@ if(ENABLE_TESTING)
     COMMAND csg_resample --in ${REFPATH}/table_in --out table_linear --type linear --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_resample_linear PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_resample_linear COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_linear --type linear --grid 0:0.1:3
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_resample_linear COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_linear --type linear --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_resample_linear_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 table_linear -f2 ${REFPATH}/table_linear WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_resample_linear_output PROPERTIES DEPENDS Run_csg_resample_linear)
   set_tests_properties(Compare_csg_resample_linear_output PROPERTIES LABELS "csg;tools;votca")
@@ -182,10 +182,10 @@ if(ENABLE_TESTING)
     COMMAND csg_resample --in ${REFPATH}/table_in --out table_cubicfit --type cubic --grid 0:1:9 --fitgrid 0:2:9
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Run_csg_resample_cubicfit PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND)                                                                
-    add_test(NAME memory_Run_csg_resample_cubicfit COMMAND "${VALGRIND}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_cubicfit --type cubic --grid 0:1:9 --fitgrid 0:2:9
+  if(VALGRIND_EXECUTABLE)                                                                
+    add_test(NAME memory_Run_csg_resample_cubicfit COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_cubicfit --type cubic --grid 0:1:9 --fitgrid 0:2:9
     WORKING_DIRECTORY ${RUNPATH})
-  endif(VALGRIND)   
+endif(VALGRIND_EXECUTABLE)   
   add_test(NAME Compare_csg_resample_cubicfit_output COMMAND ${VOTCA_COMPARE} --etol ${REGRESSIONTEST_TOLERANCE} -f1 table_cubicfit -f2 ${REFPATH}/table_cubicfit WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(Compare_csg_resample_cubicfit_output PROPERTIES DEPENDS Run_csg_resample_cubicfit)
   set_tests_properties(Compare_csg_resample_cubicfit_output PROPERTIES LABELS "csg;tools;votca")

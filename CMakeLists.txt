@@ -43,9 +43,10 @@ include(GNUInstallDirs)
 
 option(ENABLE_TESTING "Build and enable testing stuff" OFF)
 if(ENABLE_TESTING)
-  include(CTest)
   enable_testing()
-  find_program(VALGRIND "valgrind")
+  include(FindPackageHandleStandardArgs)
+  find_program(VALGRIND_EXECUTABLE "valgrind")
+  find_package_handle_standard_args(VALGRIND REQUIRED_VARS VALGRIND_EXECUTABLE)
 endif(ENABLE_TESTING)
 
 # this has to be the include specification!
