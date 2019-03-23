@@ -187,32 +187,6 @@ inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
 // file format
 /*
   void PDBWriter::writeSymmetry(Bead &bead) {
-    if (bead.getSymmetry() > 1) {
-      tools::vec r = tools::conv::nm2ang * bead.getPos();
-      boost::format beadfrmt(
-          "HETATM%1$5d %2$4s %3$3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f
-  %9$+2s\n"); tools::vec ru = 0.1 * bead.getU() + r;
-
-      _out << beadfrmt % getId(bead) % 100000  // bead serial number
-        % bead.getType()                    // bead name
-        % bead.getResidueType()                              // residue name
-        % " "                               // chain identifier 1 char
-        % getResId(bead)             // residue sequence number
-        % ru.x() % ru.y() % ru.z()          // we skip the charge
-        % getElement(bead);
-
-      if (bead.getSymmetry() > 2) {
-        tools::vec rv = 0.1 * bead.getV() + r;
-        _out << beadfrmt % getId(bead) % 100000  // bead serial number
-          % bead.getType()                    // bead name
-          % bead.getResidueType()                  // residue name
-          % " "                        // chain identifier 1 char
-          % getResId(bead)     // residue sequence number
-          % rv.x() % rv.y() % rv.z()  // we skip the charge
-          % getElement(bead);
-      }
-    }
-    return;
   }*/
 }  // namespace csg
 }  // namespace votca
