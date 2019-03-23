@@ -34,14 +34,23 @@ void PDBWriter::Open(string file, bool bAppend) {
 }
 
 void PDBWriter::WriteHeader(std::string header) {
-  if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
-    _out << "HEADER    ";
+  if (_out.is_open()) {
+    if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
+      _out << "HEADER    ";
+    }
+    _out << header;
+    if (header.back() != '\n') _out << "\n";
+  } else {
+    throw runtime_error("Cannot write header to pdb file, file is not open.");
   }
-  _out << header;
-  if (header.back() != '\n') _out << "\n";
 }
 
-void PDBWriter::Close() { _out.close(); }
+void PDBWriter::Close() {
+
+  if (_out.is_open()) {
+    _out.close();
+  }
+}
 
 /*<<<<<<< HEAD
 void PDBWriter::Write(CSG_Topology *conf) {
@@ -75,12 +84,14 @@ void PDBWriter::Write(CSG_Topology *conf) {
                                                  // we skip the charge
 =======*/
 void PDBWriter::Write(CSG_Topology *conf) {
-
-  _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
-       << std::flush;
-  ;
-  WriteContainer<CSG_Topology>(conf, *conf);
-  _out << "ENDMDL" << std::endl;
+  if (_out.is_open()) {
+    _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
+         << std::flush;
+    WriteContainer<CSG_Topology>(conf, *conf);
+    _out << "ENDMDL" << std::endl;
+  } else {
+    throw runtime_error("Cannot write topology to file, file is not open.");
+  }
 }
 //>>>>>>> master
 /*

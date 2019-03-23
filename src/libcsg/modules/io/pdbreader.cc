@@ -73,10 +73,27 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
   size_t bead_count = 0;
+  // Can only support a pdb file with a single step per file at the moment
+  bool step_set = false;
   while (std::getline(_fl, line)) {
     cout << line << endl;
-    if (wildcmp("CRYST1*", line.c_str())) {
-      string a, b, c, alpha, beta, gamma;
+    if (wildcmp("MODEL*", line.c_str())) {
+      // The model number is the same as the step number
+      // Internallu step numbers start at 0 however pdb files store model
+      // numbers starting at 1
+      // 11 - 14    Model number/Step Number
+      string model_num = string(line, (11 - 1), 4);
+      boost::algorithm::trim(model_num);
+      int step = stoi(model_num) - 1;
+      top.setStep(step);
+      if (step_set) {
+        throw runtime_error(
+            "Current pdbreader does not support reading more than a single "
+            "model from a pdb file at a time.");
+      }
+      step_set = true;
+    } else if (wildcmp("CRYST1*", line.c_str())) {
+      string a, b, c, alpha, beta, gamma = "";
       try {
         // 1 -  6       Record name    "CRYST1"
         a = string(line, (7 - 1), 9);

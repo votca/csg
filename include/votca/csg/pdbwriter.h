@@ -150,28 +150,34 @@ class PDBWriter : public TrajectoryWriter {
 
 template <class T>
 inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
-  boost::format atomfrmt(
-      "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f           "
-      "           %9$+2s\n");
 
-  std::vector<Bead *> atoms = getIterable(*conf, container);
-  for (auto &atom : atoms) {
-    int atomid = getId(*atom);
-    std::string resname = getResidueType(*atom);
-    int residueid = getResId(*atom);
-    std::string atomtype = getType(*atom);
-    std::string element = getElement(*atom);
-    Eigen::Vector3d r = getPos(*atom);
+  if (_out.is_open()) {
+    boost::format atomfrmt(
+        "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f         "
+        "  "
+        "           %9$+2s\n");
 
-    _out << atomfrmt % (atomid % 100000)    // atom serial number
-                % atomtype % resname % " "  // chain identifier 1 char
-                % residueid                 // residue sequence number
-                % r.x() % r.y() % r.z() % element;
+    std::vector<Bead *> atoms = getIterable(*conf, container);
+    for (auto &atom : atoms) {
+      int atomid = getId(*atom);
+      std::string resname = getResidueType(*atom);
+      int residueid = getResId(*atom);
+      std::string atomtype = getType(*atom);
+      std::string element = getElement(*atom);
+      Eigen::Vector3d r = getPos(*atom);
 
-    // we skip the charge
-    // writeSymmetry(*atom);
+      _out << atomfrmt % (atomid % 100000)    // atom serial number
+                  % atomtype % resname % " "  // chain identifier 1 char
+                  % residueid                 // residue sequence number
+                  % r.x() % r.y() % r.z() % element;
+
+      // we skip the charge
+      // writeSymmetry(*atom);
+    }
+    _out << std::flush;
+  } else {
+    throw std::runtime_error("Cannot write container to file it is not open.");
   }
-  _out << std::flush;
 }
 
 // Super Hacky does not follow the pdb file convention, essentially is breaking

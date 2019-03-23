@@ -223,6 +223,7 @@ void CsgApplication::Run(void) {
   // read in the topology for master
   //////////////////////////////////////////////////
   reader->ReadTopology(_op_vm["top"].as<string>(), master->_top);
+  delete reader;
 
   cout << "I have " << master->_top.BeadCount() << " beads in "
        << master->_top.MoleculeCount() << " molecules" << endl;
@@ -405,6 +406,7 @@ void CsgApplication::Run(void) {
     _threadsMutexesIn.clear();
     _threadsMutexesOut.clear();
     _traj_reader->Close();
+    delete _traj_reader;
   }
 }
 

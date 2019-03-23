@@ -249,7 +249,10 @@ class TemplateTopology {
    * get the time of current frame
    * \return simulation time in ns
    */
-  double getTime() const { return time_; }
+  double getTime() const {
+    assert(time_ >= 0 && "Cannot get time has not been set.");
+    return time_;
+  }
 
   /**
    * set the step number of current frame
@@ -261,7 +264,10 @@ class TemplateTopology {
    * get the step number of current frame
    * \return step number
    */
-  int getStep() const { return step_; };
+  int getStep() const {
+    assert(step_ > -1 && "Cannot get step it has not been set.");
+    return step_;
+  };
 
   /**
    * Sets the particle group. (For the H5MD file format)
@@ -435,10 +441,10 @@ class TemplateTopology {
 
   std::map<std::string, std::list<Interaction *>> interactions_by_group_;
 
-  double time_;
-  int step_;
-  bool has_vel_;
-  bool has_force_;
+  double time_ = -1.0;
+  int step_ = -1;
+  bool has_vel_ = false;
+  bool has_force_ = false;
 
   /// The particle group (For H5MD file format)
   std::string particle_group_;

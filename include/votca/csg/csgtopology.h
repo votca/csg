@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_CSGTOPOLOGY_H
-#define _VOTCA_CSG_CSGTOPOLOGY_H
+#ifndef VOTCA_CSG_CSGTOPOLOGY_H
+#define VOTCA_CSG_CSGTOPOLOGY_H
 
 #include <votca/tools/types.h>
 
@@ -110,4 +110,4 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_CSGTOPOLOGY_H
+#endif  // VOTCA_CSG_CSGTOPOLOGY_H
