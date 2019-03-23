@@ -223,6 +223,7 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   TopologyReader* reader2;
   reader2 = TopReaderFactory().Create(str2);
   reader2->ReadTopology(str2, top2);
+  delete reader2;
   BOOST_CHECK_EQUAL(reader2 != NULL, true);
   BOOST_CHECK_EQUAL(top2.BeadCount(), 10);
 

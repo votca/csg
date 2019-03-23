@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _XMLTOPOLOGYREADER_H
-#define _XMLTOPOLOGYREADER_H
+#ifndef VOTCA_CSG_XMLTOPOLOGYREADER_H
+#define VOTCA_CSG_XMLTOPOLOGYREADER_H
 
 #include <boost/unordered_map.hpp>
 #include <stack>
@@ -72,8 +72,8 @@ class XMLMolecule {
   std::string name;
   int nmols;
   int pid;
-  std::vector<XMLBead *> beads;
-  std::map<std::string, XMLBead *> name2beads;
+  // std::vector<XMLBead> beads;
+  std::map<std::string, XMLBead> name2beads;
   Molecule *mi;
 };
 
@@ -91,7 +91,7 @@ class XMLTopologyReader : public TopologyReader {
   ~XMLTopologyReader();
 
  private:
-  typedef boost::unordered_multimap<std::string, XMLMolecule *> MoleculesMap;
+  typedef boost::unordered_multimap<std::string, XMLMolecule> MoleculesMap;
 
   void ReadTopolFile(std::string file);
 
@@ -120,4 +120,4 @@ class XMLTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _PDBTOPOLOGYREADER_H */
+#endif  // VOTCA_CSG_XMLTOPOLOGYREADER_H

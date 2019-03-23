@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_NBLIST_3BODY_H
-#define _VOTCA_CSG_NBLIST_3BODY_H
+#ifndef VOTCA_CSG_NBLIST_3BODY_H
+#define VOTCA_CSG_NBLIST_3BODY_H
 
 #include "beadlist.h"
 #include "beadtriple.h"
@@ -216,4 +216,4 @@ inline void NBList_3Body::SetMatchFunction(
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_NBLIST_3BODY_H */
+#endif  // VOTCA_CSG_NBLIST_3BODY_H
