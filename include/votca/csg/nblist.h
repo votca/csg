@@ -102,7 +102,7 @@ class NBList : public PairList<Bead *, BeadPair> {
   typedef BeadPair *(*pair_creator_t)(Bead *bead1, Bead *bead2,
                                       const tools::vec &r);
   /// the current bead pair creator function
-  pair_creator_t _pair_creator;
+  pair_creator_t _pair_creator = nullptr;
 
  protected:
   /// Functor for match function to be able to set member and non-member
@@ -150,7 +150,7 @@ class NBList : public PairList<Bead *, BeadPair> {
     fkt_t _fkt;
   };
 
-  Functor *_match_function;
+  Functor *_match_function = nullptr;
 };
 
 template <typename pair_type>

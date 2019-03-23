@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_FMATCH_H
-#define _VOTCA_CSG_FMATCH_H
+#ifndef VOTCA_CSG_FMATCH_H
+#define VOTCA_CSG_FMATCH_H
 
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/trajectoryreader.h>
@@ -134,7 +134,7 @@ class CGForceMatching : public CsgApplication {
   /// \brief std::list of non-bonded interactions
   std::list<tools::Property *> _nonbonded;
 
-  typedef std::vector<SplineInfo *> SplineContainer;
+  typedef std::vector<SplineInfo> SplineContainer;
   /// \brief std::vector of SplineInfo * for all interactions
   SplineContainer _splines;
 
@@ -199,4 +199,4 @@ class CGForceMatching : public CsgApplication {
 };
 }  // namespace csg
 }  // namespace votca
-#endif /* _VOTCA_CSG_FMATCH_H */
+#endif  // VOTCA_CSG_FMATCH_H

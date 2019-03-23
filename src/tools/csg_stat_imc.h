@@ -85,7 +85,7 @@ class Imc {
 
   /// struct to store collected information for groups (e.g. crosscorrelations)
   struct group_t {
-    std::list<interaction_t *> _interactions;
+    std::list<std::unique_ptr<interaction_t>> _interactions;
     group_matrix _corr;
     std::vector<pair_t> _pairs;
   };
@@ -112,7 +112,7 @@ class Imc {
   /// map ineteractionm-name to interaction
   std::map<std::string, interaction_t *> _interactions;
   /// map group-name to group
-  std::map<std::string, group_t *> _groups;
+  std::map<std::string, std::unique_ptr<group_t>> _groups;
 
   /// create a new interaction entry based on given options
   interaction_t *AddInteraction(tools::Property *p);

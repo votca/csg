@@ -32,6 +32,7 @@ NBList::NBList() : _do_exclusions(false), _match_function(0) {
 
 NBList::~NBList() {
   // TODO: NBList destructor
+  if (_match_function) delete _match_function;
 }
 
 void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {

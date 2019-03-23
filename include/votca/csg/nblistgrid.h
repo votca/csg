@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_NBLISTGRID_H
-#define _VOTCA_CSG_NBLISTGRID_H
+#ifndef VOTCA_CSG_NBLISTGRID_H
+#define VOTCA_CSG_NBLISTGRID_H
 
 #include "nblist.h"
 #include <vector>
@@ -61,4 +61,4 @@ inline NBListGrid::cell_t &NBListGrid::getCell(const int &a, const int &b,
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_NBLISTGRID_H */
+#endif  // VOTCA_CSG_NBLISTGRID_H
