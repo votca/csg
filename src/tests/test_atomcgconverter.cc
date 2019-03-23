@@ -39,6 +39,7 @@ BOOST_AUTO_TEST_CASE(test_atomcgconverter_constructor) {
 BOOST_AUTO_TEST_CASE(test_load) {
 
   CSG_Topology atom_top;
+  atom_top.setStep(0);
   // Create two propane molecules
 
   // Propane atoms will be positioned as
@@ -280,6 +281,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
 
   // Create an empty topology
   CSG_Topology cg_top;
+  cg_top.setStep(0);
 
   converter.Convert(atom_top, cg_top);
 

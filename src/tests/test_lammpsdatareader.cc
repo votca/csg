@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("data");
   lammpsDataReader->ReadTopology(lammpsdatafilename, top);
+  delete lammpsDataReader;
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
   vec first_bead_correct_pos(62.806, 52.5127, 49.8873);
@@ -120,6 +121,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("data");
   lammpsDataReader->ReadTopology(lammpsdatafilename, top);
+  delete lammpsDataReader;
 
   string lammpsdatafilename2 = "test_polymer4.data";
   if (fexists_(lammpsdatafilename2)) {
@@ -134,6 +136,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
   lammpsDataReaderTrj->FirstFrame(top);
   lammpsDataReaderTrj->Close();
+  delete lammpsDataReaderTrj;
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
 

@@ -356,6 +356,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   writer->Open(lammpsDumpFileName);
   writer->Write(&top);
   writer->Close();
+  delete writer;
 
   // Read the .dump file and ensure the information is correct
   TrajectoryReader::RegisterPlugins();
@@ -364,6 +365,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   reader->Open(lammpsDumpFileName);
   reader->FirstFrame(top);
   reader->Close();
+  delete reader;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);
