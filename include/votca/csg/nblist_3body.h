@@ -187,7 +187,7 @@ class NBList_3Body : public TripleList<Bead *, BeadTriple> {
     fkt_t _fkt;
   };
 
-  Functor *_match_function;
+  std::unique_ptr<Functor> _match_function;
 };
 
 template <typename triple_type>
@@ -201,16 +201,18 @@ inline void NBList_3Body::SetMatchFunction(
     bool (T::*fkt)(Bead *, Bead *, Bead *, const tools::vec &,
                    const tools::vec &, const tools::vec &, const double dist12,
                    const double dist13, const double dist23)) {
-  if (_match_function) delete _match_function;
-  _match_function = dynamic_cast<Functor *>(new FunctorMember<T>(object, fkt));
+  // if (_match_function) delete _match_function;
+  _match_function = std::unique_ptr<Functor>(
+      dynamic_cast<Functor *>(new FunctorMember<T>(object, fkt)));
 }
 
 inline void NBList_3Body::SetMatchFunction(
     bool (*fkt)(Bead *, Bead *, Bead *, const tools::vec &, const tools::vec &,
                 const tools::vec &, const double dist12, const double dist13,
                 const double dist23)) {
-  if (_match_function) delete _match_function;
-  _match_function = dynamic_cast<Functor *>(new FunctorNonMember(fkt));
+  // if (_match_function) delete _match_function;
+  _match_function = std::unique_ptr<Functor>(
+      dynamic_cast<Functor *>(new FunctorNonMember(fkt)));
 }
 
 }  // namespace csg
