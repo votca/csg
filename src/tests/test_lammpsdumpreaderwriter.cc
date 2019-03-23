@@ -229,6 +229,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   reader->Open(lammpsdumpfilename);
   reader->FirstFrame(top);
   reader->Close();
+  delete reader;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);
