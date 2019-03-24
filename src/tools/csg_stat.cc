@@ -65,6 +65,7 @@ void CsgStatApp::HelpText(ostream &out) {
 }
 
 void CsgStatApp::Initialize() {
+  cout << "Calling initialize" << endl;
   CsgApplication::Initialize();
   AddProgramOptions("Specific options")("options",
                                         boost::program_options::value<string>(),
@@ -79,27 +80,34 @@ void CsgStatApp::Initialize() {
 }
 
 bool CsgStatApp::EvaluateOptions() {
+  cout << "Evaluating options" << endl;
   CsgApplication::EvaluateOptions();
   CheckRequired("options");
   CheckRequired("trj", "no trajectory file specified");
 
+  cout << "Load" << endl;
   _imc.LoadOptions(OptionsMap()["options"].as<string>());
-
   if (OptionsMap().count("block-length")) {
+    cout << "BlockLength" << endl;
     _imc.BlockLength(OptionsMap()["block-length"].as<int>());
   } else {
+    cout << "BlockLength 0" << endl;
     _imc.BlockLength(0);
   }
 
   if (OptionsMap().count("do-imc")) _imc.DoImc(true);
 
+  cout << "Extension " << endl;
   _imc.Extension(_extension);
 
+  cout << "Initialize" << endl;
   _imc.Initialize();
+  cout << "Finished eval options" << endl;
   return true;
 }
 
 void CsgStatApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
+  cout << "Calling begin evaluate in csgstat app" << endl;
   _imc.BeginEvaluate(top, top_ref);
 }
 

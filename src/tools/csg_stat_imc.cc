@@ -40,24 +40,28 @@ Imc::~Imc() {}
 // here the data structures are prepared to handle all the data
 void Imc::Initialize() {
   // do some output
-  if (_do_imc)
+  if (_do_imc) {
     cout << "begin to calculate inverse monte carlo parameters\n";
-  else
+  } else {
     cout << "begin to calculate distribution functions\n";
+  }
   cout << "# of bonded interactions: " << _bonded.size() << endl;
   cout << "# of non-bonded interactions: " << _nonbonded.size() << endl;
 
-  if (_bonded.size() + _nonbonded.size() == 0)
+  if (_bonded.size() + _nonbonded.size() == 0) {
     throw std::runtime_error(
         "No interactions defined in options xml-file - nothing to be done");
-
+  }
   // initialize non-bonded structures
+  cout << "Adding non bonded interaction " << endl;
   for (list<Property *>::iterator iter = _nonbonded.begin();
        iter != _nonbonded.end(); ++iter) {
+    cout << *iter << endl;
     interaction_t *i = AddInteraction(*iter);
     i->_is_bonded = false;
   }
 
+  cout << "Adding bonded interaction " << endl;
   // initialize bonded structures
   for (list<Property *>::iterator iter = _bonded.begin(); iter != _bonded.end();
        ++iter) {
@@ -65,6 +69,7 @@ void Imc::Initialize() {
     i->_is_bonded = true;
   }
 
+  cout << "Initialize groups" << endl;
   // initialize the group structures
   if (_do_imc) InitializeGroups();
 };
@@ -163,14 +168,20 @@ void Imc::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
 Imc::interaction_t *Imc::AddInteraction(Property *p) {
   string name = p->get("name").value();
   string group;
-  if (_do_imc)
+  if (_do_imc) {
     group = p->get("inverse.imc.group").value();
-  else
+  } else {
     group = "none";
-
+  }
   size_t index = _interactions.size();
-  getGroup(group)->_interactions.push_back(
-      unique_ptr<interaction_t>(new interaction_t));
+  cout << "index " << index << endl;
+  unique_ptr<interaction_t> unique_interaction =
+      unique_ptr<interaction_t>(new interaction_t);
+  getGroup(group)->_interactions.push_back(move(unique_interaction));
+  // getGroup(group)->_interactions.push_back(
+  //   unique_ptr<interaction_t>(new interaction_t));
+
+  cout << "Adding to map " << endl;
   _interactions[name] = (getGroup(group)->_interactions.back()).get();
   interaction_t *i = _interactions[name];
 
@@ -197,7 +208,8 @@ Imc::interaction_t *Imc::AddInteraction(Property *p) {
   if (i->_force) {
     i->_average_force.Initialize(i->_min, i->_max, n);
   }
-
+  cout << "Interaction " << endl;
+  cout << i->_index << " " << i->_step << " " << i->_min << endl;
   return i;
 }
 
@@ -450,13 +462,17 @@ void Imc::Worker::DoBonded(CSG_Topology *top) {
 
 // returns a group, creates it if doesn't exist
 Imc::group_t *Imc::getGroup(const string &name) {
-  map<string, unique_ptr<group_t>>::iterator iter;
-  iter = _groups.find(name);
-  if (iter == _groups.end()) {
+  cout << "calling getgroup" << endl;
+  // map<string, unique_ptr<group_t>>::iterator iter;
+  // iter = _groups.find(name);
+  // if (iter == _groups.end()) {
+  if (_groups.count(name) == 0) {
+    cout << "Creating new group" << endl;
     _groups[name] = unique_ptr<group_t>(new group_t);
-    _groups[name].get();
   }
-  return (*iter).second.get();
+  cout << "Got the group" << endl;
+  return _groups[name].get();
+  // return (*iter).second.get();
 }
 
 // initialize the groups after interactions are added

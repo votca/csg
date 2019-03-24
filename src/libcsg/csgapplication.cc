@@ -192,6 +192,7 @@ bool CsgApplication::ProcessData(Worker *worker) {
 }
 
 void CsgApplication::Run(void) {
+  cout << "Calling csg Run " << endl;
   TopologyReader *reader;
   // create reader for atomistic topology
   reader = TopReaderFactory().Create(_op_vm["top"].as<string>());
@@ -207,11 +208,12 @@ void CsgApplication::Run(void) {
   };
 
   // create the master worker
-  Worker *master = NULL;
-  if (DoThreaded())
+  Worker *master = nullptr;
+  if (DoThreaded()) {
     master = ForkWorker();
-  else
+  } else {
     master = new DummyWorker();
+  }
 
   master->setApplication(this);
   master->setId(0);
@@ -219,6 +221,7 @@ void CsgApplication::Run(void) {
 
   CGEngine cg;
 
+  cout << "Reading in topology" << endl;
   //////////////////////////////////////////////////
   // read in the topology for master
   //////////////////////////////////////////////////
