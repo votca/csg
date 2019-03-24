@@ -85,6 +85,8 @@ BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
       new BeadTriple(top.getBead(bead_id1), top.getBead(bead_id2),
                      top.getBead(bead_id3), dist12, dist13, dist23);
 
+  // Because we added the testriple to the triplelist there is no need for us
+  // to delete it, it will be deleted by triplelist container
   triplelist.AddTriple(testtriple);
 
   BeadTriple *triplefront, *tripleback;

@@ -108,8 +108,9 @@ void NBList_3Body::Generate(BeadList &list1, BeadList &list2, BeadList &list3,
             }
           if ((*_match_function)(*iter1, *iter2, *iter3, r12, r13, r23, d12,
                                  d13, d23))
-            if (!FindTriple(*iter1, *iter2, *iter3))
+            if (!FindTriple(*iter1, *iter2, *iter3)) {
               AddTriple(_triple_creator(*iter1, *iter2, *iter3, r12, r13, r23));
+            }
         }
       }
     }

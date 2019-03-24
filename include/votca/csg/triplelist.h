@@ -15,10 +15,11 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TRIPLELIST_H
-#define _VOTCA_CSG_TRIPLELIST_H
+#ifndef VOTCA_CSG_TRIPLELIST_H
+#define VOTCA_CSG_TRIPLELIST_H
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace votca {
@@ -60,13 +61,15 @@ class TripleList {
 
 template <typename element_type, typename triple_type>
 inline void TripleList<element_type, triple_type>::AddTriple(triple_type *t) {
+  /// \todo check if unique
+  _triples.push_back(t);
   //(*t)[i] gives access to ith element of tuple object (i=0,1,2).
   // only consider the permutations of elements (1,2) of the tuple object ->
   // tuple objects of the form (*,1,2) and (*,2,1) are considered to be the same
-  _triple_map[std::get<0>(*t)][std::get<1>(*t)][std::get<2>(*t)] = t;
-  _triple_map[std::get<0>(*t)][std::get<2>(*t)][std::get<1>(*t)] = t;
-  /// \todo check if unique
-  _triples.push_back(t);
+  _triple_map[std::get<0>(*t)][std::get<1>(*t)][std::get<2>(*t)] =
+      _triples.back();
+  _triple_map[std::get<0>(*t)][std::get<2>(*t)][std::get<1>(*t)] =
+      _triples.back();
 }
 
 template <typename element_type, typename triple_type>
@@ -85,16 +88,16 @@ inline triple_type *TripleList<element_type, triple_type>::FindTriple(
       std::map<element_type, std::map<element_type, triple_type *>>>::iterator
       iter1;
   iter1 = _triple_map.find(e1);
-  if (iter1 == _triple_map.end()) return NULL;
+  if (iter1 == _triple_map.end()) return nullptr;
 
   typename std::map<element_type,
                     std::map<element_type, triple_type *>>::iterator iter2;
   iter2 = iter1->second.find(e2);
-  if (iter2 == iter1->second.end()) return NULL;
+  if (iter2 == iter1->second.end()) return nullptr;
 
   typename std::map<element_type, triple_type *>::iterator iter3;
   iter3 = iter2->second.find(e3);
-  if (iter3 == iter2->second.end()) return NULL;
+  if (iter3 == iter2->second.end()) return nullptr;
 
   return iter3->second;
 }
@@ -102,4 +105,4 @@ inline triple_type *TripleList<element_type, triple_type>::FindTriple(
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TRIPLELIST_H */
+#endif  // VOTCA_CSG_TRIPLELIST_H

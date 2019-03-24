@@ -192,7 +192,6 @@ bool CsgApplication::ProcessData(Worker *worker) {
 }
 
 void CsgApplication::Run(void) {
-  cout << "Calling csg Run " << endl;
   TopologyReader *reader;
   // create reader for atomistic topology
   reader = TopReaderFactory().Create(_op_vm["top"].as<string>());
@@ -221,7 +220,6 @@ void CsgApplication::Run(void) {
 
   CGEngine cg;
 
-  cout << "Reading in topology" << endl;
   //////////////////////////////////////////////////
   // read in the topology for master
   //////////////////////////////////////////////////
@@ -294,7 +292,6 @@ void CsgApplication::Run(void) {
   if (_do_mapping) {
     // Now that the _top object boundaries are consistent with the trajectory
     // files it is possible to create the CG topology.
-    cout << "Calling CreateCGTopology" << endl;
     master->converter_ = cg.PopulateCGTopology(master->_top, master->_top_cg);
     cout << "I have " << master->_top_cg.BeadCount() << " beads in "
          << master->_top_cg.MoleculeCount()

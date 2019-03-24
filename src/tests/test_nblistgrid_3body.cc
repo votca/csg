@@ -213,6 +213,7 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
       throw runtime_error("Failed to trigger test something is off!");
     }
   }
+  delete nb;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
