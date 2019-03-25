@@ -19,13 +19,13 @@
 #define _VOTCA_CSG_BEADSTRUCTURE_H
 
 #include <cassert>
+#include <iostream>
 #include <unordered_map>
+
 #include <votca/tools/graph.h>
 #include <votca/tools/graph_bf_visitor.h>
 #include <votca/tools/graphalgorithm.h>
 #include <votca/tools/graphdistvisitor.h>
-
-namespace TOOLS = votca::tools;
 
 namespace votca {
 namespace csg {
@@ -42,10 +42,10 @@ namespace csg {
  * E.g. If a beadstructure is composed of the following:
  *
  * BeadStructure 1
- * Name:"A" Id:1 ---- Name:"B" Id:2
+ * Type:"A" Id:1 ---- Type:"B" Id:2
  *
  * BeadStucture 2
- * Name:"A" Id:3 ---- Name:"B" Id:4
+ * Type:"A" Id:3 ---- Type:"B" Id:4
  *
  * Here BeadStructure 1 and 2 will compare equal
  *
@@ -69,7 +69,7 @@ class BeadStructure {
   /**
    * \brief returns the number of beads in the bead structure
    **/
-  size_t BeadCount() { return beads_.size(); }
+  size_t BeadCount() const { return beads_.size(); }
 
   /**
    * \brief add a bead to the bead structure
@@ -84,6 +84,14 @@ class BeadStructure {
   T *getBead(int id);
 
   /**
+   * @brief Grabs the const version of the bead pointer
+   *
+   * @param[in] id grabs the bead with the provided `id`
+   *
+   * @return const pointer to the bead
+   */
+  const T *getBeadConst(int id) const;
+  /**
    * \brief Create a connection between two beads in the structure
    *
    * A bead cannot be connected to itself. It also may not be connected to a
@@ -92,11 +100,24 @@ class BeadStructure {
   void ConnectBeads(int bead1_id, int bead2_id);
 
   /**
-   * \brief Return a vector of all the beads neighboring the index
+   * \brief Return a vector of all the beads neighboring the bead_id
    **/
-  std::vector<T *> getNeighBeads(int index);
+  std::vector<T *> getNeighBeads(int bead_id);
 
-  TOOLS::Graph getGraph();
+  /**
+   * @brief Returns a vector containing all the bead ids in the structure
+   *
+   * @return vector of ints
+   */
+  std::vector<int> getBeadIds() const;
+
+  /**
+   * @brief Returns a copy of the internal graph
+   *
+   * @return graph
+   */
+  tools::Graph getGraph();
+
   /**
    * \brief Compare the topology of two bead structures
    *
@@ -109,22 +130,23 @@ class BeadStructure {
    **/
   bool isStructureEquivalent(BeadStructure<T> &beadstructure);
 
+  /// Determine if a bead exists in the structure
   bool BeadExist(int bead_id) const { return beads_.count(bead_id); }
 
  protected:
   void InitializeGraph_();
   void CalculateStructure_();
-  TOOLS::GraphNode BaseBeadToGraphNode_(T *basebead);
+  tools::GraphNode BaseBeadToGraphNode_(T *basebead);
 
   bool structureIdUpToDate = false;
   bool graphUpToDate = false;
   bool single_structureUpToDate_ = false;
   bool single_structure_ = false;
   std::string structure_id_ = "";
-  TOOLS::Graph graph_;
-  std::set<TOOLS::Edge> connections_;
+  tools::Graph graph_;
+  std::set<tools::Edge> connections_;
   std::unordered_map<int, T *> beads_;
-  std::unordered_map<int, TOOLS::GraphNode> graphnodes_;
+  std::unordered_map<int, tools::GraphNode> graphnodes_;
 };
 
 /**********************
@@ -134,8 +156,8 @@ class BeadStructure {
 template <class T>
 void BeadStructure<T>::InitializeGraph_() {
   if (!graphUpToDate) {
-    std::vector<TOOLS::Edge> connections_vector;
-    for (const TOOLS::Edge &edge : connections_) {
+    std::vector<tools::Edge> connections_vector;
+    for (const tools::Edge &edge : connections_) {
       connections_vector.push_back(edge);
     }
 
@@ -143,7 +165,7 @@ void BeadStructure<T>::InitializeGraph_() {
       graphnodes_[id_bead_ptr_pair.first] =
           BaseBeadToGraphNode_(id_bead_ptr_pair.second);
     }
-    graph_ = TOOLS::Graph(connections_vector, graphnodes_);
+    graph_ = tools::Graph(connections_vector, graphnodes_);
     graphUpToDate = true;
   }
 }
@@ -153,21 +175,21 @@ void BeadStructure<T>::CalculateStructure_() {
 
   InitializeGraph_();
   if (!structureIdUpToDate) {
-    structure_id_ = TOOLS::findStructureId<TOOLS::GraphDistVisitor>(graph_);
+    structure_id_ = tools::findStructureId<tools::GraphDistVisitor>(graph_);
     structureIdUpToDate = true;
   }
 }
 
 template <class T>
-TOOLS::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
+tools::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
   std::unordered_map<std::string, double> attributes1;
   std::unordered_map<std::string, std::string> attributes2;
 
   attributes1["Mass"] = basebead->getMass();
-  attributes2["Name"] = basebead->getName();
+  attributes2["Type"] = basebead->getType();
 
   /// Add graphnodes
-  TOOLS::GraphNode graphnode;
+  tools::GraphNode graphnode;
   graphnode.setDouble(attributes1);
   graphnode.setStr(attributes2);
 
@@ -209,7 +231,7 @@ void BeadStructure<T>::ConnectBeads(int bead1_id, int bead2_id) {
     throw std::invalid_argument(err);
   }
   size_t numberOfConnections = connections_.size();
-  connections_.insert(TOOLS::Edge(bead1_id, bead2_id));
+  connections_.insert(tools::Edge(bead1_id, bead2_id));
   if (numberOfConnections != connections_.size()) {
     single_structureUpToDate_ = false;
     graphUpToDate = false;
@@ -218,7 +240,7 @@ void BeadStructure<T>::ConnectBeads(int bead1_id, int bead2_id) {
 }
 
 template <class T>
-TOOLS::Graph BeadStructure<T>::getGraph() {
+tools::Graph BeadStructure<T>::getGraph() {
   InitializeGraph_();
   return graph_;
 }
@@ -234,7 +256,7 @@ bool BeadStructure<T>::isSingleStructure() {
       return single_structure_;
     }
     // Choose first vertex that is actually in the graph as the starting vertex
-    TOOLS::Graph_BF_Visitor gv_breadth_first;
+    tools::Graph_BF_Visitor gv_breadth_first;
     gv_breadth_first.setStartingVertex(vertices.at(0));
     if (!singleNetwork(graph_, gv_breadth_first)) {
       single_structure_ = false;
@@ -266,11 +288,11 @@ bool BeadStructure<T>::isStructureEquivalent(BeadStructure<T> &beadstructure) {
 }
 
 template <class T>
-std::vector<T *> BeadStructure<T>::getNeighBeads(int index) {
+std::vector<T *> BeadStructure<T>::getNeighBeads(int bead_id) {
   if (!graphUpToDate) {
     InitializeGraph_();
   }
-  std::vector<int> neighbor_ids = graph_.getNeighVertices(index);
+  std::vector<int> neighbor_ids = graph_.getNeighVertices(bead_id);
   std::vector<T *> neighbeads;
   for (int &node_id : neighbor_ids) {
     neighbeads.push_back(beads_[node_id]);
@@ -279,9 +301,24 @@ std::vector<T *> BeadStructure<T>::getNeighBeads(int index) {
 }
 
 template <class T>
-T *BeadStructure<T>::getBead(int index) {
-  assert(beads_.count(index));
-  return beads_[index];
+T *BeadStructure<T>::getBead(int bead_id) {
+  assert(beads_.count(bead_id));
+  return beads_[bead_id];
+}
+
+template <class T>
+const T *BeadStructure<T>::getBeadConst(int bead_id) const {
+  assert(beads_.count(bead_id));
+  return beads_.at(bead_id);
+}
+
+template <class T>
+std::vector<int> BeadStructure<T>::getBeadIds() const {
+  std::vector<int> bead_ids;
+  for (const std::pair<const int, T *> &id_bead_ptr_pair : beads_) {
+    bead_ids.push_back(id_bead_ptr_pair.first);
+  }
+  return bead_ids;
 }
 
 }  // namespace csg

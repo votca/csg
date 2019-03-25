@@ -15,6 +15,7 @@
  *
  */
 
+#include "../../include/votca/csg/csgapplication.h"
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <votca/csg/version.h>

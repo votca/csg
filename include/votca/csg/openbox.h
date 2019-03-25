@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_OPENBOX_H
-#define _VOTCA_CSG_OPENBOX_H
+#ifndef VOTCA_CSG_OPENBOX_H
+#define VOTCA_CSG_OPENBOX_H
 
 #include "boundarycondition.h"
 
@@ -26,13 +26,17 @@ namespace csg {
 class OpenBox : public BoundaryCondition {
 
  public:
-  Eigen::Vector3d BCShortestConnection(const Eigen::Vector3d &r_i,
-                                       const Eigen::Vector3d &r_j) const;
+  virtual std::unique_ptr<BoundaryCondition> Clone() const override {
+    return std::unique_ptr<BoundaryCondition>(new OpenBox(*this));
+  }
 
-  eBoxtype getBoxType() { return typeOpen; }
+  Eigen::Vector3d BCShortestConnection(
+      const Eigen::Vector3d &r_i, const Eigen::Vector3d &r_j) const override;
+
+  eBoxtype getBoxType() const override { return typeOpen; }
 };
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_OPENBOX_H */
+#endif  // VOTCA_CSG_OPENBOX_H

@@ -21,7 +21,9 @@
 namespace votca {
 namespace csg {
 
-NBList_3Body::NBList_3Body() : _do_exclusions(false), _match_function(0) {
+using namespace votca::tools;
+
+NBList_3Body::NBList_3Body() : _do_exclusions(false) {
   setTripleType<BeadTriple>();
   SetMatchFunction(NBList_3Body::match_always);
 }
@@ -40,10 +42,10 @@ void NBList_3Body::Generate(BeadList &list1, BeadList &list2, BeadList &list3,
   if (list3.empty()) return;
 
   // check if all bead lists "have" the same topology
-  assert(list1.getTopology() == list2.getTopology());
-  assert(list1.getTopology() == list3.getTopology());
-  assert(list2.getTopology() == list3.getTopology());
-  Topology *top = list1.getTopology();
+  assert(list1.getCSGTopology() == list2.getCSGTopology());
+  assert(list1.getCSGTopology() == list3.getCSGTopology());
+  assert(list2.getCSGTopology() == list3.getCSGTopology());
+  CSG_Topology *top = list1.getCSGTopology();
 
   // builds neighbor lists for all cases, where all list are of different bead
   // typess (list1 neq list2 neq list3), list2 and list3 are of the same type
@@ -106,8 +108,9 @@ void NBList_3Body::Generate(BeadList &list1, BeadList &list2, BeadList &list3,
             }
           if ((*_match_function)(*iter1, *iter2, *iter3, r12, r13, r23, d12,
                                  d13, d23))
-            if (!FindTriple(*iter1, *iter2, *iter3))
+            if (!FindTriple(*iter1, *iter2, *iter3)) {
               AddTriple(_triple_creator(*iter1, *iter2, *iter3, r12, r13, r23));
+            }
         }
       }
     }

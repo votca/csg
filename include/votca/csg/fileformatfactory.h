@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_FILEFORMATFACTORY_H
-#define _VOTCA_CSG_FILEFORMATFACTORY_H
+#ifndef VOTCA_CSG_FILEFORMATFACTORY_H
+#define VOTCA_CSG_FILEFORMATFACTORY_H
 
 #include <string>
 #include <votca/tools/filesystem.h>
@@ -25,10 +25,8 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 template <typename T>
-class FileFormatFactory : public TOOLS::ObjectFactory<std::string, T> {
+class FileFormatFactory : public tools::ObjectFactory<std::string, T> {
  public:
   FileFormatFactory() {}
 
@@ -39,17 +37,17 @@ template <typename T>
 T *FileFormatFactory<T>::Create(const std::string &file) {
   std::string filetype = tools::filesystem::GetFileExtension(file);
   try {
-    return TOOLS::ObjectFactory<std::string, T>::Create(filetype);
+    return tools::ObjectFactory<std::string, T>::Create(filetype);
   } catch (std::exception &error) {
     throw std::runtime_error("Error '" + filetype +
                              "' file format of file "
                              "'" +
                              file + "' cannot be read or written");
   }
-  return NULL;
+  return nullptr;
 }
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_FILEFORMATFACTORY_H */
+#endif  // VOTCA_CSG_FILEFORMATFACTORY_H

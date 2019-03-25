@@ -25,6 +25,7 @@
 // using namespace votca::tools;
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgTestApp : public CsgApplication {
   string ProgramName() { return "template_nblist"; }
@@ -34,13 +35,13 @@ class CsgTestApp : public CsgApplication {
 
   bool DoTrajectory() { return true; }
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
   void EndEvaluate();
 
  protected:
   HistogramNew _rdf;
-  double       _cut_off;
+  double _cut_off;
 };
 
 int main(int argc, char **argv) {
@@ -49,7 +50,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref) {
+void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   BeadList b;
   b.Generate(*top, "*");
   NBListGrid nb;
@@ -66,7 +67,7 @@ void CsgTestApp::Initialize() {
       "the cutoff");
 }
 
-void CsgTestApp::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgTestApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   _cut_off = OptionsMap()["c"].as<double>();
   _rdf.Initialize(0, _cut_off, 50);
 }

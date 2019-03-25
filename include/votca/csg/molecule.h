@@ -15,11 +15,11 @@
  *
  */
 
-#ifndef _VOTCA_CSG_MOLECULE_H
-#define _VOTCA_CSG_MOLECULE_H
+#ifndef VOTCA_CSG_MOLECULE_H
+#define VOTCA_CSG_MOLECULE_H
 
+#include "basemolecule.h"
 #include "bead.h"
-#include "topologyitem.h"
 #include <assert.h>
 #include <map>
 #include <string>
@@ -28,12 +28,10 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-
 class Interaction;
 
 /**
-    \brief information about molecules
+    \brief Information about molecules.
 
     The Molecule class stores which beads belong to a molecule.
     The organization of beads into molecules is needed for the CG mapping.
@@ -41,78 +39,49 @@ class Interaction;
     \todo sort atoms in molecule
 
 */
-class Molecule : public TopologyItem {
+class Molecule : public BaseMolecule<Bead> {
  public:
-  /// get the molecule ID
-  int getId() const { return _id; }
-
-  /// get the name of the molecule
-  const std::string &getName() const { return _name; }
-
-  /// set the name of the molecule
-  void setName(const std::string &name) { _name = name; }
-
-  /// Add a bead to the molecule
-  void AddBead(Bead *bead, const std::string &name);
-  /// get the id of a bead in the molecule
-  Bead *getBead(int bead) { return _beads[bead]; }
-  int getBeadId(int bead) { return _beads[bead]->getId(); }
-  int getBeadIdByName(const std::string &name);
-
-  /// get the number of beads in the molecule
-  int BeadCount() const { return _beads.size(); }
-
-  const std::vector<Bead *> &Beads() const { return _beads; }
-  std::vector<Bead *> &Beads() { return _beads; }
-  /// find a bead by it's name
-  int getBeadByName(const std::string &name);
-  std::string getBeadName(int bead) { return _bead_names[bead]; }
+  Molecule(){};
+  /**
+   * @brief Grabs all beads that have the label given by `label`
+   *
+   * @param label string of the form ResidueName:ResidueNumber:AtomName
+   *
+   * @return an unordered set with the ids of the beads that match the label
+   */
+  std::unordered_set<int> getBeadIdsByLabel(const std::string &label) const;
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
 
-  std::vector<Interaction *> Interactions() { return _interactions; }
-
-  template <typename T>
-  void setUserData(T *userdata) {
-    _userdata = (void *)userdata;
-  }
-
-  template <typename T>
-  T *getUserData() {
-    return (T *)_userdata;
+  const std::vector<Interaction *> Interactions() const {
+    return _interactions;
   }
 
  private:
-  // maps a name to a bead id
-  std::map<std::string, int> _beadmap;
   std::vector<Interaction *> _interactions;
 
-  // id of the molecules
-  int _id;
-
-  // name of the molecule
-  std::string _name;
-  // the beads in the molecule
-  std::vector<Bead *> _beads;
-  std::vector<std::string> _bead_names;
-
-  void *_userdata;
-
   /// constructor
-  Molecule(Topology *parent, int id, std::string name)
-      : TopologyItem(parent), _id(id), _name(name) {}
+  Molecule(int id, std::string molecule_type) {
+    id_.setId(id);
+    type_.setName(molecule_type);
+  }
 
-  friend class Topology;
+  friend class CSG_Topology;
 };
 
-inline int Molecule::getBeadIdByName(const std::string &name) {
-  int i = getBeadByName(name);
-  if (i < 0) return i;
-  return _beads[i]->getId();
+inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
+    const std::string &label) const {
+  std::unordered_set<int> bead_ids;
+  for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
+    if (label.compare(id_and_bead.second->getLabel()) == 0) {
+      bead_ids.insert(id_and_bead.first);
+    }
+  }
+  return bead_ids;
 }
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_MOLECULE_H */
+#endif  // VOTCA_CSG_MOLECULE_H

@@ -24,6 +24,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void DLPOLYTrajectoryWriter::Open(string file, bool bAppend)
 // open/create a dlpoly configuration or trajectory file
@@ -74,7 +75,7 @@ void DLPOLYTrajectoryWriter::Open(string file, bool bAppend)
 
 void DLPOLYTrajectoryWriter::Close() { _fl.close(); }
 
-void DLPOLYTrajectoryWriter::Write(Topology *conf) {
+void DLPOLYTrajectoryWriter::Write(CSG_Topology *conf) {
   static int nstep = 1;
   static double dstep = 0.0;
   const double scale = 10.0;  // nm -> A factor
@@ -122,7 +123,7 @@ void DLPOLYTrajectoryWriter::Write(Topology *conf) {
           << m(i, 1) * scale << setw(20) << m(i, 2) * scale << endl;
   }
 
-  for (int i = 0; i < conf->BeadCount(); i++) {
+  for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); i++) {
     Bead *bead = conf->getBead(i);
 
     // AB: DL_POLY needs bead TYPE, not name!
@@ -135,12 +136,6 @@ void DLPOLYTrajectoryWriter::Write(Topology *conf) {
       _fl << setprecision(6) << setw(12) << bead->getMass() << setw(12)
           << bead->getQ() << setw(12) << "   0.0" << endl;
     }
-
-    // alternative with atom NAME & fixed floating point format (in case the
-    // need arises)
-    //_fl << setw(8) << left << bead->getName() << right << setw(10) << i+1;
-    //_fl << fixed << setprecision(6) << setw(12) << bead->getMass() << setw(12)
-    //<< bead->getQ() << "   0.0" << endl;
 
     // nm -> Angs
     _fl << resetiosflags(std::ios::fixed) << setprecision(12) << setw(20)

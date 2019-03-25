@@ -27,6 +27,9 @@
 namespace votca {
 namespace csg {
 
+using namespace std;
+using namespace votca::tools;
+
 void StdAnalysis::Register(map<string, AnalysisTool *> &lib) {
   lib["list"] = this;
   lib["vals"] = this;
@@ -34,7 +37,7 @@ void StdAnalysis::Register(map<string, AnalysisTool *> &lib) {
   lib["autocor"] = this;
 }
 
-void StdAnalysis::Command(BondedStatistics &bs, string cmd,
+void StdAnalysis::Command(BondedStatistics &bs, const string &cmd,
                           vector<string> &args) {
   if (cmd == "vals") WriteValues(bs, args);
   if (cmd == "cor") WriteCorrelations(bs, args);
@@ -51,7 +54,7 @@ void StdAnalysis::Command(BondedStatistics &bs, string cmd,
   }
 }
 
-void StdAnalysis::Help(string cmd, vector<string> &args) {
+void StdAnalysis::Help(const string &cmd, vector<string> &args) {
   if (cmd == "vals") {
     cout << "vals <file> <selection>\n"
          << "write values to file. The first row is the frame number, then one "

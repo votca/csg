@@ -15,25 +15,30 @@
  *
  */
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include <votca/csg/xyzreader.h>
+#include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
+
 namespace votca {
 namespace csg {
+
 using namespace boost;
 using namespace std;
+using namespace votca::tools;
 
-bool XYZReader::ReadTopology(string file, Topology &top) {
+bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   top.Cleanup();
+
   _file = file;
   _fl.open(file);
-  if (!_fl.is_open())
+  if (!_fl.is_open()) {
     throw std::ios_base::failure("Error on open topology file: " + file);
+  }
 
-  top.CreateResidue("DUM");
-
-  ReadFrame<true, Topology>(top);
+  ReadFrame<true, CSG_Topology>(top);
 
   _fl.close();
 
@@ -45,18 +50,18 @@ bool XYZReader::Open(const string &file) {
   _fl.open(file);
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open trajectory file: " + file);
-  _line = 0;
-  return true;
 }
+_line = 0;
+return true;
+}  // namespace csg
 
 void XYZReader::Close() { _fl.close(); }
 
-bool XYZReader::FirstFrame(Topology &top) { return NextFrame(top); }
+bool XYZReader::FirstFrame(CSG_Topology &top) { return NextFrame(top); }
 
-bool XYZReader::NextFrame(Topology &top) {
-  bool success = ReadFrame<false, Topology>(top);
+bool XYZReader::NextFrame(CSG_Topology &top) {
+  bool success = ReadFrame<false, CSG_Topology>(top);
   return success;
 }
-
-}  // namespace csg
+}  // namespace votca
 }  // namespace votca

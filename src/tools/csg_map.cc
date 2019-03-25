@@ -15,16 +15,17 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <fstream>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <votca/csg/csgapplication.h>
-#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgMapApp : public CsgApplication {
  public:
@@ -69,8 +70,8 @@ class CsgMapApp : public CsgApplication {
     return true;
   }
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
-  void EvalConfiguration(Topology *top, Topology *top_ref) {
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
     if (!_do_hybrid) {
       // simply write the topology mapped by csgapplication class
       if (_do_vel) top->SetHasVel(true);
@@ -78,68 +79,63 @@ class CsgMapApp : public CsgApplication {
       _writer->Write(top);
     } else {
       // we want to combine atomistic and coarse-grained into one topology
-      Topology *hybtol = new Topology();
-
-      ResidueContainer::iterator it_res;
-      MoleculeContainer::iterator it_mol;
+      CSG_Topology *hybtol = new CSG_Topology();
+      hybtol->Copy(*top);
+      /*MoleculeContainer::iterator it_mol;
 
       hybtol->setBox(top->getBox());
       hybtol->setTime(top->getTime());
       hybtol->setStep(top->getStep());
 
       // copy all residues from both
-      for (it_res = top_ref->Residues().begin();
-           it_res != top_ref->Residues().end(); ++it_res) {
-        hybtol->CreateResidue((*it_res)->getName());
-      }
-      for (it_res = top->Residues().begin(); it_res != top->Residues().end();
-           ++it_res) {
-        hybtol->CreateResidue((*it_res)->getName());
-      }
+      hybtol->setMoleculeNamesAndIds(top->getMoleculeNamesAndIds());
+      hybtol->setResidueIdsAndNames(top->getResidueIdsAndNames());
 
       // copy all molecules and beads
 
       for (it_mol = top_ref->Molecules().begin();
            it_mol != top_ref->Molecules().end(); ++it_mol) {
         Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
-        for (int i = 0; i < (*it_mol)->BeadCount(); i++) {
-          // copy atomistic beads of molecule
-          int beadid = (*it_mol)->getBead(i)->getId();
+        vector<int> bead_ids = (*it_mol)->getBeadIds();
+        for (const int &bead_id : bead_ids) {
 
-          Bead *bi = (*it_mol)->getBead(i);
+          Bead *bi = (*it_mol)->getBead(bead_id);
           if (!hybtol->BeadTypeExist(bi->getType())) {
             hybtol->RegisterBeadType(bi->getType());
           }
 
-          Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(),
-                                        bi->getType(), bi->getResnr(),
-                                        bi->getMass(), bi->getQ());
+          Bead *bn = hybtol->CreateBead(
+              bi->getSymmetry(), bi->getName(), bi->getType(),
+              bi->getResidueId(), bi->getResidueType(),
+              (*it_mol)->getName(), bi->getMass(), bi->getQ());
+
           bn->setPos(bi->getPos());
           if (bi->HasVel()) bn->setVel(bi->getVel());
           if (bi->HasF()) bn->setF(bi->getF());
 
-          mi->AddBead(hybtol->Beads()[beadid], (*it_mol)->getBeadName(i));
+          mi->AddBead(hybtol->Beads()[bead_id]);
         }
 
         if (mi->getId() < top->MoleculeCount()) {
           // copy cg beads of molecule
           Molecule *cgmol = top->Molecules()[mi->getId()];
-          for (int i = 0; i < cgmol->BeadCount(); i++) {
-            Bead *bi = cgmol->getBead(i);
-            // todo: this is a bit dirty as a cg bead will always have the resid
-            // of its first parent
+          vector<int> bead_ids = cgmol->getBeadIds();
+          for (const int &bead_id : bead_ids) {
+            Bead *bi = cgmol->getBead(bead_id);
             Bead *bparent = (*it_mol)->getBead(0);
-            Bead *bn = hybtol->CreateBead(bi->getSymmetry(), bi->getName(),
-                                          bi->getType(), bparent->getResnr(),
-                                          bi->getMass(), bi->getQ());
+            Bead *bn = hybtol->CreateBead<Bead>(
+                bi->getSymmetry(), bi->getName(), bi->getType(),
+                bparent->getResidueNumber(), bparent->getResidueName(),
+                cgmol->getName(), bi->getMass(), bi->getQ());
+
             bn->setPos(bi->getPos());
             if (bi->HasVel()) bn->setVel(bi->getVel());
-            mi->AddBead(bi, bi->getName());
+            mi->AddBead(bi);
           }
         }
       }
       hybtol->setBox(top_ref->getBox());
-
+*/
       _writer->Write(hybtol);
     }
   }
@@ -156,7 +152,7 @@ class CsgMapApp : public CsgApplication {
   bool _do_force;
 };
 
-void CsgMapApp::BeginEvaluate(Topology *top, Topology *top_atom) {
+void CsgMapApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   string out = OptionsMap()["out"].as<string>();
   cout << "writing coarse-grained trajectory to " << out << endl;
   _writer = TrjWriterFactory().Create(out);

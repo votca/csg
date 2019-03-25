@@ -16,6 +16,7 @@
  */
 
 #include "lammpsdumpwriter.h"
+#include "../../../../include/votca/csg/bead.h"
 #include <stdio.h>
 #include <string>
 
@@ -23,18 +24,18 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
+using namespace votca::tools;
 void LAMMPSDumpWriter::Open(std::string file, bool bAppend) {
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
 void LAMMPSDumpWriter::Close() { fclose(_out); }
 
-void LAMMPSDumpWriter::Write(Topology *conf) {
-  Topology *top = conf;
+void LAMMPSDumpWriter::Write(CSG_Topology *conf) {
+  CSG_Topology *top = conf;
   Eigen::Matrix3d box = conf->getBox();
   fprintf(_out, "ITEM: TIMESTEP\n%i\n", top->getStep());
-  fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top->Beads().size());
+  fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top->BeadCount());
   fprintf(_out, "ITEM: BOX BOUNDS pp pp pp\n");
   fprintf(_out, "0 %f\n0 %f\n0 %f\n", box(0, 0), box(1, 1), box(2, 2));
 
@@ -49,22 +50,23 @@ void LAMMPSDumpWriter::Write(Topology *conf) {
   }
   fprintf(_out, "\n");
 
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bi = *iter;
+  vector<int> bead_ids = conf->getBeadIds();
+  // Sort the beads before outputing them
+  sort(bead_ids.begin(), bead_ids.end());
+  for (const int bead_id : bead_ids) {
+    Bead *bead = conf->getBead(bead_id);
+    int bead_type_id = conf->getBeadTypeId(bead_id);
 
-    int type_id = conf->getBeadTypeId(bi->getType());
-
-    fprintf(_out, "%i %i", bi->getId() + 1, type_id);
-    fprintf(_out, " %f %f %f", bi->getPos().x(), bi->getPos().y(),
-            bi->getPos().z());
+    fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
+    fprintf(_out, " %f %f %f", bead->getPos().getX(), bead->getPos().getY(),
+            bead->getPos().getZ());
     if (v) {
-      fprintf(_out, " %f %f %f", bi->getVel().x(), bi->getVel().y(),
-              bi->getVel().z());
+      fprintf(_out, " %f %f %f", bead->getVel().getX(), bead->getVel().getY(),
+              bead->getVel().getZ());
     }
     if (f) {
-      fprintf(_out, " %f %f %f", bi->getF().x(), bi->getF().y(),
-              bi->getF().z());
+      fprintf(_out, " %f %f %f", bead->getF().getX(), bead->getF().getY(),
+              bead->getF().getZ());
     }
     fprintf(_out, "\n");
   }

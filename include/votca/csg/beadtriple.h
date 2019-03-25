@@ -15,14 +15,16 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BEADTRIPLE_H
-#define _VOTCA_CSG_BEADTRIPLE_H
+#ifndef VOTCA_CSG_BEADTRIPLE_H
+#define VOTCA_CSG_BEADTRIPLE_H
 
 #include <tuple>
+#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
 
+class Bead;
 /**
    \brief A particle pair
 
@@ -72,4 +74,4 @@ class BeadTriple : public std::tuple<Bead *, Bead *, Bead *> {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_BEADTRIPLE_H */
+#endif  // VOTCA_CSG_BEADTRIPLE_H

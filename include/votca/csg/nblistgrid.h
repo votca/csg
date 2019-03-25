@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_NBLISTGRID_H
-#define _VOTCA_CSG_NBLISTGRID_H
+#ifndef VOTCA_CSG_NBLISTGRID_H
+#define VOTCA_CSG_NBLISTGRID_H
 
 #include "nblist.h"
 #include <vector>
@@ -36,16 +36,27 @@ class NBListGrid : public NBList {
     std::vector<cell_t *> _neighbours;
   };
 
+<<<<<<< HEAD
   Eigen::Vector3d _box_a, _box_b, _box_c;
   Eigen::Vector3d _norm_a, _norm_b, _norm_c;
+=======
+  tools::vec _box_a, _box_b, _box_c;
+  tools::vec _norm_a, _norm_b, _norm_c;
+>>>>>>> joshs-development
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
-  Topology *_top;
+  CSG_Topology *_top;
 
+<<<<<<< HEAD
   void InitializeGrid(const Eigen::Matrix3d &box);
 
   cell_t &getCell(const Eigen::Vector3d &r);
+=======
+  void InitializeGrid(const tools::matrix &box);
+
+  cell_t &getCell(const tools::vec &r);
+>>>>>>> joshs-development
   cell_t &getCell(const int &a, const int &b, const int &c);
 
   void TestBead(cell_t &cell, Bead *bead);
@@ -60,4 +71,4 @@ inline NBListGrid::cell_t &NBListGrid::getCell(const int &a, const int &b,
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_NBLISTGRID_H */
+#endif  // VOTCA_CSG_NBLISTGRID_H

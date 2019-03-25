@@ -16,8 +16,9 @@
  */
 
 #include "lammpsdatareader.h"
+#include <boost/algorithm/string.hpp>
 #include <vector>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
@@ -25,7 +26,7 @@ namespace votca {
 namespace csg {
 using namespace boost;
 using namespace std;
-
+using namespace votca::tools;
 /*****************************************************************************
  * Internal Helper Functions                                                 *
  *****************************************************************************/
@@ -81,7 +82,7 @@ string getStringGivenDoubleAndMap_(double value, map<string, double> nameValue,
  * Public Facing Methods                                                     *
  *****************************************************************************/
 
-bool LAMMPSDataReader::ReadTopology(string file, Topology &top) {
+bool LAMMPSDataReader::ReadTopology(string file, CSG_Topology &top) {
 
   cout << endl;
   cout << "WARNING: The votca lammps data reader is only able to read ";
@@ -126,13 +127,13 @@ bool LAMMPSDataReader::Open(const string &file) {
 
 void LAMMPSDataReader::Close() { fl_.close(); }
 
-bool LAMMPSDataReader::FirstFrame(Topology &top) {
+bool LAMMPSDataReader::FirstFrame(CSG_Topology &top) {
   topology_ = false;
   NextFrame(top);
   return true;
 }
 
-bool LAMMPSDataReader::NextFrame(Topology &top) {
+bool LAMMPSDataReader::NextFrame(CSG_Topology &top) {
 
   string line;
   getline(fl_, line);
@@ -173,7 +174,7 @@ bool LAMMPSDataReader::NextFrame(Topology &top) {
  *****************************************************************************/
 
 bool LAMMPSDataReader::MatchOneFieldLabel_(vector<string> fields,
-                                           Topology &top) {
+                                           CSG_Topology &top) {
 
   if (fields.at(0) == "Masses") {
     SortIntoDataGroup_("Masses");
@@ -194,7 +195,7 @@ bool LAMMPSDataReader::MatchOneFieldLabel_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchTwoFieldLabels_(vector<string> fields,
-                                            Topology &top) {
+                                            CSG_Topology &top) {
 
   string label = fields.at(0) + " " + fields.at(1);
 
@@ -223,7 +224,7 @@ bool LAMMPSDataReader::MatchTwoFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchThreeFieldLabels_(vector<string> fields,
-                                              Topology &top) {
+                                              CSG_Topology &top) {
   string label = fields.at(1) + " " + fields.at(2);
   if (label == "atom types") {
     ReadNumTypes_(fields, "atom");
@@ -242,7 +243,7 @@ bool LAMMPSDataReader::MatchThreeFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchFourFieldLabels_(vector<string> fields,
-                                             Topology &top) {
+                                             CSG_Topology &top) {
   string label = fields.at(2) + " " + fields.at(3);
   if (label == "xlo xhi") {
     ReadBox_(fields, top);
@@ -253,7 +254,7 @@ bool LAMMPSDataReader::MatchFourFieldLabels_(vector<string> fields,
 }
 
 bool LAMMPSDataReader::MatchFieldsTimeStepLabel_(vector<string> fields,
-                                                 Topology &top) {
+                                                 CSG_Topology &top) {
   size_t index = 0;
   for (auto field : fields) {
     if (field == "timestep" && (index + 2) < fields.size()) {
@@ -274,6 +275,7 @@ void LAMMPSDataReader::InitializeAtomAndBeadTypes_() {
   auto baseNamesMasses = determineBaseNameAssociatedWithMass_();
   auto baseNamesCount = determineAtomAndBeadCountBasedOnMass_(baseNamesMasses);
 
+  Elements elements;
   // If there is more than one atom type of the same element append a number
   // to the atom type name
   map<string, int> baseNameIndices;
@@ -296,8 +298,17 @@ void LAMMPSDataReader::InitializeAtomAndBeadTypes_() {
         label += label + " Type " + to_string(baseNameIndices[baseName]);
       }
     }
+
+    string name_all_caps = boost::to_upper_copy<string>(baseName);
+    string element = topology_constants::unassigned_element;
+    if (elements.isEleShort(baseName)) {
+      element = baseName;
+    } else if (elements.isEleFull(name_all_caps)) {
+      element = elements.getEleShort(name_all_caps);
+    }
     atomtypes_[index].push_back(baseName);
     atomtypes_[index].push_back(label);
+    atomtypes_[index].push_back(element);
     ++index;
   }
 }
@@ -338,7 +349,7 @@ map<string, int> LAMMPSDataReader::determineAtomAndBeadCountBasedOnMass_(
   return countSameElementOrBead;
 }
 
-void LAMMPSDataReader::ReadBox_(vector<string> fields, Topology &top) {
+void LAMMPSDataReader::ReadBox_(vector<string> fields, CSG_Topology &top) {
   Eigen::Matrix3d m = Eigen::Matrix3d::Zero();
   m(0, 0) = stod(fields.at(1)) - stod(fields.at(0));
 
@@ -384,9 +395,10 @@ void LAMMPSDataReader::ReadNumTypes_(vector<string> fields, string type) {
   numberOfDifferentTypes_[type] = stoi(fields.at(0));
 }
 
-void LAMMPSDataReader::ReadNumOfAtoms_(vector<string> fields, Topology &top) {
+void LAMMPSDataReader::ReadNumOfAtoms_(vector<string> fields,
+                                       CSG_Topology &top) {
   numberOf_["atoms"] = stoi(fields.at(0));
-  if (!topology_ && numberOf_["atoms"] != top.BeadCount())
+  if (!topology_ && static_cast<size_t>(numberOf_["atoms"]) != top.BeadCount())
     std::runtime_error("Number of beads in topology and trajectory differ");
 }
 
@@ -427,7 +439,7 @@ LAMMPSDataReader::lammps_format LAMMPSDataReader::determineDataFileFormat_(
   return format;
 }
 
-void LAMMPSDataReader::ReadAtoms_(Topology &top) {
+void LAMMPSDataReader::ReadAtoms_(CSG_Topology &top) {
 
   string line;
   getline(fl_, line);
@@ -455,7 +467,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
   trim_(line);
 
   int atomId = 0;
-  int moleculeId = 0;
+  int moleculeId = topology_constants::unassigned_molecule_id;
   while (!line.empty()) {
     istringstream iss(line);
     iss >> atomId;
@@ -481,8 +493,6 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
     iss >> atomId;
     if (moleculeRead) {
       iss >> moleculeId;
-    } else {
-      moleculeId = atomId;
     }
     iss >> atomTypeId;
     if (chargeRead) iss >> charge;
@@ -504,38 +514,30 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
       atomIdToMoleculeId_[atomId] = moleculeId;
       Molecule *mol;
       if (!molecules_.count(moleculeId)) {
-        mol = top.CreateMolecule("UNKNOWN");
+        mol = top.CreateMolecule(moleculeId,
+                                 topology_constants::unassigned_molecule_type);
         molecules_[moleculeId] = mol;
       } else {
         mol = molecules_[moleculeId];
       }
-      int symmetry = 1;  // spherical
-      double mass = stod(data_["Masses"].at(atomTypeId).at(1));
+      byte_t symmetry = 1;  // spherical
+      double mass =
+          boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
 
-      int residue_index = moleculeId;
-      if (residue_index >= top.ResidueCount()) {
-        while ((residue_index - 1) >= top.ResidueCount()) {
-          top.CreateResidue("DUM");
-        }
-        top.CreateResidue("DUM");
-      }
-
-      string bead_type_name = to_string(atomTypeId + 1);
-      if (!top.BeadTypeExist(bead_type_name)) {
-        top.RegisterBeadType(bead_type_name);
-      }
       if (atomtypes_.count(atomTypeId) == 0) {
         string err =
             "Unrecognized atomTypeId, the atomtypes map "
             "may be uninitialized";
         throw runtime_error(err);
       }
-
-      b = top.CreateBead(symmetry, bead_type_name, bead_type_name,
-                         residue_index, mass, charge);
-
-      mol->AddBead(b, bead_type_name);
-      b->setMolecule(mol);
+      string atom_type = atomtypes_.at(atomTypeId).at(0);
+      string element = atomtypes_[atomTypeId].at(2);
+      b = top.CreateBead(symmetry, atom_type, atomId, mol->getId(),
+                         topology_constants::unassigned_residue_id,
+                         topology_constants::unassigned_residue_type, element,
+                         mass, charge);
+      mol->AddBead(b);
+      b->setMoleculeId(mol->getId());
 
     } else {
       b = top.getBead(atomIndex - startingIndex);
@@ -545,7 +547,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
     b->setPos(xyz_pos);
   }
 
-  if (top.BeadCount() != numberOf_["atoms"]) {
+  if (top.BeadCount() != static_cast<size_t>(numberOf_["atoms"])) {
     string err =
         "The number of atoms read in is not equivalent to the "
         "number of atoms indicated to exist in the lammps data file. \n"
@@ -556,7 +558,7 @@ void LAMMPSDataReader::ReadAtoms_(Topology &top) {
   }
 }
 
-void LAMMPSDataReader::ReadBonds_(Topology &top) {
+void LAMMPSDataReader::ReadBonds_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -584,13 +586,12 @@ void LAMMPSDataReader::ReadBonds_(Topology &top) {
       int atom1Index = atomIdToIndex_[atom1Id];
       int atom2Index = atomIdToIndex_[atom2Id];
 
-      Interaction *ic = new IBond(atom1Index, atom2Index);
-      ic->setGroup("BONDS");
-      ic->setIndex(bondId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
-      ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
+
+      Interaction *ic = top.CreateInteraction(
+          InteractionType::bond, "BONDS", bondId, mi->getId(),
+          vector<int>{atom1Index, atom2Index});
       mi->AddInteraction(ic);
     }
 
@@ -610,7 +611,7 @@ void LAMMPSDataReader::ReadBonds_(Topology &top) {
   }
 }
 
-void LAMMPSDataReader::ReadAngles_(Topology &top) {
+void LAMMPSDataReader::ReadAngles_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -642,13 +643,12 @@ void LAMMPSDataReader::ReadAngles_(Topology &top) {
       int atom2Index = atomIdToIndex_[atom2Id];
       int atom3Index = atomIdToIndex_[atom3Id];
 
-      Interaction *ic = new IAngle(atom1Index, atom2Index, atom3Index);
-      ic->setGroup("ANGLES");
-      ic->setIndex(angleId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
-      ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
+
+      Interaction *ic = top.CreateInteraction(
+          InteractionType::angle, "ANGLES", angleId, mi->getId(),
+          vector<int>{atom1Index, atom2Index, atom3Index});
       mi->AddInteraction(ic);
     }
 
@@ -669,7 +669,7 @@ void LAMMPSDataReader::ReadAngles_(Topology &top) {
   }
 }
 
-void LAMMPSDataReader::ReadDihedrals_(Topology &top) {
+void LAMMPSDataReader::ReadDihedrals_(CSG_Topology &top) {
   string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -703,14 +703,11 @@ void LAMMPSDataReader::ReadDihedrals_(Topology &top) {
       int atom3Index = atomIdToIndex_[atom3Id];
       int atom4Index = atomIdToIndex_[atom4Id];
 
-      Interaction *ic =
-          new IDihedral(atom1Index, atom2Index, atom3Index, atom4Index);
-      ic->setGroup("DIHEDRALS");
-      ic->setIndex(dihedralId);
-      auto b = top.getBead(atom1Index);
-      auto mi = b->getMolecule();
-      ic->setMolecule(atomIdToMoleculeId_[atom1Index]);
-      top.AddBondedInteraction(ic);
+      Bead *b = top.getBead(atom1Index);
+      Molecule *mi = top.getMolecule(b->getMoleculeId());
+      Interaction *ic = top.CreateInteraction(
+          InteractionType::dihedral, "DIHEDRALS", dihedralId, mi->getId(),
+          vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});
       mi->AddInteraction(ic);
     }
     ++dihedral_count;

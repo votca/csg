@@ -20,14 +20,18 @@
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <iostream>
+#include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
+#include <votca/tools/vec.h>
+
+using namespace votca::tools;
 
 namespace votca {
 namespace csg {
 
 using namespace std;
 
-bool GROReader::ReadTopology(string file, Topology &top) {
+bool GROReader::ReadTopology(string file, CSG_Topology &top) {
   _topology = true;
   top.Cleanup();
 
@@ -51,13 +55,13 @@ bool GROReader::Open(const string &file) {
 
 void GROReader::Close() { _fl.close(); }
 
-bool GROReader::FirstFrame(Topology &top) {
+bool GROReader::FirstFrame(CSG_Topology &top) {
   _topology = false;
   NextFrame(top);
   return true;
 }
 
-bool GROReader::NextFrame(Topology &top) {
+bool GROReader::NextFrame(CSG_Topology &top) {
   string tmp;
   getline(_fl, tmp);  // title
   if (_fl.eof()) {
@@ -65,26 +69,28 @@ bool GROReader::NextFrame(Topology &top) {
   }
   getline(_fl, tmp);  // number atoms
   int natoms = atoi(tmp.c_str());
-  if (!_topology && natoms != top.BeadCount())
+  if (!_topology && static_cast<size_t>(natoms) != top.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
 
+  Elements elements;
   for (int i = 0; i < natoms; i++) {
     string line;
     getline(_fl, line);
-    string resNum, resName, atName, x, y, z;
+    string resNum, resName, atName, atNum, x, y, z;
     try {
       resNum = string(line, 0, 5);   // %5i
       resName = string(line, 5, 5);  //%5s
       atName = string(line, 10, 5);  // %5s
-      // atNum= string(line,15,5); // %5i not needed
-      x = string(line, 20, 8);  // %8.3f
-      y = string(line, 28, 8);  // %8.3f
-      z = string(line, 36, 8);  // %8.3f
+      atNum = string(line, 15, 5);   // %5i not needed
+      x = string(line, 20, 8);       // %8.3f
+      y = string(line, 28, 8);       // %8.3f
+      z = string(line, 36, 8);       // %8.3f
     } catch (std::out_of_range &err) {
       throw std::runtime_error("Misformated gro file");
     }
     boost::algorithm::trim(atName);
+    boost::algorithm::trim(atNum);
     boost::algorithm::trim(resName);
     boost::algorithm::trim(resNum);
     boost::algorithm::trim(x);
@@ -102,29 +108,31 @@ bool GROReader::NextFrame(Topology &top) {
 
     Bead *b;
     if (_topology) {
-      int resnr = boost::lexical_cast<int>(resNum);
-      if (resnr < 1)
-        throw std::runtime_error("Misformated gro file, resnr has to be > 0");
-      // TODO: fix the case that resnr is not in ascending order
-      if (resnr > top.ResidueCount()) {
-        while ((resnr - 1) > top.ResidueCount()) {  // gro resnr should start
-                                                    // with 1 but accept sloppy
-                                                    // files
-          top.CreateResidue("DUMMY");  // create dummy residue, hopefully it
-                                       // will never show
-          cout << "Warning: residue numbers not continous, create DUMMY "
-                  "residue with nr "
-               << top.ResidueCount() << endl;
-        }
-        top.CreateResidue(resName);
-      }
+      int residue_number = boost::lexical_cast<int>(resNum);
+      if (residue_number < 1)
+        throw std::runtime_error(
+            "Misformated gro file, residue_number has to be > 0");
+
       // this is not correct, but still better than no type at all!
-      if (!top.BeadTypeExist(atName)) {
-        top.RegisterBeadType(atName);
-      }
 
       // res -1 as internal number starts with 0
-      b = top.CreateBead(1, atName, atName, resnr - 1, 1., 0.);
+      byte_t symmetry = 1;
+      string element = topology_constants::unassigned_element;
+      string atom_all_caps = boost::to_upper_copy<string>(atName);
+      double atom_weight = 1.0;
+      double atom_charge = 0.0;
+      int atom_number = boost::lexical_cast<int>(atNum);
+      if (elements.isEleFull(atom_all_caps)) {
+        element = elements.getEleShort(atom_all_caps);
+        atom_weight = elements.getMass(element);
+      } else if (elements.isEleShort(atName)) {
+        element = atName;
+        atom_weight = elements.getMass(element);
+      }
+      b = top.CreateBead(symmetry, atName, atom_number,
+                         topology_constants::unassigned_molecule_id,
+                         residue_number - 1, resName, element, atom_weight,
+                         atom_charge);
     } else {
       b = top.getBead(i);
     }

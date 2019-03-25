@@ -15,18 +15,17 @@
  *
  */
 
-#ifndef _VOTCA_CSG_FMATCH_H
-#define _VOTCA_CSG_FMATCH_H
+#ifndef VOTCA_CSG_FMATCH_H
+#define VOTCA_CSG_FMATCH_H
 
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/tools/cubicspline.h>
 #include <votca/tools/property.h>
 
-using namespace votca::csg;
-
-using namespace std;
-
+namespace votca {
+namespace csg {
+namespace TOOLS = votca::tools;
 /**
     \brief Implements force matching algorithm using cubic spline basis set
  *
@@ -39,8 +38,8 @@ using namespace std;
 
 class CGForceMatching : public CsgApplication {
  public:
-  string ProgramName() { return "csg_fmatch"; }
-  void HelpText(ostream &out) {
+  std::string ProgramName() { return "csg_fmatch"; }
+  void HelpText(std::ostream &out) {
     out << "Perform force matching (also called multiscale coarse-graining)";
   }
 
@@ -51,20 +50,21 @@ class CGForceMatching : public CsgApplication {
   bool EvaluateOptions();
 
   /// \brief called before the first frame
-  void BeginEvaluate(Topology *top, Topology *top_atom);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
   /// \brief called after the last frame
   void EndEvaluate();
   /// \brief called for each frame which is mapped
-  void EvalConfiguration(Topology *conf, Topology *conf_atom = 0);
+  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom = 0);
   /// \brief load options from the input file
-  void LoadOptions(const string &file);
+  void LoadOptions(const std::string &file);
 
  protected:
-  /// \brief structure, which contains CubicSpline object with related
+  /// \brief structure, which contains tools::CubicSpline object with related
   /// parameters
   struct SplineInfo {
     /// \brief constructor
-    SplineInfo(int index, bool bonded_, int matr_pos_, Property *options);
+    SplineInfo(int index, bool bonded_, int matr_pos_,
+               tools::Property *options);
     /// \brief number of spline functions
     int num_splinefun;
     /// \brief number of spline grid points
@@ -84,15 +84,15 @@ class CGForceMatching : public CsgApplication {
     double a;
     double sigma;
     double gamma;
-    /// \brief CubicSpline object
-    CubicSpline Spline;
+    /// \brief tools::CubicSpline object
+    tools::CubicSpline Spline;
     /// \brief position in the _A matrix (first coloumn which is occupied with
     /// this particular spline)
     int matr_pos;
     /// \brief dx for output. Calculated in the code
     double dx_out;
     /// \brief only for non-bonded interactions (seems like it is not used?)
-    pair<int, int> beadTypes;
+    std::pair<int, int> beadTypes;
 
     /// \brief Result of 1 block calculation for f
     Eigen::VectorXd block_res_f;
@@ -119,29 +119,29 @@ class CGForceMatching : public CsgApplication {
     Eigen::VectorXd resSumDer2;
 
     /// \brief Spline Name
-    string splineName;
+    std::string splineName;
     /// \brief for non-bonded interactions: types of beads involved (type3 only
     /// used if threebody interaction)
-    string type1, type2, type3;  //
+    std::string type1, type2, type3;  //
 
-    /// \brief pointer to Property object to hande input options
-    Property *_options;
+    /// \brief pointer to tools::Property object to hande input options
+    tools::Property *_options;
   };
-  /// \brief Property object to hande input options
-  Property _options;
-  /// \brief list of bonded interactions
-  std::vector<Property *> _bonded;
-  /// \brief list of non-bonded interactions
-  std::vector<Property *> _nonbonded;
+  /// \brief tools::Property object to hande input options
+  tools::Property _options;
+  /// \brief std::list of bonded interactions
+  std::list<tools::Property *> _bonded;
+  /// \brief std::list of non-bonded interactions
+  std::list<tools::Property *> _nonbonded;
 
-  typedef vector<SplineInfo *> SplineContainer;
-  /// \brief vector of SplineInfo * for all interactions
+  typedef std::vector<SplineInfo> SplineContainer;
+  /// \brief std::vector of SplineInfo * for all interactions
   SplineContainer _splines;
 
   /// \brief matrix used to store force matching equations
   Eigen::MatrixXd _A;
-  /// \brief vector used to store reference forces on CG beads (from atomistic
-  /// simulations)
+  /// \brief std::vector used to store reference forces on CG beads (from
+  /// atomistic simulations)
   Eigen::VectorXd _b;
   /// \brief Solution of matrix equation _A * _x = _b : CG force-field
   /// parameters
@@ -182,20 +182,21 @@ class CGForceMatching : public CsgApplication {
   void FmatchAssignSmoothCondsToMatrix(Eigen::MatrixXd &Matrix);
   /// \brief For each trajectory frame writes equations for bonded interactions
   /// to matrix _A
-  void EvalBonded(Topology *conf, SplineInfo *sinfo);
+  void EvalBonded(CSG_Topology *conf, SplineInfo *sinfo);
   /// \brief For each trajectory frame writes equations for non-bonded
   /// interactions to matrix _A
-  void EvalNonbonded(Topology *conf, SplineInfo *sinfo);
+  void EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo);
   /// \brief For each trajectory frame writes equations for non-bonded threebody
   /// interactions to matrix _A
-  void EvalNonbonded_Threebody(Topology *conf, SplineInfo *sinfo);
+  void EvalNonbonded_Threebody(CSG_Topology *conf, SplineInfo *sinfo);
   /// \brief Write results to output files
   void WriteOutFiles();
 
   void OpenForcesTrajectory();
 
-  Topology _top_force;
+  CSG_Topology _top_force;
   TrajectoryReader *_trjreader_force;
 };
-
-#endif /* _VOTCA_CSG_FMATCH_H */
+}  // namespace csg
+}  // namespace votca
+#endif  // VOTCA_CSG_FMATCH_H

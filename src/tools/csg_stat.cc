@@ -26,6 +26,7 @@
 // using namespace votca::tools;
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgStatApp : public CsgApplication {
  public:
@@ -40,7 +41,7 @@ class CsgStatApp : public CsgApplication {
   void Initialize();
   bool EvaluateOptions();
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
   void EndEvaluate();
 
   CsgApplication::Worker *ForkWorker() { return _imc.ForkWorker(); }
@@ -84,7 +85,6 @@ bool CsgStatApp::EvaluateOptions() {
   CheckRequired("trj", "no trajectory file specified");
 
   _imc.LoadOptions(OptionsMap()["options"].as<string>());
-
   if (OptionsMap().count("block-length")) {
     _imc.BlockLength(OptionsMap()["block-length"].as<int>());
   } else {
@@ -99,7 +99,7 @@ bool CsgStatApp::EvaluateOptions() {
   return true;
 }
 
-void CsgStatApp::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgStatApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   _imc.BeginEvaluate(top, top_ref);
 }
 

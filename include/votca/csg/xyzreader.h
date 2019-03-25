@@ -18,14 +18,17 @@
 #ifndef __VOTCA_CSG_XYZREADER_H
 #define __VOTCA_CSG_XYZREADER_H
 
+#include "csgtopology.h"
+#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <type_traits>
 #include <votca/csg/topologyreader.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/tools/constants.h>
+#include <votca/tools/elements.h>
 
-#include <type_traits>
 namespace votca {
 namespace csg {
 
@@ -42,14 +45,14 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   ~XYZReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
   /// open a trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
-  bool NextFrame(Topology &top);
+  bool NextFrame(CSG_Topology &top);
 
   template <class T>
   void ReadFile(T &container) {
@@ -66,7 +69,9 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     return container.size();
   }
 
-  int getContainerSize(Topology &container) { return container.BeadCount(); }
+  int getContainerSize(CSG_Topology &container) {
+    return container.BeadCount();
+  }
 
   template <bool topology, class T>
   void AddAtom(T &container, std::string name, int id,
@@ -80,15 +85,28 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   }
 
   template <bool topology, class T>
-  void AddAtom(Topology &container, std::string name, int id,
-               const Eigen::Vector3d &pos) {
+
+  void AddAtom(CSG_Topology &container, std::string bead_type, int bead_id,
+               std::string element, const Eigen::Vector3d &pos) {
+
     Bead *b;
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
     if (topology) {
-      b = container.CreateBead(1, name + boost::lexical_cast<string>(id), name,
-                               0, 0, 0);
+
+      tools::byte_t symmetry = 1;
+      std::string element = tools::topology_constants::unassigned_element;
+      int molecule_id = tools::topology_constants::unassigned_molecule_id;
+      int residue_id = tools::topology_constants::unassigned_residue_id;
+      std::string residue_type =
+          tools::topology_constants::unassigned_residue_type;
+      double mass = 0.0;
+      double charge = 0.0;
+
+      b = container.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
+
     } else {
-      b = container.getBead(id);
+      b = container.getBead(bead_id);
     }
     b->setPos(posnm);
   }
@@ -103,12 +121,12 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
 
 template <bool topology, class T>
 inline bool XYZReader::ReadFrame(T &container) {
-  string line;
+  std::string line;
   getline(_fl, line);
   ++_line;
   if (!_fl.eof()) {
     // read the number of atoms
-    Tokenizer tok1(line, " \t");
+    tools::Tokenizer tok1(line, " \t");
     std::vector<std::string> line1;
     tok1.ToVector(line1);
     if (line1.size() != 1) {
@@ -124,27 +142,38 @@ inline bool XYZReader::ReadFrame(T &container) {
     // the title line
     getline(_fl, line);
     ++_line;
+    tools::Elements elements;
     // read atoms
-    for (int i = 0; i < natoms; ++i) {
+    for (int bead_id = 0; bead_id < natoms; ++bead_id) {
       getline(_fl, line);
       ++_line;
+
       if (_fl.eof()) {
         throw std::runtime_error("unexpected end of file in xyz file");
       }
-      vector<string> fields;
-      Tokenizer tok(line, " ");
+      std::vector<std::string> fields;
+      tools::Tokenizer tok(line, " ");
       tok.ToVector(fields);
       if (fields.size() != 4) {
         throw std::runtime_error("invalide line " +
-                                 boost::lexical_cast<string>(_line) +
+                                 boost::lexical_cast<std::string>(_line) +
                                  " in xyz file\n" + line);
       }
-      Eigen::Vector3d pos =
-          Eigen::Vector3d(boost::lexical_cast<double>(fields[1]),
-                          boost::lexical_cast<double>(fields[2]),
-                          boost::lexical_cast<double>(fields[3]));
 
-      AddAtom<topology, T>(container, fields[0], i, pos);
+      std::string name_upper_case =
+          boost::to_upper_copy<std::string>(fields[0]);
+      std::string element = tools::topology_constants::unassigned_element;
+      if (elements.isEleFull(name_upper_case)) {
+        element = elements.getEleShort(name_upper_case);
+      } else if (elements.isEleShort(fields[0])) {
+        element = fields[0];
+      }
+
+      Eigen::Vector3d pos = tools::vec(boost::lexical_cast<double>(fields[1]),
+                                       boost::lexical_cast<double>(fields[2]),
+                                       boost::lexical_cast<double>(fields[3]));
+
+      AddAtom<topology, T>(container, fields[0], bead_id, element, pos);
     }
   }
   return !_fl.eof();

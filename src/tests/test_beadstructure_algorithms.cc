@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class TestBead : public BaseBead {
  public:
@@ -46,23 +47,23 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoStructures) {
   //     H
   //
   TestBead testbead1;
-  testbead1.setName("Hydrogen");
+  testbead1.setType("Hydrogen");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Hydrogen");
+  testbead3.setType("Hydrogen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   // Make a Water molecule
@@ -71,15 +72,15 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoStructures) {
   //
 
   TestBead testbead6;
-  testbead6.setName("Hydrogen");
+  testbead6.setType("Hydrogen");
   testbead6.setId(6);
 
   TestBead testbead7;
-  testbead7.setName("Oxygen");
+  testbead7.setType("Oxygen");
   testbead7.setId(7);
 
   TestBead testbead8;
-  testbead8.setName("Hydrogen");
+  testbead8.setType("Hydrogen");
   testbead8.setId(8);
 
   // Adding a Helium
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoStructures) {
   //
 
   TestBead testbead12;
-  testbead12.setName("Helium");
+  testbead12.setType("Helium");
   testbead12.setId(12);
 
   // Methane
@@ -164,15 +165,15 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoStructures) {
   //
 
   TestBead testbead9;
-  testbead9.setName("Hydrogen");
+  testbead9.setType("Hydrogen");
   testbead9.setId(9);
 
   TestBead testbead11;
-  testbead11.setName("Hydrogen");
+  testbead11.setType("Hydrogen");
   testbead11.setId(11);
 
   TestBead testbead10;
-  testbead10.setName("Oxygen");
+  testbead10.setType("Oxygen");
   testbead10.setId(10);
 
   // Adding the water
@@ -185,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_breakIntoStructures) {
 
   // Adding a Helium
   TestBead testbead13;
-  testbead13.setName("Helium");
+  testbead13.setType("Helium");
   testbead13.setId(13);
 
   beadstructure.AddBead(&testbead13);

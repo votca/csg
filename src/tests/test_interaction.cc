@@ -22,103 +22,145 @@
 
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/beadtype.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/interaction.h>
 #include <votca/csg/molecule.h>
-#include <votca/csg/topology.h>
+#include <votca/tools/constants.h>
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 BOOST_AUTO_TEST_SUITE(interaction_test)
 
-BOOST_AUTO_TEST_CASE(test_interaction_constructor) {
-  IBond bond1(1, 2);
-  IAngle angle1(1, 2, 3);
-  IDihedral dihedral(1, 2, 3, 4);
-}
-
 BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
 
-  IBond bond1(1, 2);
-  bond1.setGroup("large");
-  bond1.setGroupId(1);
-  bond1.setIndex(1);
-  bond1.setMolecule(1);
+  CSG_Topology top;
 
-  string name = bond1.getName();
-  cout << name << endl;
-  bool correctName = name.compare("molecule 1:large 1:index 1") == 0;
-  BOOST_CHECK(correctName);
-  BOOST_CHECK_EQUAL(bond1.getGroupId(), 1);
-  BOOST_CHECK_EQUAL(bond1.getIndex(), 1);
-  BOOST_CHECK_EQUAL(bond1.getMolecule(), 1);
-  BOOST_CHECK_EQUAL(bond1.BeadCount(), 2);
-  BOOST_CHECK_EQUAL(bond1.getBeadId(0), 1);
-  BOOST_CHECK_EQUAL(bond1.getBeadId(1), 2);
-  string groupName = bond1.getGroup();
-  correctName = groupName.compare("large") == 0;
+  string bead_type = "type1";
+  byte_t symmetry = 1;
+  int bead_id = 1;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "Protein";
+  double mass = 1.1;
+  double charge = 0.3;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
+  ++bead_id;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
+  ++bead_id;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
+  ++bead_id;
+  top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                 residue_type, topology_constants::unassigned_element, mass,
+                 charge);
 
-  BOOST_CHECK(correctName);
+  int bond_id = 1;
+  Interaction* bond1 = top.CreateInteraction(
+      InteractionType::bond, "BONDS", bond_id, molecule_id, vector<int>{1, 2});
+  bond1->setGroupId(1);
 
-  IAngle angle1(1, 2, 3);
-  angle1.setGroup("medium");
-  angle1.setGroupId(1);
-  angle1.setIndex(1);
-  angle1.setMolecule(1);
+  string label = bond1->getLabel();
+  cout << label << endl;
+  bool correct_label =
+      label.compare("molecule id 1:group name BONDS:group id 1:index 1") == 0;
+  BOOST_CHECK(correct_label);
+  BOOST_CHECK_EQUAL(bond1->getGroupId(), 1);
+  BOOST_CHECK_EQUAL(bond1->getIndex(), 1);
+  BOOST_CHECK_EQUAL(bond1->getMolecule(), 1);
+  BOOST_CHECK_EQUAL(bond1->BeadCount(), 2);
+  BOOST_CHECK_EQUAL(bond1->getBeadId(0), 1);
+  BOOST_CHECK_EQUAL(bond1->getBeadId(1), 2);
+  string groupName = bond1->getGroup();
+  correct_label = groupName.compare("BONDS") == 0;
 
-  name = angle1.getName();
-  cout << name << endl;
-  correctName = name.compare("molecule 1:medium 1:index 1") == 0;
-  BOOST_CHECK(correctName);
-  BOOST_CHECK_EQUAL(angle1.getGroupId(), 1);
-  BOOST_CHECK_EQUAL(angle1.getIndex(), 1);
-  BOOST_CHECK_EQUAL(angle1.getMolecule(), 1);
-  BOOST_CHECK_EQUAL(angle1.BeadCount(), 3);
-  BOOST_CHECK_EQUAL(angle1.getBeadId(0), 1);
-  BOOST_CHECK_EQUAL(angle1.getBeadId(1), 2);
-  BOOST_CHECK_EQUAL(angle1.getBeadId(2), 3);
-  groupName = angle1.getGroup();
-  correctName = groupName.compare("medium") == 0;
+  BOOST_CHECK(correct_label);
 
-  IDihedral dihedral1(1, 2, 3, 4);
-  dihedral1.setGroup("small");
-  dihedral1.setGroupId(1);
-  dihedral1.setIndex(1);
-  dihedral1.setMolecule(1);
+  ++bond_id;
+  Interaction* angle1 =
+      top.CreateInteraction(InteractionType::angle, "ANGLES", bond_id,
+                            molecule_id, vector<int>{1, 2, 3});
+  angle1->setGroupId(1);
 
-  name = dihedral1.getName();
-  cout << name << endl;
-  correctName = name.compare("molecule 1:small 1:index 1") == 0;
-  BOOST_CHECK(correctName);
-  BOOST_CHECK_EQUAL(dihedral1.getGroupId(), 1);
-  BOOST_CHECK_EQUAL(dihedral1.getIndex(), 1);
-  BOOST_CHECK_EQUAL(dihedral1.getMolecule(), 1);
-  BOOST_CHECK_EQUAL(dihedral1.BeadCount(), 4);
-  BOOST_CHECK_EQUAL(dihedral1.getBeadId(0), 1);
-  BOOST_CHECK_EQUAL(dihedral1.getBeadId(1), 2);
-  BOOST_CHECK_EQUAL(dihedral1.getBeadId(2), 3);
-  BOOST_CHECK_EQUAL(dihedral1.getBeadId(3), 4);
-  groupName = dihedral1.getGroup();
-  correctName = groupName.compare("small") == 0;
+  label = angle1->getLabel();
+  cout << label << endl;
+  correct_label =
+      label.compare("molecule id 1:group name ANGLES:group id 1:index 2") == 0;
+  BOOST_CHECK(correct_label);
+  BOOST_CHECK_EQUAL(angle1->getGroupId(), 1);
+  BOOST_CHECK_EQUAL(angle1->getIndex(), 2);
+  BOOST_CHECK_EQUAL(angle1->getMolecule(), 1);
+  BOOST_CHECK_EQUAL(angle1->BeadCount(), 3);
+  BOOST_CHECK_EQUAL(angle1->getBeadId(0), 1);
+  BOOST_CHECK_EQUAL(angle1->getBeadId(1), 2);
+  BOOST_CHECK_EQUAL(angle1->getBeadId(2), 3);
+  groupName = angle1->getGroup();
+  correct_label = groupName.compare("ANGLES") == 0;
+
+  ++bond_id;
+  Interaction* dihedral1 =
+      top.CreateInteraction(InteractionType::dihedral, "DIHEDRAL", bond_id,
+                            molecule_id, vector<int>{1, 2, 3, 4});
+  dihedral1->setGroupId(1);
+
+  label = dihedral1->getLabel();
+  cout << label << endl;
+  correct_label =
+      label.compare("molecule id 1:group name DIHEDRAL:group id 1:index 3") ==
+      0;
+  BOOST_CHECK(correct_label);
+  BOOST_CHECK_EQUAL(dihedral1->getGroupId(), 1);
+  BOOST_CHECK_EQUAL(dihedral1->getIndex(), 3);
+  BOOST_CHECK_EQUAL(dihedral1->getMolecule(), 1);
+  BOOST_CHECK_EQUAL(dihedral1->BeadCount(), 4);
+  BOOST_CHECK_EQUAL(dihedral1->getBeadId(0), 1);
+  BOOST_CHECK_EQUAL(dihedral1->getBeadId(1), 2);
+  BOOST_CHECK_EQUAL(dihedral1->getBeadId(2), 3);
+  BOOST_CHECK_EQUAL(dihedral1->getBeadId(3), 4);
 }
 
 BOOST_AUTO_TEST_CASE(bond_test) {
 
-  Topology top;
+  CSG_Topology top;
+
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H2";
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
+  votca::tools::vec pos1 = votca::tools::vec(1, 0, 0);
   Eigen::Vector3d pos1(1, 0, 0);
-  bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
-  IBond bond1(0, 1);
-  double length = bond1.EvaluateVar(top);
-  Eigen::Vector3d grad0 = bond1.Grad(top, 0);
-  Eigen::Vector3d grad1 = bond1.Grad(top, 1);
+  InteractionType interaction_type = InteractionType::bond;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1};
+  Interaction* bond1 = top.CreateInteraction(interaction_type, group, bond_id,
+                                             molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+  double length = bond1->EvaluateVar(*boundaries, bead_positions);
+  Eigen::Vector3d grad0 = bond1->Grad(*boundaries, 0, bead_positions);
+  Eigen::Vector3d grad1 = bond1->Grad(*boundaries, 1, bead_positions);
   Eigen::Vector3d grad0_ref(1, 0, 0);
   Eigen::Vector3d grad1_ref(-1, 0, 0);
   BOOST_CHECK_CLOSE(length, 1.0, 1e-5);
@@ -142,26 +184,46 @@ BOOST_AUTO_TEST_CASE(bond_test) {
 
 BOOST_AUTO_TEST_CASE(angle_test) {
 
-  Topology top;
+  CSG_Topology top;
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H3";
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos1(1, 0, 0);
   bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
 
-  Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  bead_id = 2;
+  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos3(0, 1, 0);
   bead3->setPos(pos3);
 
-  IAngle angle(0, 1, 2);
-  double angle1 = angle.EvaluateVar(top);
-  Eigen::Vector3d grad0 = angle.Grad(top, 0);
-  Eigen::Vector3d grad1 = angle.Grad(top, 1);
-  Eigen::Vector3d grad2 = angle.Grad(top, 2);
+  InteractionType interaction_type = InteractionType::angle;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1, 2};
+  Interaction* angle = top.CreateInteraction(interaction_type, group, bond_id,
+                                             molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+  double angle1 = angle->EvaluateVar(*boundaries, bead_positions);
+  Eigen::Vector3d grad0 = angle->Grad(*boundaries, 0, bead_positions);
+  Eigen::Vector3d grad1 = angle->Grad(*boundaries, 1, bead_positions);
+  Eigen::Vector3d grad2 = angle->Grad(*boundaries, 2, bead_positions);
   Eigen::Vector3d grad0_ref(0, -1, 0);
   Eigen::Vector3d grad1_ref(1, 1, 0);
   Eigen::Vector3d grad2_ref(-1, 0, 0);
@@ -194,31 +256,56 @@ BOOST_AUTO_TEST_CASE(angle_test) {
 
 BOOST_AUTO_TEST_CASE(dihedral_test) {
 
-  Topology top;
+  CSG_Topology top;
+  byte_t symmetry = 1;
+  string bead_type = "H";
+  string element = "H";
+  int bead_id = 0;
+  int molecule_id = 1;
+  int residue_id = 1;
+  string residue_type = "H4";
+
   double mass = 1.0;
   double charge = 1.0;
-  int resid = 1;
-  Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  // Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
+  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos1(1, 0, 0);
   bead1->setPos(pos1);
-  Bead* bead2 = top.CreateBead(0, "a2", "C", resid, mass, charge);
+  bead_id = 1;
+  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
 
-  Bead* bead3 = top.CreateBead(0, "a3", "C", resid, mass, charge);
+  bead_id = 2;
+  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
   Eigen::Vector3d pos3(0, 1, 0);
   bead3->setPos(pos3);
 
-  Bead* bead4 = top.CreateBead(0, "a4", "C", resid, mass, charge);
+  bead_id = 3;
+  Bead* bead4 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
+                               residue_id, residue_type, element, mass, charge);
+  votca::tools::vec pos4 = votca::tools::vec(-1, 1, 1);
   Eigen::Vector3d pos4(-1, 1, 1);
-  bead4->setPos(pos4);
 
-  IDihedral dihedral(0, 1, 2, 3);
-  double dihedral1 = dihedral.EvaluateVar(top);
-  Eigen::Vector3d grad0 = dihedral.Grad(top, 0);
-  Eigen::Vector3d grad1 = dihedral.Grad(top, 1);
-  Eigen::Vector3d grad2 = dihedral.Grad(top, 2);
-  Eigen::Vector3d grad3 = dihedral.Grad(top, 3);
+  InteractionType interaction_type = InteractionType::dihedral;
+  string group = "group1";
+  int bond_id = 0;
+  vector<int> bonded_beads{0, 1, 2, 3};
+  Interaction* dihedral = top.CreateInteraction(
+      interaction_type, group, bond_id, molecule_id, bonded_beads);
+
+  const BoundaryCondition* boundaries = top.getBoundaryCondition();
+  unordered_map<int, const vec*> bead_positions =
+      top.getBeadPositions(bonded_beads);
+
+  double dihedral1 = dihedral->EvaluateVar(*boundaries, bead_positions);
+  Eigen::Vector3d grad0 = dihedral->Grad(*boundaries, 0, bead_positions);
+  Eigen::Vector3d grad1 = dihedral->Grad(*boundaries, 1, bead_positions);
+  Eigen::Vector3d grad2 = dihedral->Grad(*boundaries, 2, bead_positions);
+  Eigen::Vector3d grad3 = dihedral->Grad(*boundaries, 3, bead_positions);
   Eigen::Vector3d grad0_ref(0, 0, 1);
   Eigen::Vector3d grad1_ref(0, 0, -1);
   Eigen::Vector3d grad2_ref(-0.5, 0, -0.5);

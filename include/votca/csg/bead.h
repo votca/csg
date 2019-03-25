@@ -15,11 +15,11 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BEAD_H
-#define _VOTCA_CSG_BEAD_H
+#ifndef VOTCA_CSG_BEAD_H
+#define VOTCA_CSG_BEAD_H
 
-#include <assert.h>
 #include <cassert>
+#include <sstream>
 #include <string>
 #include <votca/tools/property.h>
 #include <votca/tools/types.h>
@@ -29,34 +29,42 @@
 namespace votca {
 namespace csg {
 
-class Topology;
 class Molecule;
-
-using namespace votca::tools;
 
 /**
  * \brief information about a bead
  *
  * The Bead class describes an atom or a coarse grained bead. It stores
- * information like the id, the name, the mass, the
- * charge and the residue it belongs to. The coordinates are stored in the
- * configuration class.
+ * information like the id, the name, the mass, the charge and the residue it
+ * belongs to.
  *
- * \todo change resnr to pointer
- * \todo make sure bead belongs to topology
  **/
 class Bead : public BaseBead {
  public:
+  Bead(){};
   /**
    * destructor
    */
   virtual ~Bead() {}
 
+  int getResnr() const {
+    throw std::runtime_error(
+        "getResnr() is now depricated use getResidueId() instead");
+  }
+
   /**
-   * get the residu number of the bead
+   * Get The residue number of the bead, not the residue number is not the same
+   * as the molecule number. Residues are components of molecules.
    * \return residue id
    */
-  const int &getResnr() const { return residue_number_; }
+  const int &getResidueId() const { return residue_id_; }
+
+  /**
+   * @brief Returns the residue type
+   *
+   * @return string indicating the type if unassigned will return `unassigned`
+   */
+  std::string getResidueType() const { return residue_type_.getName(); }
 
   /**
    * get the mass of the bead
@@ -98,7 +106,7 @@ class Bead : public BaseBead {
    *
    * \return bead symmetry
    */
-  byte_t getSymmetry() const { return symmetry_; }
+  tools::byte_t getSymmetry() const { return symmetry_; }
 
   /**
    * set the velocity of the bead
@@ -244,19 +252,19 @@ class Bead : public BaseBead {
   const Eigen::Vector3d &getF() const;
 
   /** does this configuration store velocities? */
-  bool HasVel() { return bead_velocity_set_; }
+  bool HasVel() const { return bead_velocity_set_; }
 
   /** does this configuration store forces? */
-  bool HasF() { return bead_force_set_; }
+  bool HasF() const { return bead_force_set_; }
 
   /** does this configuration store u-orientations? */
-  bool HasU() { return bU_; }
+  bool HasU() const { return bU_; }
 
   /** does this configuration store v-orientations? */
-  bool HasV() { return bV_; }
+  bool HasV() const { return bV_; }
 
   /** does this configuration store w-orientations? */
-  bool HasW() { return bW_; }
+  bool HasW() const { return bW_; }
 
   /** dos the bead store a velocity */
   void HasVel(bool b);
@@ -291,17 +299,36 @@ class Bead : public BaseBead {
     parent_beads_.push_back(parent_bead_id);
   }
 
+  /**
+   * \brief Label describes the beads identity based on three attributes
+   *
+   * 1. The Residue number
+   * 2. The name of the residue
+   * 3. The name of the bead
+   *
+   * It is returned in the following format:
+   *
+   * ResidueNumber:ResidueType:BeadType
+   **/
+  std::string getLabel() {
+    std::stringstream label;
+    label << molecule_id_.getId() << ":" << getResidueType() << ":"
+          << getType();
+    return label.str();
+  };
+
  protected:
   std::vector<int> parent_beads_;
 
-  // TODO: this is so far a pointer. this should change! each bead should have
-  // own options.
-  // Property *options_;
+  tools::Name residue_type_;
 
-  byte_t symmetry_;
+  // Bead label is composed of ResidueNumber:ResidueType:bead_type
+  tools::Name bead_label_;
+
+  tools::byte_t symmetry_;
   double charge_;
 
-  int residue_number_;
+  int residue_id_ = -1;
 
   Eigen::Vector3d velocity_, bead_force_, u_, v_, w_;
 
@@ -312,13 +339,15 @@ class Bead : public BaseBead {
   bool bead_force_set_;
 
   /// constructur
-  Bead(Topology *owner, int id, std::string type, byte_t symmetry,
-       std::string name, int resnr, double m, double q)
-      : symmetry_(symmetry), charge_(q), residue_number_(resnr) {
-    topology_item_._parent = owner;
+  Bead(tools::byte_t symmetry, int id, std::string type, int residue_id,
+       std::string residue_type, int molecule_id, std::string element_symbol,
+       double m, double q)
+      : symmetry_(symmetry), charge_(q), residue_id_(residue_id) {
     setId(id);
+    molecule_id_.setId(molecule_id);
     setType(type);
-    setName(name);
+    residue_type_.setName(residue_type);
+    element_symbol_.setName(element_symbol);
     setMass(m);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
@@ -328,9 +357,7 @@ class Bead : public BaseBead {
     bead_force_set_ = false;
   }
 
-  // void *_userdata;
-
-  friend class Topology;
+  friend class CSG_Topology;
   friend class Molecule;
 };
 
@@ -394,7 +421,8 @@ inline void Bead::HasU(bool b) { bU_ = b; }
 inline void Bead::HasV(bool b) { bV_ = b; }
 
 inline void Bead::HasW(bool b) { bW_ = b; }
+
 }  // namespace csg
 }  // namespace votca
 
-#endif  // _VOTCA_CSG_BEAD_H
+#endif  // VOTCA_CSG_BEAD_H

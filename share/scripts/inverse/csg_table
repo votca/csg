@@ -1,5 +1,5 @@
 #
-#Copyright 2009 - 2019 The VOTCA Development Team(http:  // www.votca.org)
+#Copyright 2009 -2019 The VOTCA Development Team(http:  // www.votca.org)
 #
 #Licensed under the Apache License, Version 2.0(the "License");
 #you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ tag file tag_file.sh dummy dummy dummy
 
 #the update step
 
-#add up the   potential
+#add up the potential
 #TODO : think about name add_pot, is other name maybe better
         add_pot ibi add_pot_generic.sh add_pot imc
             add_pot_generic.sh add_pot optimizer dummy.sh add_pot re dummy
@@ -160,7 +160,7 @@ tag file tag_file.sh dummy dummy dummy
 #do not use table functional here as it needs gnuplot
         table dummy table_dummy.sh table get_value table_get_value
     .pl table switch_border table_switch_border.pl table compare
-                                                         table_combine.pl-- die-- op =
+        table_combine.pl-- die-- op =
     table combine table_combine.pl table average table_average
         .sh table scale table_scale.pl table change_flag
             table_change_flag.sh table functional table_functional
@@ -185,7 +185,7 @@ tag file tag_file.sh dummy dummy dummy
         .pl
 
 #BEGIN : these scripts have to be defined for each simulation program
-#interface to                                                 gromacs
+#interface to gromacs
             initstep gromacs initialize_step_genericsim
         .sh run gromacs run_gromacs.sh clean gromacs
             clean_generic.sh presimulation gromacs
@@ -274,7 +274,7 @@ tag file tag_file.sh dummy dummy dummy
 #hoomd - blue scripts
             convert_potential hoomd -
     blue potential_to_generic.sh convert_potentials hoomd -
-    blue                                            potentials_to_generic.sh
+    blue potentials_to_generic.sh
 
 #interface to hoomd - blue
         initstep hoomd -
@@ -282,10 +282,10 @@ tag file tag_file.sh dummy dummy dummy
     blue run_genericsim.sh clean hoomd - blue clean_generic.sh rdf hoomd -
     blue calc_rdf_generic.sh imc_stat hoomd -
     blue imc_stat_generic.sh density hoomd -
-    blue                             calc_density_generic.sh
+    blue calc_density_generic.sh
 
 #function for hoomd - blue
         functions hoomd -
-    blue          functions_genericsim.sh
+    blue functions_genericsim.sh
 
 #END : these scripts have to be defined for each simulation program

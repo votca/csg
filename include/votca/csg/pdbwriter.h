@@ -15,28 +15,41 @@
  *
  */
 
-#ifndef _PDBWRITER_H
-#define _PDBWRITER_H
+#ifndef VOTCA_CSG_PDBWRITER_H
+#define VOTCA_CSG_PDBWRITER_H
 
 #include <stdio.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/trajectorywriter.h>
 #include <votca/tools/constants.h>
 
 namespace votca {
 namespace csg {
 
+/**
+ * @brief
+ *
+ * Note that by default the coordinates stored in the pdb file are in units
+ * of Angstroms while the following repositories have default units of:
+ *
+ * csg: nm
+ * xtp: bohr
+ *
+ * Further note that pdb files store the ids, serical numbers and indices
+ * starting at 1, votca uses ids, indices and serial numbers starting at 0.
+ */
 class PDBWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void RegisteredAt(ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+  void RegisteredAt(
+      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(Topology *conf);
+  void Write(CSG_Topology *conf);
 
   template <class T>
-  void WriteContainer(T &container);
+  void WriteContainer(CSG_Topology *conf, T &container);
 
   void WriteHeader(std::string header);
 
@@ -44,81 +57,140 @@ class PDBWriter : public TrajectoryWriter {
 
  private:
   template <class Atom>
-  std::string getName(Atom &atom) {
+  std::string getType(Atom &atom) {
+    std::string atomtype = atom.getType();
+    if (atomtype.size() > 4) {
+      atomtype = atomtype.substr(0, 4);
+    }
+    return atomtype;
+  }
+
+  template <class Atom>
+  std::string getElement(Atom &atom) {
+    if (atom.getElement() == tools::topology_constants::unassigned_element) {
+      return "";
+    }
     return atom.getElement();
   }
 
-  std::string getName(Bead *bead) { return bead->getName(); }
+  // std::string getType(Bead *bead) { return bead->getType(); }
 
-  template <class T, class Atom>
-  std::string getResname(T &container, Atom &atom) {
-    return container.getName();
+  /**
+   * @brief Get the residue type
+   *
+   * In the case that the residue type is unknown it will follow the pdb
+   * convention and assign it a value of "UNK", see the url for more info:
+   *
+   * www.wwpdb.org/documentation/file-format-content/format33/sect4.html
+   *
+   * @tparam Atom
+   * @param atom
+   *
+   * @return
+   */
+  template <class Atom>
+  std::string getResidueType(Atom &atom) {
+    std::string restype = atom.getResidueType();
+    if (restype == tools::topology_constants::unassigned_residue_type) {
+      restype = "UNK";
+    } else if (restype.size() > 3) {
+      restype = restype.substr(0, 3);
+    }
+    return restype;
   }
-  std::string getResname(Topology &conf, Bead *bead);
+  // std::string getResidueType(Bead *bead){
+  //  return bead->getResidueType();
+  //}
 
   template <class Atom>
   int getId(Atom &atom) {
-    return atom.getId();
+    return atom.getId() + 1;
   }
-  int getId(Bead *bead) { return bead->getId(); }
-
-  template <class T, class Atom>
-  int getResId(T &container, Atom &atom) {
-    return container.getId();
-  }
-  int getResId(Topology &conf, Bead *bead) { return bead->getResnr() + 1; }
+  // int getId(Bead *bead) { return bead->getId(); }
 
   template <class Atom>
-  void writeSymmetry(Atom &atom) {
-    return;
+  int getResId(Atom &atom) {
+    return atom.getResidueId() + 1;
   }
-  void writeSymmetry(Bead *bead);
+  // int getResId(CSG_Topology &conf, Bead *bead) { return bead->getResnr() + 1;
+  // }
+
+  /*template <class Atom>
+  void writeSymmetry(Atom &atom) {};
+  void writeSymmetry(Bead & bead);*/
 
   template <class Atom>
   Eigen::Vector3d getPos(Atom &atom) {
     return atom.getPos() * tools::conv::bohr2ang;
   }
 
-  Eigen::Vector3d getPos(Bead *bead) {
-    return bead->Pos() * tools::conv::nm2ang;
+  Eigen::Vector3d getPos(Bead &bead) {
+    return bead.Pos().toEigen() * tools::conv::nm2ang;
   }
 
   template <class T>
-  T &getIterable(T &container) {
-    return container;
+  std::vector<Bead *> getIterable(CSG_Topology &top, T &container) {
+    std::vector<Bead *> beads;
+    std::vector<int> bead_ids = container.getBeadIds();
+    for (int &bead_id : bead_ids) {
+      beads.push_back(top.getBead(bead_id));
+    }
+    return beads;
   }
 
-  BeadContainer &getIterable(Topology &top) { return top.Beads(); }
+  std::vector<Bead *> getIterable(CSG_Topology &top) {
+    std::vector<Bead *> beads;
+    std::vector<int> bead_ids = top.getBeadIds();
+    for (int &bead_id : bead_ids) {
+      beads.push_back(top.getBead(bead_id));
+    }
+    return beads;
+  }
 
   std::ofstream _out;
 };
 
 template <class T>
-inline void PDBWriter::WriteContainer(T &container) {
-  boost::format atomfrmt(
-      "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f\n");
+inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
 
-  for (auto &atom : getIterable(container)) {
-    Eigen::Vector3d r = getPos(atom);
-    string resname = getResname(container, atom);
-    string atomname = getName(atom);
-    if (resname.size() > 3) {
-      resname = resname.substr(0, 3);
-    }
-    if (atomname.size() > 4) {
-      atomname = atomname.substr(0, 4);
-    }
+  if (_out.is_open()) {
+    boost::format atomfrmt(
+        "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f         "
+        "  "
+        "           %9$+2s\n");
 
-    _out << atomfrmt % (getId(atom) % 100000)  // atom serial number
-                % atomname % resname % " "     // chain identifier 1 char
-                % getResId(container, atom)    // residue sequence number
-                % r.x() % r.y() % r.z();
-    // we skip the charge
-    writeSymmetry(atom);
+    std::vector<Bead *> atoms = getIterable(*conf, container);
+    for (auto &atom : atoms) {
+      int atomid = getId(*atom);
+      std::string resname = getResidueType(*atom);
+      int residueid = getResId(*atom);
+      std::string atomtype = getType(*atom);
+      std::string element = getElement(*atom);
+      Eigen::Vector3d r = getPos(*atom);
+
+      _out << atomfrmt % (atomid % 100000)    // atom serial number
+                  % atomtype % resname % " "  // chain identifier 1 char
+                  % residueid                 // residue sequence number
+                  % r.x() % r.y() % r.z() % element;
+
+      // we skip the charge
+      // writeSymmetry(*atom);
+    }
+    _out << std::flush;
+  } else {
+    throw std::runtime_error("Cannot write container to file it is not open.");
   }
-  _out << std::flush;
 }
+
+// Super Hacky does not follow the pdb file convention, essentially is breaking
+// up coarse grained beads into arbitraty pieces, if we are going to allow
+// this it should be exact and break the pieces back into their constituent
+// atoms using the cgatomconverter class. Or you should simply use a differnt
+// file format
+/*
+  void PDBWriter::writeSymmetry(Bead &bead) {
+  }*/
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _PDBWRITER_H */
+#endif  // VOTCA_CSG_PDBWRITER_H

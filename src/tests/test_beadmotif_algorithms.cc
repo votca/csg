@@ -27,8 +27,8 @@
 #include <votca/tools/edge.h>
 
 using namespace std;
-using namespace votca::tools;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class TestBead : public BaseBead {
  public:
@@ -53,23 +53,23 @@ BOOST_AUTO_TEST_CASE(test_breakintomotifs) {
   // Should return this as type single_structure
 
   TestBead testbead1;
-  testbead1.setName("Hydrogen");
+  testbead1.setType("Hydrogen");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Hydrogen");
+  testbead3.setType("Hydrogen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   beadstructure1.AddBead(&testbead1);
@@ -90,15 +90,15 @@ BOOST_AUTO_TEST_CASE(test_breakintomotifs) {
   // Should turn into a motif of type edge
 
   TestBead testbead6;
-  testbead6.setName("Hydrogen");
+  testbead6.setType("Hydrogen");
   testbead6.setId(6);
 
   TestBead testbead7;
-  testbead7.setName("Oxygen");
+  testbead7.setType("Oxygen");
   testbead7.setId(7);
 
   TestBead testbead8;
-  testbead8.setName("Hydrogen");
+  testbead8.setType("Hydrogen");
   testbead8.setId(8);
 
   beadstructure1.AddBead(&testbead6);
@@ -117,19 +117,19 @@ BOOST_AUTO_TEST_CASE(test_breakintomotifs) {
   //
   // Should return as type loop
   TestBead testbead9;
-  testbead9.setName("Carbon");
+  testbead9.setType("Carbon");
   testbead9.setId(9);
 
   TestBead testbead10;
-  testbead10.setName("Carbon");
+  testbead10.setType("Carbon");
   testbead10.setId(10);
 
   TestBead testbead11;
-  testbead11.setName("Carbon");
+  testbead11.setType("Carbon");
   testbead11.setId(11);
 
   TestBead testbead12;
-  testbead12.setName("Carbon");
+  testbead12.setType("Carbon");
   testbead12.setId(12);
 
   beadstructure1.AddBead(&testbead9);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_breakintomotifs) {
   for (int index = 0; index < 6; ++index) {
     int id = index + 13;
     TestBead temp;
-    temp.setName("Carbon");
+    temp.setType("Carbon");
     temp.setId(id);
     fused_ring.push_back(temp);
   }
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_breakintomotifs) {
   // He19
 
   TestBead testbead19;
-  testbead19.setName("Helium");
+  testbead19.setType("Helium");
   testbead19.setId(19);
   beadstructure1.AddBead(&testbead19);
 
@@ -227,23 +227,23 @@ BOOST_AUTO_TEST_CASE(test_breakintosimplemotifs) {
   // Should return this as type single_structure
 
   TestBead testbead1;
-  testbead1.setName("Hydrogen");
+  testbead1.setType("Hydrogen");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Hydrogen");
+  testbead3.setType("Hydrogen");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Hydrogen");
+  testbead4.setType("Hydrogen");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Hydrogen");
+  testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
   beadstructure1.AddBead(&testbead1);
@@ -310,27 +310,27 @@ BOOST_AUTO_TEST_CASE(test_breakintosimplemotifs2) {
   // Should return this as type single_structure
 
   TestBead testbead1;
-  testbead1.setName("Carbon");
+  testbead1.setType("Carbon");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Carbon");
+  testbead3.setType("Carbon");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Carbon");
+  testbead4.setType("Carbon");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Carbon");
+  testbead5.setType("Carbon");
   testbead5.setId(5);
 
   TestBead testbead6;
-  testbead6.setName("Hydrogen");
+  testbead6.setType("Hydrogen");
   testbead6.setId(6);
 
   beadstructure1.AddBead(&testbead1);
@@ -417,48 +417,48 @@ BOOST_AUTO_TEST_CASE(test_breakintosimplemotifs3) {
   //  H8 - B9
   //
   TestBead testbead1;
-  testbead1.setName("Carbon");
+  testbead1.setType("Carbon");
   testbead1.setId(1);
 
   TestBead testbead2;
-  testbead2.setName("Carbon");
+  testbead2.setType("Carbon");
   testbead2.setId(2);
 
   TestBead testbead3;
-  testbead3.setName("Carbon");
+  testbead3.setType("Carbon");
   testbead3.setId(3);
 
   TestBead testbead4;
-  testbead4.setName("Carbon");
+  testbead4.setType("Carbon");
   testbead4.setId(4);
 
   TestBead testbead5;
-  testbead5.setName("Carbon");
+  testbead5.setType("Carbon");
   testbead5.setId(5);
 
   TestBead testbead6;
-  testbead6.setName("Hydrogen");
+  testbead6.setType("Hydrogen");
   testbead6.setId(6);
 
   TestBead testbead7;
-  testbead7.setName("Hydrogen");
+  testbead7.setType("Hydrogen");
   testbead7.setId(7);
 
   TestBead testbead8;
-  testbead8.setName("Hydrogen");
+  testbead8.setType("Hydrogen");
   testbead8.setId(8);
 
   TestBead testbead9;
-  testbead9.setName("Boron");
+  testbead9.setType("Boron");
   testbead9.setId(9);
 
   // Skip 10
   TestBead testbead11;
-  testbead11.setName("Silicon");
+  testbead11.setType("Silicon");
   testbead11.setId(11);
 
   TestBead testbead12;
-  testbead12.setName("Silicon");
+  testbead12.setType("Silicon");
   testbead12.setId(12);
 
   beadstructure1.AddBead(&testbead1);

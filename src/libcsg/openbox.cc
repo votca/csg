@@ -16,7 +16,7 @@
  */
 
 #include <votca/csg/openbox.h>
-
+#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
 

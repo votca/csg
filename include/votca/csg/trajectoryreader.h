@@ -15,11 +15,11 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TRAJECTORYREADER_H
-#define _VOTCA_CSG_TRAJECTORYREADER_H
+#ifndef VOTCA_CSG_TRAJECTORYREADER_H
+#define VOTCA_CSG_TRAJECTORYREADER_H
 
+#include "csgtopology.h"
 #include "fileformatfactory.h"
-#include "topology.h"
 #include <string>
 
 namespace votca {
@@ -39,9 +39,9 @@ class TrajectoryReader {
   virtual void Close(){};
 
   /// read in the first frame
-  virtual bool FirstFrame(Topology &top) = 0;
+  virtual bool FirstFrame(CSG_Topology &top) = 0;
   /// read in the next frame
-  virtual bool NextFrame(Topology &top) = 0;
+  virtual bool NextFrame(CSG_Topology &top) = 0;
 
   static void RegisterPlugins(void);
 };
@@ -55,4 +55,4 @@ inline FileFormatFactory<TrajectoryReader> &TrjReaderFactory() {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TRAJECTORYREADER_H */
+#endif  // VOTCA_CSG_TRAJECTORYREADER_H

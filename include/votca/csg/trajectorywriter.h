@@ -15,30 +15,27 @@
  *
  */
 
-#ifndef _VOTCA_CSG_TRAJECTORYWRITER_H
-#define _VOTCA_CSG_TRAJECTORYWRITER_H
+#ifndef VOTCA_CSG_TRAJECTORYWRITER_H
+#define VOTCA_CSG_TRAJECTORYWRITER_H
 
+#include "csgtopology.h"
 #include "fileformatfactory.h"
-#include "topology.h"
 #include <fstream>
 #include <iostream>
 #include <string>
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
-
-using namespace std;
 
 class TrajectoryWriter {
  public:
   TrajectoryWriter() {}
   virtual ~TrajectoryWriter() {}
 
-  virtual void Open(string file, bool bAppend = false) {}
+  virtual void Open(std::string file, bool bAppend = false) {}
   virtual void Close(){};
 
-  virtual void Write(Topology *top) {}
+  virtual void Write(CSG_Topology *top) {}
 
   static void RegisterPlugins(void);
 };
@@ -52,4 +49,4 @@ inline FileFormatFactory<TrajectoryWriter> &TrjWriterFactory() {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_TRAJECTORYWRITER_H */
+#endif  // VOTCA_CSG_TRAJECTORYWRITER_H

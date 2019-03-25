@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgBoltzmann : public CsgApplication {
  public:
@@ -50,10 +51,12 @@ class CsgBoltzmann : public CsgApplication {
   void Run();
 
   void InteractiveMode();
-  bool EvaluateTopology(Topology *top, Topology *top_ref);
+  bool EvaluateTopology(CSG_Topology *top_cg, CSG_Topology *top_atomistic);
 
  protected:
-  ExclusionList *CreateExclusionList(Molecule &atomistic, Molecule &cg);
+  ExclusionList *CreateExclusionList(CSG_Topology &top_atomistic,
+                                     CSG_Topology &top_cg,
+                                     Molecule &mol_atomistic, Molecule &mol_cg);
   BondedStatistics _bs;
 };
 void CsgBoltzmann::Initialize() {
@@ -73,24 +76,27 @@ bool CsgBoltzmann::EvaluateOptions() {
   return true;
 }
 
-bool CsgBoltzmann::EvaluateTopology(Topology *top, Topology *top_ref) {
+bool CsgBoltzmann::EvaluateTopology(CSG_Topology *top_cg,
+                                    CSG_Topology *top_atomistic) {
   if (OptionsMap().count("excl")) {
     ExclusionList *ex;
-    if (top_ref->MoleculeCount() > 1)
+    if (top_atomistic->MoleculeCount() > 1)
       cout << "WARNING: cannot create exclusion list for topology with"
               "multiple molecules, using only first molecule\n";
 
+    vector<int> molecule_ids = top_atomistic->getMoleculeIds();
+    Molecule *mol_atomistic = top_atomistic->getMolecule(molecule_ids.at(0));
+    Molecule *mol_cg = top_cg->getMolecule(molecule_ids.at(0));
     cout << "Writing exclusion list for atomistic molecule "
-         << top_ref->MoleculeByIndex(0)->getName()
-         << " in coarse grained representation "
-         << top_ref->MoleculeByIndex(0)->getName() << endl;
+         << mol_atomistic->getType() << " in coarse grained representation "
+         << mol_cg->getType() << endl;
 
-    ex = CreateExclusionList(*top_ref->MoleculeByIndex(0),
-                             *top->MoleculeByIndex(0));
+    ex = CreateExclusionList(*top_atomistic, *top_cg, *mol_atomistic, *mol_cg);
+
     ofstream fl;
     fl.open(OptionsMap()["excl"].as<string>().c_str());
-    fl << "# atomistic: " << top_ref->MoleculeByIndex(0)->getName()
-       << " cg: " << top_ref->MoleculeByIndex(0)->getName()
+    fl << "# atomistic: " << mol_atomistic->getType()
+       << " cg: " << mol_cg->getType()
        << " cgmap: " << OptionsMap()["cg"].as<string>() << endl;
     fl << *ex;
     fl.close();
@@ -100,43 +106,51 @@ bool CsgBoltzmann::EvaluateTopology(Topology *top, Topology *top_ref) {
   return true;
 }
 
-ExclusionList *CsgBoltzmann::CreateExclusionList(Molecule &atomistic,
-                                                 Molecule &cg) {
+ExclusionList *CsgBoltzmann::CreateExclusionList(CSG_Topology &top_atomistic,
+                                                 CSG_Topology &top_cg,
+                                                 Molecule &mol_atomistic,
+                                                 Molecule &mol_cg) {
   ExclusionList *ex = new ExclusionList();
   // exclude all with all
   {
     list<Bead *> excl_list;
-    for (int i = 0; i < atomistic.BeadCount(); ++i) {
-      excl_list.push_back(atomistic.getBead(i));
+    vector<int> bead_ids = mol_atomistic.getBeadIds();
+    for (int &bead_id : bead_ids) {
+      excl_list.push_back(mol_atomistic.getBead(bead_id));
     }
     ex->ExcludeList(excl_list);
   }
 
   // remove exclusions from inside a mapped bead
-  Topology *at_top = atomistic.getParent();
-  for (int i = 0; i < cg.BeadCount(); ++i) {
-    const vector<int> &parent_beads = cg.getBead(i)->ParentBeads();
+  vector<int> cg_bead_ids = mol_cg.getBeadIds();
+  for (int &bead_id : cg_bead_ids) {
+    const vector<int> &parent_beads = mol_cg.getBead(bead_id)->ParentBeads();
     list<Bead *> excl_list;
 
     for (const int &parent_bead_id : parent_beads) {
-      excl_list.push_back(at_top->getBead(parent_bead_id));
+      excl_list.push_back(top_atomistic.getBead(parent_bead_id));
     }
     ex->Remove(excl_list);
   }
 
-  // remove exclusion which come from atomistic topology and hence bonds and
+  // remove exclusion which come from mol_atomistic topology and hence bonds and
   // angles
-  Topology *cg_top = cg.getParent();
-  for (int i = 0; i < cg.BeadCount() - 1; ++i) {
-    for (int j = i + 1; j < cg.BeadCount(); ++j) {
-      if (cg_top->getExclusions().IsExcluded(cg.getBead(i), cg.getBead(j))) {
-        const vector<int> &parent_beads_w = cg.getBead(i)->ParentBeads();
-        const vector<int> &parent_beads_v = cg.getBead(j)->ParentBeads();
+  for (size_t index_1 = 0; index_1 < cg_bead_ids.size() - 1; ++index_1) {
+    for (size_t index_2 = index_1 + 1; index_2 < cg_bead_ids.size();
+         ++index_2) {
+      int bead_id_1 = cg_bead_ids.at(index_1);
+      int bead_id_2 = cg_bead_ids.at(index_2);
+      if (top_cg.getExclusions().IsExcluded(mol_cg.getBead(bead_id_1),
+                                            mol_cg.getBead(bead_id_2))) {
+        const vector<int> &parent_beads_w =
+            mol_cg.getBead(bead_id_1)->ParentBeads();
+        const vector<int> &parent_beads_v =
+            mol_cg.getBead(bead_id_2)->ParentBeads();
 
         for (const int parent_bead_id_w : parent_beads_w) {
           for (const int parent_bead_id_v : parent_beads_v) {
-            ex->RemoveExclusion(at_top->getBead(parent_bead_id_w),
-                                at_top->getBead(parent_bead_id_v));
+            ex->RemoveExclusion(top_atomistic.getBead(parent_bead_id_w),
+                                top_atomistic.getBead(parent_bead_id_v));
           }
         }
       }

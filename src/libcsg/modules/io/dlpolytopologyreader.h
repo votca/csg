@@ -15,11 +15,11 @@
  *
  */
 
-#ifndef _DLPTOPOLOGYREADER_H
-#define _DLPTOPOLOGYREADER_H
+#ifndef VOTCA_CSG_DLPTOPOLOGYREADER_H
+#define VOTCA_CSG_DLPTOPOLOGYREADER_H
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <string>
-#include <votca/csg/topology.h>
 #include <votca/csg/topologyreader.h>
 
 namespace votca {
@@ -38,7 +38,7 @@ class DLPOLYTopologyReader : public TopologyReader {
   DLPOLYTopologyReader() {}
 
   /// read a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
   /// set the topology file name: <name>.dlpf (convention: ".dlpf"="FIELD")
   void setFname(std::string name) {
@@ -66,4 +66,4 @@ class DLPOLYTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _DLPTOPOLOGYREADER_H */
+#endif  // VOTCA_CSG_DLPTOPOLOGYREADER_H

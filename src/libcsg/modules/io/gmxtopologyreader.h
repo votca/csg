@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _gmxtopologyreader_H
-#define _gmxtopologyreader_H
+#ifndef VOTCA_CSG_GMXTOPOLOGYREADER_H
+#define VOTCA_CSG_GMXTOPOLOGYREADER_H
 
 #include <string>
 #include <votca/csg/topologyreader.h>
@@ -36,7 +36,7 @@ class GMXTopologyReader : public TopologyReader {
   GMXTopologyReader() {}
 
   /// read a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
  private:
 };
@@ -44,4 +44,4 @@ class GMXTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _gmxtopologyreader_H */
+#endif  // VOTCA_CSG_GMXTOPOLOGYREADER_H

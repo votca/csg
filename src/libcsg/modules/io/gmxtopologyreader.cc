@@ -19,29 +19,33 @@
 #include <votca_config.h>
 #endif
 
+#include "gmxtopologyreader.h"
 #include <iostream>
 #include <string>
 
-#include <votca/csg/topology.h>
-
-#include "gmxtopologyreader.h"
+#include <boost/algorithm/string.hpp>
+#include <votca/tools/constants.h>
+#include <votca/tools/elements.h>
+#include <votca/tools/matrix.h>
 
 #include <gromacs/fileio/tpxio.h>
 #include <gromacs/mdtypes/inputrec.h>
 #include <gromacs/topology/atoms.h>
 #include <gromacs/topology/topology.h>
-
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
 #undef bool
 
-using namespace std;
-
 namespace votca {
 namespace csg {
 
-bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
+using namespace std;
+namespace TOOLS = votca::tools;
+
+bool GMXTopologyReader::ReadTopology(string file, CSG_Topology &top) {
   gmx_mtop_t mtop;
+
+  TOOLS::Elements elements;
 
   int natoms;
   // cleanup topology to store new data
@@ -65,16 +69,14 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
 
     string molname = *(mol->name);
 
-    int res_offset = top.ResidueCount();
+    // This is to check that you are not adding another residue with the same id
+    // as one that was previously added
+    // int res_offset = top.getMaxResidueId() + 1;
 
     t_atoms *atoms = &(mol->atoms);
 
-    for (int i = 0; i < atoms->nres; i++) {
-      top.CreateResidue(*(atoms->resinfo[i].name));
-    }
-
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      Molecule *mi = top.CreateMolecule(molname);
+      Molecule *mi = top.CreateMolecule(top.MoleculeCount(), molname);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -84,19 +86,24 @@ bool GMXTopologyReader::ReadTopology(string file, Topology &top) {
       // read the atoms
       for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
         t_atom *a = &(atoms->atom[iatom]);
+        string residue_name = *(atoms->resinfo[iatom].name);
 
         string bead_type = *(atoms->atomtype[iatom]);
-        if (!top.BeadTypeExist(bead_type)) {
-          top.RegisterBeadType(bead_type);
-        }
-        Bead *bead = top.CreateBead(1, *(atoms->atomname[iatom]), bead_type,
-                                    a->resind + res_offset, a->m, a->q);
 
-        stringstream nm;
-        nm << bead->getResnr() + 1 - res_offset << ":"
-           << top.getResidue(bead->getResnr())->getName() << ":"
-           << bead->getName();
-        mi->AddBead(bead, nm.str());
+        string element = TOOLS::topology_constants::unassigned_element;
+        if (elements.isEleShort(bead_type)) {
+          element = bead_type;
+        }
+        string name_all_caps = boost::to_upper_copy<std::string>(bead_type);
+        if (elements.isEleFull(name_all_caps)) {
+          element = elements.getEleShort(name_all_caps);
+        }
+
+        TOOLS::byte_t symmetry = 1;
+        Bead *bead =
+            top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
+                           a->resind, residue_name, element, a->m, a->q);
+        mi->AddBead(bead);
       }
 
       // add exclusions

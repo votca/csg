@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_EXCLUSIONLIST_H
-#define _VOTCA_CSG_EXCLUSIONLIST_H
+#ifndef VOTCA_CSG_EXCLUSIONLIST_H
+#define VOTCA_CSG_EXCLUSIONLIST_H
 
 #include "bead.h"
 #include <iostream>
@@ -25,12 +25,11 @@
 
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList
 
-class Topology;
+class CSG_Topology;
 class Bead;
 
 class ExclusionList {
@@ -51,15 +50,14 @@ class ExclusionList {
     std::list<Bead *> _exclude;
   };
 
-  void CreateExclusions(Topology *top);
   exclusion_t *GetExclusions(Bead *bead);
 
-  typedef std::list<exclusion_t *>::iterator iterator;
+  typedef std::vector<exclusion_t *>::iterator iterator;
 
   iterator begin() { return _exclusions.begin(); }
   iterator end() { return _exclusions.end(); }
 
-  bool IsExcluded(Bead *bead1, Bead *bead2);
+  bool IsExcluded(const Bead *bead1, const Bead *bead2) const;
 
   template <typename iteratable>
   void InsertExclusion(Bead *bead, iteratable &excluded);
@@ -69,7 +67,7 @@ class ExclusionList {
   void RemoveExclusion(Bead *bead1, Bead *bead2);
 
  private:
-  std::list<exclusion_t *> _exclusions;
+  std::vector<exclusion_t *> _exclusions;
   std::map<Bead *, exclusion_t *> _excl_by_bead;
 
   friend std::ostream &operator<<(std::ostream &out, ExclusionList &exl);
@@ -93,12 +91,12 @@ inline void ExclusionList::Remove(iteratable &l) {
 }
 
 template <typename iteratable>
-inline void ExclusionList::ExcludeList(iteratable &l) {
-  typename iteratable::iterator i, j;
+inline void ExclusionList::ExcludeList(iteratable &beads) {
+  typename iteratable::iterator bead_iter1, bead_iter2;
 
-  for (i = l.begin(); i != l.end(); ++i) {
-    for (j = i; j != l.end(); ++j) {
-      InsertExclusion(*i, *j);
+  for (bead_iter1 = beads.begin(); bead_iter1 != beads.end(); ++bead_iter1) {
+    for (bead_iter2 = bead_iter1; bead_iter2 != beads.end(); ++bead_iter2) {
+      InsertExclusion(*bead_iter1, *bead_iter2);
     }
   }
 }
@@ -143,16 +141,16 @@ inline void ExclusionList::RemoveExclusion(Bead *bead1, Bead *bead2) {
   if (bead2->getId() < bead1->getId()) std::swap(bead1, bead2);
   if (bead1 == bead2) return;
   if (!IsExcluded(bead1, bead2)) return;
-  std::list<exclusion_t *>::iterator ex;
-  for (ex = _exclusions.begin(); ex != _exclusions.end(); ++ex)
+  std::vector<exclusion_t *>::iterator ex;
+  for (ex = _exclusions.begin(); ex != _exclusions.end(); ++ex) {
     if ((*ex)->_atom == bead1) break;
+  }
   if (ex == _exclusions.end()) return;
   (*ex)->_exclude.remove(bead2);
   if ((*ex)->_exclude.empty()) {
     (*ex) = NULL;
     _exclusions.erase(ex);
   }
-  _exclusions.remove(NULL);
 }
 
 std::ostream &operator<<(std::ostream &out, ExclusionList &ex);
@@ -160,4 +158,4 @@ std::ostream &operator<<(std::ostream &out, ExclusionList &ex);
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_EXCLUSIONLIST_H */
+#endif  // VOTCA_CSG_EXCLUSIONLIST_H

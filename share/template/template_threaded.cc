@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 // comments were mainly added to explain the "overhead" needed for threaded
 // calculations/analyzations
@@ -63,7 +64,7 @@ class CsgTestApp : public CsgApplication {
   //      return false;
   //  }
 
-  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
   void EndEvaluate();
 
   // ForkWorker is the function you need to override and initialize your workers
@@ -76,7 +77,7 @@ class CsgTestApp : public CsgApplication {
  protected:
   // data belonging to the main class CsgTestApp
   HistogramNew _rdf;
-  double       _cut_off;
+  double _cut_off;
 };
 
 // derive from CsgApplication::Worker and define your worker
@@ -84,10 +85,10 @@ class RDFWorker : public CsgApplication::Worker {
  public:
   ~RDFWorker(){};
   // override EvalConfiguration with your analysis routine
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
   // data belonging to this particular worker
   HistogramNew _rdf;
-  double       _cut_off;
+  double _cut_off;
 };
 
 int main(int argc, char **argv) {
@@ -103,7 +104,7 @@ void CsgTestApp::Initialize() {
       "the cutoff");
 }
 
-void CsgTestApp::BeginEvaluate(Topology *top, Topology *top_ref) {
+void CsgTestApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   _cut_off = OptionsMap()["c"].as<double>();
   _rdf.Initialize(0, _cut_off, 50);
 }
@@ -123,7 +124,7 @@ CsgApplication::Worker *CsgTestApp::ForkWorker() {
 
 // EvalConfiguration does the actual calculation
 // you won't see any explicit threaded stuff here
-void RDFWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
+void RDFWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   BeadList b;
   b.Generate(*top, "*");
   NBListGrid nb;

@@ -15,12 +15,18 @@
  *
  */
 
-#include <stdlib.h>
+#include "../../include/votca/csg/csgtopology.h"
+#include <iostream>
+#include <map>
+#include <string>
+#include <votca/csg/boundarycondition.h>
 #include <votca/csg/csgapplication.h>
+#include <votca/csg/exclusionlist.h>
+#include <votca/tools/matrix.h>
 
 using namespace std;
 using namespace votca::csg;
-
+using namespace votca::tools;
 class CsgDumpApp : public CsgApplication {
   string ProgramName() { return "csg_dump"; }
   void HelpText(ostream &out) {
@@ -33,7 +39,7 @@ class CsgDumpApp : public CsgApplication {
         "excl", "  display exclusion list instead of molecule list");
   }
 
-  bool EvaluateTopology(Topology *top, Topology *top_ref);
+  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
 
   bool DoMapping() { return true; }
   bool DoMappingDefault(void) { return false; }
@@ -45,7 +51,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
+bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   if (!OptionsMap().count("excl")) {
     cout << "Boundary Condition: ";
     if (top->getBoxType() == BoundaryCondition::typeAuto) {
@@ -69,27 +75,36 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
       }
     }
 
-    cout << "\nList of residues:\n";
-    for (int i = 0; i < top->ResidueCount(); i++) {
-      cout << i << " name: " << top->getResidue(i)->getName()
-           << " id: " << top->getResidue(i)->getId() << endl;
+    cout << "\nList of residues:" << endl;
+    // Get all the residues by cycling through all the molecules
+    vector<int> molecule_ids = top->getMoleculeIds();
+    sort(molecule_ids.begin(), molecule_ids.end());
+    for (const int &molecule_id : molecule_ids) {
+      std::map<int, std::string> residue_ids_and_types =
+          top->getResidueIdsAndTypesInMolecule(molecule_id);
+      for (const pair<int, string> &id_and_type : residue_ids_and_types) {
+        cout << "name: " << id_and_type.second;
+        cout << " id: " << id_and_type.first << endl;
+      }
     }
 
     cout << "\nList of molecules:\n";
-    MoleculeContainer::iterator mol;
-    for (mol = top->Molecules().begin(); mol != top->Molecules().end(); ++mol) {
-      cout << "molecule: " << (*mol)->getId() + 1 << " " << (*mol)->getName()
-           << " beads: " << (*mol)->BeadCount() << endl;
-      for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-        int resnr = (*mol)->getBead(i)->getResnr();
+    for (const int &molecule_id : molecule_ids) {
+      Molecule *mol = top->getMolecule(molecule_id);
+      cout << "molecule: " << molecule_id + 1 << " " << mol->getType();
+      cout << " beads: " << mol->BeadCount() << endl;
 
-        cout << (*mol)->getBeadId(i) << " Name " << (*mol)->getBeadName(i)
-             << " Type " << (*mol)->getBead(i)->getType() << " Mass "
-             << (*mol)->getBead(i)->getMass() << " Resnr " << resnr
-             << " Resname " << top->getResidue(resnr)->getName() << " Charge "
-             << (*mol)->getBead(i)->getQ() << endl;
+      vector<int> bead_ids = mol->getBeadIds();
+      sort(bead_ids.begin(), bead_ids.end());
+      for (const int &bead_id : bead_ids) {
+        Bead *bead = top->getBead(bead_id);
+        cout << bead_id << " Type " << bead->getType() << " Mass "
+             << bead->getMass() << " Resnr " << bead->getResidueId()
+             << " Resname " << bead->getResidueType() << " Charge "
+             << bead->getQ() << endl;
       }
     }
+
   } else {
     cout << "\nList of exclusions:\n" << top->getExclusions();
   }

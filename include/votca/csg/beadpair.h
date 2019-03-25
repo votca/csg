@@ -23,6 +23,7 @@
 namespace votca {
 namespace csg {
 
+class Bead;
 /**
    \brief A particle pair
 

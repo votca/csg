@@ -14,28 +14,26 @@
  * limitations under the License.
  *
  */
-
-#include <votca/csg/topologymap.h>
+#ifndef VOTCA_CSG_CGBEADSTENCIL
+#define VOTCA_CSG_CGBEADSTENCIL
+#include <string>
+#include <vector>
+#include <votca/tools/types.h>
 
 namespace votca {
+
 namespace csg {
 
-TopologyMap::~TopologyMap() {
-  MapContainer::iterator i;
-
-  for (i = _maps.begin(); i != _maps.end(); ++i) delete *i;
-  _maps.clear();
-}
-
-void TopologyMap::Apply() {
-  MapContainer::iterator iter;
-
-  _out->setStep(_in->getStep());
-  _out->setTime(_in->getTime());
-  _out->setBox(_in->getBox());
-
-  for (iter = _maps.begin(); iter != _maps.end(); ++iter) (*iter)->Apply();
-}
+struct CGBeadStencil {
+  std::string cg_name_;
+  std::string cg_bead_type_;
+  tools::byte_t cg_symmetry_;
+  std::string mapping_;
+  std::vector<std::string> atomic_subbeads_;
+  std::vector<double> subbead_weights_;
+  std::vector<double> subbead_d_;
+};
 
 }  // namespace csg
 }  // namespace votca
+#endif  // VOTCA_CSG_CGBEADSTENCIL

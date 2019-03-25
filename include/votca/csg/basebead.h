@@ -20,12 +20,10 @@
 
 #include <assert.h>
 #include <memory>
-#include <votca/csg/moleculeitem.h>
-#include <votca/csg/topologyitem.h>
 #include <votca/tools/eigen.h>
 #include <votca/tools/identity.h>
 #include <votca/tools/name.h>
-namespace TOOLS = votca::tools;
+#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
@@ -51,20 +49,11 @@ class BaseBead {
   /// Sets the id of the bead
   void setId(int id) { id_.setId(id); }
 
-  /// Gets the name of the bead
-  std::string getName() const { return name_.getName(); }
-
-  /// Sets the name of the bead
-  void setName(std::string name) { return name_.setName(name); }
-
   /// Sets the molecule the bead is attached too
-  void setMolecule(Molecule *molecule) { molecule_item_.setMolecule(molecule); }
+  void setMoleculeId(int molecule_id) { molecule_id_.setId(molecule_id); }
 
   /// Gets the molecule pointer the bead is attached too
-  Molecule *getMolecule() const { return molecule_item_.getMolecule(); }
-
-  /// Gets the topology pointer the bead is attached too
-  Topology *getParent() const { return topology_item_.getParent(); }
+  int getMoleculeId() const { return molecule_id_.getId(); }
 
   /**
    * get the bead type
@@ -77,6 +66,14 @@ class BaseBead {
    * \param bead type object
    */
   virtual void setType(std::string type) { type_.setName(type); }
+
+  /**
+   * @brief Returns the element type of the bead
+   *
+   * @return either the element symbol i.e. "Si" for silcon or unassigned if it
+   * has not been specified.
+   */
+  std::string getElement() const { return element_symbol_.getName(); }
 
   /**
    * get the mass of the base bead
@@ -118,19 +115,12 @@ class BaseBead {
   void HasPos(bool true_or_false) { bead_position_set_ = true_or_false; }
 
  protected:
-  BaseBead()
-      : topology_item_(nullptr),
-        molecule_item_(nullptr),
-        mass_(0.0),
-        bead_position_set_(false){};
+  BaseBead() : mass_(0.0), bead_position_set_(false){};
 
-  TopologyItem topology_item_;
-  MoleculeItem molecule_item_;
-
-  TOOLS::Identity<int> id_;
-  TOOLS::Name name_;
-  TOOLS::Name type_;
-
+  tools::Identity<int> molecule_id_;
+  tools::Identity<int> id_;
+  tools::Name type_;
+  tools::Name element_symbol_;
   double mass_;
   Eigen::Vector3d bead_position_;
 

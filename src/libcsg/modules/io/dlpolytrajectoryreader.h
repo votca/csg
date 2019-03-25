@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _dlpolytrajectoryreader_H
-#define _dlpolytrajectoryreader_H
+#ifndef VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
+#define VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
 
 #include <fstream>
 #include <iostream>
@@ -39,9 +39,9 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   /// open original trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &conf);
+  bool FirstFrame(CSG_Topology &conf);
   /// read in the next frame
-  bool NextFrame(Topology &conf);
+  bool NextFrame(CSG_Topology &conf);
   /// close original trajectory file
   void Close();
 
@@ -71,4 +71,4 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _dlpolytrajectoryreader_H */
+#endif  // VOTCA_CSG_DLPOLYTRAJECTORYREADER_H

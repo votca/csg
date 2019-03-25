@@ -16,7 +16,10 @@
  */
 
 #include <math.h>
-#include <votca/csg/csgapplication.h>
+
+#include "../../include/votca/csg/csgapplication.h"
+#include "../../include/votca/csg/csgtopology.h"
+
 #include <votca/tools/histogramnew.h>
 #include <votca/tools/tokenizer.h>
 
@@ -41,8 +44,8 @@ class CsgDensityApp : public CsgApplication {
 
   // write out results in EndEvaluate
   void EndEvaluate();
-  void BeginEvaluate(Topology *top, Topology *top_atom);
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
 
   bool EvaluateOptions() {
     CsgApplication::EvaluateOptions();
@@ -75,7 +78,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgDensityApp::BeginEvaluate(Topology *top, Topology *top_atom) {
+void CsgDensityApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
 
   Eigen::Matrix3d box = top->getBox();
   Eigen::Vector3d a = box.col(0);
@@ -129,17 +132,20 @@ void CsgDensityApp::BeginEvaluate(Topology *top, Topology *top_atom) {
   _nblock = 0;
 }
 
-void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref) {
+void CsgDensityApp::EvalConfiguration(CSG_Topology *top,
+                                      CSG_Topology *top_ref) {
   // loop over all molecules
   bool did_something = false;
-  for (MoleculeContainer::iterator imol = top->Molecules().begin();
-       imol != top->Molecules().end(); ++imol) {
-    Molecule *mol = *imol;
-    if (!wildcmp(_molname.c_str(), mol->getName().c_str())) continue;
+  // for (MoleculeContainer::iterator imol = top->Molecules().begin();
+  //    imol != top->Molecules().end(); ++imol) {
+  vector<int> molecule_ids = top->getMoleculeIds();
+  for (const int &molecule_id : molecule_ids) {
+    Molecule *mol = top->getMolecule(molecule_id);
+    if (!wildcmp(_molname.c_str(), mol->getType().c_str())) continue;
     int N = mol->BeadCount();
     for (int i = 0; i < N; i++) {
       Bead *b = mol->getBead(i);
-      if (!wildcmp(_filter.c_str(), b->getName().c_str())) continue;
+      if (!wildcmp(_filter.c_str(), b->getType().c_str())) continue;
       double r;
       if (_axisname == "r") {
         r = (top->BCShortestConnection(_ref, b->getPos()).norm());

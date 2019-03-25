@@ -15,11 +15,15 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <iostream>
 #include <votca/csg/nblist.h>
 
 namespace votca {
 namespace csg {
+
+using namespace std;
+using namespace votca::tools;
 
 NBList::NBList() : _do_exclusions(false), _match_function(0) {
   setPairType<BeadPair>();
@@ -28,6 +32,7 @@ NBList::NBList() : _do_exclusions(false), _match_function(0) {
 
 NBList::~NBList() {
   // TODO: NBList destructor
+  if (_match_function) delete _match_function;
 }
 
 void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
@@ -38,8 +43,8 @@ void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
   if (list1.empty()) return;
   if (list2.empty()) return;
 
-  assert(list1.getTopology() == list2.getTopology());
-  Topology *top = list1.getTopology();
+  assert(list1.getCSGTopology() == list2.getCSGTopology());
+  CSG_Topology *top = list1.getCSGTopology();
 
   for (iter1 = list1.begin(); iter1 != list1.end(); ++iter1) {
     if (&list1 == &list2) {
@@ -58,7 +63,7 @@ void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
       double d = r.norm();
       if (d < _cutoff) {
         if (_do_exclusions)
-          if (top->getExclusions().IsExcluded(*iter1, *iter2)) {
+          if (top->getExclusionsConst().IsExcluded(*iter1, *iter2)) {
             continue;
           }
         if ((*_match_function)(*iter1, *iter2, r, d))

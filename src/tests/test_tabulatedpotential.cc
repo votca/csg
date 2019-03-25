@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include <votca/tools/constants.h>
+
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;
@@ -69,10 +71,9 @@ BOOST_AUTO_TEST_CASE(test_register) {
 
 BOOST_AUTO_TEST_CASE(test_command) {
 
-  Topology top;
+  CSG_Topology top;
   BondedStatistics bonded_statistics;
   string interaction_group = "interaction";
-  string interaction_group_name = ":interaction";
   vector<string> interactions;
   interactions.push_back("file_interactions.txt");
   // Setup BondedStatistics Object
@@ -81,11 +82,12 @@ BOOST_AUTO_TEST_CASE(test_command) {
     Eigen::Matrix3d box = 20 * Eigen::Matrix3d::Identity();
     top.setBox(box);
 
+    const BoundaryCondition *bc = top.getBoundaryCondition();
+    BOOST_CHECK_EQUAL(bc->getBoxType(), BoundaryCondition::typeOrthorhombic);
     // Create three beads
     byte_t symmetry = 1;
 
-    string bead_type_name = "H2";
-    top.RegisterBeadType(bead_type_name);
+    string bead_type = "H2";
 
     double mass = 0.9;
     double charge = 0.0;
@@ -93,42 +95,56 @@ BOOST_AUTO_TEST_CASE(test_command) {
     // Create a bunch of H2 molecules, each bead is considered a molecule they
     // are placed on a regular grid so the table properties can be compared
     // consistently
-
-    int number_of_H2 = 0;
-    int residue_number = 0;
+    cout << "Creating Beads" << endl;
+    int number_of_H2_molecules = 0;
+    int bead_id = 0;
+    int residue_id = 0;
     for (double x = 2.0; x < (box(0, 0) - 2.0); x += 4.0) {
       for (double y = 2.0; y < (box(1, 1) - 2.0); y += 3.0) {
         for (double z = 2.0; z < (box(2, 2) - 2.0); z += 4.0) {
-          residue_number++;
+          ++residue_id;
 
-          string bead_name = to_string(number_of_H2) + "_H2";
           Eigen::Vector3d bead_pos(x, y, z);
-          auto bead_ptr = top.CreateBead(symmetry, bead_name, bead_type_name,
-                                         residue_number, mass, charge);
-          bead_ptr->setId(number_of_H2);
+          Bead *bead_ptr = top.CreateBead(
+              symmetry, bead_type, bead_id, number_of_H2_molecules, residue_id,
+              topology_constants::unassigned_residue_type,
+              topology_constants::unassigned_element, mass, charge);
           bead_ptr->setPos(bead_pos);
-          number_of_H2++;
+          ++number_of_H2_molecules;
+          ++bead_id;
         }
       }
     }
 
-    cout << "Number of H2 " << number_of_H2 << endl;
+    cout << "Creating interactions" << endl;
+    int molecule_id = 0;
     // Every molecule interacts with every other molecule
-    for (int index = 0; index < number_of_H2; ++index) {
-      for (int index2 = index + 1; index2 < number_of_H2; ++index2) {
-        auto bond = new IBond(index, index2);
-        bond->setGroup(interaction_group + to_string(index) + "_" +
-                       to_string(index2));
-        top.AddBondedInteraction(bond);
-        interactions.push_back(interaction_group_name + to_string(index) + "_" +
-                               to_string(index2));
+    int interaction_id = 0;
+    for (int index = 0; index < number_of_H2_molecules; ++index) {
+      for (int index2 = index + 1; index2 < number_of_H2_molecules; ++index2) {
+        string interaction_group2 = interaction_group;
+        interaction_group2 += to_string(index) + "_" + to_string(index2);
+        cout << interaction_group2 << endl;
+        auto bond = top.CreateInteraction(
+            InteractionType::bond, interaction_group2, interaction_id,
+            molecule_id, vector<int>{index, index2});
+        interactions.push_back("molecule id " + to_string(molecule_id) +
+                               ":group name " + interaction_group +
+                               to_string(index) + "_" + to_string(index2) +
+                               ":group id " + to_string(bond->getGroupId()) +
+                               ":index " + to_string(interaction_id));
+        cout << "bond index " << bond->getIndex() << " " << bond->getGroup()
+             << " " << bond->getGroupId() << " "
+             << InteractionTypeToString(bond->getType()) << endl;
       }
     }
 
+    cout << "Evalulating topology" << endl;
     bonded_statistics.BeginCG(&top, nullptr);
+    cout << "Eval Config" << endl;
     bonded_statistics.EvalConfiguration(&top, nullptr);
   }  // End of setup
-
+  cout << "Creating DataCollection" << endl;
   DataCollection<double> &bonded_values = bonded_statistics.BondedValues();
   cout << "bonded_values after pulling out of statistics "
        << bonded_values.size() << endl;
@@ -138,6 +154,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   tabulatedpotential.Register(commands);
 
   // Test 1
+  cout << "Running Test 1" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -147,9 +164,18 @@ BOOST_AUTO_TEST_CASE(test_command) {
     arguments.push_back("5");
 
     string command = "tab";
+    cout << "Command with args" << endl;
+    cout << "bonded statistics " << bonded_statistics.BondedValues().size()
+         << endl;
+    auto iter = bonded_values.begin();
+    while (iter != bonded_values.end()) {
+      cout << (*iter)->getName() << endl;
+      ++iter;
+    }
     tabulatedpotential.Command(bonded_statistics, command, arguments);
+    cout << "Command with interactions" << endl;
     tabulatedpotential.Command(bonded_statistics, command, interactions);
-
+    cout << "Get columns from file" << endl;
     Eigen::VectorXd column1 = getColumnFromFile(interactions.at(0), 1);
     Eigen::VectorXd column2 = getColumnFromFile(interactions.at(0), 2);
     Eigen::VectorXd column3 = getColumnFromFile(interactions.at(0), 3);
@@ -161,6 +187,10 @@ BOOST_AUTO_TEST_CASE(test_command) {
     Eigen::VectorXd col3_ref(5);
     col3_ref << 1.16, 0.90, 0.26, -1.00, -1.87;
 
+    cout << column1 << endl;
+    cout << col1_ref << endl;
+    cout << column2 << endl;
+    cout << column3 << endl;
     BOOST_CHECK_EQUAL(column1.isApprox(col1_ref, 1e-2), true);
     BOOST_CHECK_EQUAL(column2.isApprox(col2_ref, 1e-2), true);
     BOOST_CHECK_EQUAL(column3.isApprox(col3_ref, 1e-2), true);
@@ -168,6 +198,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 1
 
   // Test 2
+  cout << "Running Test 2" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -200,6 +231,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 2
 
   // Test 3
+  cout << "Running Test 3" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -234,6 +266,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 3
 
   // Test 4
+  cout << "Running Test 4" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -262,6 +295,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 4
 
   // Test 5
+  cout << "Running Test 5" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -292,6 +326,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 5
 
   // Test 6
+  cout << "Running Test 6" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -323,6 +358,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 6
 
   // Test 7
+  cout << "Running Test 7" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do
@@ -351,6 +387,7 @@ BOOST_AUTO_TEST_CASE(test_command) {
   }  // End of Test 7
 
   // Test 8
+  cout << "Running Test 8" << endl;
   {
     vector<string> arguments;
     // Set the table properties so that only 11 points are used, this way we do

@@ -17,11 +17,13 @@
 
 #include "gmxtrajectorywriter.h"
 #include <string>
-
+#include <votca/tools/matrix.h>
+#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
 
 using namespace std;
+using namespace votca::tools;
 
 void GMXTrajectoryWriter::Open(string file, bool bAppend) {
   // char c[1] = bAppend ? "a" : "w";
@@ -30,7 +32,7 @@ void GMXTrajectoryWriter::Open(string file, bool bAppend) {
 
 void GMXTrajectoryWriter::Close() { close_trx(_file); }
 
-void GMXTrajectoryWriter::Write(Topology *conf) {
+void GMXTrajectoryWriter::Write(CSG_Topology *conf) {
   static int step = 0;
   int N = conf->BeadCount();
   t_trxframe frame;

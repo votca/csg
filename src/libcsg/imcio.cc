@@ -31,6 +31,7 @@ namespace csg {
 
 typedef Eigen::MatrixXd group_matrix;
 using namespace std;
+using namespace votca::tools;
 
 void imcio_write_dS(const string &file, Eigen::VectorXd &r, Eigen::VectorXd &dS,
                     std::list<int> *list) {

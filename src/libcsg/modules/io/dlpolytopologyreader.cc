@@ -15,21 +15,30 @@
  *
  */
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/convenience.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/case_conv.hpp>  // IWYU pragma: keep
+#include <boost/filesystem/convenience.hpp>      // IWYU pragma: keep
+#include <boost/filesystem/path.hpp>             // IWYU pragma: keep
 #include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <votca/csg/topology.h>
-#include <votca/tools/getline.h>
+#include <stddef.h>
+#include <votca/csg/molecule.h>
+#include <votca/tools/constants.h>
+#include <votca/tools/elements.h>
 #include <votca/tools/tokenizer.h>
+#include <votca/tools/types.h>
 
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif
 
 #include "dlpolytopologyreader.h"
+
+namespace votca {
+namespace csg {
+class Bead;
+}  // namespace csg
+}  // namespace votca
 
 using namespace votca::tools;
 using namespace std;
@@ -129,7 +138,7 @@ bool DLPOLYTopologyReader::_isKeyInt(const string &line, const char *wspace,
   return true;
 }
 
-bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
+bool DLPOLYTopologyReader::ReadTopology(string file, CSG_Topology &top) {
   const char *WhiteSpace = " \t";
 
   int matoms = 0;
@@ -139,10 +148,6 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
   boost::filesystem::path filepath(file.c_str());
 
   string line;
-
-  // TODO: fix residue naming / assignment - DL_POLY has no means to recognise
-  // residues!
-  Residue *res = top.CreateResidue("no");
 
   if (boost::filesystem::basename(filepath).size() == 0) {
     if (filepath.parent_path().string().size() == 0) {
@@ -192,7 +197,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      Molecule *mi = top.CreateMolecule(mol_name);
+      Molecule *mi = top.CreateMolecule(top.MoleculeCount(), mol_name);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -210,6 +215,7 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 #endif
 
       // read molecule
+      Elements elements;
       int id_map[natoms];
       for (int i = 0; i < natoms;) {  // i is altered in repeater loop
         stringstream sl(_NextKeyline(fl, WhiteSpace));
@@ -220,9 +226,16 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 #endif
         string beadtype;
         sl >> beadtype;
-        if (!top.BeadTypeExist(beadtype)) {
-          top.RegisterBeadType(beadtype);
+
+        string element;
+        if (elements.isEleShort(beadtype)) {
+          element = beadtype;
         }
+        string full_name = boost::to_upper_copy<string>(beadtype);
+        if (elements.isEleFull(full_name)) {
+          element = full_name;
+        }
+
         double mass;
         sl >> mass;
         double charge;
@@ -245,29 +258,28 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
         for (int j = 0; j < repeater; j++) {
 
-          string beadname = beadtype + "#" + boost::lexical_cast<string>(i + 1);
-          Bead *bead =
-              top.CreateBead(1, beadname, beadtype, res->getId(), mass, charge);
+          byte_t symmetry = 1;
 
-          stringstream nm;
-          nm << bead->getResnr() + 1 << ":"
-             << top.getResidue(bead->getResnr())->getName() << ":"
-             << bead->getName();
-          mi->AddBead(bead, nm.str());
+          Bead *bead =
+              top.CreateBead(symmetry, beadtype, top.BeadCount(), mi->getId(),
+                             topology_constants::unassigned_residue_id,
+                             topology_constants::unassigned_residue_type,
+                             element, mass, charge);
+
+          mi->AddBead(bead);
           id_map[i] = bead->getId();
           i++;
 #ifdef DEBUG
-          cout << "Atom identification in maps '" << nm.str() << "'" << endl;
+          cout << "Atom identification in maps '" << bead->getLabel() << "'"
+               << endl;
 #endif
         }
         matoms += repeater;
       }
 
       while (line != "FINISH") {
-
         stringstream nl(_NextKeyline(fl, WhiteSpace));
         nl >> line;
-
 #ifdef DEBUG
         cout << "Read unit type# from dlpoly topology : '" << nl.str() << "'"
              << endl;
@@ -276,10 +288,11 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
         boost::to_upper(line);
         line = line.substr(0, 6);
         if ((line == "BONDS") || (line == "ANGLES") || (line == "DIHEDR")) {
-          string type = line;
+          string interaction_group = line;
           int count;
           nl >> count;
-          for (int i = 0; i < count; i++) {
+          for (int interaction_id = 0; interaction_id < count;
+               interaction_id++) {
 
             stringstream sl(_NextKeyline(fl, WhiteSpace));
 #ifdef DEBUG
@@ -292,31 +305,37 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
             Interaction *ic = NULL;
             sl >> ids[0];
             sl >> ids[1];
-            if (type == "BONDS") {
-              ic = new IBond(id_map[ids[0] - 1],
-                             id_map[ids[1] - 1]);  // -1 due to fortran vs c
-            } else if (type == "ANGLES") {
+            if (interaction_group == "BONDS") {
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              ic = top.CreateInteraction(
+                  InteractionType::bond, interaction_group, interaction_id,
+                  mi->getId(), vector<int>{bead_id1, bead_id2});
+            } else if (interaction_group == "ANGLES") {
               sl >> ids[2];
-              ic = new IAngle(id_map[ids[0] - 1], id_map[ids[1] - 1],
-                              id_map[ids[2] - 1]);  // -1 due to fortran vs c
-            } else if (type.substr(0, 6) == "DIHEDR") {
-              type = "DIHEDRALS";
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              int bead_id3 = id_map[ids[2] - 1];
+              ic = top.CreateInteraction(
+                  InteractionType::angle, interaction_group, interaction_id,
+                  mi->getId(), vector<int>{bead_id1, bead_id2, bead_id3});
+            } else if (interaction_group.substr(0, 6) == "DIHEDR") {
+              interaction_group = "DIHEDRALS";
               sl >> ids[2];
               sl >> ids[3];
-              ic = new IDihedral(id_map[ids[0] - 1], id_map[ids[1] - 1],
-                                 id_map[ids[2] - 1],
-                                 id_map[ids[3] - 1]);  // -1 due to fortran vs c
+              int bead_id1 = id_map[ids[0] - 1];
+              int bead_id2 = id_map[ids[1] - 1];
+              int bead_id3 = id_map[ids[2] - 1];
+              int bead_id4 = id_map[ids[3] - 1];
+              ic = top.CreateInteraction(
+                  InteractionType::dihedral, interaction_group, interaction_id,
+                  mi->getId(),
+                  vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
             } else {
               throw std::runtime_error(
-                  "Error: type should be BONDS, ANGLES or DIHEDRALS");
+                  "Error: interaction_group should be BONDS, ANGLES or "
+                  "DIHEDRALS");
             }
-            // could one use bond/angle/dihedral function types for 1:1 mapping?
-            // (CG map overwrites ic->Group anyway)
-            // ic->setGroup(line);
-            ic->setGroup(type);
-            ic->setIndex(i);
-            ic->setMolecule(mi->getId());
-            top.AddBondedInteraction(ic);
             mi->AddInteraction(ic);
           }
         }
@@ -329,40 +348,50 @@ bool DLPOLYTopologyReader::ReadTopology(string file, Topology &top) {
 
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
-        Molecule *mi_replica = top.CreateMolecule(mol_name);
-        for (int i = 0; i < mi->BeadCount(); i++) {
-          Bead *bead = mi->getBead(i);
-          string type = bead->getType();
-          Bead *bead_replica =
-              top.CreateBead(1, bead->getName(), type, res->getId(),
-                             bead->getMass(), bead->getQ());
-          mi_replica->AddBead(bead_replica, bead->getName());
+        Molecule *mi_replica =
+            top.CreateMolecule(top.MoleculeCount(), mol_name);
+        vector<int> bead_ids = mi->getBeadIds();
+        for (const int &bead_id : bead_ids) {
+          Bead *bead = mi->getBead(bead_id);
+          byte_t symmetry = 1;
+          Bead *bead_replica = top.CreateBead(
+              symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
+              bead->getResidueId(), bead->getResidueType(), bead->getElement(),
+              bead->getMass(), bead->getQ());
+          mi_replica->AddBead(bead_replica);
         }
         matoms += mi->BeadCount();
-        InteractionContainer ics = mi->Interactions();
+        vector<Interaction *> ics = mi->Interactions();
         for (vector<Interaction *>::iterator ic = ics.begin(); ic != ics.end();
              ++ic) {
           Interaction *ic_replica = NULL;
           int offset =
               mi_replica->getBead(0)->getId() - mi->getBead(0)->getId();
           if ((*ic)->BeadCount() == 2) {
-            ic_replica = new IBond((*ic)->getBeadId(0) + offset,
-                                   (*ic)->getBeadId(1) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            ic_replica = top.CreateInteraction(
+                InteractionType::bond, (*ic)->getGroup(), (*ic)->getIndex(),
+                mi_replica->getId(), vector<int>{bead_id1, bead_id2});
           } else if ((*ic)->BeadCount() == 3) {
-            ic_replica = new IAngle((*ic)->getBeadId(0) + offset,
-                                    (*ic)->getBeadId(1) + offset,
-                                    (*ic)->getBeadId(2) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            int bead_id3 = (*ic)->getBeadId(2) + offset;
+            ic_replica = top.CreateInteraction(
+                InteractionType::angle, (*ic)->getGroup(), (*ic)->getIndex(),
+                mi_replica->getId(), vector<int>{bead_id1, bead_id2, bead_id3});
           } else if ((*ic)->BeadCount() == 4) {
-            ic_replica = new IDihedral(
-                (*ic)->getBeadId(0) + offset, (*ic)->getBeadId(1) + offset,
-                (*ic)->getBeadId(2) + offset, (*ic)->getBeadId(3) + offset);
+            int bead_id1 = (*ic)->getBeadId(0) + offset;
+            int bead_id2 = (*ic)->getBeadId(1) + offset;
+            int bead_id3 = (*ic)->getBeadId(2) + offset;
+            int bead_id4 = (*ic)->getBeadId(3) + offset;
+            ic_replica = top.CreateInteraction(
+                InteractionType::dihedral, (*ic)->getGroup(), (*ic)->getIndex(),
+                mi_replica->getId(),
+                vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
           } else {
             throw std::runtime_error("Error: BeadCount not equal 2, 3 or 4");
           }
-          ic_replica->setGroup((*ic)->getGroup());
-          ic_replica->setIndex((*ic)->getIndex());
-          ic_replica->setMolecule(mi_replica->getId());
-          top.AddBondedInteraction(ic_replica);
           mi_replica->AddInteraction(ic_replica);
         }
       }

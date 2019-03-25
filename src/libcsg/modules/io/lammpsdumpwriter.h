@@ -15,24 +15,27 @@
  *
  */
 
-#ifndef __VOTCA_CSG_LAMMPSDUMPWRITER_H
-#define __VOTCA_CSG_LAMMPSDUMPWRITER_H
+#ifndef VOTCA_CSG_LAMMPSDUMPWRITER_H
+#define VOTCA_CSG_LAMMPSDUMPWRITER_H
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <stdio.h>
-#include <votca/csg/topology.h>
 #include <votca/csg/trajectorywriter.h>
 
 namespace votca {
 namespace csg {
+
+namespace TOOLS = votca::tools;
 
 class LAMMPSDumpWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void RegisteredAt(ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+  void RegisteredAt(
+      TOOLS::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(Topology *conf);
+  void Write(CSG_Topology *conf);
 
  private:
   FILE *_out;
@@ -41,4 +44,4 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // __VOTCA_CSG_LAMMPSDUMPWRITER_H
+#endif  // VOTCA_CSG_LAMMPSDUMPWRITER_H

@@ -24,7 +24,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
+using namespace votca::tools;
 void PDBWriter::Open(string file, bool bAppend) {
   if (bAppend) {
     _out.open(file, std::ios_base::app);
@@ -34,22 +34,15 @@ void PDBWriter::Open(string file, bool bAppend) {
 }
 
 void PDBWriter::WriteHeader(std::string header) {
-  if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
-    _out << "HEADER    ";
+  if (_out.is_open()) {
+    if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
+      _out << "HEADER    ";
+    }
+    _out << header;
+    if (header.back() != '\n') _out << "\n";
+  } else {
+    throw runtime_error("Cannot write header to pdb file, file is not open.");
   }
-  _out << header;
-  if (header.back() != '\n') _out << "\n";
-}
-
-void PDBWriter::Close() { _out.close(); }
-
-void PDBWriter::Write(Topology *conf) {
-
-  _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
-       << std::flush;
-  ;
-  WriteContainer<Topology>(*conf);
-  _out << "ENDMDL" << std::endl;
 }
 
 void PDBWriter::WriteBox(const Eigen::Matrix3d &box) {
@@ -66,39 +59,22 @@ void PDBWriter::WriteBox(const Eigen::Matrix3d &box) {
   _out << boxfrmt % a % b % c % alpha % beta % gamma;
 }
 
-void PDBWriter::writeSymmetry(Bead *bead) {
-  if (bead->getSymmetry() > 1) {
-    Eigen::Vector3d r = 10 * bead->getPos();
-    boost::format beadfrmt(
-        "HETATM%1$5d %2$4s %3$3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f\n");
-    Eigen::Vector3d ru = 0.1 * bead->getU() + r;
-
-    _out << beadfrmt % (bead->getId() + 1) % 100000  // atom serial number
-                % bead->getName()                    // atom name
-                % "REU"                              // residue name
-                % " "                                // chain identifier 1 char
-                % (bead->getResnr() + 1)             // residue sequence number
-                % ru.x() % ru.y() % ru.z();          // we skip the charge
-
-    if (bead->getSymmetry() > 2) {
-      Eigen::Vector3d rv = 0.1 * bead->getV() + r;
-      _out << beadfrmt % (bead->getId() + 1) % 100000  // atom serial number
-                  % bead->getName()                    // atom name
-                  % "REV"                              // residue name
-                  % " "                        // chain identifier 1 char
-                  % (bead->getResnr() + 1)     // residue sequence number
-                  % rv.x() % rv.y() % rv.z();  // we skip the charge
-    }
+void PDBWriter::Close() {
+  if (_out.is_open()) {
+    _out.close();
   }
-  return;
 }
 
-std::string PDBWriter::getResname(Topology &conf, Bead *bead) {
-  if (conf.getResidue(bead->getResnr())) {
-    return conf.getResidue(bead->getResnr())->getName();
+void PDBWriter::Write(CSG_Topology *conf) {
+  if (_out.is_open()) {
+    _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
+         << std::flush;
+    WriteContainer<CSG_Topology>(conf, *conf);
+    _out << "ENDMDL" << std::endl;
   } else {
-    return "";
+    throw runtime_error("Cannot write topology to file, file is not open.");
   }
 }
+
 }  // namespace csg
 }  // namespace votca

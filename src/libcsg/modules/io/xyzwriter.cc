@@ -21,6 +21,9 @@
 namespace votca {
 namespace csg {
 
+using namespace std;
+using namespace votca::tools;
+
 void XYZWriter::Open(std::string file, bool bAppend) {
   if (bAppend) {
     _out.open(file, std::ios_base::app);
@@ -31,11 +34,11 @@ void XYZWriter::Open(std::string file, bool bAppend) {
 
 void XYZWriter::Close() { _out.close(); }
 
-void XYZWriter::Write(Topology *conf) {
+void XYZWriter::Write(CSG_Topology *conf) {
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
                         (conf->getStep() + 1) % conf->getTime())
                            .str();
-  Write<Topology>(*conf, header);
+  Write<CSG_Topology>(*conf, *conf, header);
 }
 }  // namespace csg
 }  // namespace votca

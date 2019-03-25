@@ -15,6 +15,7 @@
  *
  */
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <iostream>
@@ -23,6 +24,7 @@
 using namespace votca::csg;
 using namespace std;
 using boost::format;
+using namespace votca::tools;
 
 class GmxTopolApp : public CsgApplication {
  public:
@@ -40,12 +42,12 @@ class GmxTopolApp : public CsgApplication {
     CheckRequired("out", "no output topology specified");
     return true;
   }
-  bool EvaluateTopology(Topology *top, Topology *top_ref);
+  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
 
  protected:
   void WriteAtoms(ostream &out, Molecule &cg);
-  void WriteInteractions(ostream &out, Molecule &cg);
-  void WriteMolecule(ostream &out, Molecule &cg);
+  void WriteInteractions(ostream &out, CSG_Topology &top, Molecule &cg);
+  void WriteMolecule(ostream &out, CSG_Topology &top, Molecule &cg);
 };
 
 void GmxTopolApp::Initialize(void) {
@@ -55,13 +57,14 @@ void GmxTopolApp::Initialize(void) {
       "output topology (will create .top and in future also .itp)");
 }
 
-bool GmxTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
+bool GmxTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   if (top->MoleculeCount() > 1)
     cout << "WARNING: cannot create topology for topology with"
             "multiple molecules, using only first molecule\n";
   ofstream fl;
   fl.open((OptionsMap()["out"].as<string>() + ".top").c_str());
-  WriteMolecule(fl, *(top->MoleculeByIndex(0)));
+  vector<int> molecule_ids = top->getMoleculeIds();
+  WriteMolecule(fl, *top, *(top->getMolecule(molecule_ids.at(0))));
   fl.close();
   return true;
 }
@@ -69,27 +72,27 @@ bool GmxTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
 void GmxTopolApp::WriteAtoms(ostream &out, Molecule &cg) {
   out << "[atoms]\n";
   out << "; nr type resnr residue atom cgnr charge mass\n";
-  for (int i = 0; i < cg.BeadCount(); ++i) {
+  for (size_t i = 0; i < cg.BeadCount(); ++i) {
     Bead *b = cg.getBead(i);
     out << format("%d %s 1 RES %s %d %f %f\n") % (i + 1) % b->getType() %
-               b->getName() % (i + 1) % b->getQ() % b->getMass();
+               b->getType() % (i + 1) % b->getQ() % b->getMass();
   }
   out << endl;
 }
 
-void GmxTopolApp::WriteInteractions(ostream &out, Molecule &cg) {
+void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
+                                    Molecule &cg) {
   int nb = -1;
 
-  Interaction *ic;
-  vector<Interaction *>::iterator iter;
+  // unique_ptr<Interaction> ic;
+  vector<unique_ptr<Interaction>>::const_iterator ic_iter;
+  const vector<unique_ptr<Interaction>> &ics = top.BondedInteractions();
 
-  InteractionContainer &ics = cg.getParent()->BondedInteractions();
-
-  for (iter = ics.begin(); iter != ics.end(); ++iter) {
-    ic = *iter;
-    if (ic->getMolecule() != cg.getId()) continue;
-    if (nb != ic->BeadCount()) {
-      nb = ic->BeadCount();
+  for (ic_iter = ics.begin(); ic_iter != ics.end(); ++ic_iter) {
+    // ic = *iter;
+    if ((*ic_iter)->getMolecule() != cg.getId()) continue;
+    if (nb != (*ic_iter)->BeadCount()) {
+      nb = (*ic_iter)->BeadCount();
       switch (nb) {
         case 2:
           out << "\n[ bonds ]\n";
@@ -102,25 +105,26 @@ void GmxTopolApp::WriteInteractions(ostream &out, Molecule &cg) {
           break;
         default:
           string err = "cannot handle number of beads in interaction:";
-          err += to_string(ic->getMolecule() + 1) + ":" + ic->getGroup();
-          err += ":" + to_string(ic->getIndex() + 1);
+          err += to_string((*ic_iter)->getMolecule() + 1) + ":" +
+                 (*ic_iter)->getGroup();
+          err += ":" + to_string((*ic_iter)->getIndex() + 1);
           throw runtime_error(err);
       }
     }
-    for (int i = 0; i < nb; ++i) out << ic->getBeadId(i) + 1 << " ";
+    for (int i = 0; i < nb; ++i) out << (*ic_iter)->getBeadId(i) + 1 << " ";
     out << "  1  ; ";
-    out << to_string(ic->getMolecule() + 1);
-    out << ":" + ic->getGroup();
-    out << ":" + to_string(ic->getIndex() + 1) << endl;
+    out << to_string((*ic_iter)->getMolecule() + 1);
+    out << ":" + (*ic_iter)->getGroup();
+    out << ":" + to_string((*ic_iter)->getIndex() + 1) << endl;
   }
 }
 
-void GmxTopolApp::WriteMolecule(ostream &out, Molecule &cg) {
+void GmxTopolApp::WriteMolecule(ostream &out, CSG_Topology &top, Molecule &cg) {
   out << "[ moleculetype ]\n";
-  out << cg.getName() << " 3\n\n";
+  out << cg.getType() << " 3\n\n";
 
   WriteAtoms(out, cg);
-  WriteInteractions(out, cg);
+  WriteInteractions(out, top, cg);
 }
 
 int main(int argc, char **argv) {

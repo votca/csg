@@ -44,7 +44,7 @@ class Imc {
   void LoadOptions(const std::string &file);
 
   /// begin coarse graining a trajectory
-  void BeginEvaluate(Topology *top, Topology *top_atom);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
 
   /// end coarse graining a trajectory
   void EndEvaluate();
@@ -54,7 +54,7 @@ class Imc {
   void Extension(std::string ext) { _extension = ext; }
 
  protected:
-  Average<double> _avg_vol;
+  tools::Average<double> _avg_vol;
 
   typedef Eigen::MatrixXd group_matrix;
   typedef Eigen::Block<group_matrix> pair_matrix;
@@ -62,9 +62,9 @@ class Imc {
   /// struct to store collected information for interactions
   struct interaction_t {
     int _index;
-    Property *_p;
-    HistogramNew _average;
-    HistogramNew _average_force;
+    tools::Property *_p;
+    tools::HistogramNew _average;
+    tools::HistogramNew _average_force;
     double _min, _max, _step;
     double _norm;
     double _cut;
@@ -85,13 +85,13 @@ class Imc {
 
   /// struct to store collected information for groups (e.g. crosscorrelations)
   struct group_t {
-    std::list<interaction_t *> _interactions;
+    std::list<std::unique_ptr<interaction_t>> _interactions;
     group_matrix _corr;
     std::vector<pair_t> _pairs;
   };
 
   /// the options parsed from cg definition file
-  Property _options;
+  tools::Property _options;
   // length of the block to write out and averages are clear after every write
   int _block_length;
   // calculate the inverse monte carlos parameters (cross correlations)
@@ -105,17 +105,17 @@ class Imc {
   int _nblock;
 
   /// list of bonded interactions
-  std::vector<Property *> _bonded;
+  std::list<tools::Property *> _bonded;
   /// list of non-bonded interactions
-  std::vector<Property *> _nonbonded;
+  std::list<tools::Property *> _nonbonded;
 
   /// map ineteractionm-name to interaction
   std::map<std::string, interaction_t *> _interactions;
   /// map group-name to group
-  std::map<std::string, group_t *> _groups;
+  std::map<std::string, std::unique_ptr<group_t>> _groups;
 
   /// create a new interaction entry based on given options
-  interaction_t *AddInteraction(Property *p);
+  interaction_t *AddInteraction(tools::Property *p);
 
   /// get group by name, creates one if it doesn't exist
   group_t *getGroup(const std::string &name);
@@ -134,17 +134,17 @@ class Imc {
 
   class Worker : public CsgApplication::Worker {
    public:
-    std::vector<HistogramNew> _current_hists;
-    std::vector<HistogramNew> _current_hists_force;
+    std::vector<tools::HistogramNew> _current_hists;
+    std::vector<tools::HistogramNew> _current_hists_force;
     Imc *_imc;
     double _cur_vol;
 
     /// evaluate current conformation
-    void EvalConfiguration(Topology *top, Topology *top_atom);
+    void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_atom);
     /// process non-bonded interactions for given frame
-    void DoNonbonded(Topology *top);
+    void DoNonbonded(CSG_Topology *top);
     /// process bonded interactions for given frame
-    void DoBonded(Topology *top);
+    void DoBonded(CSG_Topology *top);
   };
   /// update the correlations after interations were processed
   void DoCorrelations(Imc::Worker *worker);

@@ -15,20 +15,18 @@
  *
  */
 
-#ifndef _VOTCA_CSG_CGENGINE_H
-#define _VOTCA_CSG_CGENGINE_H
+#ifndef VOTCA_CSG_CGENGINE_H
+#define VOTCA_CSG_CGENGINE_H
 
-#include "cgmoleculedef.h"
+#include "atomcgconverter.h"
 #include "cgobserver.h"
-#include "topology.h"
-#include "topologymap.h"
+#include "csgtopology.h"
 #include <boost/program_options.hpp>
 #include <list>
 #include <map>
 #include <votca/tools/datacollection.h>
 
 #include "cgengine.h"
-#include "cgmoleculedef.h"
 #include "molecule.h"
 #include "nematicorder.h"
 #include "topologyreader.h"
@@ -39,69 +37,58 @@
 namespace votca {
 namespace csg {
 
-namespace TOOLS = votca::tools;
-/**
-    \brief coarse graining engine
-
-    This class manages the coarse graining, at the moment it does the
-   measurement stuff
-
-    TODO: split this into an additional VotcaApplication object
-
-*/
 class CGEngine {
  public:
-  CGEngine();
-  ~CGEngine();
+  CGEngine(){};
+  ~CGEngine(){};
 
   /**
-      create a coarse grained topolgy based on a given topology
-  */
-  TopologyMap *CreateCGTopology(Topology &in, Topology &out);
-
-  /**
-      load molecule type from file
-  */
-  void LoadMoleculeType(std::string filename);
-
-  CGMoleculeDef *getMoleculeDef(std::string name);
-
-  /**
-   * \brief ignores molecule in mapping process
-   * \param pattern glob pattern for molecule ident
+   * @brief Loads .xml files containing coarse graining stencils and mapping
+   * information
+   *
+   * @param[in] filenames - a string of with .xml files, can be a single file or
+   * multiple file names separated by ';'
    */
-  void AddIgnore(std::string pattern) { _ignores.push_back(pattern); }
+  void LoadFiles(std::string filenames);
+
+  /**
+   * @brief Takes the atomisitic topology and populates the coarse grained
+   * topology with a coarse grained represenation
+   *
+   * @param[in] atomistic_top_in
+   * @param[in,out] cg_top
+   *
+   * @return return an atom to cg converter which can be used to update the
+   * positions vectors and forces of the coarse grained representation
+   */
+  std::unique_ptr<AtomCGConverter> PopulateCGTopology(
+      CSG_Topology& atomistic_top_in, CSG_Topology& cg_top);
+
+  /**
+   * \brief Adds molecules that are to be ignored during the mapping process
+   * \param molecule_type glob molecule_type for molecule molecule_type
+   */
+  void AddIgnore(std::string molecule_type) {
+    _ignores.push_back(molecule_type);
+  }
 
   /**
    * \brief checks whether molecule is ignored
    * \param ident identifyier of molecule
    * \return true if is ignored
    */
-  bool IsIgnored(std::string ident);
+  bool IsIgnored(std::string molecule_type);
 
  private:
-  std::map<std::string, CGMoleculeDef *> _molecule_defs;
+  std::unordered_set<std::string> file_names_;
 
   std::list<std::string> _ignores;
 };
 
-inline CGMoleculeDef *CGEngine::getMoleculeDef(std::string name) {
-  std::map<std::string, CGMoleculeDef *>::iterator iter;
-
-  // if there is only 1 molecule definition, don't care about the name
-  if (_molecule_defs.size() == 1 && name == "unnamed") {
-    return (*(_molecule_defs.begin())).second;
-  }
-
-  iter = _molecule_defs.find(name);
-  if (iter == _molecule_defs.end()) return NULL;
-  return (*iter).second;
-}
-
-inline bool CGEngine::IsIgnored(std::string ident) {
+inline bool CGEngine::IsIgnored(std::string molecule_type) {
   for (std::list<std::string>::iterator iter = _ignores.begin();
        iter != _ignores.end(); ++iter) {
-    if (wildcmp(iter->c_str(), ident.c_str())) return true;
+    if (tools::wildcmp(iter->c_str(), molecule_type.c_str())) return true;
   }
   return false;
 }
@@ -109,4 +96,4 @@ inline bool CGEngine::IsIgnored(std::string ident) {
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_CGENGINE_H */
+#endif  // VOTCA_CSG_CGENGINE_H

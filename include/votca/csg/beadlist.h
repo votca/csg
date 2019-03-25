@@ -15,10 +15,13 @@
  *
  */
 
-#ifndef _VOTCA_CSG_BEADLIST_H
-#define _VOTCA_CSG_BEADLIST_H
+#ifndef VOTCA_CSG_BEADLIST_H
+#define VOTCA_CSG_BEADLIST_H
 
-#include "topology.h"
+#include <votca/tools/vec.h>
+
+#include "bead.h"
+#include "csgtopology.h"
 #include <list>
 #include <string>
 
@@ -35,10 +38,10 @@ namespace csg {
 class BeadList {
  public:
   /// \brief Select all beads of type <select>
-  int Generate(Topology &top, const std::string &select);
+  int Generate(CSG_Topology &top, const std::string &select);
   /// \brief Select all beads of type <select> withn a radius <radius> of
   /// reference vector <ref>
-  int GenerateInSphericalSubvolume(Topology &top, const std::string &select,
+  int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
                                    Eigen::Vector3d ref, double radius);
 
   int size() const { return _beads.size(); }
@@ -52,14 +55,16 @@ class BeadList {
   iterator begin() { return _beads.begin(); }
   iterator end() { return _beads.end(); }
 
-  Topology *getTopology() { return _topology; }
+  /// Get the csg topology object
+  const CSG_Topology *getCSGTopologyConst() const { return topology_; }
+  CSG_Topology *getCSGTopology() const { return topology_; }
 
  private:
   std::vector<Bead *> _beads;
-  Topology *_topology;
+  CSG_Topology *topology_;
 };
 
 }  // namespace csg
 }  // namespace votca
 
-#endif /* _VOTCA_CSG_BEADLIST_H */
+#endif  // VOTCA_CSG_BEADLIST_H

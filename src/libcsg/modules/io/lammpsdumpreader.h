@@ -40,27 +40,27 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDumpReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, Topology &top);
+  bool ReadTopology(std::string file, CSG_Topology &top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(Topology &top);
+  bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
-  bool NextFrame(Topology &top);
+  bool NextFrame(CSG_Topology &top);
 
   void Close();
 
  private:
-  void ReadTimestep(Topology &top, std::string itemline);
-  void ReadBox(Topology &top, std::string itemline);
-  void ReadNumAtoms(Topology &top, std::string itemline);
-  void ReadAtoms(Topology &top, std::string itemline);
+  void ReadTimestep(CSG_Topology &top, const std::string &itemline);
+  void ReadBox(CSG_Topology &top, const std::string &itemline);
+  void ReadNumAtoms(CSG_Topology &top, const std::string &itemline);
+  void ReadAtoms(CSG_Topology &top, std::string itemline);
 
   std::ifstream _fl;
   std::string _fname;
-  bool _topology;
-  int _natoms;
+  bool read_topology_data_ = false;
+  int number_of_atoms_ = 0;
 };
 
 }  // namespace csg
