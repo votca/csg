@@ -121,8 +121,7 @@ class TemplateTopology {
 
   std::unordered_map<int, const Eigen::Vector3d *> getBeadPositions(
       std::vector<int> bead_ids) const {
-    std::unordered_map<int, const tools::Eigen::Vector3d *>
-        bead_id_and_positions;
+    std::unordered_map<int, const Eigen::Vector3d *> bead_id_and_positions;
     for (int &bead_id : bead_ids) {
       bead_id_and_positions[bead_id] = &(beads_.at(bead_id).getPos());
     }
@@ -304,8 +303,8 @@ class TemplateTopology {
    * calculates the smallest distance between two points with correct treatment
    * of pbc
    */
-  Eigen::Vector3d TemplateTopology<Bead_T, Molecule_T>::BCShortestConnection(
-      const Eigen::Vector3d &r_i, const Eigen::Vector3d &r_j) const;
+  Eigen::Vector3d BCShortestConnection(const Eigen::Vector3d &r_i,
+                                       const Eigen::Vector3d &r_j) const;
 
   /**
    * \brief return the shortest box size

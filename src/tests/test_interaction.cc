@@ -141,8 +141,8 @@ BOOST_AUTO_TEST_CASE(bond_test) {
 
   Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
                                residue_id, residue_type, element, mass, charge);
-  votca::tools::vec pos1 = votca::tools::vec(1, 0, 0);
-  Eigen::Vector3d pos1(1, 0, 0);
+  Eigen::Vector3d pos1 = Eigen::Vector3d(1, 0, 0);
+  bead1->setPos(pos1);
   bead_id = 1;
   Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
                                residue_id, residue_type, element, mass, charge);
@@ -156,8 +156,9 @@ BOOST_AUTO_TEST_CASE(bond_test) {
                                              molecule_id, bonded_beads);
 
   const BoundaryCondition* boundaries = top.getBoundaryCondition();
-  unordered_map<int, const vec*> bead_positions =
+  unordered_map<int, const Eigen::Vector3d*> bead_positions =
       top.getBeadPositions(bonded_beads);
+
   double length = bond1->EvaluateVar(*boundaries, bead_positions);
   Eigen::Vector3d grad0 = bond1->Grad(*boundaries, 0, bead_positions);
   Eigen::Vector3d grad1 = bond1->Grad(*boundaries, 1, bead_positions);
@@ -218,7 +219,7 @@ BOOST_AUTO_TEST_CASE(angle_test) {
                                              molecule_id, bonded_beads);
 
   const BoundaryCondition* boundaries = top.getBoundaryCondition();
-  unordered_map<int, const vec*> bead_positions =
+  unordered_map<int, const Eigen::Vector3d*> bead_positions =
       top.getBeadPositions(bonded_beads);
   double angle1 = angle->EvaluateVar(*boundaries, bead_positions);
   Eigen::Vector3d grad0 = angle->Grad(*boundaries, 0, bead_positions);
@@ -287,9 +288,8 @@ BOOST_AUTO_TEST_CASE(dihedral_test) {
   bead_id = 3;
   Bead* bead4 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
                                residue_id, residue_type, element, mass, charge);
-  votca::tools::vec pos4 = votca::tools::vec(-1, 1, 1);
-  Eigen::Vector3d pos4(-1, 1, 1);
-
+  Eigen::Vector3d pos4 = Eigen::Vector3d(-1, 1, 1);
+  bead4->setPos(pos4);
   InteractionType interaction_type = InteractionType::dihedral;
   string group = "group1";
   int bond_id = 0;
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(dihedral_test) {
       interaction_type, group, bond_id, molecule_id, bonded_beads);
 
   const BoundaryCondition* boundaries = top.getBoundaryCondition();
-  unordered_map<int, const vec*> bead_positions =
+  unordered_map<int, const Eigen::Vector3d*> bead_positions =
       top.getBeadPositions(bonded_beads);
 
   double dihedral1 = dihedral->EvaluateVar(*boundaries, bead_positions);

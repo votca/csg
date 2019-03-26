@@ -135,9 +135,9 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
     BOOST_CHECK_EQUAL(bd->getResidueType(), residue_type.at(i));
     v = bd->getPos();
     BOOST_CHECK_CLOSE(bd->getQ(), 0, 1e-5);
-    BOOST_CHECK_CLOSE(v.getX(), x.at(i), 1e-5);
-    BOOST_CHECK_CLOSE(v.getY(), y.at(i), 1e-5);
-    BOOST_CHECK_CLOSE(v.getZ(), z.at(i), 1e-5);
+    BOOST_CHECK_CLOSE(v.x(), x.at(i), 1e-5);
+    BOOST_CHECK_CLOSE(v.y(), y.at(i), 1e-5);
+    BOOST_CHECK_CLOSE(v.z(), z.at(i), 1e-5);
   }
   delete reader;
 }

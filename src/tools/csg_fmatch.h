@@ -130,9 +130,9 @@ class CGForceMatching : public CsgApplication {
   /// \brief tools::Property object to hande input options
   tools::Property _options;
   /// \brief std::list of bonded interactions
-  std::list<tools::Property *> _bonded;
+  std::vector<tools::Property *> _bonded;
   /// \brief std::list of non-bonded interactions
-  std::list<tools::Property *> _nonbonded;
+  std::vector<tools::Property *> _nonbonded;
 
   typedef std::vector<SplineInfo> SplineContainer;
   /// \brief std::vector of SplineInfo * for all interactions

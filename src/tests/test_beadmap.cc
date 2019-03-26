@@ -85,42 +85,40 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
     BOOST_CHECK(found);
   }
 
-  vec row1(10.0, 0.0, 0.0);
-  vec row2(0.0, 10.0, 0.0);
-  vec row3(0.0, 0.0, 10.0);
-  matrix box(row1, row2, row3);
+  Eigen::Matrix3d box;
+  box << 10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0;
   OrthorhombicBox boundaries;
   boundaries.setBox(box);
 
   TestBead beadC2;
 
-  vec vel(0.0, 1.3, -0.1);
+  Eigen::Vector3d vel(0.0, 1.3, -0.1);
   beadC2.setVel(vel);
-  vec pos(3.4, 2.4, 4.5);
+  Eigen::Vector3d pos(3.4, 2.4, 4.5);
   beadC2.setPos(pos);
-  vec force(0.3, -0.4, 0.2);
+  Eigen::Vector3d force(0.3, -0.4, 0.2);
   beadC2.setF(force);
   beadC2.setMass(12.0);
   beadC2.setType("C");
   beadC2.setId(2);
 
   TestBead beadH7;
-  vec velH7(0.3, 0.3, 0.1);
+  Eigen::Vector3d velH7(0.3, 0.3, 0.1);
   beadH7.setVel(velH7);
-  vec posH7(3.5, 3.4, 4.5);
+  Eigen::Vector3d posH7(3.5, 3.4, 4.5);
   beadH7.setPos(posH7);
-  vec forceH7(-0.1, -0.2, -0.1);
+  Eigen::Vector3d forceH7(-0.1, -0.2, -0.1);
   beadH7.setF(forceH7);
   beadH7.setMass(1.0);
   beadH7.setType("H");
   beadH7.setId(7);
 
   TestBead beadH8;
-  vec velH8(-0.2, 0.4, 0.1);
+  Eigen::Vector3d velH8(-0.2, 0.4, 0.1);
   beadH8.setVel(velH8);
-  vec posH8(3.5, 2.4, 2.8);
+  Eigen::Vector3d posH8(3.5, 2.4, 2.8);
   beadH8.setPos(posH8);
-  vec forceH8(0.1, -0.2, -0.1);
+  Eigen::Vector3d forceH8(0.1, -0.2, -0.1);
   beadH8.setF(forceH8);
   beadH8.setMass(1.0);
   beadH8.setType("H");
@@ -132,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   atomic_beads[subbeads.at(2)] = &beadH8;
 
   TestBead cg_bead;
-  vec initialize(0.0);
+  Eigen::Vector3d initialize(0.0, 0.0, 0.0);
   cg_bead.setType("CH2");
   cg_bead.setF(initialize);
   cg_bead.setVel(initialize);
@@ -153,17 +151,17 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   cout << cg_bead.getW() << endl;
   cout << cg_bead.getMass() << endl;
 
-  BOOST_CHECK_CLOSE(cg_bead.getF().getX(), 0.3, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getF().getY(), -0.8, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getF().getZ(), 0.0, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().x(), 0.3, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().y(), -0.8, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().z(), 0.0, 1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getX(), 0.00714285714285714, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getY(), 1.1642857142857141, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getZ(), -0.071428571428571425, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().x(), 0.00714285714285714, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().y(), 1.1642857142857141, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().z(), -0.071428571428571425, 1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getX(), 3.4142857142857141, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getY(), 2.4714285714285711, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getZ(), 4.3785714285714281, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().x(), 3.4142857142857141, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().y(), 2.4714285714285711, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().z(), 4.3785714285714281, 1E-5);
 
   BOOST_CHECK_CLOSE(cg_bead.getMass(), 14.0, 1E-5);
 }
@@ -199,37 +197,35 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
     BOOST_CHECK(found);
   }
 
-  vec row1(10.0, 0.0, 0.0);
-  vec row2(0.0, 10.0, 0.0);
-  vec row3(0.0, 0.0, 10.0);
-  matrix box(row1, row2, row3);
+  Eigen::Matrix3d box;
+  box << 10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 10.0;
   OrthorhombicBox boundaries;
   boundaries.setBox(box);
 
   TestBead beadC2;
-  vec vel(0.0, 1.3, -0.1);
+  Eigen::Vector3d vel(0.0, 1.3, -0.1);
   beadC2.setVel(vel);
-  vec pos(3.4, 2.4, 4.5);
+  Eigen::Vector3d pos(3.4, 2.4, 4.5);
   beadC2.setPos(pos);
-  vec force(0.3, -0.4, 0.2);
+  Eigen::Vector3d force(0.3, -0.4, 0.2);
   beadC2.setF(force);
   beadC2.setMass(12.0);
 
   TestBead beadH7;
-  vec velH7(0.3, 0.3, 0.1);
+  Eigen::Vector3d velH7(0.3, 0.3, 0.1);
   beadH7.setVel(velH7);
-  vec posH7(3.5, 3.4, 4.5);
+  Eigen::Vector3d posH7(3.5, 3.4, 4.5);
   beadH7.setPos(posH7);
-  vec forceH7(-0.1, -0.2, -0.1);
+  Eigen::Vector3d forceH7(-0.1, -0.2, -0.1);
   beadH7.setF(forceH7);
   beadH7.setMass(1.0);
 
   TestBead beadH8;
-  vec velH8(-0.2, 0.4, 0.1);
+  Eigen::Vector3d velH8(-0.2, 0.4, 0.1);
   beadH8.setVel(velH8);
-  vec posH8(3.5, 2.4, 2.8);
+  Eigen::Vector3d posH8(3.5, 2.4, 2.8);
   beadH8.setPos(posH8);
-  vec forceH8(0.1, -0.2, -0.1);
+  Eigen::Vector3d forceH8(0.1, -0.2, -0.1);
   beadH8.setF(forceH8);
   beadH8.setMass(1.0);
 
@@ -240,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
 
   TestBead cg_bead;
   cg_bead.setSymmetry(3);  // For Ellipsoid
-  vec initialize(0.0);
+  Eigen::Vector3d initialize(0.0, 0.0, 0.0);
   cg_bead.setF(initialize);
   cg_bead.setVel(initialize);
   cg_bead.setPos(initialize);
@@ -259,29 +255,29 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
   cout << cg_bead.getW() << endl;
   cout << cg_bead.getMass() << endl;
 
-  BOOST_CHECK_CLOSE(cg_bead.getF().getX(), 0.3, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getF().getY(), -0.8, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getF().getZ(), 0.0, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().x(), 0.3, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().y(), -0.8, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getF().z(), 0.0, 1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getX(), 0.00714285714285714, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getY(), 1.1642857142857141, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getVel().getZ(), -0.071428571428571425, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().x(), 0.00714285714285714, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().y(), 1.1642857142857141, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getVel().z(), -0.071428571428571425, 1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getX(), 3.4142857142857141, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getY(), 2.4714285714285711, 1E-5);
-  BOOST_CHECK_CLOSE(cg_bead.getPos().getZ(), 4.3785714285714281, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().x(), 3.4142857142857141, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().y(), 2.4714285714285711, 1E-5);
+  BOOST_CHECK_CLOSE(cg_bead.getPos().z(), 4.3785714285714281, 1E-5);
 
-  BOOST_CHECK_CLOSE(cg_bead.getU().getX(), -0.50871738647660514, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getU().getY(), 0.84141289136147968, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getU().getZ(), -0.18229362837775606, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getU().x(), -0.50871738647660514, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getU().y(), 0.84141289136147968, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getU().z(), -0.18229362837775606, 1E-4);
 
-  BOOST_CHECK_CLOSE(cg_bead.getV().getX(), 0.0995037, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getV().getY(), 0.995037, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getV().getZ(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getV().x(), 0.0995037, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getV().y(), 0.995037, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getV().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(cg_bead.getW().getX(), 0.29377573551808389, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getW().getY(), -0.029377573551808416, 1E-4);
-  BOOST_CHECK_CLOSE(cg_bead.getW().getZ(), -0.95542282545112811, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getW().x(), 0.29377573551808389, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getW().y(), -0.029377573551808416, 1E-4);
+  BOOST_CHECK_CLOSE(cg_bead.getW().z(), -0.95542282545112811, 1E-4);
 
   BOOST_CHECK_CLOSE(cg_bead.getMass(), 14.0, 1E-5);
 }
@@ -387,17 +383,17 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   //      |    |    |
   //      H6   H8   H10
   //
-  vec pos_c1(1.0, 1.0, 0.0);
-  vec pos_h5(1.0, 2.0, 0.0);
-  vec pos_h6(1.0, 0.0, 0.0);
-  vec pos_h4(0.0, 1.0, 0.0);
-  vec pos_c2(2.0, 1.0, 0.0);
-  vec pos_h7(2.0, 2.0, 0.0);
-  vec pos_h8(2.0, 0.0, 0.0);
-  vec pos_c3(3.0, 1.0, 0.0);
-  vec pos_h11(4.0, 1.0, 0.0);
-  vec pos_h9(3.0, 2.0, 0.0);
-  vec pos_h10(3.0, 0.0, 0.0);
+  Eigen::Vector3d pos_c1(1.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h5(1.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h6(1.0, 0.0, 0.0);
+  Eigen::Vector3d pos_h4(0.0, 1.0, 0.0);
+  Eigen::Vector3d pos_c2(2.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h7(2.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h8(2.0, 0.0, 0.0);
+  Eigen::Vector3d pos_c3(3.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h11(4.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h9(3.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h10(3.0, 0.0, 0.0);
 
   // Only the H4 and H11 atoms will be given velocities and forces
   //
@@ -405,18 +401,18 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   //
   // <- H4     H11 ->
   //
-  vec vel_h4(-0.5, 0.0, 0.0);
-  vec vel_h11(0.6, 0.0, 0.0);
+  Eigen::Vector3d vel_h4(-0.5, 0.0, 0.0);
+  Eigen::Vector3d vel_h11(0.6, 0.0, 0.0);
 
   // Forces
   //
   // <- H4     <- H11
   //
-  vec force_h4(-0.3, 0.0, 0.0);
-  vec force_h11(-0.7, 0.0, 0.0);
+  Eigen::Vector3d force_h4(-0.3, 0.0, 0.0);
+  Eigen::Vector3d force_h11(-0.7, 0.0, 0.0);
 
   // Used to initialize all other forces and velocities
-  vec initialize(0.0, 0.0, 0.0);
+  Eigen::Vector3d initialize(0.0, 0.0, 0.0);
 
   CSG_Topology atom_top;
   int mol_id = 0;
@@ -614,35 +610,35 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   // velocity etc
   mapper.Apply(atom_top, cg_top, cgmolid_cgbeadid_atomname_and_id);
 
-  BOOST_CHECK_CLOSE(A1->getPos().getX(), 0.933333, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getPos().getY(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getPos().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().getX(), 2.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().getY(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().getX(), 3.0666666666666673, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().getY(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().getZ(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getPos().x(), 0.933333, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getPos().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getPos().x(), 2.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getPos().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getPos().x(), 3.0666666666666673, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getPos().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(A1->getVel().getX(), -0.033333333333333333, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getVel().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getVel().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().getX(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().getX(), 0.04, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().getZ(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getVel().x(), -0.033333333333333333, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getVel().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getVel().x(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getVel().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getVel().x(), 0.04, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getVel().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(A1->getF().getX(), -0.3, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getF().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getF().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().getX(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().getZ(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().getX(), -0.7, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().getY(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().getZ(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getF().x(), -0.3, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1->getF().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getF().x(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1->getF().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getF().x(), -0.7, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2->getF().z(), 0.0, 1E-4);
 
   BOOST_CHECK_CLOSE(A1->getMass(), 48.0, 1E-4);
   BOOST_CHECK_CLOSE(B1->getMass(), 36.0, 1E-4);

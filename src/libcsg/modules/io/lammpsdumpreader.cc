@@ -206,11 +206,11 @@ void LAMMPSDumpReader::ReadAtoms(CSG_Topology &top, string itemline) {
       } else if (fields[j] == "zu") {
         atom_attributes_double["zu"] = stod(*itok);
       } else if (fields[j] == "xs") {
-        atom_attributes_double["xs"] = stod(*itok) * m[0][0];
+        atom_attributes_double["xs"] = stod(*itok) * m(0, 0);
       } else if (fields[j] == "ys") {
-        atom_attributes_double["ys"] = stod(*itok) * m[1][1];
+        atom_attributes_double["ys"] = stod(*itok) * m(1, 1);
       } else if (fields[j] == "zs") {
-        atom_attributes_double["zs"] = stod(*itok) * m[2][2];
+        atom_attributes_double["zs"] = stod(*itok) * m(2, 2);
       } else if (fields[j] == "vx") {
         atom_attributes_double["vx"] = stod(*itok);
       } else if (fields[j] == "vy") {

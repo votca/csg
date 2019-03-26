@@ -69,15 +69,6 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
   // 1 - id of first atom
   // 2 - id of second atom
   vector<vector<int>> bond_pairs;
-<<<<<<< HEAD
-  // Store pointers to every bead
-  // WARNING we are assuming in the bead_Eigen::Vector3d that the indices of the
-  // beads
-  //         correspond to the order in which they are read in. As in the first
-  //         bead read in will be at index 0, etc...
-  vector<Bead *> bead_vec;
-=======
->>>>>>> joshs-development
   ////////////////////////////////////////////////////////////////////////////////
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
@@ -315,16 +306,9 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         b = top.getBead(atom_number);
       }
       // convert to nm from A
-<<<<<<< HEAD
-      b->setPos(
-          Eigen::Vector3d(stod(x) / 10.0, stod(y) / 10.0, stod(z) / 10.0));
-
-      bead_vec.push_back(b);
-=======
-      b->setPos(vec(stod(x) * tools::conv::ang2nm,
-                    stod(y) * tools::conv::ang2nm,
-                    stod(z) * tools::conv::ang2nm));
->>>>>>> joshs-development
+      b->setPos(Eigen::Vector3d(stod(x) * tools::conv::ang2nm,
+                                stod(y) * tools::conv::ang2nm,
+                                stod(z) * tools::conv::ang2nm));
     }
 
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {

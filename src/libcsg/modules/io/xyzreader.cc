@@ -50,10 +50,10 @@ bool XYZReader::Open(const string &file) {
   _fl.open(file);
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open trajectory file: " + file);
+
+  _line = 0;
+  return true;
 }
-_line = 0;
-return true;
-}  // namespace csg
 
 void XYZReader::Close() { _fl.close(); }
 
@@ -63,5 +63,5 @@ bool XYZReader::NextFrame(CSG_Topology &top) {
   bool success = ReadFrame<false, CSG_Topology>(top);
   return success;
 }
-}  // namespace votca
+}  // namespace csg
 }  // namespace votca

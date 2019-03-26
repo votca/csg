@@ -259,7 +259,7 @@ void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
   // write out w
   w = u.cross(v);
   w.normalize();
-  _out->setW(w);
+  cg_bead->setW(w);
 }
 
 AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {

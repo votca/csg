@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 #include <votca/csg/beadlist.h>
 #include <votca/csg/imcio.h>
 #include <votca/csg/nblistgrid.h>
@@ -274,7 +275,7 @@ class IMCNBSearchHandler {
 };
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoNonbonded(Topology *top) {
+void Imc::Worker::DoNonbonded(CSG_Topology *top) {
   for (Property *prop : _imc->_nonbonded) {
     string name = prop->get("name").value();
 
@@ -314,7 +315,7 @@ void Imc::Worker::DoNonbonded(Topology *top) {
         nb = new NBList_3Body();
 
       nb->setCutoff(i._cut);  // implement different cutoffs for different
-                              // interactions!
+      // interactions!
       // Here, a is the distance between two beads of a triple, where the 3-body
       // interaction is zero
 
@@ -386,50 +387,50 @@ void Imc::Worker::DoNonbonded(Topology *top) {
       nb->SetMatchFunction(&h, &IMCNBSearchHandler::FoundPair);
 
       // is it same types or different types?
-      if (prop->get("type1").value() == prop->get("type2").value())
+      if (prop->get("type1").value() == prop->get("type2").value()) {
         nb->Generate(beads1);
-    } else {
-      nb->Generate(beads1, beads2);
-    }
-
-    delete nb;
-
-    // if one wants to calculate the mean force
-    if (i._force) {
-      if (gridsearch) {
-        nb = new NBListGrid();
       } else {
-        nb = new NBList();
+        nb->Generate(beads1, beads2);
       }
 
-      nb->setCutoff(i._max + i._step);
+      delete nb;
 
-      // is it same types or different types?
-      if (prop->get("type1").value() == prop->get("type2").value())
-        nb->Generate(beads1);
-    } else {
-      nb->Generate(beads1, beads2);
+      // if one wants to calculate the mean force
+      if (i._force) {
+        if (gridsearch) {
+          nb = new NBListGrid();
+        } else {
+          nb = new NBList();
+        }
+
+        nb->setCutoff(i._max + i._step);
+
+        // is it same types or different types?
+        if (prop->get("type1").value() == prop->get("type2").value()) {
+          nb->Generate(beads1);
+        } else {
+          nb->Generate(beads1, beads2);
+        }
+        // process all pairs to calculate the projection of the
+        // mean force on bead 1 on the pair distance: F1 * r12
+        NBList::iterator pair_iter;
+        for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter) {
+          Eigen::Vector3d F2 = (*pair_iter)->second()->getF();
+          Eigen::Vector3d F1 = (*pair_iter)->first()->getF();
+          Eigen::Vector3d r12 = (*pair_iter)->r();
+          r12.normalize();
+          double var = (*pair_iter)->dist();
+          double scale = 0.5 * (F2 - F1).dot(r12);
+          _current_hists_force[i._index].Process(var, scale);
+        }
+        delete nb;
+      }
     }
-    // process all pairs to calculate the projection of the
-    // mean force on bead 1 on the pair distance: F1 * r12
-    NBList::iterator pair_iter;
-    for (pair_iter = nb->begin(); pair_iter != nb->end(); ++pair_iter) {
-      Eigen::Vector3d F2 = (*pair_iter)->second()->getF();
-      Eigen::Vector3d F1 = (*pair_iter)->first()->getF();
-      Eigen::Vector3d r12 = (*pair_iter)->r();
-      r12.normalize();
-      double var = (*pair_iter)->dist();
-      double scale = 0.5 * (F2 - F1).dot(r12);
-      _current_hists_force[i._index].Process(var, scale);
-    }
-    delete nb;
-  }
-}
-}  // namespace csg
+  }  // namespace csg
 }  // namespace votca
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoBonded(Topology *top) {
+void Imc::Worker::DoBonded(CSG_Topology *top) {
   for (Property *prop : _imc->_bonded) {
     string name = prop->get("name").value();
 
@@ -445,7 +446,7 @@ void Imc::Worker::DoBonded(Topology *top) {
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
       vector<int> bead_ids = ic->getBeadIds();
-      unordered_map<int, const vec *> bead_ids_and_positions =
+      unordered_map<int, const Eigen::Vector3d *> bead_ids_and_positions =
           top->getBeadPositions(bead_ids);
       double v = ic->EvaluateVar(*(top->getBoundaryCondition()),
                                  bead_ids_and_positions);
@@ -546,7 +547,7 @@ void Imc::WriteDist(const string &suffix) {
   map<string, interaction_t *>::iterator iter;
 
   cout << std::endl;  // Cosmetic, put \n before printing names of distribution
-                      // files.
+  // files.
   // for all interactions
   for (iter = _interactions.begin(); iter != _interactions.end(); ++iter) {
     // calculate the rdf

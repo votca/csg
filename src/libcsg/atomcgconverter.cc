@@ -225,13 +225,11 @@ vector<string> AtomCGConverter::getAtomicBeadNamesOfCGBead(
 vector<CGBeadStencil> AtomCGConverter::ParseBeads_(Property &options_in) {
 
   Property options = options_in.get("cg_beads");
-  list<Property *> beads = options.Select("cg_bead");
+  vector<Property *> beads = options.Select("cg_bead");
 
   unordered_set<string> bead_cg_names;
   vector<CGBeadStencil> beads_info;
-  for (list<Property *>::iterator bead_iter = beads.begin();
-       bead_iter != beads.end(); ++bead_iter) {
-    Property *p = *bead_iter;
+  for (Property *p : beads) {
     CGBeadStencil bead_info;
     bead_info.cg_name_ = p->get("name").as<string>();
     bead_info.cg_bead_type_ = p->get("type").as<string>();
@@ -264,12 +262,9 @@ void AtomCGConverter::ParseMaps_(
     unordered_map<string, CGBeadStencil> &bead_maps_info) {
 
   Property maps_prop = options_in.get("cg_molecule.maps");
-  list<Property *> all_maps = maps_prop.Select("map");
+  vector<Property *> all_maps = maps_prop.Select("map");
 
-  for (list<Property *>::iterator bead_map_iter = all_maps.begin();
-       bead_map_iter != all_maps.end(); ++bead_map_iter) {
-
-    Property *p = *bead_map_iter;
+  for (Property *p : all_maps) {
     string map_type = p->get("name").as<string>();
 
     // get vector of weights
@@ -333,9 +328,9 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(
   vector<CGInteractionStencil> all_interactions_info;
   if (options_in.exists("cg_bonded")) {
     Property options = options_in.get("cg_bonded");
-    std::list<Property *> bonded = options.Select("*");
+    std::vector<Property *> bonded = options.Select("*");
 
-    list<Property *>::iterator bond;
+    vector<Property *>::iterator bond;
     unordered_set<string> interaction_groups;
     // Parse through the different bond sections
     for (bond = bonded.begin(); bond != bonded.end(); ++bond) {

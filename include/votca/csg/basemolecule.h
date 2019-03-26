@@ -94,7 +94,7 @@ class BaseMolecule : public BeadStructure<T> {
    *
    * @return vector describting the position of the bead
    */
-  const tools::vec &getBeadPosition(const int &id) const;
+  const Eigen::Vector3d &getBeadPosition(const int &id) const;
 
   /**
    * @brief Determines the beads name provided the id
@@ -140,7 +140,7 @@ const std::string &BaseMolecule<T>::getBeadType(const int &id) const {
 }
 
 template <class T>
-const tools::vec &BaseMolecule<T>::getBeadPosition(const int &id) const {
+const Eigen::Vector3d &BaseMolecule<T>::getBeadPosition(const int &id) const {
   assert(BeadStructure<T>::beads_.count(id) &&
          "Cannot get bead position with id because "
          "bead is not stored in the base molecule.");

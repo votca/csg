@@ -169,9 +169,10 @@ inline bool XYZReader::ReadFrame(T &container) {
         element = fields[0];
       }
 
-      Eigen::Vector3d pos = tools::vec(boost::lexical_cast<double>(fields[1]),
-                                       boost::lexical_cast<double>(fields[2]),
-                                       boost::lexical_cast<double>(fields[3]));
+      Eigen::Vector3d pos =
+          Eigen::Vector3d(boost::lexical_cast<double>(fields[1]),
+                          boost::lexical_cast<double>(fields[2]),
+                          boost::lexical_cast<double>(fields[3]));
 
       AddAtom<topology, T>(container, fields[0], bead_id, element, pos);
     }

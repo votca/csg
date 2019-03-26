@@ -58,15 +58,15 @@ void LAMMPSDumpWriter::Write(CSG_Topology *conf) {
     int bead_type_id = conf->getBeadTypeId(bead_id);
 
     fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
-    fprintf(_out, " %f %f %f", bead->getPos().getX(), bead->getPos().getY(),
-            bead->getPos().getZ());
+    fprintf(_out, " %f %f %f", bead->getPos().x(), bead->getPos().y(),
+            bead->getPos().z());
     if (v) {
-      fprintf(_out, " %f %f %f", bead->getVel().getX(), bead->getVel().getY(),
-              bead->getVel().getZ());
+      fprintf(_out, " %f %f %f", bead->getVel().x(), bead->getVel().y(),
+              bead->getVel().z());
     }
     if (f) {
-      fprintf(_out, " %f %f %f", bead->getF().getX(), bead->getF().getY(),
-              bead->getF().getZ());
+      fprintf(_out, " %f %f %f", bead->getF().x(), bead->getF().y(),
+              bead->getF().z());
     }
     fprintf(_out, "\n");
   }

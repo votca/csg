@@ -46,7 +46,7 @@ void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
   for (ia = interactions.begin(), is = _bonded_values.begin();
        ia != interactions.end(); ++ia, ++is) {
     vector<int> bead_ids = (*ia)->getBeadIds();
-    unordered_map<int, const TOOLS::vec *> bead_positions =
+    unordered_map<int, const Eigen::Vector3d *> bead_positions =
         conf->getBeadPositions(bead_ids);
     double value =
         (*ia)->EvaluateVar(*(conf->getBoundaryCondition()), bead_positions);

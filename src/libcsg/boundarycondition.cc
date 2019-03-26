@@ -21,7 +21,9 @@
 namespace votca {
 namespace csg {
 
-double BoundaryCondition::BoxVolume() { return std::abs(box_.determinant()); }
+double BoundaryCondition::BoxVolume() const {
+  return std::abs(box_.determinant());
+}
 
 double BoundaryCondition::getShortestBoxDimension() const {
   assert(getBoxType() != eBoxtype::typeOpen &&

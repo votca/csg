@@ -26,7 +26,6 @@
 #include <unordered_map>
 #include <vector>
 #include <votca/tools/constants.h>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
@@ -54,9 +53,9 @@ class Interaction {
 
   virtual std::unique_ptr<Interaction> Clone() const = 0;
 
-  virtual double EvaluateVar(
-      const BoundaryCondition &bc,
-      std::unordered_map<int, const tools::vec *> bead_positions) const = 0;
+  virtual double EvaluateVar(const BoundaryCondition &bc,
+                             std::unordered_map<int, const Eigen::Vector3d *>
+                                 bead_positions) const = 0;
 
   InteractionType getType() const { return interaction_type_; }
 
@@ -142,8 +141,8 @@ class IBond : public Interaction {
   }
 
   double EvaluateVar(const BoundaryCondition &bc,
-                     std::unordered_map<int, const tools::vec *> bead_positions)
-      const override;
+                     std::unordered_map<int, const Eigen::Vector3d *>
+                         bead_positions) const override;
   Eigen::Vector3d Grad(const BoundaryCondition &bc, int bead_index,
                        std::unordered_map<int, const Eigen::Vector3d *>
                            bead_positions) const override;
@@ -197,9 +196,9 @@ class IDihedral : public Interaction {
   double EvaluateVar(const BoundaryCondition &bc,
                      std::unordered_map<int, const Eigen::Vector3d *>
                          bead_positions) const override;
-  tools::vec Grad(const BoundaryCondition &bc, int bead_index,
-                  std::unordered_map<int, const Eigen::Vector3d *>
-                      bead_positions) const override;
+  Eigen::Vector3d Grad(const BoundaryCondition &bc, int bead_index,
+                       std::unordered_map<int, const Eigen::Vector3d *>
+                           bead_positions) const override;
 
  private:
   IDihedral(std::vector<int> bead_ids) {
@@ -220,13 +219,13 @@ inline double IBond::EvaluateVar(
       .norm();
 }
 
-inline tools::vec IBond::Grad(
+inline Eigen::Vector3d IBond::Grad(
     const BoundaryCondition &bc, int bead_index,
     std::unordered_map<int, const Eigen::Vector3d *> bead_positions) const {
   Eigen::Vector3d r = bc.BCShortestConnection(
       *bead_positions.at(bead_ids_.at(0)), *bead_positions.at(bead_ids_.at(1)));
   r.normalize();
-  return (bead_id == 0) ? -r : r;
+  return (bead_index == 0) ? -r : r;
 }
 
 inline double IAngle::EvaluateVar(
