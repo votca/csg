@@ -396,17 +396,19 @@ void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
     }
   }
 
-  SplineContainer::iterator spiter;
-  for (spiter = _splines.begin(); spiter != _splines.end(); ++spiter) {
-    SplineInfo sinfo = *spiter;
-    if (sinfo.bonded)  // bonded interaction
+  // SplineContainer::iterator spiter;
+  // for (spiter = _splines.begin(); spiter != _splines.end(); ++spiter) {
+  for (auto &sinfo : _splines) {
+    // SplineInfo sinfo = *spiter;
+    if (sinfo.bonded) {  // bonded interaction
       EvalBonded(conf, &sinfo);
-    else  // non-bonded interaction
-          // check if threebody interaction or not
-        if (sinfo.threebody) {
-      EvalNonbonded_Threebody(conf, &sinfo);
-    } else {
-      EvalNonbonded(conf, &sinfo);
+    } else {  // non-bonded interaction
+      // check if threebody interaction or not
+      if (sinfo.threebody) {
+        EvalNonbonded_Threebody(conf, &sinfo);
+      } else {
+        EvalNonbonded(conf, &sinfo);
+      }
     }
   }
 
@@ -484,57 +486,57 @@ void CGForceMatching::FmatchAccumulateData() {
     cout << endl;
   }
 
-  SplineContainer::iterator is;
-  for (is = _splines.begin(); is != _splines.end(); ++is) {
-    int &mp = (*is).matr_pos;
-    int &ngp = (*is).num_gridpoints;
+  // SplineContainer::iterator is;
+  // for (is = _splines.begin(); is != _splines.end(); ++is) {
+  for (auto &is : _splines) {
+    int &mp = is.matr_pos;
+    int &ngp = is.num_gridpoints;
 
     // _x contains results for all splines. Here we cut the results for one
     // spline
     for (int i = 0; i < ngp; i++) {
-      (*is).block_res_f[i] = _x[i + mp];
-      (*is).block_res_f2[i] = _x[i + mp + ngp];
+      is.block_res_f[i] = _x[i + mp];
+      is.block_res_f2[i] = _x[i + mp + ngp];
     }
     // result cutted before is assigned to the corresponding spline
     // (*is).Spline.setSplineData((*is).block_res_f, (*is).block_res_f2);
 
     // first output point = first grid point
-    double out_x = (*is).Spline.getGridPoint(0);
+    double out_x = is.Spline.getGridPoint(0);
 
     // point in the middle of the output grid for printing debug information
-    int grid_point_debug = (*is).num_outgrid / 2;
+    int grid_point_debug = is.num_outgrid / 2;
 
     // loop over output grid
-    for (int i = 0; i < (*is).num_outgrid; i++) {
+    for (int i = 0; i < is.num_outgrid; i++) {
       // update resSum (add result of a particular block)
-      (*is).resSum[i] += (*is).Spline.Calculate(out_x);
+      is.resSum[i] += is.Spline.Calculate(out_x);
       // update resSum2 (add result of a particular block)
-      (*is).resSum2[i] +=
-          (*is).Spline.Calculate(out_x) * (*is).Spline.Calculate(out_x);
+      is.resSum2[i] += is.Spline.Calculate(out_x) * is.Spline.Calculate(out_x);
 
       // Only if threebody interaction, the derivatives are explicitly
       // calculated
-      if ((*is).threebody) {
-        (*is).resSumDer[i] += (*is).Spline.CalculateDerivative(out_x);
+      if (is.threebody) {
+        is.resSumDer[i] += is.Spline.CalculateDerivative(out_x);
         // update resSumDer2 (add result of a particular block)
-        (*is).resSumDer2[i] += (*is).Spline.CalculateDerivative(out_x) *
-                               (*is).Spline.CalculateDerivative(out_x);
+        is.resSumDer2[i] += is.Spline.CalculateDerivative(out_x) *
+                            is.Spline.CalculateDerivative(out_x);
       }
 
       // print useful debug information
       if (i == grid_point_debug)
-        cout << "This should be a number: " << (*is).Spline.Calculate(out_x)
-             << " " << endl;
+        cout << "This should be a number: " << is.Spline.Calculate(out_x) << " "
+             << endl;
 
       // output point for the next iteration
-      out_x += (*is).dx_out;
+      out_x += is.dx_out;
     }
   }
 }
 
 void CGForceMatching::FmatchAssignSmoothCondsToMatrix(Eigen::MatrixXd &Matrix) {
   // This function assigns Spline smoothing conditions to the Matrix.
-  // For the simple least squares the function is used for Eigen::Matrix3d _A
+  // For the simple least squares the functioisused for Eigen::Matrix3d _A
   // For constrained least squares - for Eigen::Matrix3d _B_constr
   int line_tmp, col_tmp;
   line_tmp = 0;
@@ -639,7 +641,6 @@ void CGForceMatching::EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo) {
                                                          // cutoffs for
                                                          // different
                                                          // interactions!
-
   // generate the bead lists
   BeadList beads1, beads2;
   beads1.Generate(*conf, sinfo->type1);
