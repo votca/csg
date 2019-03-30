@@ -161,14 +161,14 @@ class CGForceMatching : public CsgApplication {
 
   /// \brief Flag: true for constrained least squares, false for simple least
   /// squares
-  bool _constr_least_sq;
+  bool _constr_least_sq = false;
   /// \brief used in EvalConf to distinguish constrained and simple least
   /// squares
-  int _least_sq_offset;
+  int _least_sq_offset = 0;
   /// \brief Number of frames used in one block for block averaging
-  int _nframes;
+  int _nframes = -1;
   /// \brief Current number of blocks
-  int _nblocks;
+  int _nblocks = -1;
 
   /// \brief Counters for lines and coloumns in _B_constr
   int _line_cntr, _col_cntr;

@@ -111,7 +111,7 @@ class CsgApplication : public tools::Application {
     int getId() { return _id; }
 
    protected:
-    CsgApplication *_app;
+    CsgApplication *_app = nullptr;
     CSG_Topology _top, _top_cg;
     // TopologyMap *_map;
     std::unique_ptr<AtomCGConverter> converter_;

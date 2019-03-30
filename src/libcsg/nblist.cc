@@ -61,8 +61,6 @@ void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
 
       Eigen::Vector3d u = (*iter1)->getPos();
       Eigen::Vector3d v = (*iter2)->getPos();
-      cout << "Positions " << u << endl;
-      cout << "Positions " << v << endl;
       Eigen::Vector3d r = top->BCShortestConnection(u, v);
       double d = r.norm();
       if (d < _cutoff) {

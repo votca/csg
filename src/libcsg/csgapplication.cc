@@ -133,6 +133,7 @@ void CsgApplication::ShowHelpText(std::ostream &out) {
 }
 
 void CsgApplication::Worker::Run(void) {
+  assert(_app != nullptr && "Cannot run app it is a nullptr");
   while (_app->ProcessData(this)) {
     if (_app->SynchronizeThreads()) {
       int id = getId();

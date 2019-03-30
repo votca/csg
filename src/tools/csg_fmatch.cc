@@ -499,7 +499,7 @@ void CGForceMatching::FmatchAccumulateData() {
       is.block_res_f2[i] = _x[i + mp + ngp];
     }
     // result cutted before is assigned to the corresponding spline
-    // (*is).Spline.setSplineData((*is).block_res_f, (*is).block_res_f2);
+    is.Spline.setSplineData(is.block_res_f, is.block_res_f2);
 
     // first output point = first grid point
     double out_x = is.Spline.getGridPoint(0);
