@@ -317,5 +317,26 @@ bool H5MDTrajectoryReader::NextFrame(Topology &top) {  // NOLINT const reference
   return true;
 }
 
+double* H5MDTrajectoryReader::ReadBox(hid_t ds, hid_t ds_data_type, int row) {
+  hsize_t offset[2];
+  offset[0] = row;
+  offset[1] = 0;
+  hsize_t ch_rows[2];
+  ch_rows[0] = 1;
+  ch_rows[1] = 3;
+  hid_t dsp = H5Dget_space(ds);
+  H5Sselect_hyperslab(dsp, H5S_SELECT_SET, offset, NULL, ch_rows, NULL);
+  hid_t mspace1 = H5Screate_simple(2, ch_rows, NULL);
+  double *data_out = new double[3];
+  herr_t status =
+      H5Dread(ds, ds_data_type, mspace1, dsp, H5P_DEFAULT, data_out);
+  if (status < 0) {
+    throw std::runtime_error("Error ReadScalarData: " +
+                             boost::lexical_cast<std::string>(status));
+  } else {
+    return data_out;
+  }
+}
+
 }  // namespace csg
 }  // namespace votca
