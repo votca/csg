@@ -99,7 +99,7 @@ bool CsgApplication::EvaluateOptions(void) {
         ShowHelpText(cout);
         throw runtime_error("no-map and cg options are mutually exclusive!");
       }
-    } // default mapping is off, if user gives cg, then do mapping
+    }  // default mapping is off, if user gives cg, then do mapping
     else if (OptionsMap().count("cg")) {
       _do_mapping = true;
     }
@@ -119,14 +119,12 @@ bool CsgApplication::EvaluateOptions(void) {
 
 void CsgApplication::ShowHelpText(std::ostream &out) {
   string name = ProgramName();
-  if (VersionString() != "")
-    name = name + ", version " + VersionString();
+  if (VersionString() != "") name = name + ", version " + VersionString();
 
   HelpTextHeader(name);
   HelpText(out);
 
   out << "\n\n" << VisibleOptions() << endl;
-  // out << "\n\n" << OptionsDesc() << endl;
 }
 
 void CsgApplication::Worker::Run(void) {
@@ -171,8 +169,7 @@ bool CsgApplication::ProcessData(Worker *worker) {
       return false;
     }
   }
-  if (worker->getId() == 0)
-    _is_first_frame = false;
+  if (worker->getId() == 0) _is_first_frame = false;
 
   _traj_readerMutex.Unlock();
   if (SynchronizeThreads()) {
@@ -198,7 +195,7 @@ void CsgApplication::Run(void) {
                         _op_vm["top"].as<string>());
 
   class DummyWorker : public Worker {
-  public:
+   public:
     void EvalConfiguration(Topology *top, Topology *top_ref) {
       _app->EvalConfiguration(top, top_ref);
     }
@@ -236,8 +233,7 @@ void CsgApplication::Run(void) {
       for (iter = tok.begin(); iter != tok.end(); ++iter) {
         string str = *iter;
         boost::trim(str);
-        if (str.length() > 0)
-          cg.AddIgnore(str);
+        if (str.length() > 0) cg.AddIgnore(str);
       }
     }
 
@@ -247,8 +243,7 @@ void CsgApplication::Run(void) {
          << master->_top_cg.MoleculeCount()
          << " molecules for the coarsegraining" << endl;
     master->_map->Apply();
-    if (!EvaluateTopology(&master->_top_cg, &master->_top))
-      return;
+    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
   } else if (!EvaluateTopology(&master->_top))
     return;
 
@@ -319,8 +314,8 @@ void CsgApplication::Run(void) {
       }
       break;
     }
-    if (!bok) { // trajectory was too short and we did not proceed to first
-                // frame
+    if (!bok) {  // trajectory was too short and we did not proceed to first
+                 // frame
       _traj_reader->Close();
       delete _traj_reader;
 
@@ -397,8 +392,7 @@ void CsgApplication::Run(void) {
 }
 
 CsgApplication::Worker::~Worker() {
-  if (_map)
-    delete _map;
+  if (_map) delete _map;
 }
 
 void CsgApplication::BeginEvaluate(Topology *top, Topology *top_ref) {
@@ -428,5 +422,5 @@ void CsgApplication::MergeWorker(CsgApplication::Worker *worker) {
   throw std::runtime_error("MergeWorker not implemented in application");
 }
 
-} // namespace csg
-} // namespace votca
+}  // namespace csg
+}  // namespace votca
