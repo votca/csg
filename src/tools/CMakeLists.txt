@@ -179,7 +179,7 @@ endif(VALGRIND_EXECUTABLE)
   add_test(NAME integration_Run_csg_resample_linear
     COMMAND csg_resample --in ${REFPATH}/table_in --out table_linear --type linear --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
-  set_tests_properties(Run_csg_resample_linear PROPERTIES LABELS "csg;tools;votca")
+  set_tests_properties(integration_Run_csg_resample_linear PROPERTIES LABELS "csg;tools;votca")
   if(VALGRIND_EXECUTABLE)                                                                
     add_test(NAME memory_Run_csg_resample_linear COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --error-exitcode=1 $<TARGET_FILE:csg_resample> --in ${REFPATH}/table_in --out table_linear --type linear --grid 0:0.1:3
     WORKING_DIRECTORY ${RUNPATH})
