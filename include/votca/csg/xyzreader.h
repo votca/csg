@@ -18,7 +18,6 @@
 #ifndef __VOTCA_CSG_XYZREADER_H
 #define __VOTCA_CSG_XYZREADER_H
 
-#include "csgtopology.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
@@ -45,14 +44,22 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   ~XYZReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, CSG_Topology &top);
+  //  bool ReadTopology(std::string file,
+  //  TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
+  template <bool topology, class Bead_T, class Molecule_T>
+  bool ReadTopology(std::string file,
+                    TemplateTopology<Bead_T, Molecule_T> &top);
 
   /// open a trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(CSG_Topology &top);
+  template <bool topology, class Bead_T, class Molecule_T>
+  bool FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top);
+  // bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   /// read in the next frame
-  bool NextFrame(CSG_Topology &top);
+  template <class Bead_T, class Molecule_T>
+  bool NextFrame(TemplateTopology<Bead_T, Molecule_T> &top);
+  // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   template <class T>
   void ReadFile(T &container) {
@@ -69,7 +76,9 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     return container.size();
   }
 
-  int getContainerSize(CSG_Topology &container) {
+  template <class Bead_T, template <class Bead_T2> class Molecule_T>
+  int getContainerSize(
+      TemplateTopology<Bead_T, Molecule_T<Bead_T>> &container) {
     return container.BeadCount();
   }
 
@@ -84,12 +93,15 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     container.push_back(atom(id, name, pos2));
   }
 
-  template <bool topology, class T>
+  template <bool topology, class Bead_T, class Molecule_T>
+  void AddAtom(TemplateTopology<Bead_T, Molecule_T> &container,
+               std::string bead_type, int bead_id, std::string element,
+               const Eigen::Vector3d &pos) {
+    // void AddAtom(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
+    // &container, std::string bead_type, int bead_id,
+    //            std::string element, const Eigen::Vector3d &pos) {
 
-  void AddAtom(CSG_Topology &container, std::string bead_type, int bead_id,
-               std::string element, const Eigen::Vector3d &pos) {
-
-    Bead *b;
+    Bead_T *b;
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
     if (topology) {
 
@@ -118,6 +130,34 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   std::string _file;
   int _line;
 };
+
+template <bool topology, class Bead_T, class Molecule_T>
+bool XYZReader::FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+  return NextFrame(top);
+}
+template <class Bead_T, class Molecule_T>
+bool XYZReader::NextFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+  bool success = ReadFrame<false, TemplateTopology<Bead_T, Molecule_T>>(top);
+  return success;
+}
+
+template <bool topology, class Bead_T, class Molecule_T>
+bool XYZReader::ReadTopology(std::string file,
+                             TemplateTopology<Bead_T, Molecule_T> &top) {
+  top.Cleanup();
+
+  _file = file;
+  _fl.open(file);
+  if (!_fl.is_open()) {
+    throw std::ios_base::failure("Error on open topology file: " + file);
+  }
+
+  ReadFrame<true, CSG_Topology>(top);
+
+  _fl.close();
+
+  return true;
+}
 
 template <bool topology, class T>
 inline bool XYZReader::ReadFrame(T &container) {

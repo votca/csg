@@ -18,8 +18,10 @@
 #ifndef VOTCA_CSG_TRAJECTORYREADER_H
 #define VOTCA_CSG_TRAJECTORYREADER_H
 
-#include "csgtopology.h"
+#include "basebead.h"
+#include "basemolecule.h"
 #include "fileformatfactory.h"
+#include "templatetopology.h"
 #include <string>
 
 namespace votca {
@@ -38,10 +40,23 @@ class TrajectoryReader {
 
   virtual void Close(){};
 
-  /// read in the first frame
-  virtual bool FirstFrame(CSG_Topology &top) = 0;
+  //  template<class Bead_T>;
+
+  // template< template<class> class Bead_T>
+  //  class Molecule_T;
+
+  template <class Bead_T, class Molecule_T>
+  bool FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+    throw std::runtime_error(
+        "The FirstFrame method must be overwritten by a child class");
+  }
   /// read in the next frame
-  virtual bool NextFrame(CSG_Topology &top) = 0;
+  template <class Bead_T, class Molecule_T>
+  bool NextFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+    throw std::runtime_error(
+        "The NextFrame method must be overwritten by a child class");
+  }
+  // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   static void RegisterPlugins(void);
 };

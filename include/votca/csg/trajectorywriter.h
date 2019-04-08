@@ -18,10 +18,12 @@
 #ifndef VOTCA_CSG_TRAJECTORYWRITER_H
 #define VOTCA_CSG_TRAJECTORYWRITER_H
 
-#include "csgtopology.h"
+#include "basemolecule.h"
 #include "fileformatfactory.h"
+#include "templatetopology.h"
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 namespace votca {
@@ -35,7 +37,12 @@ class TrajectoryWriter {
   virtual void Open(std::string file, bool bAppend = false) {}
   virtual void Close(){};
 
-  virtual void Write(CSG_Topology *top) {}
+  // void Write(CSG_Topology *top) {};
+  template <class Bead_T, class Molecule_T>
+  void Write(TemplateTopology<Bead_T, Molecule_T> *top) {
+    throw std::runtime_error(
+        "Trajectory Write method must be derived by child class");
+  }
 
   static void RegisterPlugins(void);
 };

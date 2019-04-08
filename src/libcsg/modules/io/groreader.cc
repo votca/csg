@@ -16,6 +16,7 @@
  */
 
 #include "groreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
@@ -23,7 +24,6 @@
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 #include <votca/tools/vec.h>
-
 using namespace votca::tools;
 
 namespace votca {

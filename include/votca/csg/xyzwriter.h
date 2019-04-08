@@ -19,7 +19,7 @@
 #define __VOTCA_CSG_XYZWRITER_H
 
 #include <stdio.h>
-#include <votca/csg/csgtopology.h>
+//#include <votca/csg/csgtopology.h>
 #include <votca/csg/trajectorywriter.h>
 #include <votca/tools/constants.h>
 
@@ -34,10 +34,14 @@ class XYZWriter : public TrajectoryWriter {
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(CSG_Topology *conf);
+  template <class Bead_T, class Molecule_T>
+  void Write(TemplateTopology<Bead_T, Molecule_T> *conf);
 
-  template <class T>
-  void Write(CSG_Topology &top, T &container, std::string header);
+  template <class T, class Bead_T, class Molecule_T>
+  void Write(TemplateTopology<Bead_T, Molecule_T> &top, T &container,
+             std::string header);
+
+  //  void Write(CSG_Topology &top, T &container, std::string header);
 
  private:
   //  template <class T>
@@ -63,9 +67,10 @@ class XYZWriter : public TrajectoryWriter {
 
   // The CSG Topology object is the only object that stores the beads and its
   // pointers, all other containers only store the bead ids
-  template <class T>
-  std::vector<Bead *> getIterable(CSG_Topology &top, T &container) {
-    std::vector<Bead *> beads;
+  template <typename T, class Bead_T, class Molecule_T>
+  std::vector<Bead_T *> getIterable(TemplateTopology<Bead_T, Molecule_T> &top,
+                                    T &container) {
+    std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = container.getBeadIds();
     for (int &bead_id : bead_ids) {
       beads.push_back(top.getBead(bead_id));
@@ -76,17 +81,27 @@ class XYZWriter : public TrajectoryWriter {
   std::ofstream _out;
 };
 
-template <class T>
-inline void XYZWriter::Write(CSG_Topology &top, T &container,
-                             std::string header) {
+template <class Bead_T, class Molecule_T>
+void XYZWriter::Write(TemplateTopology<Bead_T, Molecule_T> *conf) {
+  std::string header = (boost::format("frame: %1$d time: %2$f\n") %
+                        (conf->getStep() + 1) % conf->getTime())
+                           .str();
+  Write<TemplateTopology<Bead_T, Molecule_T>>(*conf, header);
+}
 
-  std::vector<Bead *> atoms = getIterable(top, container);
+template <typename T, class Bead_T, class Molecule_T>
+inline void XYZWriter::Write(TemplateTopology<Bead_T, Molecule_T> &top,
+                             T &container, std::string header) {
+  // inline void XYZWriter::Write(CSG_Topology &top, T &container,
+  //                            std::string header) {
+
+  std::vector<Bead_T *> atoms = getIterable(top, container);
   _out << atoms.size() << "\n";
   _out << header << "\n";
 
   boost::format fmter("%1$s%2$10.5f%3$10.5f%4$10.5f\n");
 
-  for (auto &atom : atoms) {
+  for (Bead_T &atom : atoms) {
     Eigen::Vector3d r = getPos(atom);
     // truncate strings if necessary
     std::string atomtype = getType(atom);

@@ -16,12 +16,12 @@
  */
 
 #include "lammpsdumpreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include <boost/lexical_cast.hpp>
 #include <memory>
 #include <vector>
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
-
 namespace votca {
 namespace csg {
 using namespace boost;

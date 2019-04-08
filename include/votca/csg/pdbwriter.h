@@ -19,7 +19,7 @@
 #define VOTCA_CSG_PDBWRITER_H
 
 #include <stdio.h>
-#include <votca/csg/csgtopology.h>
+//#include <votca/csg/csgtopology.h>
 #include <votca/csg/trajectorywriter.h>
 #include <votca/tools/constants.h>
 
@@ -46,10 +46,13 @@ class PDBWriter : public TrajectoryWriter {
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(CSG_Topology *conf);
+  template <class Bead_T, class Molecule_T>
+  void Write(TemplateTopology<Bead_T, Molecule_T> *conf);
+  //  void Write(CSG_Topology *conf);
 
-  template <class T>
-  void WriteContainer(CSG_Topology *conf, T &container);
+  template <class T, class Bead_T, class Molecule_T>
+  void WriteContainer(TemplateTopology<Bead_T, Molecule_T> *conf, T &container);
+  // void WriteContainer(CSG_Topology *conf, T &container);
 
   void WriteHeader(std::string header);
 
@@ -128,9 +131,10 @@ class PDBWriter : public TrajectoryWriter {
     return bead.Pos() * tools::conv::nm2ang;
   }
 
-  template <class T>
-  std::vector<Bead *> getIterable(CSG_Topology &top, T &container) {
-    std::vector<Bead *> beads;
+  template <class T, class Bead_T>
+  std::vector<T *> getIterable(
+      TemplateTopology<Bead_T, BaseMolecule<Bead_T>> &top, T &container) {
+    std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = container.getBeadIds();
     for (int &bead_id : bead_ids) {
       beads.push_back(top.getBead(bead_id));
@@ -138,8 +142,10 @@ class PDBWriter : public TrajectoryWriter {
     return beads;
   }
 
-  std::vector<Bead *> getIterable(CSG_Topology &top) {
-    std::vector<Bead *> beads;
+  template <class T>
+  std::vector<T *> getIterable(TemplateTopology<T, BaseMolecule<T>> &top) {
+    // std::vector<Bead *> getIterable(CSG_Topology &top) {
+    std::vector<T *> beads;
     std::vector<int> bead_ids = top.getBeadIds();
     for (int &bead_id : bead_ids) {
       beads.push_back(top.getBead(bead_id));
@@ -150,8 +156,9 @@ class PDBWriter : public TrajectoryWriter {
   std::ofstream _out;
 };
 
-template <class T>
-inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
+template <class T, class Bead_T, class Molecule_T>
+inline void PDBWriter::WriteContainer(
+    TemplateTopology<Bead_T, Molecule_T> *conf, T &container) {
 
   if (_out.is_open()) {
     boost::format atomfrmt(
@@ -160,7 +167,7 @@ inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
         "           %9$+2s\n");
 
     std::vector<Bead *> atoms = getIterable(*conf, container);
-    for (auto &atom : atoms) {
+    for (Bead_T &atom : atoms) {
       int atomid = getId(*atom);
       std::string resname = getResidueType(*atom);
       int residueid = getResId(*atom);
@@ -182,6 +189,18 @@ inline void PDBWriter::WriteContainer(CSG_Topology *conf, T &container) {
   }
 }
 
+template <class Bead_T, class Molecule_T>
+void PDBWriter::Write(TemplateTopology<Bead_T, Molecule_T> *conf) {
+  if (_out.is_open()) {
+    _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
+         << std::flush;
+    WriteContainer<TemplateTopology<Bead_T, BaseMolecule<Bead_T>>>(conf, *conf);
+    _out << "ENDMDL" << std::endl;
+  } else {
+    throw std::runtime_error(
+        "Cannot write topology to file, file is not open.");
+  }
+}
 // Super Hacky does not follow the pdb file convention, essentially is breaking
 // up coarse grained beads into arbitraty pieces, if we are going to allow
 // this it should be exact and break the pieces back into their constituent

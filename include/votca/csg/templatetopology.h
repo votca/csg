@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "basemolecule.h"
 #include "boundarycondition.h"
 #include "exclusionlist.h"
 #include "interaction.h"
@@ -41,6 +42,7 @@
 namespace votca {
 namespace csg {
 
+class BaseBead;
 /**
  * @brief Creates a template topology class
  *
@@ -418,6 +420,23 @@ class TemplateTopology {
    */
   const std::unordered_map<std::string, int> getMoleculeTypes() const {
     return type_container_.getMoleculeTypes();
+  }
+
+  BaseBead *CreateBead(tools::byte_t symmetry, std::string bead_type,
+                       int bead_id, int molecule_id, int residue_id,
+                       std::string residue_type, std::string element_symbol,
+                       double mass, double charge) {
+
+    throw std::runtime_error(
+        "CreateBead must be overwritten by derived type it may not be called "
+        "from template");
+  }
+
+  template <class Bead_T2, template <class Bead_T3> class Molecule_T2>
+  Molecule_T2<Bead_T2> *CreateMolecule(int id, std::string molecule_type) {
+    throw std::runtime_error(
+        "CreateMolecule must be overwritten by derived type it may not be "
+        "called from template");
   }
 
  protected:

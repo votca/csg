@@ -28,7 +28,7 @@ namespace csg {
 using namespace boost;
 using namespace std;
 using namespace votca::tools;
-
+/*
 bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   top.Cleanup();
 
@@ -43,7 +43,7 @@ bool XYZReader::ReadTopology(string file, CSG_Topology &top) {
   _fl.close();
 
   return true;
-}
+}*/
 
 bool XYZReader::Open(const string &file) {
   _file = file;
@@ -57,11 +57,11 @@ bool XYZReader::Open(const string &file) {
 
 void XYZReader::Close() { _fl.close(); }
 
-bool XYZReader::FirstFrame(CSG_Topology &top) { return NextFrame(top); }
-
+// bool XYZReader::FirstFrame(CSG_Topology &top) { return NextFrame(top); }
+/*
 bool XYZReader::NextFrame(CSG_Topology &top) {
   bool success = ReadFrame<false, CSG_Topology>(top);
   return success;
-}
+}*/
 }  // namespace csg
 }  // namespace votca

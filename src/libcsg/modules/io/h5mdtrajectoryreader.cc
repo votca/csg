@@ -16,8 +16,8 @@
  */
 
 #include "h5mdtrajectoryreader.h"
+#include "../../../../include/votca/csg/csgtopology.h"
 #include "hdf5.h"
-
 #include <vector>
 
 namespace votca {

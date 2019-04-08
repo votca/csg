@@ -19,6 +19,7 @@
 #include <votca_config.h>
 #endif
 
+#include "../../../../include/votca/csg/csgtopology.h"
 #include "gmxtopologyreader.h"
 #include <iostream>
 #include <string>

@@ -20,6 +20,7 @@
 #define BOOST_TEST_MODULE lammpdumpstrajectoryreaderwriter_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/csgtopology.h"
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -30,7 +31,6 @@
 #include <votca/csg/trajectorywriter.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/types.h>
-
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;

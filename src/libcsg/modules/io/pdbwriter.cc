@@ -65,6 +65,7 @@ void PDBWriter::Close() {
   }
 }
 
+/*
 void PDBWriter::Write(CSG_Topology *conf) {
   if (_out.is_open()) {
     _out << boost::format("MODEL     %1$4d\n") % (conf->getStep() + 1)
@@ -75,6 +76,6 @@ void PDBWriter::Write(CSG_Topology *conf) {
     throw runtime_error("Cannot write topology to file, file is not open.");
   }
 }
-
+*/
 }  // namespace csg
 }  // namespace votca

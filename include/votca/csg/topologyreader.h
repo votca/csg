@@ -18,8 +18,10 @@
 #ifndef _VOTCA_CSG_TOPOLOGYREADER_H
 #define _VOTCA_CSG_TOPOLOGYREADER_H
 
-#include "csgtopology.h"
+#include "basebead.h"
+#include "basemolecule.h"
 #include "fileformatfactory.h"
+#include "templatetopology.h"
 #include <string>
 
 namespace votca {
@@ -29,7 +31,15 @@ class TopologyReader {
  public:
   virtual ~TopologyReader() {}
   /// open, read and close topology file
-  virtual bool ReadTopology(std::string file, CSG_Topology &top) = 0;
+  // virtual bool ReadTopology(std::string file,
+  // TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top) = 0;
+
+  template <class Bead_T, class Molecule_T>
+  bool ReadTopology(std::string file,
+                    TemplateTopology<Bead_T, Molecule_T> &top) {
+    throw std::runtime_error(
+        "ReadTopology method must be derived by child class.");
+  }
 
   static void RegisterPlugins(void);
 };
