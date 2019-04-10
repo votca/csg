@@ -27,16 +27,16 @@
 #ifdef GMX_DOUBLE
 #include "modules/io/gmxtrajectoryreader.h"
 #endif
+#include "../../include/votca/csg/pdbreader.h"
 #include "modules/io/dlpolytrajectoryreader.h"
 #include "modules/io/groreader.h"
-#include "modules/io/pdbreader.h"
 #ifdef H5MD
 #include "modules/io/h5mdtrajectoryreader.h"
 #endif
 
 namespace votca {
 namespace csg {
-
+/*
 void TrajectoryReader::RegisterPlugins(void) {
   TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
   TrjReaderFactory().Register<LAMMPSDataReader>("data");
@@ -53,6 +53,6 @@ void TrajectoryReader::RegisterPlugins(void) {
   TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
 #endif
 }
-
+*/
 }  // namespace csg
 }  // namespace votca

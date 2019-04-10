@@ -20,24 +20,35 @@
 
 #include <string>
 #include <votca/tools/filesystem.h>
-#include <votca/tools/objectfactory.h>
+//#include <votca/tools/objectfactory.h>
+#include "topologyobjectfactory.h"
 
 namespace votca {
 namespace csg {
 
-template <typename T>
-class FileFormatFactory : public tools::ObjectFactory<std::string, T> {
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T,
+          template <class, template <class> class,
+                    template <class, template <class> class> class> class T>
+class FileFormatFactory : public csg::ObjectFactory<std::string, Bead_T,
+                                                    Molecule_T, Topology_T, T> {
  public:
   FileFormatFactory() {}
 
-  T *Create(const std::string &file);
+  T<Bead_T, Molecule_T, Topology_T> *Create(const std::string &file);
 };
 
-template <typename T>
-T *FileFormatFactory<T>::Create(const std::string &file) {
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T,
+          template <class, template <class> class,
+                    template <class, template <class> class> class> class T>
+T<Bead_T, Molecule_T, Topology_T>
+    *FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>::Create(
+        const std::string &file) {
   std::string filetype = tools::filesystem::GetFileExtension(file);
   try {
-    return tools::ObjectFactory<std::string, T>::Create(filetype);
+    return csg::ObjectFactory<std::string, Bead_T, Molecule_T, Topology_T,
+                              T>::Create(filetype);
   } catch (std::exception &error) {
     throw std::runtime_error("Error '" + filetype +
                              "' file format of file "

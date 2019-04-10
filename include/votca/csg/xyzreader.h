@@ -47,18 +47,18 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   //  bool ReadTopology(std::string file,
   //  TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   template <bool topology, class Bead_T, class Molecule_T>
-  bool ReadTopology(std::string file,
-                    TemplateTopology<Bead_T, Molecule_T> &top);
+  bool ReadTopology_(std::string file,
+                     TemplateTopology<Bead_T, Molecule_T> &top);
 
   /// open a trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
   template <bool topology, class Bead_T, class Molecule_T>
-  bool FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top);
+  bool FirstFrame_(TemplateTopology<Bead_T, Molecule_T> &top);
   // bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   /// read in the next frame
   template <class Bead_T, class Molecule_T>
-  bool NextFrame(TemplateTopology<Bead_T, Molecule_T> &top);
+  bool NextFrame_(TemplateTopology<Bead_T, Molecule_T> &top);
   // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   template <class T>
@@ -132,18 +132,18 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
 };
 
 template <bool topology, class Bead_T, class Molecule_T>
-bool XYZReader::FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+bool XYZReader::FirstFrame_(TemplateTopology<Bead_T, Molecule_T> &top) {
   return NextFrame(top);
 }
 template <class Bead_T, class Molecule_T>
-bool XYZReader::NextFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
+bool XYZReader::NextFrame_(TemplateTopology<Bead_T, Molecule_T> &top) {
   bool success = ReadFrame<false, TemplateTopology<Bead_T, Molecule_T>>(top);
   return success;
 }
 
 template <bool topology, class Bead_T, class Molecule_T>
-bool XYZReader::ReadTopology(std::string file,
-                             TemplateTopology<Bead_T, Molecule_T> &top) {
+bool XYZReader::ReadTopology_(std::string file,
+                              TemplateTopology<Bead_T, Molecule_T> &top) {
   top.Cleanup();
 
   _file = file;

@@ -18,9 +18,9 @@
 #ifndef VOTCA_CSG_TRAJECTORYWRITER_H
 #define VOTCA_CSG_TRAJECTORYWRITER_H
 
-#include "basemolecule.h"
+//#include "basemolecule.h"
 #include "fileformatfactory.h"
-#include "templatetopology.h"
+//#include "templatetopology.h"
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -29,7 +29,15 @@
 namespace votca {
 namespace csg {
 
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
 class TrajectoryWriter {
+ private:
+  /*    template <class Bead_T, class Molecule_T>
+        void Write_(TemplateTopology<Bead_T, Molecule_T> *top) {
+          throw std::runtime_error(
+              "Trajectory Write method must be derived by child class");
+        }*/
  public:
   TrajectoryWriter() {}
   virtual ~TrajectoryWriter() {}
@@ -38,19 +46,41 @@ class TrajectoryWriter {
   virtual void Close(){};
 
   // void Write(CSG_Topology *top) {};
-  template <class Bead_T, class Molecule_T>
-  void Write(TemplateTopology<Bead_T, Molecule_T> *top) {
-    throw std::runtime_error(
-        "Trajectory Write method must be derived by child class");
-  }
+  // template <class Bead_T, class Molecule_T>
+  virtual void Write(void *top) = 0;
 
   static void RegisterPlugins(void);
 };
 
 // important - singleton pattern, make sure factory is created before accessed
-inline FileFormatFactory<TrajectoryWriter> &TrjWriterFactory() {
-  static FileFormatFactory<TrajectoryWriter> _TrjWriterFactory;
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T,
+          template <class, template <class> class,
+                    template <class, template <class> class> class> class T>
+inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>
+    &TrjWriterFactory() {
+  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TrjWriterFactory;
   return _TrjWriterFactory;
+}
+
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T>
+class PDBWriter;
+
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T>
+void TrajectoryWriter<Bead_T, Molecule_T, Topology_T>::RegisterPlugins() {
+  TrjWriterFactory<Bead_T, Molecule_T, Topology_T, PDBWriter>()
+      .template Register<Bead_T, Molecule_T, Topology_T, PDBWriter>("pdb");
+  /*  TrjWriterFactory().Register<XYZWriter>("xyz");
+    TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
+    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
+    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
+  #ifdef GMX_DOUBLE
+    TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
+    TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
+  #endif
+    TrjWriterFactory().Register<GROWriter>("gro"); */
 }
 
 }  // namespace csg

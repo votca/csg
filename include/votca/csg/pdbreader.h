@@ -15,24 +15,80 @@
  *
  */
 
-#include "../../../../include/votca/csg/pdbreader.h"
+#ifndef __VOTCA_CSG_PDBREADER_H
+#define __VOTCA_CSG_PDBREADER_H
 
-#include "../../../../include/votca/csg/csgtopology.h"
-#include <boost/filesystem.hpp>
-#include <stdexcept>
+#include "topologyreader.h"
+#include "trajectoryreader.h"
+#include <fstream>
+#include <iostream>
+#include <list>
+#include <map>
+#include <string>
 #include <unordered_map>
+#include <vector>
 #include <votca/tools/elements.h>
-
-using namespace votca::tools;
+//#include "templatetopology.h"
 
 namespace votca {
 namespace csg {
-using namespace boost;
-using namespace std;
-using namespace votca::tools;
-/*bool PDBReader::ReadTopology(string file, CSG_Topology &top) {
+
+/**
+  brief typename for reading pdb files
+
+  This class provides the Trajectory and Topology reader interface
+  for pdb files
+
+*/
+//    template <class Bead_T, class Molecule_T>
+
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+class PDBReader : public csg::TopologyReader<Bead_T, Molecule_T, Topology_T>,
+                  public csg::TrajectoryReader<Bead_T, Molecule_T, Topology_T> {
+ public:
+  /// Constuctor
+  PDBReader() {}
+  /// Destructor
+  ~PDBReader() {}
+  //  bool ReadTopology(std::string file, CSG_Topology &top);
+  /// open a trajectory file
+  bool Open(const std::string &file);
+  /// read in the first frame
+
+  // template <class Bead_T, class Molecule_T>
+  bool FirstFrame(void *top);
+  // bool FirstFrame(CSG_Topology &top);
+  /// read in the next frame
+  // template <class Bead_T, class Molecule_T>
+  bool NextFrame(void *top);
+  // bool NextFrame(CSG_Topology &top);
+  void Close();
+
+  bool ReadTopology(std::string file, void *top);
+
+ private:
+  /// open a topology file
+  // template <class Bead_T, class Molecule_T>
+  //        bool ReadTopology_(std::string file,
+  //        TemplateTopology<Bead_T,Molecule_T> &top);
+  std::ifstream _fl;
+  bool _topology;
+};
+
+// template <class Bead_T, class Molecule_T>
+// bool PDBReader::ReadTopology_(std::string file,
+// TemplateTopology<Bead_T,Molecule_T> &top) {
+// template <class Bead_T, class Molecule_T>
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
+                                                             void *top) {
+
+  Topology_T<Bead_T, Molecule_T> top_cast =
+      static_cast<Topology_T<Bead_T, Molecule_T>>(top);
   _topology = true;
-  top.Cleanup();
+  top_cast.Cleanup();
 
   _fl.open(file.c_str());
   if (!_fl.is_open())
@@ -42,33 +98,28 @@ using namespace votca::tools;
   _fl.close();
 
   return true;
-}*/
-
-bool PDBReader::Open(const string &file) {
-
-  boost::filesystem::path filepath(file.c_str());
-
-  _fl.open(file.c_str());
-  if (!_fl.is_open())
-    throw std::ios_base::failure("Error on open trajectory file: " + file);
-
-  return true;
 }
 
-void PDBReader::Close() { _fl.close(); }
-
-/*
-bool PDBReader::FirstFrame(CSG_Topology &top) {
+// template <class Bead_T, class Molecule_T>
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
   _topology = false;
   return NextFrame(top);
 }
-bool PDBReader::NextFrame(CSG_Topology &top) {
-  string line;
+
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
+
+  Topology_T<Bead_T, Molecule_T> *top_cast =
+      static_cast<Topology_T<Bead_T, Molecule_T> *>(top);
+  std::string line;
   tools::Elements elements;
   // Two column vector for storing all bonds
   // 1 - id of first atom
   // 2 - id of second atom
-  vector<vector<int>> bond_pairs;
+  std::vector<std::vector<int>> bond_pairs;
   ////////////////////////////////////////////////////////////////////////////////
   // Read in information from .pdb file
   ////////////////////////////////////////////////////////////////////////////////
@@ -76,37 +127,36 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
   // Can only support a pdb file with a single step per file at the moment
   bool step_set = false;
   while (std::getline(_fl, line)) {
-    cout << line << endl;
-    if (wildcmp("MODEL*", line.c_str())) {
+    if (tools::wildcmp("MODEL*", line.c_str())) {
       // The model number is the same as the step number
       // Internallu step numbers start at 0 however pdb files store model
       // numbers starting at 1
       // 11 - 14    Model number/Step Number
-      string model_num = string(line, (11 - 1), 4);
+      std::string model_num = std::string(line, (11 - 1), 4);
       boost::algorithm::trim(model_num);
       int step = stoi(model_num) - 1;
-      top.setStep(step);
+      top_cast->setStep(step);
       if (step_set) {
-        throw runtime_error(
+        throw std::runtime_error(
             "Current pdbreader does not support reading more than a single "
             "model from a pdb file at a time.");
       }
       step_set = true;
-    } else if (wildcmp("CRYST1*", line.c_str())) {
-      string a, b, c, alpha, beta, gamma = "";
+    } else if (tools::wildcmp("CRYST1*", line.c_str())) {
+      std::string a, b, c, alpha, beta, gamma = "";
       try {
         // 1 -  6       Record name    "CRYST1"
-        a = string(line, (7 - 1), 9);
+        a = std::string(line, (7 - 1), 9);
         // 7 - 15       Real(9.3)      a           (Angstroms)
-        b = string(line, (16 - 1), 9);
+        b = std::string(line, (16 - 1), 9);
         // 16 - 24       Real(9.3)     b           (Angstroms)
-        c = string(line, (25 - 1), 9);
+        c = std::string(line, (25 - 1), 9);
         // 25 - 33       Real(9.3)     c           (Angstroms)
-        alpha = string(line, (34 - 1), 7);
+        alpha = std::string(line, (34 - 1), 7);
         // 34 - 40       Real(7.2)     alpha (degrees)
-        beta = string(line, (41 - 1), 7);
+        beta = std::string(line, (41 - 1), 7);
         // 41 - 47       Real(7.2)     beta        (degrees)
-        gamma = string(line, (48 - 1), 7);
+        gamma = std::string(line, (48 - 1), 7);
         // 48 - 54       Real(7.2)     gamma (degrees)
         // 56 - 66       LString       Space group
         // 67 - 70       Integer       Z value
@@ -119,9 +169,9 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       boost::algorithm::trim(alpha);
       boost::algorithm::trim(beta);
       boost::algorithm::trim(gamma);
-      if ((!wildcmp("90*", alpha.c_str())) ||
-          (!wildcmp("90*", alpha.c_str())) ||
-          (!wildcmp("90*", alpha.c_str()))) {
+      if ((!tools::wildcmp("90*", alpha.c_str())) ||
+          (!tools::wildcmp("90*", alpha.c_str())) ||
+          (!tools::wildcmp("90*", alpha.c_str()))) {
         throw std::runtime_error(
             "Non cubical box in pdb file not implemented, yet!");
       }
@@ -130,42 +180,34 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       double cc = stod(c) / 10.0;
       Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
       box.diagonal() = Eigen::Vector3d(aa, bb, cc);
-      top.setBox(box);
+      top_cast->setBox(box);
     }
     // Only read the CONECT keyword if the topology is set too true
-    if (_topology && wildcmp("CONECT*", line.c_str())) {
-      vector<string> bonded_atms;
-      string atm1;
+    if (_topology && tools::wildcmp("CONECT*", line.c_str())) {
+      std::vector<std::string> bonded_atms;
+      std::string atm1;
       // Keep track of the number of bonds
       int num_bonds = 0;
       try {
         // If the CONECT keyword is found then there must be at least
         // two atom identifiers, more than that is optional.
 
-        stringstream ss;
-        ss << string(line.substr(6));
+        std::stringstream ss;
+        ss << std::string(line.substr(6));
         // 1 -  6       Record name    "CONECT"
         // 11 -  7       Real(5)        atm1           (ID)
         ss >> atm1;
-        string temp_atm;
+        std::string temp_atm;
         ss >> temp_atm;
         bonded_atms.push_back(temp_atm);
         num_bonds = 1;
         ss >> temp_atm;
-        // Here we have taken a less rigorous approach to the .pdb files
-        // we do not care at this point how large the ids of the atoms are
-        // they can be greater than 99,999 with this approach.
-        while (ss) {
-          bonded_atms.push_back(temp_atm);
-          num_bonds++;
-          ss >> temp_atm;
-        }
       } catch (std::out_of_range &err) {
         throw std::runtime_error("Misformated pdb file in CONECT line\n" +
                                  line);
       }
 
-      vector<int> row(2);
+      std::vector<int> row(2);
       boost::algorithm::trim(atm1);
       // Atom ids are stored internally starting at 0 but are stored in pdb
       // files starting at 1
@@ -187,59 +229,62 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       }
     }
 
-    if (wildcmp("ATOM*", line.c_str()) || wildcmp("HETATM*", line.c_str())) {
+    if (tools::wildcmp("ATOM*", line.c_str()) ||
+        tools::wildcmp("HETATM*", line.c_str())) {
 
       // according to PDB format
-      string atom_id_pdb, x, y, z, residue_id_pdb_str, residue_type, atom_type;
-      string charge_str, element_symbol;
-      // string atom_id_pdb;
+      std::string atom_id_pdb, x, y, z, residue_id_pdb_str, residue_type,
+          atom_type;
+      std::string charge_str, element_symbol;
+      // std::string atom_id_pdb;
       try {
-        // Some pdb don't include all this, read only what we really need
-        // leave this here in case we need more later
+        /* Some pdb don't include all this, read only what we really need*/
+        /* leave this here in case we need more later*/
 
         // str       ,  "ATOM", "HETATM"
-        // string recType    (line,( 1-1),6);
+        // std::string recType    (line,( 1-1),6);
         // int       , Atom serial number
-        atom_id_pdb = string(line, (7 - 1), 6);
+        atom_id_pdb = std::string(line, (7 - 1), 6);
         // str       , Atom name
-        atom_type = string(line, (13 - 1), 4);
+        atom_type = std::string(line, (13 - 1), 4);
         // char      , Alternate location indicator
-        // string atAltLoc   (line,(17-1),1);
+        // std::string atAltLoc   (line,(17-1),1);
         // str       , Residue name
-        residue_type = string(line, (18 - 1), 3);
+        residue_type = std::string(line, (18 - 1), 3);
         // char      , Chain identifier
-        // string chainID    (line,(22-1),1);
+        // std::string chainID    (line,(22-1),1);
         // int       , Residue sequence number
-        residue_id_pdb_str = string(line, (23 - 1), 4);
+        residue_id_pdb_str = std::string(line, (23 - 1), 4);
         // char      , Code for insertion of res
-        // string atICode    (line,(27-1),1);
+        // std::string atICode    (line,(27-1),1);
         // float 8.3 , x
-        x = string(line, (31 - 1), 8);
+        x = std::string(line, (31 - 1), 8);
         // float 8.3 , y
-        y = string(line, (39 - 1), 8);
+        y = std::string(line, (39 - 1), 8);
         // float 8.3 , z
-        z = string(line, (47 - 1), 8);
+        z = std::string(line, (47 - 1), 8);
         // float 6.2 , Occupancy
-        // string atOccup    (line,(55-1),6);
+        // std::string atOccup    (line,(55-1),6);
         // float 6.2 , Temperature factor
-        // string atTFactor  (line,(61-1),6);
+        // std::string atTFactor  (line,(61-1),6);
         // str       , Segment identifier
-        // string segID      (line,(73-1),4);
+        // std::string segID      (line,(73-1),4);
         // str       , Element symbol
-        element_symbol = string(line, (77 - 1), 2);
+        element_symbol = std::string(line, (77 - 1), 2);
         // str       , Charge on the atom
-        charge_str = string(line, (79 - 1), 2);
+        charge_str = std::string(line, (79 - 1), 2);
       } catch (std::out_of_range &err) {
-        string err_msg = "Misformated pdb file in atom line # " +
-                         boost::lexical_cast<string>(bead_count) +
-                         "\n the correct pdb file format requires 80 "
-                         "characters in width. Furthermore, " +
-                         "\n to read the topology in from a .pdb file the "
-                         "following attributes must be " +
-                         "\n specified:                                        "
-                         "                        " +
-                         "\n Atom Name, Residue Name, Residue Number, x, y, z, "
-                         "charge (optional)     \n";
+        std::string err_msg =
+            "Misformated pdb file in atom line # " +
+            boost::lexical_cast<std::string>(bead_count) +
+            "\n the correct pdb file format requires 80 "
+            "characters in width. Furthermore, " +
+            "\n to read the topology in from a .pdb file the "
+            "following attributes must be " +
+            "\n specified:                                        "
+            "                        " +
+            "\n Atom Name, Residue Name, Residue Number, x, y, z, "
+            "charge (optional)     \n";
         throw std::runtime_error(err_msg);
       }
       boost::algorithm::trim(atom_id_pdb);
@@ -256,7 +301,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         if (elements.isEleShort(atom_type)) {
           element_symbol = atom_type;
         } else {
-          element_symbol = topology_constants::unassigned_element;
+          element_symbol = tools::topology_constants::unassigned_element;
         }
       }
 
@@ -265,13 +310,13 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       int atom_number = boost::lexical_cast<int>(atom_id_pdb) - 1;
       ++bead_count;
 
-      Bead *b;
+      Bead_T *b;
       // Only read the CONECT keyword if the topology is set too true
       if (_topology) {
         int residue_id, residue_id_pdb;
         try {
           residue_id_pdb = boost::lexical_cast<int>(residue_id_pdb_str);
-        } catch (bad_lexical_cast &) {
+        } catch (boost::bad_lexical_cast &) {
           throw std::runtime_error(
               "Cannot convert residue_id_pdb='" + residue_id_pdb_str +
               "' to int, that usallly means: misformated pdb file");
@@ -297,13 +342,14 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
         // 6 - charge               (double)
         //
         // res -1 as internal number starts with 0
-        byte_t symmetry = 1;
-        b = top.CreateBead(symmetry, atom_type, atom_number,
-                           topology_constants::unassigned_molecule_id,
-                           residue_id, residue_type, element_symbol,
-                           elements.getMass(element_symbol), charge);
+        tools::byte_t symmetry = 1;
+        b = top_cast->CreateBead(
+            symmetry, atom_type, atom_number,
+            tools::topology_constants::unassigned_molecule_id, residue_id,
+            residue_type, element_symbol, elements.getMass(element_symbol),
+            charge);
       } else {
-        b = top.getBead(atom_number);
+        b = top_cast->getBead(atom_number);
       }
       // convert to nm from A
       b->setPos(Eigen::Vector3d(stod(x) * tools::conv::ang2nm,
@@ -314,14 +360,15 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {
       break;
     }
-  }
+  }  // while std::getline
 
-  if (!_topology && (bead_count > 0) && bead_count != top.BeadCount())
+  if (!_topology && (bead_count > 0) && bead_count != top_cast->BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Sort data and determine atom structure, connect with top (molecules, bonds)
+  // Sort data and determine atom structure, connect with top_cast (molecules,
+  // bonds)
   ////////////////////////////////////////////////////////////////////////////////
 
   // Extra processing is done if the file is a topology file, in which case the
@@ -332,11 +379,11 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
 
     // First int  - is the index of the atom
     // Second int - is the index of the molecule
-    map<int, int> atm_molecule;
+    std::map<int, int> atm_molecule;
 
     // First int  - is the index of the molecule
     // list<int>  - is a list of the atoms in the molecule
-    unordered_map<int, list<int>> molecule_atms;
+    std::unordered_map<int, std::list<int>> molecule_atms;
 
     // Keep track of the number of molecules we have created through an index
     int mol_index = 0;
@@ -354,7 +401,7 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       // This means neither atom is attached to a molecule
       if (mol_iter1 == atm_molecule.end() && mol_iter2 == atm_molecule.end()) {
         // We are going to create a new row for a new molecule
-        list<int> atms_in_mol;
+        std::list<int> atms_in_mol;
         atms_in_mol.push_back(atm_id1);
         atms_in_mol.push_back(atm_id2);
         molecule_atms[mol_index] = atms_in_mol;
@@ -411,19 +458,19 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       }
     }
 #ifndef NDEBUG
-    cerr << "Consistency check for pdbreader" << endl;
+    std::cerr << "Consistency check for pdbreader" << std::endl;
     int i = 0;
     for (auto lis = molecule_atms.begin(); lis != molecule_atms.end(); lis++) {
-      cerr << "Molecule " << i << endl;
-      cerr << "Atoms: ";
+      std::cerr << "Molecule " << i << std::endl;
+      std::cerr << "Atoms: ";
       for (auto atm_ind = lis->second.begin(); atm_ind != lis->second.end();
            atm_ind++) {
-        cerr << *atm_ind << " ";
+        std::cerr << *atm_ind << " ";
       }
-      cerr << endl;
+      std::cerr << std::endl;
       i++;
     }
-    cerr << endl;
+    std::cerr << std::endl;
 #endif
     // Now that we know which interactions belong to which molecules we can:
     // 1 Add the molecules
@@ -432,18 +479,19 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
     // Molecule map
     // First int - is the index of the molecule
     // Molecule* - is a pointer to the Molecule object
-    map<int, Molecule *> mol_map;
+    std::map<int, Molecule_T<Bead_T> *> mol_map;
 
-    for (const pair<const int, list<int>> &mol_and_atom_ids : molecule_atms) {
+    for (const std::pair<const int, std::list<int>> &mol_and_atom_ids :
+         molecule_atms) {
 
       int molecule_id = mol_and_atom_ids.first;
-      Molecule *mi = top.CreateMolecule(
-          molecule_id, topology_constants::unassigned_molecule_type);
+      Molecule_T<Bead_T> *mi = top_cast->CreateMolecule(
+          molecule_id, tools::topology_constants::unassigned_molecule_type);
       mol_map[molecule_id] = mi;
 
       // Add all the atoms to the appropriate molecule object
       for (const int &atm_temp : mol_and_atom_ids.second) {
-        mi->AddBead(top.getBead(atm_temp));
+        mi->AddBead(top_cast->getBead(atm_temp));
       }
     }
 
@@ -457,25 +505,28 @@ bool PDBReader::NextFrame(CSG_Topology &top) {
       // Should be able to just look at one of the atoms the bond is attached
       // too because the other will also be attached to the same molecule.
       int mol_ind = atm_molecule[atm_id1];
-      Molecule *mi = mol_map[mol_ind];
+      Molecule_T<Bead_T> *mi = mol_map[mol_ind];
       // Grab the id of the bead associated with the atom
       // It may be the case that the atom id's and bead id's are different
       int bead_id1 = atm_id1;
       int bead_id2 = atm_id2;
       mi->ConnectBeads(bead_id1, bead_id2);
 
-      Interaction *ic =
-          top.CreateInteraction(InteractionType::bond, "BONDS", bond_index,
-                                mi->getId(), vector<int>{bead_id1, bead_id2});
+      Interaction *ic = top_cast->CreateInteraction(
+          InteractionType::bond, "BONDS", bond_index, mi->getId(),
+          std::vector<int>{bead_id1, bead_id2});
       mi->AddInteraction(ic);
       ++bond_index;
     }
 
     // Finally we want to build an exclusion matrix
-    top.RebuildExclusions();
+    top_cast->RebuildExclusions();
   }
 
   return !_fl.eof();
-}*/
+}
+
 }  // namespace csg
 }  // namespace votca
+
+#endif  // __VOTCA_CSG_PDBREADER_H

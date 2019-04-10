@@ -36,7 +36,7 @@ namespace votca {
 namespace csg {
 
 using namespace std;
-
+/*
 void TrajectoryWriter::RegisterPlugins() {
   TrjWriterFactory().Register<PDBWriter>("pdb");
   TrjWriterFactory().Register<XYZWriter>("xyz");
@@ -48,6 +48,6 @@ void TrajectoryWriter::RegisterPlugins() {
   TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
 #endif
   TrjWriterFactory().Register<GROWriter>("gro");
-}
+}*/
 }  // namespace csg
 }  // namespace votca

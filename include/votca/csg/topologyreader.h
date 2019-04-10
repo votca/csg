@@ -27,28 +27,74 @@
 namespace votca {
 namespace csg {
 
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T>
 class TopologyReader {
+ private:
+  /*  template <class Bead_T, class Molecule_T>
+      bool ReadTopology_(std::string file,
+          TemplateTopology<Bead_T, Molecule_T> &top) {
+        throw std::runtime_error(
+            "ReadTopology_ method must be defined by child class.");
+      }*/
  public:
   virtual ~TopologyReader() {}
   /// open, read and close topology file
   // virtual bool ReadTopology(std::string file,
   // TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top) = 0;
 
-  template <class Bead_T, class Molecule_T>
-  bool ReadTopology(std::string file,
-                    TemplateTopology<Bead_T, Molecule_T> &top) {
-    throw std::runtime_error(
-        "ReadTopology method must be derived by child class.");
-  }
+  //  template <class Bead_T, class Molecule_T>
+  //  virtual bool ReadTopology(std::string file,
+  //                   TemplateTopology<BaseBead, BaseMolecule<BaseBead>> * top)
+  //                   = 0;
+  virtual bool ReadTopology(std::string file, void* top) = 0;
 
+  //    return ReadTopology_(file,top);
+  // }
   static void RegisterPlugins(void);
 };
 
 // important - singleton pattern, make sure factory is created before accessed
-inline FileFormatFactory<TopologyReader> &TopReaderFactory() {
-  static FileFormatFactory<TopologyReader> _TopReaderFactory;
+/*template<class Bead_T,
+         template <class > class Molecule_T,
+         template < class, template< class > class > class Topology_T> */
+/*csg::FileFormatFactory<Bead_T,Molecule_T,Topology_T,TopologyReader> &
+TopReaderFactory() { static
+FileFormatFactory<Bead_T,Molecule_T,Topology_T,TopologyReader>
+_TopReaderFactory; return _TopReaderFactory;
+}*/
+
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T,
+          template <class, template <class> class,
+                    template <class, template <class> class> class> class T>
+inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>&
+    TopReaderFactory() {
+  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TopReaderFactory;
   return _TopReaderFactory;
 }
+
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+class PDBReader;
+
+template <class Bead_T, template <class> class Molecule_T,
+          template <class, template <class> class> class Topology_T>
+void TopologyReader<Bead_T, Molecule_T, Topology_T>::RegisterPlugins(void) {
+//  TopReaderFactory().Register<XMLTopologyReader>("xml");
+//  TopReaderFactory().Register<LAMMPSDumpReader>("dump");
+//  TopReaderFactory().Register<LAMMPSDataReader>("data");
+//  TopReaderFactory().Register<XYZReader>("xyz");
+//  TopReaderFactory().Register<GROReader>("gro");
+#ifdef GMX_DOUBLE
+//  TopReaderFactory().Register<GMXTopologyReader>("tpr");
+#endif
+  TopReaderFactory<Bead_T, Molecule_T, Topology_T,
+                   PDBReader<Bead_T, Molecule_T, Topology_T>>()
+      .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
+  //  TopReaderFactory().Register<DLPOLYTopologyReader>("dlpf");
+}
+
 }  // namespace csg
 }  // namespace votca
 

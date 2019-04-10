@@ -35,11 +35,11 @@ class XYZWriter : public TrajectoryWriter {
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
   template <class Bead_T, class Molecule_T>
-  void Write(TemplateTopology<Bead_T, Molecule_T> *conf);
+  void Write_(TemplateTopology<Bead_T, Molecule_T> *conf);
 
   template <class T, class Bead_T, class Molecule_T>
-  void Write(TemplateTopology<Bead_T, Molecule_T> &top, T &container,
-             std::string header);
+  void Write_(TemplateTopology<Bead_T, Molecule_T> &top, T &container,
+              std::string header);
 
   //  void Write(CSG_Topology &top, T &container, std::string header);
 
@@ -82,16 +82,16 @@ class XYZWriter : public TrajectoryWriter {
 };
 
 template <class Bead_T, class Molecule_T>
-void XYZWriter::Write(TemplateTopology<Bead_T, Molecule_T> *conf) {
+void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> *conf) {
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
                         (conf->getStep() + 1) % conf->getTime())
                            .str();
-  Write<TemplateTopology<Bead_T, Molecule_T>>(*conf, header);
+  Write_<TemplateTopology<Bead_T, Molecule_T>>(*conf, header);
 }
 
 template <typename T, class Bead_T, class Molecule_T>
-inline void XYZWriter::Write(TemplateTopology<Bead_T, Molecule_T> &top,
-                             T &container, std::string header) {
+inline void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> &top,
+                              T &container, std::string header) {
   // inline void XYZWriter::Write(CSG_Topology &top, T &container,
   //                            std::string header) {
 

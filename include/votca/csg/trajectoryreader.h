@@ -18,55 +18,86 @@
 #ifndef VOTCA_CSG_TRAJECTORYREADER_H
 #define VOTCA_CSG_TRAJECTORYREADER_H
 
-#include "basebead.h"
-#include "basemolecule.h"
+//#include "basebead.h"
+//#include "basemolecule.h"
+//#include "pdbreader.h"
 #include "fileformatfactory.h"
-#include "templatetopology.h"
+//#include "templatetopology.h"
 #include <string>
-
 namespace votca {
 namespace csg {
 
 /**
     \brief trajectoryreader interface
 
-    This class defines the interface a trajectory reader has to implement
+    This typename defines the interface a trajectory reader has to implement
  */
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
 class TrajectoryReader {
+ private:
  public:
   virtual ~TrajectoryReader() {}
   /// open a trejectory file
   virtual bool Open(const std::string &file) = 0;
 
-  virtual void Close(){};
+  virtual void Close() = 0;
 
   //  template<class Bead_T>;
 
   // template< template<class> class Bead_T>
   //  class Molecule_T;
 
-  template <class Bead_T, class Molecule_T>
-  bool FirstFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
-    throw std::runtime_error(
-        "The FirstFrame method must be overwritten by a child class");
-  }
+  // virtual bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
+  // &top)=0;
+  virtual bool FirstFrame(void *top) = 0;
   /// read in the next frame
-  template <class Bead_T, class Molecule_T>
-  bool NextFrame(TemplateTopology<Bead_T, Molecule_T> &top) {
-    throw std::runtime_error(
-        "The NextFrame method must be overwritten by a child class");
-  }
+  // virtual bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
+  // *top) = 0;
+  virtual bool NextFrame(void *top) = 0;
   // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   static void RegisterPlugins(void);
 };
 
 // important - singleton pattern, make sure factory is created before accessed
-inline FileFormatFactory<TrajectoryReader> &TrjReaderFactory() {
-  static FileFormatFactory<TrajectoryReader> _TrjReaderFactory;
+
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T,
+          template <typename, template <typename> class,
+                    template <typename, template <typename> class> class>
+          class T>
+inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>
+    &TrjReaderFactory() {
+  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TrjReaderFactory;
   return _TrjReaderFactory;
 }
 
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+class PDBReader;
+
+template <typename Bead_T, template <typename> class Molecule_T,
+          template <typename, template <typename> class> class Topology_T>
+inline void TrajectoryReader<Bead_T, Molecule_T, Topology_T>::RegisterPlugins(
+    void) {
+  /*    TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
+      TrjReaderFactory().Register<LAMMPSDataReader>("data");
+      TrjReaderFactory().Register<XYZReader>("xyz");
+    #ifdef GMX_DOUBLE
+      TrjReaderFactory().Register<GMXTrajectoryReader>("trr");
+      TrjReaderFactory().Register<GMXTrajectoryReader>("xtc");
+    #endif
+      TrjReaderFactory().Register<GROReader>("gro");*/
+  TrjReaderFactory<Bead_T, Molecule_T, Topology_T, TrajectoryReader>()
+      .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
+  /*
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlph");
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlpc");
+#ifdef H5MD
+  TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
+#endif*/
+}
 }  // namespace csg
 }  // namespace votca
 

@@ -28,12 +28,12 @@
 #ifdef GMX_DOUBLE
 #include "modules/io/gmxtopologyreader.h"
 #endif
+#include "../../include/votca/csg/pdbreader.h"
 #include "modules/io/dlpolytopologyreader.h"
-#include "modules/io/pdbreader.h"
 
 namespace votca {
 namespace csg {
-
+/*
 void TopologyReader::RegisterPlugins(void) {
   TopReaderFactory().Register<XMLTopologyReader>("xml");
   TopReaderFactory().Register<LAMMPSDumpReader>("dump");
@@ -45,7 +45,7 @@ void TopologyReader::RegisterPlugins(void) {
 #endif
   TopReaderFactory().Register<PDBReader>("pdb");
   TopReaderFactory().Register<DLPOLYTopologyReader>("dlpf");
-}
+}*/
 
 }  // namespace csg
 }  // namespace votca
