@@ -20,35 +20,36 @@
 #endif
 
 #include "../../include/votca/csg/csgtopology.h"
-#include "../../include/votca/csg/pdbwriter.h"
+#include "../../include/votca/csg/io/growriter.h"
+#include "../../include/votca/csg/io/pdbwriter.h"
+#include "../../include/votca/csg/io/xyzwriter.h"
 #include "../../include/votca/csg/trajectorywriter.h"
-/*
-#include "modules/io/dlpolytrajectorywriter.h"
-#include "modules/io/lammpsdumpwriter.h"
-#include <iostream>
-#include <votca/csg/xyzwriter.h>
-
 #ifdef GMX_DOUBLE
-#include "modules/io/gmxtrajectorywriter.h"
+#include "../../include/votca/csg/io/gmxtrajectorywriter.h"
 #endif
-#include "modules/io/dlpolytrajectorywriter.h"
-#include "modules/io/growriter.h"
-*/
+#include "../../include/votca/csg/io/dlpolytrajectorywriter.h"
+#include "../../include/votca/csg/io/lammpsdumpwriter.h"
+
 namespace votca {
 namespace csg {
 
 using namespace std;
 void TrajectoryWriter::RegisterPlugins() {
   TrjWriterFactory().Register<PDBWriter<Bead, Molecule, CSG_Topology>>("pdb");
-  /*  TrjWriterFactory().Register<XYZWriter>("xyz");
-    TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
-    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
-    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
-  #ifdef GMX_DOUBLE
-    TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
-    TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
-  #endif
-    TrjWriterFactory().Register<GROWriter>("gro");*/
+  TrjWriterFactory().Register<XYZWriter<Bead, Molecule, CSG_Topology>>("xyz");
+  TrjWriterFactory().Register<GROWriter<Bead, Molecule, CSG_Topology>>("gro");
+#ifdef GMX_DOUBLE
+  TrjWriterFactory()
+      .Register<GMXTrajectoryWriter<Bead, Molecule, CSG_Topology>>("trr");
+  TrjWriterFactory()
+      .Register<GMXTrajectoryWriter<Bead, Molecule, CSG_Topology>>("xtc");
+#endif
+  TrjWriterFactory()
+      .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlph");
+  TrjWriterFactory()
+      .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlpc");
+  TrjWriterFactory().Register<LAMMPSDumpWriter<Bead, Molecule, CSG_Topology>>(
+      "dump");
 }
 }  // namespace csg
 }  // namespace votca

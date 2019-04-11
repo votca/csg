@@ -20,33 +20,36 @@
 #endif
 
 #include "../../include/votca/csg/csgtopology.h"
-#include "../../include/votca/csg/pdbreader.h"
+#include "../../include/votca/csg/io/groreader.h"
+#include "../../include/votca/csg/io/lammpsdumpreader.h"
+#include "../../include/votca/csg/io/pdbreader.h"
+#include "../../include/votca/csg/io/xmltopologyreader.h"
+#include "../../include/votca/csg/io/xyzreader.h"
 #include "../../include/votca/csg/topologyreader.h"
-/*
-#include "modules/io/groreader.h"
-#include "modules/io/lammpsdatareader.h"
-#include "modules/io/lammpsdumpreader.h"
-#include "modules/io/xmltopologyreader.h"
-#include <votca/csg/xyzreader.h>
 #ifdef GMX_DOUBLE
-#include "modules/io/gmxtopologyreader.h"
+#include "../../include/votca/csg/io/gmxtopologyreader.h"
 #endif
-#include "modules/io/dlpolytopologyreader.h"
-*/
+#include "../../include/votca/csg/io/dlpolytopologyreader.h"
+#include "../../include/votca/csg/io/lammpsdatareader.h"
 namespace votca {
 namespace csg {
 
 void TopologyReader::RegisterPlugins(void) {
   TopReaderFactory().Register<PDBReader<Bead, Molecule, CSG_Topology>>("pdb");
-  /*  TopReaderFactory().Register<XMLTopologyReader>("xml");
-    TopReaderFactory().Register<LAMMPSDumpReader>("dump");
-    TopReaderFactory().Register<LAMMPSDataReader>("data");
-    TopReaderFactory().Register<XYZReader>("xyz");
-    TopReaderFactory().Register<GROReader>("gro");
-  #ifdef GMX_DOUBLE
-    TopReaderFactory().Register<GMXTopologyReader>("tpr");
-  #endif
-    TopReaderFactory().Register<DLPOLYTopologyReader>("dlpf");*/
+  TopReaderFactory().Register<XMLTopologyReader<Bead, Molecule, CSG_Topology>>(
+      "xml");
+  TopReaderFactory().Register<XYZReader<Bead, Molecule, CSG_Topology>>("xyz");
+  TopReaderFactory().Register<LAMMPSDumpReader<Bead, Molecule, CSG_Topology>>(
+      "dump");
+  TopReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
+#ifdef GMX_DOUBLE
+  TopReaderFactory().Register<GMXTopologyReader<Bead, Molecule, CSG_Topology>>(
+      "tpr");
+#endif
+  TopReaderFactory().Register<LAMMPSDataReader<Bead, Molecule, CSG_Topology>>(
+      "data");
+  TopReaderFactory()
+      .Register<DLPOLYTopologyReader<Bead, Molecule, CSG_Topology>>("dlpf");
 }
 
 }  // namespace csg

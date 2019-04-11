@@ -19,39 +19,52 @@
 #include <votca_config.h>
 #endif
 
-#include "../../include/votca/csg/pdbreader.h"
+#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/io/dlpolytrajectoryreader.h"
+#include "../../include/votca/csg/io/gmxtrajectoryreader.h"
+#include "../../include/votca/csg/io/pdbreader.h"
+#include "../../include/votca/csg/io/xyzreader.h"
 #include "../../include/votca/csg/trajectoryreader.h"
-/*#include "modules/io/lammpsdatareader.h"
-#include "modules/io/lammpsdumpreader.h"
-#include <votca/csg/xyzreader.h>
-
-#ifdef GMX_DOUBLE
-#include "modules/io/gmxtrajectoryreader.h"
-#endif
-#include "modules/io/dlpolytrajectoryreader.h"
-#include "modules/io/groreader.h"
 #ifdef H5MD
-#include "modules/io/h5mdtrajectoryreader.h"
+#include "../../include/votca/csg/h5mdtrajectoryreader.h"
 #endif
-*/
+#include "../../include/votca/csg/io/groreader.h"
+#include "../../include/votca/csg/io/lammpsdatareader.h"
+#include "../../include/votca/csg/io/lammpsdumpreader.h"
+#ifdef GMX_DOUBLE
+#include "../../include/votca/csg/io/gmxtrajectoryreader.h"
+#endif
+/*
+ */
 namespace votca {
 namespace csg {
 
 void TrajectoryReader::RegisterPlugins(void) {
   TrjReaderFactory().Register<PDBReader<Bead, Molecule, CSG_Topology>>("pdb");
-  /*  TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
-    TrjReaderFactory().Register<LAMMPSDataReader>("data");
-    TrjReaderFactory().Register<XYZReader>("xyz");
-  #ifdef GMX_DOUBLE
-    TrjReaderFactory().Register<GMXTrajectoryReader>("trr");
-    TrjReaderFactory().Register<GMXTrajectoryReader>("xtc");
-  #endif
-    TrjReaderFactory().Register<GROReader>("gro");
-    TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlph");
-    TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlpc");
-  #ifdef H5MD
-    TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
-  #endif*/
+  TrjReaderFactory()
+      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("trr");
+  TrjReaderFactory()
+      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("xtc");
+  TrjReaderFactory()
+      .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlph");
+  TrjReaderFactory()
+      .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlpc");
+  TrjReaderFactory().Register<XYZReader<Bead, Molecule, CSG_Topology>>("xyz");
+#ifdef H5MD
+  TrjReaderFactory()
+      .Register<H5MDTrajectoryReader<Bead, Molecule, CSG_Topology>>("h5");
+#endif
+  TrjReaderFactory().Register<LAMMPSDumpReader<Bead, Molecule, CSG_Topology>>(
+      "dump");
+  TrjReaderFactory().Register<LAMMPSDataReader<Bead, Molecule, CSG_Topology>>(
+      "data");
+  TrjReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
+#ifdef GMX_DOUBLE
+  TrjReaderFactory()
+      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("trr");
+  TrjReaderFactory()
+      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("xtc");
+#endif
 }
 
 }  // namespace csg
