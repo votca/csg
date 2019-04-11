@@ -18,6 +18,9 @@
 #ifndef VOTCA_CSG_PDBWRITER_H
 #define VOTCA_CSG_PDBWRITER_H
 
+#include <Eigen/Dense>
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <stdio.h>
 //#include <votca/csg/csgtopology.h>
 #include "trajectorywriter.h"
@@ -38,9 +41,8 @@ namespace csg {
  * Further note that pdb files store the ids, serical numbers and indices
  * starting at 1, votca uses ids, indices and serial numbers starting at 0.
  */
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <class, template <typename> class> class Topology_T>
-class PDBWriter : public TrajectoryWriter<Bead_T, Molecule_T, Topology_T> {
+template <typename Bead_T, class Molecule_T, class Topology_T>
+class PDBWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
   void Close();
@@ -53,7 +55,7 @@ class PDBWriter : public TrajectoryWriter<Bead_T, Molecule_T, Topology_T> {
   void Write(void *conf);
 
   template <class T>  //, class Bead_T, class Molecule_T>
-  void WriteContainer(Topology_T<Bead_T, Molecule_T> *conf, T &container);
+  void WriteContainer(Topology_T *conf, T &container);
   // void WriteContainer(CSG_Topology *conf, T &container);
 
   void WriteHeader(std::string header);
@@ -134,8 +136,7 @@ class PDBWriter : public TrajectoryWriter<Bead_T, Molecule_T, Topology_T> {
     return bead.Pos() * tools::conv::nm2ang;
   }
 
-  std::vector<Bead_T *> getIterable(Topology_T<Bead_T, Molecule_T<Bead_T>> &top,
-                                    Bead_T &container) {
+  std::vector<Bead_T *> getIterable(Topology_T &top, Bead_T &container) {
     std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = container.getBeadIds();
     for (int &bead_id : bead_ids) {
@@ -144,8 +145,7 @@ class PDBWriter : public TrajectoryWriter<Bead_T, Molecule_T, Topology_T> {
     return beads;
   }
 
-  std::vector<Bead_T *> getIterable(
-      Topology_T<Bead_T, Molecule_T<Bead_T>> &top) {
+  std::vector<Bead_T *> getIterable(Topology_T &top) {
     // std::vector<Bead_T *> getIterable(CSG_Topology &top) {
     std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = top.getBeadIds();
@@ -159,10 +159,10 @@ class PDBWriter : public TrajectoryWriter<Bead_T, Molecule_T, Topology_T> {
 };
 
 // template<class Bead_T, class Molecule_T>
-template <class Bead_T, class Molecule_T>
+template <class Bead_T, class Molecule_T, class Topology_T>
 template <class T>
-inline void PDBWriter<Bead_T, Molecule_T>::WriteContainer(
-    Topology_T<Bead_T, Molecule_T> *conf, T &container) {
+inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
+    Topology_T *conf, T &container) {
 
   if (_out.is_open()) {
     boost::format atomfrmt(
@@ -193,15 +193,13 @@ inline void PDBWriter<Bead_T, Molecule_T>::WriteContainer(
   }
 }
 
-template <class Bead_T, class Molecule_T>
-void PDBWriter<Bead_T, Molecule_T>::Write(void *conf) {
-  Topology_T<Bead_T, Molecule_T> *conf_cast =
-      static_cast<Topology_T<Bead_T, Molecule_T> *>(conf);
+template <class Bead_T, class Molecule_T, class Topology_T>
+void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
+  Topology_T *conf_cast = static_cast<Topology_T *>(conf);
   if (_out.is_open()) {
     _out << boost::format("MODEL     %1$4d\n") % (conf_cast->getStep() + 1)
          << std::flush;
-    WriteContainer<Topology_T<Bead_T, Molecule_T<Bead_T>>>(conf_cast,
-                                                           *conf_cast);
+    WriteContainer<Topology_T>(conf_cast, *conf_cast);
     _out << "ENDMDL" << std::endl;
   } else {
     throw std::runtime_error(

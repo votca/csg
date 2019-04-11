@@ -27,7 +27,6 @@
 #include <votca/csg/trajectoryreader.h>
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
-
 namespace votca {
 namespace csg {
 
@@ -38,7 +37,7 @@ namespace csg {
     for xyz files
 
 */
-class XYZReader : public TrajectoryReader, public TopologyReader {
+/*class XYZReader : public TrajectoryReader, public TopologyReader {
  public:
   XYZReader() {}
   ~XYZReader() {}
@@ -218,7 +217,7 @@ inline bool XYZReader::ReadFrame(T &container) {
     }
   }
   return !_fl.eof();
-}
+}*/
 }  // namespace csg
 }  // namespace votca
 

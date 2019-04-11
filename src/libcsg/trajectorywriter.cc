@@ -19,11 +19,13 @@
 #include <votca_config.h>
 #endif
 
+#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/pdbwriter.h"
+#include "../../include/votca/csg/trajectorywriter.h"
+/*
 #include "modules/io/dlpolytrajectorywriter.h"
 #include "modules/io/lammpsdumpwriter.h"
 #include <iostream>
-#include <votca/csg/pdbwriter.h>
-#include <votca/csg/trajectorywriter.h>
 #include <votca/csg/xyzwriter.h>
 
 #ifdef GMX_DOUBLE
@@ -31,23 +33,22 @@
 #endif
 #include "modules/io/dlpolytrajectorywriter.h"
 #include "modules/io/growriter.h"
-
+*/
 namespace votca {
 namespace csg {
 
 using namespace std;
-/*
 void TrajectoryWriter::RegisterPlugins() {
-  TrjWriterFactory().Register<PDBWriter>("pdb");
-  TrjWriterFactory().Register<XYZWriter>("xyz");
-  TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
-#ifdef GMX_DOUBLE
-  TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
-  TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
-#endif
-  TrjWriterFactory().Register<GROWriter>("gro");
-}*/
+  TrjWriterFactory().Register<PDBWriter<Bead, Molecule, CSG_Topology>>("pdb");
+  /*  TrjWriterFactory().Register<XYZWriter>("xyz");
+    TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
+    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
+    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
+  #ifdef GMX_DOUBLE
+    TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
+    TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
+  #endif
+    TrjWriterFactory().Register<GROWriter>("gro");*/
+}
 }  // namespace csg
 }  // namespace votca

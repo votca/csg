@@ -42,10 +42,8 @@ namespace csg {
 */
 //    template <class Bead_T, class Molecule_T>
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
-class PDBReader : public csg::TopologyReader<Bead_T, Molecule_T, Topology_T>,
-                  public csg::TrajectoryReader<Bead_T, Molecule_T, Topology_T> {
+template <class Bead_T, class Molecule_T, class Topology_T>
+class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
  public:
   /// Constuctor
   PDBReader() {}
@@ -80,15 +78,13 @@ class PDBReader : public csg::TopologyReader<Bead_T, Molecule_T, Topology_T>,
 // bool PDBReader::ReadTopology_(std::string file,
 // TemplateTopology<Bead_T,Molecule_T> &top) {
 // template <class Bead_T, class Molecule_T>
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
+template <typename Bead_T, class Molecule_T, class Topology_T>
 bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
                                                              void *top) {
 
-  Topology_T<Bead_T, Molecule_T> top_cast =
-      static_cast<Topology_T<Bead_T, Molecule_T>>(top);
+  Topology_T *top_cast = static_cast<Topology_T *>(top);
   _topology = true;
-  top_cast.Cleanup();
+  top_cast->Cleanup();
 
   _fl.open(file.c_str());
   if (!_fl.is_open())
@@ -101,19 +97,16 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
 }
 
 // template <class Bead_T, class Molecule_T>
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
+template <typename Bead_T, class Molecule_T, class Topology_T>
 bool PDBReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
   _topology = false;
   return NextFrame(top);
 }
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
+template <typename Bead_T, class Molecule_T, class Topology_T>
 bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
 
-  Topology_T<Bead_T, Molecule_T> *top_cast =
-      static_cast<Topology_T<Bead_T, Molecule_T> *>(top);
+  Topology_T *top_cast = static_cast<Topology_T *>(top);
   std::string line;
   tools::Elements elements;
   // Two column vector for storing all bonds
@@ -479,13 +472,13 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
     // Molecule map
     // First int - is the index of the molecule
     // Molecule* - is a pointer to the Molecule object
-    std::map<int, Molecule_T<Bead_T> *> mol_map;
+    std::map<int, Molecule_T *> mol_map;
 
     for (const std::pair<const int, std::list<int>> &mol_and_atom_ids :
          molecule_atms) {
 
       int molecule_id = mol_and_atom_ids.first;
-      Molecule_T<Bead_T> *mi = top_cast->CreateMolecule(
+      Molecule_T *mi = top_cast->CreateMolecule(
           molecule_id, tools::topology_constants::unassigned_molecule_type);
       mol_map[molecule_id] = mi;
 
@@ -505,7 +498,7 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
       // Should be able to just look at one of the atoms the bond is attached
       // too because the other will also be attached to the same molecule.
       int mol_ind = atm_molecule[atm_id1];
-      Molecule_T<Bead_T> *mi = mol_map[mol_ind];
+      Molecule_T *mi = mol_map[mol_ind];
       // Grab the id of the bead associated with the atom
       // It may be the case that the atom id's and bead id's are different
       int bead_id1 = atm_id1;

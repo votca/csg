@@ -26,29 +26,19 @@
 namespace votca {
 namespace csg {
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T,
-          template <class, template <class> class,
-                    template <class, template <class> class> class> class T>
-class FileFormatFactory : public csg::ObjectFactory<std::string, Bead_T,
-                                                    Molecule_T, Topology_T, T> {
+template <class T>
+class FileFormatFactory : public csg::ObjectFactory<std::string, T> {
  public:
   FileFormatFactory() {}
 
-  T<Bead_T, Molecule_T, Topology_T> *Create(const std::string &file);
+  T *Create(const std::string &file);
 };
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T,
-          template <class, template <class> class,
-                    template <class, template <class> class> class> class T>
-T<Bead_T, Molecule_T, Topology_T>
-    *FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>::Create(
-        const std::string &file) {
+template <class T>
+T *FileFormatFactory<T>::Create(const std::string &file) {
   std::string filetype = tools::filesystem::GetFileExtension(file);
   try {
-    return csg::ObjectFactory<std::string, Bead_T, Molecule_T, Topology_T,
-                              T>::Create(filetype);
+    return csg::ObjectFactory<std::string, T>::Create(filetype);
   } catch (std::exception &error) {
     throw std::runtime_error("Error '" + filetype +
                              "' file format of file "

@@ -32,8 +32,6 @@ namespace csg {
 
     This typename defines the interface a trajectory reader has to implement
  */
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
 class TrajectoryReader {
  private:
  public:
@@ -62,42 +60,35 @@ class TrajectoryReader {
 
 // important - singleton pattern, make sure factory is created before accessed
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T,
-          template <typename, template <typename> class,
-                    template <typename, template <typename> class> class>
-          class T>
-inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>
-    &TrjReaderFactory() {
-  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TrjReaderFactory;
+inline FileFormatFactory<TrajectoryReader> &TrjReaderFactory() {
+  static FileFormatFactory<TrajectoryReader> _TrjReaderFactory;
   return _TrjReaderFactory;
 }
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
-class PDBReader;
+// template <class Bead_T,  class Molecule_T, class Topology_T>
+// class PDBReader;
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
-inline void TrajectoryReader<Bead_T, Molecule_T, Topology_T>::RegisterPlugins(
-    void) {
-  /*    TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
-      TrjReaderFactory().Register<LAMMPSDataReader>("data");
-      TrjReaderFactory().Register<XYZReader>("xyz");
-    #ifdef GMX_DOUBLE
-      TrjReaderFactory().Register<GMXTrajectoryReader>("trr");
-      TrjReaderFactory().Register<GMXTrajectoryReader>("xtc");
-    #endif
-      TrjReaderFactory().Register<GROReader>("gro");*/
-  TrjReaderFactory<Bead_T, Molecule_T, Topology_T, TrajectoryReader>()
-      .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
-  /*
-  TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlph");
-  TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlpc");
+// template <class Bead_T,  class Molecule_T, class Topology_T>
+// inline void TrajectoryReader<Bead_T, Molecule_T,
+// Topology_T>::RegisterPlugins(
+//    void) {
+/*    TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
+    TrjReaderFactory().Register<LAMMPSDataReader>("data");
+    TrjReaderFactory().Register<XYZReader>("xyz");
+  #ifdef GMX_DOUBLE
+    TrjReaderFactory().Register<GMXTrajectoryReader>("trr");
+    TrjReaderFactory().Register<GMXTrajectoryReader>("xtc");
+  #endif
+    TrjReaderFactory().Register<GROReader>("gro");*/
+// TrjReaderFactory<Bead_T, Molecule_T, Topology_T>()
+//   .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
+/*
+TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlph");
+TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlpc");
 #ifdef H5MD
-  TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
+TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
 #endif*/
-}
+//}
 }  // namespace csg
 }  // namespace votca
 

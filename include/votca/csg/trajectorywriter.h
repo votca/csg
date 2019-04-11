@@ -29,8 +29,6 @@
 namespace votca {
 namespace csg {
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
 class TrajectoryWriter {
  private:
   /*    template <class Bead_T, class Molecule_T>
@@ -53,35 +51,26 @@ class TrajectoryWriter {
 };
 
 // important - singleton pattern, make sure factory is created before accessed
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T,
-          template <class, template <class> class,
-                    template <class, template <class> class> class> class T>
-inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>
-    &TrjWriterFactory() {
-  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TrjWriterFactory;
+inline FileFormatFactory<TrajectoryWriter> &TrjWriterFactory() {
+  static FileFormatFactory<TrajectoryWriter> _TrjWriterFactory;
   return _TrjWriterFactory;
 }
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T>
-class PDBWriter;
+// template <class Bead_T,  class Molecule_T,class Topology_T>
+// void TrajectoryWriter<Bead_T, Molecule_T, Topology_T>::RegisterPlugins() {
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T>
-void TrajectoryWriter<Bead_T, Molecule_T, Topology_T>::RegisterPlugins() {
-  TrjWriterFactory<Bead_T, Molecule_T, Topology_T, PDBWriter>()
-      .template Register<Bead_T, Molecule_T, Topology_T, PDBWriter>("pdb");
-  /*  TrjWriterFactory().Register<XYZWriter>("xyz");
-    TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
-    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
-    TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
-  #ifdef GMX_DOUBLE
-    TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
-    TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
-  #endif
-    TrjWriterFactory().Register<GROWriter>("gro"); */
-}
+// j  TrjWriterFactory<Bead_T,Molecule_T,Topology_T>()
+//    .template Register<PDBWriter<Bead_T,Molecule_T,Topology_T>>("pdb");
+/*  TrjWriterFactory().Register<XYZWriter>("xyz");
+  TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
+#ifdef GMX_DOUBLE
+  TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
+  TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
+#endif
+  TrjWriterFactory().Register<GROWriter>("gro"); */
+//}
 
 }  // namespace csg
 }  // namespace votca

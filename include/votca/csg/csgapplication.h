@@ -21,6 +21,7 @@
 #include "atomcgconverter.h"
 #include "cgobserver.h"
 #include "csgtopology.h"
+#include "molecule.h"
 #include "trajectoryreader.h"
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>

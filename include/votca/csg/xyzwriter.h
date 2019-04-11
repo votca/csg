@@ -25,7 +25,7 @@
 
 namespace votca {
 namespace csg {
-
+/*
 class XYZWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
@@ -45,9 +45,6 @@ class XYZWriter : public TrajectoryWriter {
 
  private:
   //  template <class T>
-  /*  int getSize(T &container) {
-      return getIterable(container).size();
-    }*/
 
   template <class Atom>
   std::string getType(Atom &atom) {
@@ -113,7 +110,7 @@ inline void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> &top,
     _out << fmter % atomtype % r.x() % r.y() % r.z();
   }
   _out << std::flush;
-}
+}*/
 }  // namespace csg
 }  // namespace votca
 

@@ -27,8 +27,6 @@
 namespace votca {
 namespace csg {
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T>
 class TopologyReader {
  private:
   /*  template <class Bead_T, class Molecule_T>
@@ -64,36 +62,28 @@ FileFormatFactory<Bead_T,Molecule_T,Topology_T,TopologyReader>
 _TopReaderFactory; return _TopReaderFactory;
 }*/
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T,
-          template <class, template <class> class,
-                    template <class, template <class> class> class> class T>
-inline FileFormatFactory<Bead_T, Molecule_T, Topology_T, T>&
-    TopReaderFactory() {
-  static FileFormatFactory<Bead_T, Molecule_T, Topology_T, T> _TopReaderFactory;
+inline FileFormatFactory<TopologyReader>& TopReaderFactory() {
+  static FileFormatFactory<TopologyReader> _TopReaderFactory;
   return _TopReaderFactory;
 }
 
-template <typename Bead_T, template <typename> class Molecule_T,
-          template <typename, template <typename> class> class Topology_T>
-class PDBReader;
+// template <typename Bead_T,  class Molecule_T, class Topology_T>
+// class PDBReader;
 
-template <class Bead_T, template <class> class Molecule_T,
-          template <class, template <class> class> class Topology_T>
-void TopologyReader<Bead_T, Molecule_T, Topology_T>::RegisterPlugins(void) {
+// template <class Bead_T,  class Molecule_T, class Topology_T>
+// void TopologyReader<Bead_T, Molecule_T, Topology_T>::RegisterPlugins(void) {
 //  TopReaderFactory().Register<XMLTopologyReader>("xml");
 //  TopReaderFactory().Register<LAMMPSDumpReader>("dump");
 //  TopReaderFactory().Register<LAMMPSDataReader>("data");
 //  TopReaderFactory().Register<XYZReader>("xyz");
 //  TopReaderFactory().Register<GROReader>("gro");
-#ifdef GMX_DOUBLE
+//#ifdef GMX_DOUBLE
 //  TopReaderFactory().Register<GMXTopologyReader>("tpr");
-#endif
-  TopReaderFactory<Bead_T, Molecule_T, Topology_T,
-                   PDBReader<Bead_T, Molecule_T, Topology_T>>()
-      .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
-  //  TopReaderFactory().Register<DLPOLYTopologyReader>("dlpf");
-}
+//#endif
+// TopReaderFactory<Bead_T, Molecule_T, Topology_T>()
+//    .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
+//  TopReaderFactory().Register<DLPOLYTopologyReader>("dlpf");
+//}
 
 }  // namespace csg
 }  // namespace votca
