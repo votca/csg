@@ -18,6 +18,7 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE pdbreader_test
+#include <boost/any.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cmath>
@@ -30,7 +31,6 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/vec.h>
-
 namespace votca {
 namespace csg {
 class Bead;
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   string str = "Molecule1.pdb";
   reader = TopReaderFactory().Create(str);
 
-  void* uncast_top = static_cast<void*>(&top);
-  reader->ReadTopology(str, uncast_top);
+  boost::any any_ptr(&top);
+  reader->ReadTopology(str, any_ptr);
   BOOST_CHECK_EQUAL(reader != NULL, true);
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
 
@@ -206,8 +206,8 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   TopologyReader* reader;
   string str = "Molecule1.pdb";
   reader = TopReaderFactory().Create(str);
-  void* uncast_top = static_cast<void*>(&top);
-  reader->ReadTopology(str, uncast_top);
+  boost::any any_ptr(&top);
+  reader->ReadTopology(str, any_ptr);
   BOOST_CHECK_EQUAL(reader != NULL, true);
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
   delete reader;
@@ -224,8 +224,8 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   CSG_Topology top2;
   TopologyReader* reader2;
   reader2 = TopReaderFactory().Create(str2);
-  void* uncast_top2 = static_cast<void*>(&top2);
-  reader2->ReadTopology(str2, uncast_top2);
+  boost::any any_ptr2(&top2);
+  reader2->ReadTopology(str2, any_ptr2);
   delete reader2;
   BOOST_CHECK_EQUAL(reader2 != NULL, true);
   BOOST_CHECK_EQUAL(top2.BeadCount(), 10);

@@ -21,6 +21,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../../include/votca/csg/csgtopology.h"
+#include <boost/any.hpp>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -220,8 +221,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TrajectoryReader *reader;
   reader = TrjReaderFactory().Create(lammpsdumpfilename);
   reader->Open(lammpsdumpfilename);
-  void *uncast_top = static_cast<void *>(&top);
-  reader->FirstFrame(uncast_top);
+  boost::any any_ptr(&top);
+  reader->FirstFrame(any_ptr);
   reader->Close();
   delete reader;
 
@@ -352,8 +353,8 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   TrajectoryReader *reader;
   reader = TrjReaderFactory().Create(lammpsDumpFileName);
   reader->Open(lammpsDumpFileName);
-  void *uncast_top = static_cast<void *>(&top);
-  reader->FirstFrame(uncast_top);
+  boost::any any_ptr(&top);
+  reader->FirstFrame(any_ptr);
   reader->Close();
   delete reader;
 

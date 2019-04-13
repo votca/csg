@@ -21,6 +21,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../../include/votca/csg/csgtopology.h"
+#include <boost/any.hpp>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -68,9 +69,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   TopologyReader::RegisterPlugins();
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
-  CSG_Topology *top_ptr = &top;
-  void *uncast_top = static_cast<void *>(top_ptr);
-  lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
+  boost::any any_ptr(&top);
+  lammpsDataReader->ReadTopology(lammpsdatafilename, any_ptr);
   delete lammpsDataReader;
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
   CSG_Topology *top_ptr = &top;
-  void *uncast_top = static_cast<void *>(top_ptr);
-  lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
+  boost::any any_ptr(&top);
+  lammpsDataReader->ReadTopology(lammpsdatafilename, any_ptr);
   delete lammpsDataReader;
 
   string lammpsdatafilename2 = "test_polymer4.data";
@@ -137,9 +137,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   lammpsDataReaderTrj = TrjReaderFactory().Create("test.data");
 
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
-  CSG_Topology *top_ptr2 = &top;
-  void *uncast_top2 = static_cast<void *>(top_ptr2);
-  lammpsDataReaderTrj->FirstFrame(uncast_top2);
+  boost::any any_ptr2(&top);
+  lammpsDataReaderTrj->FirstFrame(any_ptr2);
   lammpsDataReaderTrj->Close();
   delete lammpsDataReaderTrj;
 
