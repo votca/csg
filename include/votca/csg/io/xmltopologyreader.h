@@ -25,6 +25,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -151,13 +152,11 @@ bool XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 template <class Bead_T, class Molecule_T, class Topology_T>
 void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopolFile(
     std::string file) {
-  TopologyReader *reader;
-  reader = TopReaderFactory().Create(file);
+  std::unique_ptr<TopologyReader> reader = TopReaderFactory().Create(file);
   if (!reader) throw std::runtime_error(file + ": unknown topology format");
 
   reader->ReadTopology(file, _top);
 
-  delete reader;
   // Clean XML molecules and beads.
 }
 

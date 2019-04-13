@@ -103,9 +103,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   CSG_Topology top;
   TopologyReader::RegisterPlugins();
-  TopologyReader* reader;
   string str = "Molecule1.pdb";
-  reader = TopReaderFactory().Create(str);
+  unique_ptr<TopologyReader> reader = TopReaderFactory().Create(str);
 
   boost::any any_ptr(&top);
   reader->ReadTopology(str, any_ptr);
@@ -140,7 +139,6 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
     BOOST_CHECK_CLOSE(v.y(), y.at(i), 1e-5);
     BOOST_CHECK_CLOSE(v.z(), z.at(i), 1e-5);
   }
-  delete reader;
 }
 
 BOOST_AUTO_TEST_CASE(test_topologywriter) {
@@ -203,30 +201,24 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
 
   CSG_Topology top;
   TopologyReader::RegisterPlugins();
-  TopologyReader* reader;
   string str = "Molecule1.pdb";
-  reader = TopReaderFactory().Create(str);
+  unique_ptr<TopologyReader> reader = TopReaderFactory().Create(str);
   boost::any any_ptr(&top);
   reader->ReadTopology(str, any_ptr);
   BOOST_CHECK_EQUAL(reader != NULL, true);
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
-  delete reader;
 
   TrajectoryWriter::RegisterPlugins();
-  TrajectoryWriter* writer;
   string str2 = "Molecule2.pdb";
-  writer = TrjWriterFactory().Create(str2);
+  unique_ptr<TrajectoryWriter> writer = TrjWriterFactory().Create(str2);
   writer->Open(str2);
   writer->Write(&top);
   writer->Close();
-  delete writer;
 
   CSG_Topology top2;
-  TopologyReader* reader2;
-  reader2 = TopReaderFactory().Create(str2);
+  unique_ptr<TopologyReader> reader2 = TopReaderFactory().Create(str2);
   boost::any any_ptr2(&top2);
   reader2->ReadTopology(str2, any_ptr2);
-  delete reader2;
   BOOST_CHECK_EQUAL(reader2 != NULL, true);
   BOOST_CHECK_EQUAL(top2.BeadCount(), 10);
 

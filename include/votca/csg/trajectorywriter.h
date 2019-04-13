@@ -37,7 +37,6 @@ class TrajectoryWriter {
               "Trajectory Write method must be derived by child class");
         }*/
  public:
-  TrajectoryWriter() {}
   virtual ~TrajectoryWriter() {}
 
   virtual void Open(std::string file, bool bAppend = false) {}

@@ -18,11 +18,7 @@
 #ifndef VOTCA_CSG_TRAJECTORYREADER_H
 #define VOTCA_CSG_TRAJECTORYREADER_H
 
-//#include "basebead.h"
-//#include "basemolecule.h"
-//#include "pdbreader.h"
 #include "fileformatfactory.h"
-//#include "templatetopology.h"
 #include <boost/any.hpp>
 #include <string>
 namespace votca {

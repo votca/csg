@@ -218,13 +218,14 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   }
 
   TrajectoryReader::RegisterPlugins();
-  TrajectoryReader *reader;
-  reader = TrjReaderFactory().Create(lammpsdumpfilename);
+  // TrajectoryReader *reader;
+  std::unique_ptr<TrajectoryReader> reader =
+      TrjReaderFactory().Create(lammpsdumpfilename);
   reader->Open(lammpsdumpfilename);
   boost::any any_ptr(&top);
   reader->FirstFrame(any_ptr);
   reader->Close();
-  delete reader;
+  // delete reader;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);
@@ -341,22 +342,24 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   // Write the topology object to a file
   TrajectoryWriter::RegisterPlugins();
-  TrajectoryWriter *writer;
-  writer = TrjWriterFactory().Create(lammpsDumpFileName);
+  // TrajectoryWriter *writer;
+  std::unique_ptr<TrajectoryWriter> writer =
+      TrjWriterFactory().Create(lammpsDumpFileName);
   writer->Open(lammpsDumpFileName);
   writer->Write(&top);
   writer->Close();
-  delete writer;
+  // delete writer;
 
   // Read the .dump file and ensure the information is correct
   TrajectoryReader::RegisterPlugins();
-  TrajectoryReader *reader;
-  reader = TrjReaderFactory().Create(lammpsDumpFileName);
+  //  TrajectoryReader *reader;
+  std::unique_ptr<TrajectoryReader> reader =
+      TrjReaderFactory().Create(lammpsDumpFileName);
   reader->Open(lammpsDumpFileName);
   boost::any any_ptr(&top);
   reader->FirstFrame(any_ptr);
   reader->Close();
-  delete reader;
+  // delete reader;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);

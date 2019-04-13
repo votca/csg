@@ -37,7 +37,7 @@ class TopologyReader {
             "ReadTopology_ method must be defined by child class.");
       }*/
  public:
-  ~TopologyReader() {}
+  virtual ~TopologyReader() {}
   /// open, read and close topology file
   // virtual bool ReadTopology(std::string file,
   // TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top) = 0;

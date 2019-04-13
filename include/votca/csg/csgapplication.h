@@ -24,10 +24,10 @@
 #include "molecule.h"
 #include "trajectoryreader.h"
 #include <boost/any.hpp>
+#include <memory>
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>
 #include <votca/tools/thread.h>
-
 namespace votca {
 namespace csg {
 
@@ -164,7 +164,7 @@ class CsgApplication : public tools::Application {
   std::vector<tools::Mutex *> _threadsMutexesIn;
   /// \brief stores Mutexes used to impose order for output
   std::vector<tools::Mutex *> _threadsMutexesOut;
-  TrajectoryReader *_traj_reader;
+  std::unique_ptr<TrajectoryReader> _traj_reader;
 };
 
 inline void CsgApplication::AddObserver(CGObserver *observer) {
