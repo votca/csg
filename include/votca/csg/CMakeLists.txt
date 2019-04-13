@@ -1,2 +1,4 @@
-file(GLOB_RECURSE VOTCA_HEADERS *.h potentialfunctions/*.h)
+file(GLOB VOTCA_HEADERS *.h potentialfunctions/*.h)
+file(GLOB IO_HEADERS io/*.h) 
 install(FILES ${VOTCA_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/votca/csg)
+install(FILES ${IO_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/votca/csg/io)
