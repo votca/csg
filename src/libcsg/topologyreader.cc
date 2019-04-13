@@ -15,17 +15,17 @@
  *
  */
 
-//#ifndef HAVE_NO_CONFIG
-//#include <votca_config.h>
-//#endif
+#ifndef HAVE_NO_CONFIG
+#include <votca_config.h>
+#endif
 
-#include "../../include/votca/csg/topologyreader.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/io/groreader.h"
 #include "../../include/votca/csg/io/lammpsdumpreader.h"
 #include "../../include/votca/csg/io/pdbreader.h"
 #include "../../include/votca/csg/io/xmltopologyreader.h"
 #include "../../include/votca/csg/io/xyzreader.h"
+#include "../../include/votca/csg/topologyreader.h"
 #ifdef GMX_DOUBLE
 #include "../../include/votca/csg/io/gmxtopologyreader.h"
 #endif

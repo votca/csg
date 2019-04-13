@@ -154,8 +154,6 @@ class PDBWriter : public TrajectoryWriter {
     }
     return beads;
   }
-
-  std::ofstream _out;
 };
 
 // template<class Bead_T, class Molecule_T>
@@ -164,7 +162,7 @@ template <class T>
 inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
     Topology_T *conf, T &container) {
 
-  if (_out.is_open()) {
+  if (out_.is_open()) {
     boost::format atomfrmt(
         "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f         "
         "  "
@@ -179,7 +177,7 @@ inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
       std::string element = getElement(*atom);
       Eigen::Vector3d r = getPos(*atom);
 
-      _out << atomfrmt % (atomid % 100000)    // atom serial number
+      out_ << atomfrmt % (atomid % 100000)    // atom serial number
                   % atomtype % resname % " "  // chain identifier 1 char
                   % residueid                 // residue sequence number
                   % r.x() % r.y() % r.z() % element;
@@ -187,7 +185,7 @@ inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
       // we skip the charge
       // writeSymmetry(*atom);
     }
-    _out << std::flush;
+    out_ << std::flush;
   } else {
     throw std::runtime_error("Cannot write container to file it is not open.");
   }
@@ -201,11 +199,11 @@ void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
         "type provided.");
   }
   Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
-  if (_out.is_open()) {
-    _out << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
+  if (out_.is_open()) {
+    out_ << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
          << std::flush;
     WriteContainer<Topology_T>(&conf, conf);
-    _out << "ENDMDL" << std::endl;
+    out_ << "ENDMDL" << std::endl;
   } else {
     throw std::runtime_error(
         "Cannot write topology to file, file is not open.");

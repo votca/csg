@@ -63,7 +63,6 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
   bool getIsConfig() { return _isConfig; }
 
  private:
-  std::ofstream _fl;
   std::string _fname;
   bool _isConfig;
 };
@@ -111,15 +110,15 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Open(
     _fname = file;
   }
 
-  _fl.open(_fname.c_str());
-  if (!_fl.is_open())
+  out_.open(_fname.c_str());
+  if (!out_.is_open())
     throw std::ios_base::failure("Error on creating dlpoly file '" + _fname +
                                  "'");
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Close() {
-  _fl.close();
+  out_.close();
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
@@ -150,35 +149,35 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
 
   if (_isConfig) {
 
-    _fl << "From VOTCA with love" << std::endl;
-    _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
-        << conf.BeadCount() << std::setw(20) << energy << std::endl;
+    out_ << "From VOTCA with love" << std::endl;
+    out_ << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
+         << conf.BeadCount() << std::setw(20) << energy << std::endl;
     Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
-      _fl << std::fixed << std::setprecision(10) << std::setw(20)
-          << m(i, 0) * scale << std::setw(20) << m(i, 1) * scale
-          << std::setw(20) << m(i, 2) * scale << std::endl;
+      out_ << std::fixed << std::setprecision(10) << std::setw(20)
+           << m(i, 0) * scale << std::setw(20) << m(i, 1) * scale
+           << std::setw(20) << m(i, 2) * scale << std::endl;
 
   } else {
 
     if (nstep == 1) {
-      _fl << "From VOTCA with love" << std::endl;
-      _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
-          << conf.BeadCount() << std::endl;
+      out_ << "From VOTCA with love" << std::endl;
+      out_ << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
+           << conf.BeadCount() << std::endl;
       dstep = conf.getTime() / (double)(conf.getStep());
     }
 
-    _fl << "timestep" << std::setprecision(9) << std::setw(10) << conf.getStep()
-        << std::setw(10) << conf.BeadCount() << std::setw(10) << mavecs
-        << std::setw(10) << mpbct;
-    _fl << std::setprecision(9) << std::setw(12) << dstep << std::setw(12)
-        << conf.getTime() << std::endl;
+    out_ << "timestep" << std::setprecision(9) << std::setw(10)
+         << conf.getStep() << std::setw(10) << conf.BeadCount() << std::setw(10)
+         << mavecs << std::setw(10) << mpbct;
+    out_ << std::setprecision(9) << std::setw(12) << dstep << std::setw(12)
+         << conf.getTime() << std::endl;
 
     Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
-      _fl << std::setprecision(12) << std::setw(20) << m(i, 0) * scale
-          << std::setw(20) << m(i, 1) * scale << std::setw(20)
-          << m(i, 2) * scale << std::endl;
+      out_ << std::setprecision(12) << std::setw(20) << m(i, 0) * scale
+           << std::setw(20) << m(i, 1) * scale << std::setw(20)
+           << m(i, 2) * scale << std::endl;
   }
 
   for (int i = 0; static_cast<size_t>(i) < conf.BeadCount(); i++) {
@@ -187,21 +186,21 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
     // AB: DL_POLY needs bead TYPE, not name!
 
     if (_isConfig) {
-      _fl << std::setw(8) << std::left << bead->getType() << std::right
-          << std::setw(10) << i + 1 << std::endl;
+      out_ << std::setw(8) << std::left << bead->getType() << std::right
+           << std::setw(10) << i + 1 << std::endl;
     } else {
-      _fl << std::setw(8) << std::left << bead->getType() << std::right
-          << std::setw(10) << i + 1;
-      _fl << std::setprecision(6) << std::setw(12) << bead->getMass()
-          << std::setw(12) << bead->getQ() << std::setw(12) << "   0.0"
-          << std::endl;
+      out_ << std::setw(8) << std::left << bead->getType() << std::right
+           << std::setw(10) << i + 1;
+      out_ << std::setprecision(6) << std::setw(12) << bead->getMass()
+           << std::setw(12) << bead->getQ() << std::setw(12) << "   0.0"
+           << std::endl;
     }
 
     // nm -> Angs
-    _fl << resetiosflags(std::ios::fixed) << std::setprecision(12)
-        << std::setw(20) << bead->getPos().x() * scale;
-    _fl << std::setw(20) << bead->getPos().y() * scale << std::setw(20)
-        << bead->getPos().z() * scale << std::endl;
+    out_ << resetiosflags(std::ios::fixed) << std::setprecision(12)
+         << std::setw(20) << bead->getPos().x() * scale;
+    out_ << std::setw(20) << bead->getPos().y() * scale << std::setw(20)
+         << bead->getPos().z() * scale << std::endl;
 
     if (mavecs > 0) {
       if (!bead->HasVel())
@@ -210,10 +209,10 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
             "does not have v-data");
 
       // nm -> Angs
-      _fl << std::setprecision(12) << std::setw(20)
-          << bead->getVel().x() * scale << std::setw(20);
-      _fl << bead->getVel().y() * scale << std::setw(20)
-          << bead->getVel().z() * scale << std::endl;
+      out_ << std::setprecision(12) << std::setw(20)
+           << bead->getVel().x() * scale << std::setw(20);
+      out_ << bead->getVel().y() * scale << std::setw(20)
+           << bead->getVel().z() * scale << std::endl;
 
       if (mavecs > 1) {
         if (!bead->HasF())
@@ -222,10 +221,10 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
               "does not have f-data");
 
         // nm -> Angs
-        _fl << std::setprecision(12) << std::setw(20)
-            << bead->getF().x() * scale << std::setw(20);
-        _fl << bead->getF().y() * scale << std::setw(20)
-            << bead->getF().z() * scale << std::endl;
+        out_ << std::setprecision(12) << std::setw(20)
+             << bead->getF().x() * scale << std::setw(20);
+        out_ << bead->getF().y() * scale << std::setw(20)
+             << bead->getF().z() * scale << std::endl;
       }
     }
   }

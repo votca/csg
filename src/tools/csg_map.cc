@@ -140,13 +140,10 @@ class CsgMapApp : public CsgApplication {
     }
   }
 
-  void EndEvaluate() {
-    _writer->Close();
-    delete _writer;
-  }
+  void EndEvaluate() { _writer->Close(); }
 
  protected:
-  TrajectoryWriter *_writer;
+  unique_ptr<TrajectoryWriter> _writer;
   bool _do_hybrid;
   bool _do_vel;
   bool _do_force;

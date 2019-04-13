@@ -195,7 +195,7 @@ class CGForceMatching : public CsgApplication {
   void OpenForcesTrajectory();
 
   CSG_Topology _top_force;
-  TrajectoryReader *_trjreader_force = nullptr;
+  std::unique_ptr<TrajectoryReader> _trjreader_force = nullptr;
 };
 }  // namespace csg
 }  // namespace votca

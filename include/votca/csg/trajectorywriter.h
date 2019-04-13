@@ -30,17 +30,28 @@ namespace votca {
 namespace csg {
 
 class TrajectoryWriter {
- private:
+ protected:
   /*    template <class Bead_T, class Molecule_T>
         void Write_(TemplateTopology<Bead_T, Molecule_T> *top) {
           throw std::runtime_error(
               "Trajectory Write method must be derived by child class");
         }*/
+
+  std::ofstream out_;
+
  public:
   virtual ~TrajectoryWriter() {}
 
-  virtual void Open(std::string file, bool bAppend = false) {}
-  virtual void Close(){};
+  virtual void Open(std::string file, bool bAppend = false) {
+    std::cout << "Calling open" << std::endl;
+    if (bAppend) {
+      out_.open(file, std::ios_base::app);
+    } else {
+      std::cout << "And opening " << std::endl;
+      out_.open(file);
+    }
+  }
+  virtual void Close() { out_.close(); };
 
   // void Write(CSG_Topology *top) {};
   // template <class Bead_T, class Molecule_T>
