@@ -19,6 +19,7 @@
 #define VOTCA_CSG_XMLTOPOLOGYREADER_H
 
 #include <boost/algorithm/string.hpp>
+#include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -97,7 +98,7 @@ template <class Bead_T, class Molecule_T, class Topology_T>
 class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
   ~XMLTopologyReader();
 
  private:
@@ -130,8 +131,14 @@ class XMLTopologyReader : public TopologyReader {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string filename, void *top) {
-  _top = static_cast<Topology_T *>(top);
+    std::string filename, boost::any top_any) {
+
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using xml topology reader read topology, "
+        "incorrect topology type provided.");
+  }
+  _top = boost::any_cast<Topology_T *>(top_any);
 
   tools::Property options;
   load_property_from_xml(options, filename);
@@ -148,9 +155,7 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopolFile(
   reader = TopReaderFactory().Create(file);
   if (!reader) throw std::runtime_error(file + ": unknown topology format");
 
-  Topology_T *top_ptr = _top;
-  void *uncast_top = static_cast<void *>(top_ptr);
-  reader->ReadTopology(file, uncast_top);
+  reader->ReadTopology(file, _top);
 
   delete reader;
   // Clean XML molecules and beads.

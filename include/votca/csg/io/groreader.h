@@ -21,7 +21,9 @@
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -45,14 +47,14 @@ class GROReader : public TrajectoryReader, public TopologyReader {
   ~GROReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   /// read in the next frame
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
 
   void Close();
 
@@ -62,18 +64,23 @@ class GROReader : public TrajectoryReader, public TopologyReader {
 };
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
-                                                             void *uncast_top) {
+bool GROReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
+    std::string file, boost::any top_any) {
   _topology = true;
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
-  top->Cleanup();
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gro reader read topology, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+  top.Cleanup();
 
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open topology file: " + file);
 
-  NextFrame(uncast_top);
+  NextFrame(top_any);
 
   _fl.close();
 
@@ -94,15 +101,21 @@ void GROReader<Bead_T, Molecule_T, Topology_T>::Close() {
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
+bool GROReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top_any) {
   _topology = false;
-  NextFrame(top);
+  NextFrame(top_any);
   return true;
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
+
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gro reader next frame, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string tmp;
   getline(_fl, tmp);  // title
   if (_fl.eof()) {
@@ -110,7 +123,7 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
   }
   getline(_fl, tmp);  // number atoms
   int natoms = atoi(tmp.c_str());
-  if (!_topology && static_cast<size_t>(natoms) != top->BeadCount())
+  if (!_topology && static_cast<size_t>(natoms) != top.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
 
@@ -170,12 +183,12 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
         element = atName;
         atom_weight = elements.getMass(element);
       }
-      b = top->CreateBead(symmetry, atName, atom_number,
-                          tools::topology_constants::unassigned_molecule_id,
-                          residue_number - 1, resName, element, atom_weight,
-                          atom_charge);
+      b = top.CreateBead(symmetry, atName, atom_number,
+                         tools::topology_constants::unassigned_molecule_id,
+                         residue_number - 1, resName, element, atom_weight,
+                         atom_charge);
     } else {
-      b = top->getBead(i);
+      b = top.getBead(i);
     }
 
     b->setPos(Eigen::Vector3d(stod(x), stod(y), stod(z)));
@@ -211,7 +224,7 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
   } else {
     throw std::runtime_error("Error while reading box (last) line");
   }
-  top->setBox(box);
+  top.setBox(box);
 
   if (_topology) {
     std::cout

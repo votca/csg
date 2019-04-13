@@ -19,13 +19,16 @@
 #define VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
 
 #include "dlpolytrajectoryreader.h"
+#include <boost/any.hpp>
 #include <boost/filesystem/convenience.hpp>
+
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/tools/constants.h>
@@ -48,9 +51,9 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   /// open original trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(void *conf);
+  bool FirstFrame(boost::any &conf);
   /// read in the next frame
-  bool NextFrame(void *conf);
+  bool NextFrame(boost::any &conf);
   /// close original trajectory file
   void Close();
 
@@ -131,7 +134,7 @@ void DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Close() {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    void *conf) {
+    boost::any &conf) {
   _first_frame = true;
   bool res = NextFrame(conf);
   _first_frame = false;
@@ -140,8 +143,15 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    void *conf) {
-  Topology_T *conf_cast = static_cast<Topology_T *>(conf);
+    boost::any &conf_any) {
+
+  if (typeid(Topology_T) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using dlpoly trajectory reader, incorrect "
+        "topology type provided.");
+  }
+
+  Topology_T &conf = boost::any_cast<Topology_T>(conf_any);
   static bool hasVs = false;
   static bool hasFs = false;
   static int mavecs =
@@ -190,22 +200,22 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
                            // follows velocities for each atom/bead
 
 #ifdef DEBUG
-    if (hasVs != conf_cast->HasVel() || hasFs != conf_cast->HasForce()) {
+    if (hasVs != conf.HasVel() || hasFs != conf.HasForce()) {
       std::cout << "WARNING: N of atom vectors (keytrj) in '" << _fname
                 << "' header differs from that read with topology" << std::endl;
     }
 #endif
 
-    conf_cast->SetHasVel(hasVs);
-    conf_cast->SetHasForce(hasFs);
+    conf.SetHasVel(hasVs);
+    conf.SetHasForce(hasFs);
 
 #ifdef DEBUG
     std::cout << "Read from dlpoly file '" << _fname << "' : keytrj - "
-              << mavecs << ", hasV - " << conf_cast->HasVel() << ", hasF - "
-              << conf_cast->HasForce() << std::endl;
+              << mavecs << ", hasV - " << conf.HasVel() << ", hasF - "
+              << conf.HasForce() << std::endl;
 #endif
 
-    if (static_cast<size_t>(matoms) != conf_cast->BeadCount())
+    if (static_cast<size_t>(matoms) != conf.BeadCount())
       throw std::runtime_error("Number of atoms/beads in '" + _fname +
                                "' header differs from that read with topology");
 
@@ -221,7 +231,7 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
     std::cout << "Read from dlpoly file '" << _fname
               << "' : pbc_type (imcon) - '" << pbc_type << "'" << std::endl;
 
-    if (pbc_type != conf_cast->getBoxType())
+    if (pbc_type != conf.getBoxType())
       std::cout << "WARNING: PBC type in dlpoly file '" << _fname
                 << "' header differs from that read with topology" << std::endl;
 // throw std::runtime_error("Error: Boundary conditions in '"+_fname+"'
@@ -257,13 +267,12 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
       navecs = mavecs;
       npbct = mpbct;
 
-      conf_cast->SetHasVel(hasVs);
-      conf_cast->SetHasForce(hasFs);
+      conf.SetHasVel(hasVs);
+      conf.SetHasForce(hasFs);
 
 #ifdef DEBUG
       std::cout << "Read from CONFIG: traj_key - " << navecs << ", hasV - "
-                << conf_cast->HasVel() << ", hasF - " << conf_cast->HasForce()
-                << std::endl;
+                << conf.HasVel() << ", hasF - " << conf.HasForce() << std::endl;
 #endif
 
     } else {
@@ -291,7 +300,7 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
       std::cout << ", dt = " << fields[5] << ", time = " << stime << std::endl;
 #endif
 
-      if (static_cast<size_t>(natoms) != conf_cast->BeadCount())
+      if (static_cast<size_t>(natoms) != conf.BeadCount())
         throw std::runtime_error(
             "Error: N of atoms/beads in '" + _fname +
             "' header differs from that found in topology");
@@ -310,16 +319,16 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
 
       // total time - calculated as product due to differences between DL_POLY
       // versions in HISTORY formats
-      conf_cast->setTime(nstep * dtime);
-      conf_cast->setStep(nstep);
+      conf.setTime(nstep * dtime);
+      conf.setStep(nstep);
 
-      if (std::abs(stime - conf_cast->getTime()) > 1.e-8) {
+      if (std::abs(stime - conf.getTime()) > 1.e-8) {
         nerrt++;
         if (nerrt < 11) {
           std::cout << "Check: nstep = " << nstep << ", dt = " << dtime
                     << ", time = " << stime << " (correct?)" << std::endl;
           // std::cout << "Check: nstep = " << nstep << ", dt = " << dtime << ",
-          // time = " << conf_cast->getTime() << " (correct?)" << std::endl;
+          // time = " << conf.getTime() << " (correct?)" << std::endl;
         } else if (nerrt == 11) {
           std::cout
               << "Check: timestep - more than 10 mismatches in total time "
@@ -359,7 +368,7 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
       box.col(i) = scale * Eigen::Vector3d(fields[0], fields[1], fields[2]);
     }
 
-    conf_cast->setBox(box, pbc_type);
+    conf.setBox(box, pbc_type);
 
     for (int i = 0; i < natoms; i++) {
 
@@ -387,7 +396,7 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
               " but got " + boost::lexical_cast<std::string>(id));
       }
 
-      Bead_T *b = conf_cast->getBead(i);
+      Bead_T *b = conf.getBead(i);
       Eigen::Matrix3d atom_vecs = Eigen::Matrix3d::Zero();
       for (int j = 0; j < std::min(navecs, 2) + 1; j++) {
 

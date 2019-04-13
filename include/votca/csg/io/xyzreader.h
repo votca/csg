@@ -21,6 +21,8 @@
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/any.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -47,17 +49,17 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   //  bool ReadTopology(std::string file,
   //  TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   template <bool topology>
-  bool ReadTopology_(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
   /// open a trajectory file
   // bool Open(const std::string &file);
   /// read in the first frame
   //  template <bool topology>
   //  bool FirstFrame_(void * top);
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   // bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   /// read in the next frame
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
   // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   template <class T>
@@ -120,25 +122,36 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
 
 // template <bool topology>
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top) {
   return NextFrame(top);
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
-  bool success = ReadFrame<false>(*top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using xyz reader next frame, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+
+  bool success = ReadFrame<false>(top);
   return success;
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 template <bool topology>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology_(
-    std::string file, void *uncast_top) {
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
+    std::string file, boost::any top_any) {
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
-  top->Cleanup();
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using xyz reader read topology, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+  top.Cleanup();
 
   _file = file;
   _fl.open(file);
@@ -146,7 +159,7 @@ bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology_(
     throw std::ios_base::failure("Error on open topology file: " + file);
   }
 
-  ReadFrame<true, Topology_T>(*top);
+  ReadFrame<true, Topology_T>(top);
 
   _fl.close();
 

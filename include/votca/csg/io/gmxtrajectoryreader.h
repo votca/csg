@@ -24,7 +24,10 @@
 
 #include "../trajectoryreader.h"
 
+#include <boost/any.hpp>
 #include <cstdlib>
+#include <stdexcept>
+
 #include <gromacs/fileio/oenv.h>
 #include <gromacs/fileio/trxio.h>
 #include <gromacs/trajectory/trajectoryframe.h>
@@ -54,9 +57,9 @@ class GMXTrajectoryReader : public TrajectoryReader {
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   /// read in the next frame
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
 
   void Close();
 
@@ -83,8 +86,14 @@ void GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Close() {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    void *conf) {
-  Topology_T *conf_cast = static_cast<Topology_T *>(conf);
+    boost::any conf_any) {
+
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gmxtrajectory reader first frame, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_first_frame(oenv, &_gmx_status, (char *)_filename.c_str(),
@@ -95,27 +104,27 @@ bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
   Eigen::Matrix3d m;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) m(i, j) = _gmx_frame.box[j][i];
-  conf_cast->setBox(m);
-  conf_cast->setTime(_gmx_frame.time);
-  conf_cast->setStep(_gmx_frame.step);
+  conf.setBox(m);
+  conf.setTime(_gmx_frame.time);
+  conf.setStep(_gmx_frame.step);
 
-  if (_gmx_frame.natoms != (int)conf_cast->BeadCount())
+  if (_gmx_frame.natoms != (int)conf.BeadCount())
     throw std::runtime_error(
         "number of beads in trajectory do not match topology");
 
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     Eigen::Vector3d r = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],
                          _gmx_frame.x[i][ZZ]};
-    conf_cast->getBead(i)->setPos(r);
+    conf.getBead(i)->setPos(r);
     if (_gmx_frame.bF) {
       Eigen::Vector3d f = {_gmx_frame.f[i][XX], _gmx_frame.f[i][YY],
                            _gmx_frame.f[i][ZZ]};
-      conf_cast->getBead(i)->setF(f);
+      conf.getBead(i)->setF(f);
     }
     if (_gmx_frame.bV) {
       Eigen::Vector3d v = {_gmx_frame.v[i][XX], _gmx_frame.v[i][YY],
                            _gmx_frame.v[i][ZZ]};
-      conf_cast->getBead(i)->setVel(v);
+      conf.getBead(i)->setVel(v);
     }
   }
   return true;
@@ -123,8 +132,14 @@ bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    void *conf) {
-  Topology_T *conf_cast = static_cast<Topology_T *>(conf);
+    boost::any conf_any) {
+
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gmx trajectory reader next frame, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   gmx_output_env_t *oenv;
   output_env_init(&oenv, gmx::getProgramContext(), time_ps, FALSE, exvgNONE, 0);
   if (!read_next_frame(oenv, _gmx_status, &_gmx_frame)) return false;
@@ -133,23 +148,23 @@ bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
   Eigen::Matrix3d m;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) m(i, j) = _gmx_frame.box[j][i];
-  conf_cast->setTime(_gmx_frame.time);
-  conf_cast->setStep(_gmx_frame.step);
-  conf_cast->setBox(m);
+  conf.setTime(_gmx_frame.time);
+  conf.setStep(_gmx_frame.step);
+  conf.setBox(m);
 
   for (int i = 0; i < _gmx_frame.natoms; i++) {
     Eigen::Vector3d r = {_gmx_frame.x[i][XX], _gmx_frame.x[i][YY],
                          _gmx_frame.x[i][ZZ]};
-    conf_cast->getBead(i)->setPos(r);
+    conf.getBead(i)->setPos(r);
     if (_gmx_frame.bF) {
       Eigen::Vector3d f = {_gmx_frame.f[i][XX], _gmx_frame.f[i][YY],
                            _gmx_frame.f[i][ZZ]};
-      conf_cast->getBead(i)->setF(f);
+      conf.getBead(i)->setF(f);
     }
     if (_gmx_frame.bV) {
       Eigen::Vector3d v = {_gmx_frame.v[i][XX], _gmx_frame.v[i][YY],
                            _gmx_frame.v[i][ZZ]};
-      conf_cast->getBead(i)->setVel(v);
+      conf.getBead(i)->setVel(v);
     }
   }
   return true;

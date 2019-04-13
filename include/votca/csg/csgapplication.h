@@ -23,6 +23,7 @@
 #include "csgtopology.h"
 #include "molecule.h"
 #include "trajectoryreader.h"
+#include <boost/any.hpp>
 #include <votca/tools/application.h>
 #include <votca/tools/mutex.h>
 #include <votca/tools/thread.h>

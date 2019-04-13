@@ -20,6 +20,7 @@
 
 #include "../boundarycondition.h"
 #include "../trajectorywriter.h"
+#include <boost/any.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <iomanip>
 #include <string>
@@ -42,7 +43,7 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
   // close transformed trajectory file
   void Close();
   // write a frame into transformed trajectory file
-  void Write(void *conf);
+  void Write(boost::any conf);
 
   /// set/get the created configuration or trajectory file name:
   /// <name>.dlpc or <name>.dlph (convention: ".dlpc"="CONFIG_CGV",
@@ -123,8 +124,14 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Close() {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
-    void *uncast_conf) {
-  Topology_T *conf = static_cast<Topology_T *>(uncast_conf);
+    boost::any conf_any) {
+
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot write topology using dlpolytopology writer, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   static int nstep = 1;
   static double dstep = 0.0;
   const double scale = 10.0;  // nm -> A factor
@@ -132,21 +139,21 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
   int mpbct = 0;
   double energy = 0.0;
 
-  if (conf->HasForce() && conf->HasVel()) {
+  if (conf.HasForce() && conf.HasVel()) {
     mavecs = 2;
-  } else if (conf->HasVel()) {
+  } else if (conf.HasVel()) {
     mavecs = 1;
   }
 
-  if (conf->getBoxType() == BoundaryCondition::typeOrthorhombic) mpbct = 2;
-  if (conf->getBoxType() == BoundaryCondition::typeTriclinic) mpbct = 3;
+  if (conf.getBoxType() == BoundaryCondition::typeOrthorhombic) mpbct = 2;
+  if (conf.getBoxType() == BoundaryCondition::typeTriclinic) mpbct = 3;
 
   if (_isConfig) {
 
     _fl << "From VOTCA with love" << std::endl;
     _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
-        << conf->BeadCount() << std::setw(20) << energy << std::endl;
-    Eigen::Matrix3d m = conf->getBox();
+        << conf.BeadCount() << std::setw(20) << energy << std::endl;
+    Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
       _fl << std::fixed << std::setprecision(10) << std::setw(20)
           << m(i, 0) * scale << std::setw(20) << m(i, 1) * scale
@@ -157,25 +164,25 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
     if (nstep == 1) {
       _fl << "From VOTCA with love" << std::endl;
       _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
-          << conf->BeadCount() << std::endl;
-      dstep = conf->getTime() / (double)(conf->getStep());
+          << conf.BeadCount() << std::endl;
+      dstep = conf.getTime() / (double)(conf.getStep());
     }
 
-    _fl << "timestep" << std::setprecision(9) << std::setw(10)
-        << conf->getStep() << std::setw(10) << conf->BeadCount()
-        << std::setw(10) << mavecs << std::setw(10) << mpbct;
+    _fl << "timestep" << std::setprecision(9) << std::setw(10) << conf.getStep()
+        << std::setw(10) << conf.BeadCount() << std::setw(10) << mavecs
+        << std::setw(10) << mpbct;
     _fl << std::setprecision(9) << std::setw(12) << dstep << std::setw(12)
-        << conf->getTime() << std::endl;
+        << conf.getTime() << std::endl;
 
-    Eigen::Matrix3d m = conf->getBox();
+    Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
       _fl << std::setprecision(12) << std::setw(20) << m(i, 0) * scale
           << std::setw(20) << m(i, 1) * scale << std::setw(20)
           << m(i, 2) * scale << std::endl;
   }
 
-  for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); i++) {
-    Bead_T *bead = conf->getBead(i);
+  for (int i = 0; static_cast<size_t>(i) < conf.BeadCount(); i++) {
+    Bead_T *bead = conf.getBead(i);
 
     // AB: DL_POLY needs bead TYPE, not name!
 

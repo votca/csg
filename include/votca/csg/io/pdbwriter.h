@@ -20,6 +20,7 @@
 
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
+#include <boost/any.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <stdio.h>
@@ -50,7 +51,7 @@ class PDBWriter : public TrajectoryWriter {
   */
   //  template <class Bead_T, class Molecule_T>
   // void Write_(Topology_T<Bead_T, Molecule_T> *conf);
-  void Write(void *conf);
+  void Write(boost::any conf);
 
   template <class T>  //, class Bead_T, class Molecule_T>
   void WriteContainer(Topology_T *conf, T &container);
@@ -193,12 +194,17 @@ inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
-  Topology_T *conf_cast = static_cast<Topology_T *>(conf);
+void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using pdb writer write, incorrect topology "
+        "type provided.");
+  }
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   if (_out.is_open()) {
-    _out << boost::format("MODEL     %1$4d\n") % (conf_cast->getStep() + 1)
+    _out << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
          << std::flush;
-    WriteContainer<Topology_T>(conf_cast, *conf_cast);
+    WriteContainer<Topology_T>(&conf, conf);
     _out << "ENDMDL" << std::endl;
   } else {
     throw std::runtime_error(

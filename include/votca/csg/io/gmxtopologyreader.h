@@ -27,6 +27,8 @@
 #include <string>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/any.hpp>
+
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/matrix.h>
@@ -57,23 +59,29 @@ class GMXTopologyReader : public TopologyReader {
   GMXTopologyReader() {}
 
   /// read a topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
  private:
 };
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, void *uncast_top) {
+    std::string file, boost::any top_any) {
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gmx topology reader, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+
   gmx_mtop_t mtop;
 
   tools::Elements elements;
 
   int natoms;
   // cleanup topology to store new data
-  top->Cleanup();
+  top.Cleanup();
 
   t_inputrec ir;
   ::matrix gbox;
@@ -100,7 +108,7 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
     t_atoms *atoms = &(mol->atoms);
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      Molecule_T *mi = top->CreateMolecule(top->MoleculeCount(), molname);
+      Molecule_T *mi = top.CreateMolecule(top.MoleculeCount(), molname);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -126,8 +134,8 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 
         tools::byte_t symmetry = 1;
         Bead_T *bead =
-            top->CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
-                            a->resind, residue_name, element, a->m, a->q);
+            top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
+                           a->resind, residue_name, element, a->m, a->q);
         mi->AddBead(bead);
       }
 
@@ -138,9 +146,9 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         // insert exclusions
         std::list<Bead_T *> excl_list;
         for (int k = excl->index[iatom]; k < excl->index[iatom + 1]; k++) {
-          excl_list.push_back(top->getBead(excl->a[k] + ifirstatom));
+          excl_list.push_back(top.getBead(excl->a[k] + ifirstatom));
         }
-        top->InsertExclusion(top->getBead(iatom + ifirstatom), excl_list);
+        top.InsertExclusion(top.getBead(iatom + ifirstatom), excl_list);
       }
       ifirstatom += natoms_mol;
     }
@@ -152,7 +160,7 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
       m(i, j) = gbox[j][i];
     }
   }
-  top->setBox(m);
+  top.setBox(m);
 
   return true;
 }

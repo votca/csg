@@ -20,6 +20,7 @@
 
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
+#include <boost/any.hpp>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -55,15 +56,15 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   /// read in the first frame
 
   // template <class Bead_T, class Molecule_T>
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   // bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
   // template <class Bead_T, class Molecule_T>
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
   // bool NextFrame(CSG_Topology &top);
   // void Close();
 
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
  private:
   /// open a topology file
@@ -79,18 +80,24 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
 // TemplateTopology<Bead_T,Molecule_T> &top) {
 // template <class Bead_T, class Molecule_T>
 template <typename Bead_T, class Molecule_T, class Topology_T>
-bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
-                                                             void *top) {
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
+    std::string file, boost::any top_any) {
 
-  Topology_T *top_cast = static_cast<Topology_T *>(top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using pdb reader read topology, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+
   _topology = true;
-  top_cast->Cleanup();
+  top.Cleanup();
 
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open topology file: " + file);
 
-  NextFrame(top);
+  NextFrame(top_any);
   _fl.close();
 
   return true;
@@ -98,15 +105,20 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(std::string file,
 
 // template <class Bead_T, class Molecule_T>
 template <typename Bead_T, class Molecule_T, class Topology_T>
-bool PDBReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top) {
   _topology = false;
   return NextFrame(top);
 }
 
 template <typename Bead_T, class Molecule_T, class Topology_T>
-bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
+bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
 
-  Topology_T *top_cast = static_cast<Topology_T *>(top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using pdb reader next frame, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string line;
   tools::Elements elements;
   // Two column vector for storing all bonds
@@ -128,7 +140,7 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
       std::string model_num = std::string(line, (11 - 1), 4);
       boost::algorithm::trim(model_num);
       int step = stoi(model_num) - 1;
-      top_cast->setStep(step);
+      top.setStep(step);
       if (step_set) {
         throw std::runtime_error(
             "Current pdbreader does not support reading more than a single "
@@ -173,7 +185,7 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
       double cc = stod(c) / 10.0;
       Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
       box.diagonal() = Eigen::Vector3d(aa, bb, cc);
-      top_cast->setBox(box);
+      top.setBox(box);
     }
     // Only read the CONECT keyword if the topology is set too true
     if (_topology && tools::wildcmp("CONECT*", line.c_str())) {
@@ -336,13 +348,12 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
         //
         // res -1 as internal number starts with 0
         tools::byte_t symmetry = 1;
-        b = top_cast->CreateBead(
-            symmetry, atom_type, atom_number,
-            tools::topology_constants::unassigned_molecule_id, residue_id,
-            residue_type, element_symbol, elements.getMass(element_symbol),
-            charge);
+        b = top.CreateBead(symmetry, atom_type, atom_number,
+                           tools::topology_constants::unassigned_molecule_id,
+                           residue_id, residue_type, element_symbol,
+                           elements.getMass(element_symbol), charge);
       } else {
-        b = top_cast->getBead(atom_number);
+        b = top.getBead(atom_number);
       }
       // convert to nm from A
       b->setPos(Eigen::Vector3d(stod(x) * tools::conv::ang2nm,
@@ -355,12 +366,12 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
     }
   }  // while std::getline
 
-  if (!_topology && (bead_count > 0) && bead_count != top_cast->BeadCount())
+  if (!_topology && (bead_count > 0) && bead_count != top.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Sort data and determine atom structure, connect with top_cast (molecules,
+  // Sort data and determine atom structure, connect with top.molecules,
   // bonds)
   ////////////////////////////////////////////////////////////////////////////////
 
@@ -478,13 +489,13 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
          molecule_atms) {
 
       int molecule_id = mol_and_atom_ids.first;
-      Molecule_T *mi = top_cast->CreateMolecule(
+      Molecule_T *mi = top.CreateMolecule(
           molecule_id, tools::topology_constants::unassigned_molecule_type);
       mol_map[molecule_id] = mi;
 
       // Add all the atoms to the appropriate molecule object
       for (const int &atm_temp : mol_and_atom_ids.second) {
-        mi->AddBead(top_cast->getBead(atm_temp));
+        mi->AddBead(top.getBead(atm_temp));
       }
     }
 
@@ -505,7 +516,7 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
       int bead_id2 = atm_id2;
       mi->ConnectBeads(bead_id1, bead_id2);
 
-      Interaction *ic = top_cast->CreateInteraction(
+      Interaction *ic = top.CreateInteraction(
           InteractionType::bond, "BONDS", bond_index, mi->getId(),
           std::vector<int>{bead_id1, bead_id2});
       mi->AddInteraction(ic);
@@ -513,7 +524,7 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *top) {
     }
 
     // Finally we want to build an exclusion matrix
-    top_cast->RebuildExclusions();
+    top.RebuildExclusions();
   }
 
   return !_fl.eof();

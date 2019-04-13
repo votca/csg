@@ -21,11 +21,11 @@
 //#include "basemolecule.h"
 #include "fileformatfactory.h"
 //#include "templatetopology.h"
+#include <boost/any.hpp>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-
 namespace votca {
 namespace csg {
 
@@ -45,7 +45,7 @@ class TrajectoryWriter {
 
   // void Write(CSG_Topology *top) {};
   // template <class Bead_T, class Molecule_T>
-  virtual void Write(void *top) = 0;
+  virtual void Write(boost::any top) = 0;
 
   static void RegisterPlugins(void);
 };

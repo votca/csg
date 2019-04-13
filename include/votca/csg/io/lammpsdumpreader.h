@@ -18,7 +18,9 @@
 #ifndef _VOTCA_CSG_LAMMPSDUMPREADER_H
 #define _VOTCA_CSG_LAMMPSDUMPREADER_H
 
+#include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
 
@@ -47,14 +49,14 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDumpReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   /// read in the next frame
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
 
   void Close();
 
@@ -72,17 +74,23 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, void *top) {
-  Topology_T *top_cast = static_cast<Topology_T *>(top);
+    std::string file, boost::any top_any) {
+
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using lammps dump reader read topology, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   read_topology_data_ = true;
-  top_cast->Cleanup();
+  top.Cleanup();
 
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open topology file: " + file);
   _fname = file;
 
-  NextFrame(top);
+  NextFrame(top_any);
 
   _fl.close();
 
@@ -105,7 +113,8 @@ void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::Close() {
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
+bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
+    boost::any top) {
   read_topology_data_ = false;
   NextFrame(top);
   return true;
@@ -113,8 +122,14 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    void *uncast_top) {
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+    boost::any top_any) {
+
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using lammps dump reader next frame, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string line;
   getline(_fl, line);
   std::cout << "Reading lammps dump file" << std::endl;
@@ -122,14 +137,14 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
     if (line.substr(0, 5) != "ITEM:")
       throw std::ios_base::failure("unexpected line in lammps file:\n" + line);
     if (line.substr(6, 8) == "TIMESTEP") {
-      ReadTimestep(*top, line);
+      ReadTimestep(top, line);
     } else if (line.substr(6, 15) == "NUMBER OF ATOMS") {
-      ReadNumAtoms(*top, line);
+      ReadNumAtoms(top, line);
     } else if (line.substr(6, 10) == "BOX BOUNDS") {
       std::cout << "Reading box bounds " << std::endl;
-      ReadBox(*top, line);
+      ReadBox(top, line);
     } else if (line.substr(6, 5) == "ATOMS") {
-      ReadAtoms(*top, line);
+      ReadAtoms(top, line);
       break;
     }
 

@@ -20,6 +20,7 @@
 
 #include "../trajectorywriter.h"
 #include "growriter.h"
+#include <boost/any.hpp>
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
@@ -33,7 +34,7 @@ class GROWriter : public TrajectoryWriter {
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void Write(void *conf);
+  void Write(boost::any conf);
 
  private:
   FILE *_out = nullptr;
@@ -57,16 +58,20 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Close() {
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
-
+void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using growriter write, incorrect topology "
+        "type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
   char format[100];
   int i, resnr, l, vpr;
-  Topology_T *top = static_cast<Topology_T *>(conf);
 
   fprintf(_out, "%s\n", "what a nice title");
-  fprintf(_out, "%5d\n", static_cast<int>(top->BeadCount()));
+  fprintf(_out, "%5d\n", static_cast<int>(top.BeadCount()));
 
-  bool v = top->HasVel();
+  bool v = top.HasVel();
   int pr = 3;  // precision of writeout, given by the spec
 
   /* build format sCSG_Topologytring for printing,
@@ -83,20 +88,19 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
   else
     sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
 
-  for (i = 0; static_cast<size_t>(i) < top->BeadCount(); i++) {
-    resnr = top->getBead(i)->getResidueId();
+  for (i = 0; static_cast<size_t>(i) < top.BeadCount(); i++) {
+    resnr = top.getBead(i)->getResidueId();
     std::string resname =
-        top->getBead(i)
-            ->getResidueType();  // top->getResidue(resnr)->getName();
-    std::string atomname = top->getBead(i)->getType();
+        top.getBead(i)->getResidueType();  // top.getResidue(resnr)->getName();
+    std::string atomname = top.getBead(i)->getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
             atomname.c_str(), (i + 1) % 100000);
     /* next fprintf uses built format std::string */
-    Eigen::Vector3d r = top->getBead(i)->getPos();
+    Eigen::Vector3d r = top.getBead(i)->getPos();
 
     if (v) {
-      Eigen::Vector3d vv = top->getBead(i)->getVel();
+      Eigen::Vector3d vv = top.getBead(i)->getVel();
       fprintf(_out, format, r.x(), r.y(), r.z(), vv.x(), vv.y(), vv.z());
     } else {
       fprintf(_out, format, r.x(), r.y(), r.z());
@@ -104,7 +108,7 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
   }
 
   // write the boy
-  Eigen::Matrix3d box = top->getBox();
+  Eigen::Matrix3d box = top.getBox();
 
   if (pr < 5) pr = 5;
   l = pr + 5;

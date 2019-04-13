@@ -23,6 +23,7 @@
 //#include "pdbreader.h"
 #include "fileformatfactory.h"
 //#include "templatetopology.h"
+#include <boost/any.hpp>
 #include <string>
 namespace votca {
 namespace csg {
@@ -48,12 +49,20 @@ class TrajectoryReader {
 
   // virtual bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
   // &top)=0;
-  virtual bool FirstFrame(void *top) = 0;
+  virtual bool FirstFrame(boost::any top) {
+    throw std::runtime_error(
+        "Cannot call FirstFrame using Trajectory reader it must be derived by "
+        "child class.");
+  }
   //  virtual bool FirstFrame(void *top, bool topology) = 0;
   /// read in the next frame
   // virtual bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
   // *top) = 0;
-  virtual bool NextFrame(void *top) = 0;
+  virtual bool NextFrame(boost::any top) {
+    throw std::runtime_error(
+        "Cannot call NextFrame using Trajectory reader it must be derived by "
+        "child class.");
+  }
   // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   static void RegisterPlugins(void);

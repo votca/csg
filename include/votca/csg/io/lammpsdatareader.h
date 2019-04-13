@@ -27,6 +27,8 @@
 #include "../trajectoryreader.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/any.hpp>
+
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 
@@ -47,14 +49,14 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDataReader() {}
 
   /// open, read and close topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
   /// open a trajectory file
   bool Open(const std::string &file);
   /// read in the first frame of trajectory file
-  bool FirstFrame(void *top);
+  bool FirstFrame(boost::any top);
   /// read in the next frame of trajectory file
-  bool NextFrame(void *top);
+  bool NextFrame(boost::any top);
   /// close the topology file
   void Close();
 
@@ -234,9 +236,15 @@ std::string LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, void *uncast_top) {
+    std::string file, boost::any top_any) {
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using lammps data reader read topology, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+
   std::cout << std::endl;
   std::cout << "WARNING: The votca lammps data reader is only able to read ";
   std::cout << "lammps files formatted in the following styles:" << std::endl;
@@ -258,14 +266,14 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   std::cout << std::endl;
 
   topology_ = true;
-  top->Cleanup();
+  top.Cleanup();
   fl_.open(file.c_str());
   if (!fl_.is_open())
     throw std::ios_base::failure("Error on open topology file: " + file);
 
   fname_ = file;
 
-  NextFrame(uncast_top);
+  NextFrame(top_any);
 
   fl_.close();
 
@@ -288,7 +296,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::Close() {
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
+bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
+    boost::any top) {
   topology_ = false;
   NextFrame(top);
   return true;
@@ -296,9 +305,13 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    void *uncast_top) {
-
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+    boost::any top_any) {
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using lammps data reader next frame, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string line;
   getline(fl_, line);
   while (!fl_.eof()) {
@@ -311,17 +324,17 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
     // If not check the size of the vector and parse according
     // to the number of fields
     if (fields.size() == 1) {
-      labelMatched = MatchOneFieldLabel_(fields, *top);
+      labelMatched = MatchOneFieldLabel_(fields, top);
     } else if (fields.size() == 2) {
-      labelMatched = MatchTwoFieldLabels_(fields, *top);
+      labelMatched = MatchTwoFieldLabels_(fields, top);
     } else if (fields.size() == 3) {
-      labelMatched = MatchThreeFieldLabels_(fields, *top);
+      labelMatched = MatchThreeFieldLabels_(fields, top);
     } else if (fields.size() == 4) {
-      labelMatched = MatchFourFieldLabels_(fields, *top);
+      labelMatched = MatchFourFieldLabels_(fields, top);
     } else if (fields.size() != 0) {
 
       // See if the line is the lammps .data header/info line
-      labelMatched = MatchFieldsTimeStepLabel_(fields, *top);
+      labelMatched = MatchFieldsTimeStepLabel_(fields, top);
 
       if (!labelMatched) {
         std::string err = "Unrecognized line in lammps .data file:\n" + line;

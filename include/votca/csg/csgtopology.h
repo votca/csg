@@ -29,6 +29,7 @@ namespace csg {
 
 class CSG_Topology : public TemplateTopology<Bead, Molecule> {
  public:
+  CSG_Topology(){};
   ~CSG_Topology(){};
   Molecule* CreateMolecule(int id, std::string molecule_type) {
     if (!type_container_.MoleculeTypeExist(molecule_type)) {

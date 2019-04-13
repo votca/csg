@@ -167,7 +167,8 @@ bool CsgApplication::ProcessData(Worker *worker) {
   _nframes--;
   if (!_is_first_frame || worker->getId() != 0) {
     // get frame
-    bool tmpRes = _traj_reader->NextFrame(static_cast<void *>(&(worker->_top)));
+    boost::any any_ptr(&worker->_top);
+    bool tmpRes = _traj_reader->NextFrame(any_ptr);
     if (!tmpRes) {
       _traj_readerMutex.Unlock();
       if (SynchronizeThreads())
@@ -224,8 +225,8 @@ void CsgApplication::Run(void) {
   //////////////////////////////////////////////////
   // read in the topology for master
   //////////////////////////////////////////////////
-  reader->ReadTopology(_op_vm["top"].as<string>(),
-                       static_cast<void *>(&(master->_top)));
+  boost::any any_ptr(&master->_top);
+  reader->ReadTopology(_op_vm["top"].as<string>(), any_ptr);
   delete reader;
 
   cout << "I have " << master->_top.BeadCount() << " beads in "
@@ -281,7 +282,8 @@ void CsgApplication::Run(void) {
     /////////////////verbose/////////////////////////////////
     // Note that the trajectory files will contain the boundary information
     // which may otherwise not be stored in the _top object
-    _traj_reader->FirstFrame(static_cast<void *>(&(master->_top)));
+    boost::any any_ptr(&master->_top);
+    _traj_reader->FirstFrame(any_ptr);
     master->_top_cg.CopyBoundaryConditions(master->_top);
   }
 
@@ -332,8 +334,8 @@ void CsgApplication::Run(void) {
 
     // seek first frame, let thread0 do that
     bool bok;
-    for (bok = true; bok == true;
-         bok = _traj_reader->NextFrame(static_cast<void *>(&(master->_top)))) {
+    boost::any any_ptr(&master->_top);
+    for (bok = true; bok == true; bok = _traj_reader->NextFrame(any_ptr)) {
       if ((has_begin && (master->_top.getTime() < begin)) || first_frame > 1) {
         first_frame--;
         continue;

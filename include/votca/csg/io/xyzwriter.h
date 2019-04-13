@@ -20,9 +20,9 @@
 
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
+#include <boost/any.hpp>
 #include <stdio.h>
 #include <votca/tools/constants.h>
-
 namespace votca {
 namespace csg {
 
@@ -34,7 +34,7 @@ class XYZWriter : public TrajectoryWriter {
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(void *conf);
+  void Write(boost::any conf);
 
   template <class T>
   void Write(Topology_T &top, T &container, std::string header);
@@ -72,12 +72,17 @@ class XYZWriter : public TrajectoryWriter {
 };
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void XYZWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
-  Topology_T *top = static_cast<Topology_T *>(conf);
+void XYZWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using xyz writer write, incorrect topology "
+        "type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
-                        (top->getStep() + 1) % top->getTime())
+                        (top.getStep() + 1) % top.getTime())
                            .str();
-  Write(*top, *top, header);
+  Write(top, top, header);
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>

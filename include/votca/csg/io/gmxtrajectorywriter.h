@@ -21,11 +21,14 @@
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif
+#include <boost/any.hpp>
 
 #include "../trajectorywriter.h"
 #include <gromacs/fileio/trxio.h>
 #include <gromacs/trajectory/trajectoryframe.h>
+#include <stdexcept>
 #include <string>
+#include <typeinfo>
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
 #undef bool
@@ -40,7 +43,7 @@ class GMXTrajectoryWriter : public TrajectoryWriter {
 
   void Open(std::string file, bool bAppend = false);
   void Close();
-  void Write(void *conf);
+  void Write(boost::any conf);
 
  private:
   t_trxstatus *_file;
@@ -60,36 +63,43 @@ void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Close() {
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
-    void *uncast_conf) {
-  Topology_T *conf = static_cast<Topology_T *>(uncast_conf);
+    boost::any conf_any) {
+
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using gmx trajectory writer, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
+
   static int step = 0;
-  int N = conf->BeadCount();
+  int N = conf.BeadCount();
   t_trxframe frame;
   rvec *x = new rvec[N];
   rvec *v = NULL;
   rvec *f = NULL;
-  Eigen::Matrix3d box = conf->getBox();
+  Eigen::Matrix3d box = conf.getBox();
 
   frame.natoms = N;
   frame.bTime = true;
-  frame.time = conf->getTime();
+  frame.time = conf.getTime();
   frame.bStep = true;
-  frame.step = conf->getStep();
+  frame.step = conf.getStep();
   ;
   frame.x = x;
   frame.bLambda = false;
   frame.bAtoms = false;
   frame.bPrec = false;
   frame.bX = true;
-  frame.bF = conf->HasForce();
+  frame.bF = conf.HasForce();
   frame.bBox = true;
-  frame.bV = conf->HasVel();
+  frame.bV = conf.HasVel();
 
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) frame.box[j][i] = box(i, j);
 
   for (int i = 0; i < N; ++i) {
-    Eigen::Vector3d pos = conf->getBead(i)->getPos();
+    Eigen::Vector3d pos = conf.getBead(i)->getPos();
     x[i][0] = pos.x();
     x[i][1] = pos.y();
     x[i][2] = pos.z();
@@ -99,7 +109,7 @@ void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
     v = new rvec[N];
     for (int i = 0; i < N; ++i) {
       frame.v = v;
-      Eigen::Vector3d vel = conf->getBead(i)->getVel();
+      Eigen::Vector3d vel = conf.getBead(i)->getVel();
       v[i][0] = vel.x();
       v[i][1] = vel.y();
       v[i][2] = vel.z();
@@ -109,7 +119,7 @@ void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
     f = new rvec[N];
     for (int i = 0; i < N; ++i) {
       frame.f = f;
-      Eigen::Vector3d force = conf->getBead(i)->getF();
+      Eigen::Vector3d force = conf.getBead(i)->getF();
       f[i][0] = force.x();
       f[i][1] = force.y();
       f[i][2] = force.z();

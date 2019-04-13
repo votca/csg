@@ -22,6 +22,7 @@
 #include "basemolecule.h"
 #include "fileformatfactory.h"
 #include "templatetopology.h"
+#include <boost/any.hpp>
 #include <string>
 
 namespace votca {
@@ -45,7 +46,7 @@ class TopologyReader {
   //  virtual bool ReadTopology(std::string file,
   //                   TemplateTopology<BaseBead, BaseMolecule<BaseBead>> * top)
   //                   = 0;
-  virtual bool ReadTopology(std::string file, void* top) { return false; }
+  virtual bool ReadTopology(std::string file, boost::any top) { return false; }
 
   //    return ReadTopology_(file,top);
   // }

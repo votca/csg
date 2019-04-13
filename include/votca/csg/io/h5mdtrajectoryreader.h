@@ -21,6 +21,7 @@
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
 #include "hdf5.h"
+#include <boost/any.hpp>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -51,10 +52,10 @@ class H5MDTrajectoryReader : public TrajectoryReader {
   void Initialize(Topology_T &top);
 
   /// Reads in the first frame.
-  bool FirstFrame(void *conf);  // NOLINT
+  bool FirstFrame(boost::any conf);  // NOLINT
 
   /// Reads in the next frame.
-  bool NextFrame(void *conf);  // NOLINT
+  bool NextFrame(boost::any conf);  // NOLINT
 
   /// Closes original trajectory file.
   void Close();
@@ -369,29 +370,42 @@ void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Initialize(
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    void *top) {  // NOLINT const
-                  // reference
+    boost::any top_any) {  // NOLINT const
+                           // reference
+
   if (first_frame_) {
+
+    if (typeid(Topology_T *) != top_any.type()) {
+      throw std::runtime_error(
+          "Error Cannot read topology using h3md trajectory reader first "
+          "frame, incorrect topology type provided.");
+    }
+    Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
     first_frame_ = false;
-    Initialize(*(static_cast<Topology_T *>(top)));
+    Initialize(top);
   }
-  NextFrame(top);
+  NextFrame(top_any);
   return true;
 }
 
 /// Reading the data.
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    void *conf) {  // NOLINT const
-                   // reference
-  Topology_T *top = static_cast<Topology_T *>(conf);
+    boost::any conf_any) {  // NOLINT const
+                            // reference
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using h5mdtrajectory reader next frame, "
+        "incorrect topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
   // Reads the position row.
   idx_frame_++;
   if (idx_frame_ > max_idx_frame_) return false;
 
   // Set volume of box because top on workers somehow does not have this
   // information.
-  top->setBox(m);
+  top.setBox(m);
 
   std::cout << '\r' << "Reading frame: " << idx_frame_;
   std::cout.flush();
@@ -438,7 +452,7 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
 
     // Topology has to be defined in the xml file or in other
     // topology files. The h5md only stores the trajectory data.
-    Bead_T *b = top->getBead(atom_id);
+    Bead_T *b = top.getBead(atom_id);
     if (b == NULL)
       throw std::runtime_error("Bead not found: " +
                                boost::lexical_cast<std::string>(atom_id));

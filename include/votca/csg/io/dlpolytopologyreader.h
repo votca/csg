@@ -22,6 +22,7 @@
 #include <fstream>
 #include <stddef.h>
 #include <string>
+#include <typeinfo>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp>  // IWYU pragma: keep
@@ -53,7 +54,7 @@ class DLPOLYTopologyReader : public TopologyReader {
   DLPOLYTopologyReader() {}
 
   /// read a topology file
-  bool ReadTopology(std::string file, void *top);
+  bool ReadTopology(std::string file, boost::any top);
 
   /// set the topology file name: <name>.dlpf (convention: ".dlpf"="FIELD")
   void setFname(std::string name) {
@@ -177,9 +178,15 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_isKeyInt(
 
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, void *uncast_top) {
+    std::string file, boost::any top_any) {
 
-  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+  if (typeid(Topology_T *) != top_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using dlpolytopologyreader, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+
   const char *WhiteSpace = " \t";
 
   int matoms = 0;
@@ -238,7 +245,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      Molecule_T *mi = top->CreateMolecule(top->MoleculeCount(), mol_name);
+      Molecule_T *mi = top.CreateMolecule(top.MoleculeCount(), mol_name);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -301,11 +308,11 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 
           tools::byte_t symmetry = 1;
 
-          Bead_T *bead = top->CreateBead(
-              symmetry, beadtype, top->BeadCount(), mi->getId(),
-              tools::topology_constants::unassigned_residue_id,
-              tools::topology_constants::unassigned_residue_type, element, mass,
-              charge);
+          Bead_T *bead =
+              top.CreateBead(symmetry, beadtype, top.BeadCount(), mi->getId(),
+                             tools::topology_constants::unassigned_residue_id,
+                             tools::topology_constants::unassigned_residue_type,
+                             element, mass, charge);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();
@@ -349,7 +356,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
             if (interaction_group == "BONDS") {
               int bead_id1 = id_map[ids[0] - 1];
               int bead_id2 = id_map[ids[1] - 1];
-              ic = top->CreateInteraction(
+              ic = top.CreateInteraction(
                   InteractionType::bond, interaction_group, interaction_id,
                   mi->getId(), std::vector<int>{bead_id1, bead_id2});
             } else if (interaction_group == "ANGLES") {
@@ -357,7 +364,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
               int bead_id1 = id_map[ids[0] - 1];
               int bead_id2 = id_map[ids[1] - 1];
               int bead_id3 = id_map[ids[2] - 1];
-              ic = top->CreateInteraction(
+              ic = top.CreateInteraction(
                   InteractionType::angle, interaction_group, interaction_id,
                   mi->getId(), std::vector<int>{bead_id1, bead_id2, bead_id3});
             } else if (interaction_group.substr(0, 6) == "DIHEDR") {
@@ -368,7 +375,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
               int bead_id2 = id_map[ids[1] - 1];
               int bead_id3 = id_map[ids[2] - 1];
               int bead_id4 = id_map[ids[3] - 1];
-              ic = top->CreateInteraction(
+              ic = top.CreateInteraction(
                   InteractionType::dihedral, interaction_group, interaction_id,
                   mi->getId(),
                   std::vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
@@ -390,13 +397,13 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
         Molecule_T *mi_replica =
-            top->CreateMolecule(top->MoleculeCount(), mol_name);
+            top.CreateMolecule(top.MoleculeCount(), mol_name);
         std::vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
           Bead_T *bead = mi->getBead(bead_id);
           tools::byte_t symmetry = 1;
-          Bead_T *bead_replica = top->CreateBead(
-              symmetry, bead->getType(), top->BeadCount(), mi_replica->getId(),
+          Bead_T *bead_replica = top.CreateBead(
+              symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
               bead->getResidueId(), bead->getResidueType(), bead->getElement(),
               bead->getMass(), bead->getQ());
           mi_replica->AddBead(bead_replica);
@@ -411,14 +418,14 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
           if ((*ic)->BeadCount() == 2) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
             int bead_id2 = (*ic)->getBeadId(1) + offset;
-            ic_replica = top->CreateInteraction(
+            ic_replica = top.CreateInteraction(
                 InteractionType::bond, (*ic)->getGroup(), (*ic)->getIndex(),
                 mi_replica->getId(), std::vector<int>{bead_id1, bead_id2});
           } else if ((*ic)->BeadCount() == 3) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
             int bead_id2 = (*ic)->getBeadId(1) + offset;
             int bead_id3 = (*ic)->getBeadId(2) + offset;
-            ic_replica = top->CreateInteraction(
+            ic_replica = top.CreateInteraction(
                 InteractionType::angle, (*ic)->getGroup(), (*ic)->getIndex(),
                 mi_replica->getId(),
                 std::vector<int>{bead_id1, bead_id2, bead_id3});
@@ -427,7 +434,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
             int bead_id2 = (*ic)->getBeadId(1) + offset;
             int bead_id3 = (*ic)->getBeadId(2) + offset;
             int bead_id4 = (*ic)->getBeadId(3) + offset;
-            ic_replica = top->CreateInteraction(
+            ic_replica = top.CreateInteraction(
                 InteractionType::dihedral, (*ic)->getGroup(), (*ic)->getIndex(),
                 mi_replica->getId(),
                 std::vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
@@ -438,7 +445,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         }
       }
     }
-    top->RebuildExclusions();
+    top.RebuildExclusions();
   }
 
 #ifdef DEBUG

@@ -20,6 +20,7 @@
 
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
+#include <boost/any.hpp>
 #include <stdio.h>
 #include <string>
 #include <votca/tools/objectfactory.h>
@@ -36,7 +37,7 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  void Write(void *conf);
+  void Write(boost::any conf);
 
  private:
   FILE *_out;
@@ -54,31 +55,38 @@ void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Close() {
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
-  Topology_T *top = static_cast<Topology_T *>(conf);
-  Eigen::Matrix3d box = top->getBox();
-  fprintf(_out, "ITEM: TIMESTEP\n%i\n", top->getStep());
-  fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top->BeadCount());
+void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Write(
+    boost::any conf_any) {
+
+  if (typeid(Topology_T *) != conf_any.type()) {
+    throw std::runtime_error(
+        "Error Cannot read topology using lammps dump writer, incorrect "
+        "topology type provided.");
+  }
+  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
+  Eigen::Matrix3d box = top.getBox();
+  fprintf(_out, "ITEM: TIMESTEP\n%i\n", top.getStep());
+  fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top.BeadCount());
   fprintf(_out, "ITEM: BOX BOUNDS pp pp pp\n");
   fprintf(_out, "0 %f\n0 %f\n0 %f\n", box(0, 0), box(1, 1), box(2, 2));
 
   fprintf(_out, "ITEM: ATOMS id type x y z");
-  bool v = top->HasVel();
+  bool v = top.HasVel();
   if (v) {
     fprintf(_out, " vx vy vz");
   }
-  bool f = top->HasForce();
+  bool f = top.HasForce();
   if (f) {
     fprintf(_out, " fx fy fz");
   }
   fprintf(_out, "\n");
 
-  std::vector<int> bead_ids = top->getBeadIds();
+  std::vector<int> bead_ids = top.getBeadIds();
   // Sort the beads before outputing them
   std::sort(bead_ids.begin(), bead_ids.end());
   for (const int bead_id : bead_ids) {
-    Bead_T *bead = top->getBead(bead_id);
-    int bead_type_id = top->getBeadTypeId(bead_id);
+    Bead_T *bead = top.getBead(bead_id);
+    int bead_type_id = top.getBeadTypeId(bead_id);
 
     fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
     fprintf(_out, " %f %f %f", bead->getPos().x(), bead->getPos().y(),
