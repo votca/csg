@@ -18,15 +18,15 @@
 #ifndef VOTCA_CSG_FILEFORMATFACTORY_H
 #define VOTCA_CSG_FILEFORMATFACTORY_H
 
-#include "objectfactory.h"
 #include <memory>
 #include <string>
 #include <votca/tools/filesystem.h>
+#include <votca/tools/objectfactory.h>
 namespace votca {
 namespace csg {
 
 template <class T>
-class FileFormatFactory : public ObjectFactory<std::string, T> {
+class FileFormatFactory : public tools::ObjectFactory<std::string, T> {
  public:
   FileFormatFactory() {}
 
@@ -37,7 +37,7 @@ template <class T>
 std::unique_ptr<T> FileFormatFactory<T>::Create(const std::string &file) {
   std::string filetype = tools::filesystem::GetFileExtension(file);
   try {
-    return ObjectFactory<std::string, T>::Create(filetype);
+    return tools::ObjectFactory<std::string, T>::Create(filetype);
   } catch (std::exception &error) {
     throw std::runtime_error("Error '" + filetype +
                              "' file format of file "

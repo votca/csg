@@ -23,7 +23,7 @@
 #include <boost/any.hpp>
 #include <stdio.h>
 #include <string>
-#include <votca/csg/objectfactory.h>
+#include <votca/tools/objectfactory.h>
 
 namespace votca {
 namespace csg {
@@ -34,7 +34,8 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void RegisteredAt(ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+  void RegisteredAt(
+      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
   void Write(boost::any conf);
 

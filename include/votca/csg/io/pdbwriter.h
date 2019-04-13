@@ -46,9 +46,9 @@ class PDBWriter : public TrajectoryWriter {
  public:
   // void Open(std::string file, bool bAppend = false);
 
-  /*  void RegisteredAt(
-        csg::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
-  */
+  void RegisteredAt(
+      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+
   //  template <class Bead_T, class Molecule_T>
   // void Write_(Topology_T<Bead_T, Molecule_T> *conf);
   void Write(boost::any conf);
