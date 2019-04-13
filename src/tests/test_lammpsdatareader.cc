@@ -68,7 +68,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   TopologyReader::RegisterPlugins();
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
-  void *uncast_top = static_cast<void *>(&top);
+  CSG_Topology *top_ptr = &top;
+  void *uncast_top = static_cast<void *>(top_ptr);
   lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
   delete lammpsDataReader;
 
@@ -120,7 +121,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TopologyReader::RegisterPlugins();
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
-  void *uncast_top = static_cast<void *>(&top);
+  CSG_Topology *top_ptr = &top;
+  void *uncast_top = static_cast<void *>(top_ptr);
   lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
   delete lammpsDataReader;
 
@@ -135,7 +137,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   lammpsDataReaderTrj = TrjReaderFactory().Create("test.data");
 
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
-  void *uncast_top2 = static_cast<void *>(&top);
+  CSG_Topology *top_ptr2 = &top;
+  void *uncast_top2 = static_cast<void *>(top_ptr2);
   lammpsDataReaderTrj->FirstFrame(uncast_top2);
   lammpsDataReaderTrj->Close();
   delete lammpsDataReaderTrj;

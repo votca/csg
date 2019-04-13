@@ -438,7 +438,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         }
       }
     }
-    top.RebuildExclusions();
+    top->RebuildExclusions();
   }
 
 #ifdef DEBUG

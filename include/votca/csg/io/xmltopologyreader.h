@@ -148,7 +148,9 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopolFile(
   reader = TopReaderFactory().Create(file);
   if (!reader) throw std::runtime_error(file + ": unknown topology format");
 
-  reader->ReadTopology(file, *_top);
+  Topology_T *top_ptr = _top;
+  void *uncast_top = static_cast<void *>(top_ptr);
+  reader->ReadTopology(file, uncast_top);
 
   delete reader;
   // Clean XML molecules and beads.

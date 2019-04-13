@@ -45,7 +45,7 @@ class TopologyReader {
   //  virtual bool ReadTopology(std::string file,
   //                   TemplateTopology<BaseBead, BaseMolecule<BaseBead>> * top)
   //                   = 0;
-  bool ReadTopology(std::string file, void* top) { return false; }
+  virtual bool ReadTopology(std::string file, void* top) { return false; }
 
   //    return ReadTopology_(file,top);
   // }
