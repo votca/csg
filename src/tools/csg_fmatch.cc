@@ -16,6 +16,7 @@
  */
 
 #include "csg_fmatch.h"
+#include <boost/any.hpp>
 #include <fstream>
 #include <iostream>
 #include <math.h>
@@ -161,8 +162,8 @@ void CGForceMatching::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
     // open the trajectory
     _trjreader_force->Open(_op_vm["trj-force"].as<string>());
     // read in first frame
-    void *uncast_top = static_cast<void *>(&(this->_top_force));
-    _trjreader_force->FirstFrame(uncast_top);
+    boost::any any_ptr(&(this->_top_force));
+    _trjreader_force->FirstFrame(any_ptr);
   }
 }
 
@@ -461,8 +462,8 @@ void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
       _b.setZero();
     }
   }
-  void *uncast_top = static_cast<void *>(&(this->_top_force));
-  if (_has_existing_forces) _trjreader_force->NextFrame(uncast_top);
+  boost::any any_ptr(&(this->_top_force));
+  if (_has_existing_forces) _trjreader_force->NextFrame(any_ptr);
 }
 
 void CGForceMatching::FmatchAccumulateData() {
