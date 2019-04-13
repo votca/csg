@@ -398,7 +398,9 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBond(
     throw std::runtime_error("Wrong number of beads in bond: " +
                              interaction_group);
   Interaction *ic = NULL;
-  typedef std::pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
+  typedef std::pair<typename MoleculesMap::iterator,
+                    typename MoleculesMap::iterator>
+      MRange;
   int bond_index = 0;
   for (std::vector<std::string>::iterator it = bead_list.begin();
        it != bead_list.end();) {
@@ -407,8 +409,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBond(
     if (b1.molecule_type_ == b2.molecule_type_) {
       // Iterates over molecules and gets atom pids.
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
-      for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
-           ++itm) {
+      for (typename MoleculesMap::iterator itm = mRange.first;
+           itm != mRange.second; ++itm) {
         XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
@@ -437,7 +439,9 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseAngle(
     throw std::runtime_error("Wrong number of beads in angle: " +
                              interaction_group);
   Interaction *ic = NULL;
-  typedef std::pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
+  typedef std::pair<typename MoleculesMap::iterator,
+                    typename MoleculesMap::iterator>
+      MRange;
   int bond_index = 0;
   for (std::vector<std::string>::iterator it = bead_list.begin();
        it != bead_list.end();) {
@@ -448,8 +452,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseAngle(
         (b2.molecule_type_ == b3.molecule_type_)) {
       // Iterates over molecules and gets atom pids.
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
-      for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
-           ++itm) {
+      for (typename MoleculesMap::iterator itm = mRange.first;
+           itm != mRange.second; ++itm) {
         XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
@@ -479,7 +483,9 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseDihedral(
     throw std::runtime_error("Wrong number of beads in dihedral: " +
                              interaction_group);
   Interaction *ic = NULL;
-  typedef std::pair<MoleculesMap::iterator, MoleculesMap::iterator> MRange;
+  typedef std::pair<typename MoleculesMap::iterator,
+                    typename MoleculesMap::iterator>
+      MRange;
   int bond_index = 0;
   for (std::vector<std::string>::iterator it = bead_list.begin();
        it != bead_list.end();) {
@@ -492,8 +498,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseDihedral(
         (b1.molecule_type_ == b4.molecule_type_)) {
       // Iterates over molecules and gets atom pids.
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
-      for (MoleculesMap::iterator itm = mRange.first; itm != mRange.second;
-           ++itm) {
+      for (typename MoleculesMap::iterator itm = mRange.first;
+           itm != mRange.second; ++itm) {
         XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];

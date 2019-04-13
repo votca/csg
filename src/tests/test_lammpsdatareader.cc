@@ -68,7 +68,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   TopologyReader::RegisterPlugins();
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
-  lammpsDataReader->ReadTopology(lammpsdatafilename, top);
+  void *uncast_top = static_cast<void *>(&top);
+  lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
   delete lammpsDataReader;
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
@@ -119,7 +120,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TopologyReader::RegisterPlugins();
   TopologyReader *lammpsDataReader;
   lammpsDataReader = TopReaderFactory().Create("test.data");
-  lammpsDataReader->ReadTopology(lammpsdatafilename, top);
+  void *uncast_top = static_cast<void *>(&top);
+  lammpsDataReader->ReadTopology(lammpsdatafilename, uncast_top);
   delete lammpsDataReader;
 
   string lammpsdatafilename2 = "test_polymer4.data";
@@ -133,7 +135,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   lammpsDataReaderTrj = TrjReaderFactory().Create("test.data");
 
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
-  lammpsDataReaderTrj->FirstFrame(top);
+  void *uncast_top2 = static_cast<void *>(&top);
+  lammpsDataReaderTrj->FirstFrame(uncast_top2);
   lammpsDataReaderTrj->Close();
   delete lammpsDataReaderTrj;
 

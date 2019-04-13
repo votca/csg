@@ -20,14 +20,14 @@
 
 #include <string>
 #include <votca/tools/filesystem.h>
-//#include <votca/tools/objectfactory.h>
-#include "topologyobjectfactory.h"
+#include <votca/tools/objectfactory.h>
+//#include "topologyobjectfactory.h"
 
 namespace votca {
 namespace csg {
 
 template <class T>
-class FileFormatFactory : public csg::ObjectFactory<std::string, T> {
+class FileFormatFactory : public tools::ObjectFactory<std::string, T> {
  public:
   FileFormatFactory() {}
 
@@ -38,7 +38,7 @@ template <class T>
 T *FileFormatFactory<T>::Create(const std::string &file) {
   std::string filetype = tools::filesystem::GetFileExtension(file);
   try {
-    return csg::ObjectFactory<std::string, T>::Create(filetype);
+    return tools::ObjectFactory<std::string, T>::Create(filetype);
   } catch (std::exception &error) {
     throw std::runtime_error("Error '" + filetype +
                              "' file format of file "

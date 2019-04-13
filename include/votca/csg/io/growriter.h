@@ -43,7 +43,7 @@ template <class Bead_T, class Molecule_T, class Topology_T>
 void GROWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
                                                      bool bAppend) {
   if (_out != nullptr) {
-    throw runtime_error(
+    throw std::runtime_error(
         "Cannot open file until you have closed the previously opend gro "
         "file.");
   }
@@ -93,10 +93,10 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
             atomname.c_str(), (i + 1) % 100000);
     /* next fprintf uses built format std::string */
-    Eigen::Vector3d r = conf->getBead(i)->getPos();
+    Eigen::Vector3d r = top->getBead(i)->getPos();
 
     if (v) {
-      Eigen::Vector3d vv = conf->getBead(i)->getVel();
+      Eigen::Vector3d vv = top->getBead(i)->getVel();
       fprintf(_out, format, r.x(), r.y(), r.z(), vv.x(), vv.y(), vv.z());
     } else {
       fprintf(_out, format, r.x(), r.y(), r.z());
@@ -104,7 +104,7 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
   }
 
   // write the boy
-  Eigen::Matrix3d box = conf->getBox();
+  Eigen::Matrix3d box = top->getBox();
 
   if (pr < 5) pr = 5;
   l = pr + 5;

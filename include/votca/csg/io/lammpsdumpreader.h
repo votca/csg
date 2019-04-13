@@ -122,14 +122,14 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
     if (line.substr(0, 5) != "ITEM:")
       throw std::ios_base::failure("unexpected line in lammps file:\n" + line);
     if (line.substr(6, 8) == "TIMESTEP") {
-      ReadTimestep(top, line);
+      ReadTimestep(*top, line);
     } else if (line.substr(6, 15) == "NUMBER OF ATOMS") {
-      ReadNumAtoms(top, line);
+      ReadNumAtoms(*top, line);
     } else if (line.substr(6, 10) == "BOX BOUNDS") {
       std::cout << "Reading box bounds " << std::endl;
-      ReadBox(top, line);
+      ReadBox(*top, line);
     } else if (line.substr(6, 5) == "ATOMS") {
-      ReadAtoms(top, line);
+      ReadAtoms(*top, line);
       break;
     }
 

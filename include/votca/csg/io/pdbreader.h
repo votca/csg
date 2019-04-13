@@ -51,7 +51,7 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   ~PDBReader() {}
   //  bool ReadTopology(std::string file, CSG_Topology &top);
   /// open a trajectory file
-  bool Open(const std::string &file);
+  // bool Open(const std::string &file);
   /// read in the first frame
 
   // template <class Bead_T, class Molecule_T>
@@ -61,7 +61,7 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   // template <class Bead_T, class Molecule_T>
   bool NextFrame(void *top);
   // bool NextFrame(CSG_Topology &top);
-  void Close();
+  // void Close();
 
   bool ReadTopology(std::string file, void *top);
 

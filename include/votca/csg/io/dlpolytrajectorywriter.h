@@ -18,6 +18,7 @@
 #ifndef VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
 #define VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H
 
+#include "../boundarycondition.h"
 #include "../trajectorywriter.h"
 #include <boost/filesystem/convenience.hpp>
 #include <iomanip>
@@ -143,33 +144,34 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
   if (_isConfig) {
 
     _fl << "From VOTCA with love" << std::endl;
-    _fl << setw(10) << mavecs << setw(10) << mpbct << setw(10)
-        << conf->BeadCount() << setw(20) << energy << std::endl;
+    _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
+        << conf->BeadCount() << std::setw(20) << energy << std::endl;
     Eigen::Matrix3d m = conf->getBox();
     for (int i = 0; i < 3; i++)
-      _fl << fixed << setprecision(10) << setw(20) << m(i, 0) * scale
-          << setw(20) << m(i, 1) * scale << setw(20) << m(i, 2) * scale
-          << std::endl;
+      _fl << std::fixed << std::setprecision(10) << std::setw(20)
+          << m(i, 0) * scale << std::setw(20) << m(i, 1) * scale
+          << std::setw(20) << m(i, 2) * scale << std::endl;
 
   } else {
 
     if (nstep == 1) {
       _fl << "From VOTCA with love" << std::endl;
-      _fl << setw(10) << mavecs << setw(10) << mpbct << setw(10)
+      _fl << std::setw(10) << mavecs << std::setw(10) << mpbct << std::setw(10)
           << conf->BeadCount() << std::endl;
       dstep = conf->getTime() / (double)(conf->getStep());
     }
 
-    _fl << "timestep" << setprecision(9) << setw(10) << conf->getStep()
-        << setw(10) << conf->BeadCount() << setw(10) << mavecs << setw(10)
-        << mpbct;
-    _fl << setprecision(9) << setw(12) << dstep << setw(12) << conf->getTime()
-        << std::endl;
+    _fl << "timestep" << std::setprecision(9) << std::setw(10)
+        << conf->getStep() << std::setw(10) << conf->BeadCount()
+        << std::setw(10) << mavecs << std::setw(10) << mpbct;
+    _fl << std::setprecision(9) << std::setw(12) << dstep << std::setw(12)
+        << conf->getTime() << std::endl;
 
     Eigen::Matrix3d m = conf->getBox();
     for (int i = 0; i < 3; i++)
-      _fl << setprecision(12) << setw(20) << m(i, 0) * scale << setw(20)
-          << m(i, 1) * scale << setw(20) << m(i, 2) * scale << std::endl;
+      _fl << std::setprecision(12) << std::setw(20) << m(i, 0) * scale
+          << std::setw(20) << m(i, 1) * scale << std::setw(20)
+          << m(i, 2) * scale << std::endl;
   }
 
   for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); i++) {
@@ -178,18 +180,20 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
     // AB: DL_POLY needs bead TYPE, not name!
 
     if (_isConfig) {
-      _fl << setw(8) << left << bead->getType() << right << setw(10) << i + 1
-          << std::endl;
+      _fl << std::setw(8) << std::left << bead->getType() << std::right
+          << std::setw(10) << i + 1 << std::endl;
     } else {
-      _fl << setw(8) << left << bead->getType() << right << setw(10) << i + 1;
-      _fl << setprecision(6) << setw(12) << bead->getMass() << setw(12)
-          << bead->getQ() << setw(12) << "   0.0" << std::endl;
+      _fl << std::setw(8) << std::left << bead->getType() << std::right
+          << std::setw(10) << i + 1;
+      _fl << std::setprecision(6) << std::setw(12) << bead->getMass()
+          << std::setw(12) << bead->getQ() << std::setw(12) << "   0.0"
+          << std::endl;
     }
 
     // nm -> Angs
-    _fl << resetiosflags(std::ios::fixed) << setprecision(12) << setw(20)
-        << bead->getPos().x() * scale;
-    _fl << setw(20) << bead->getPos().y() * scale << setw(20)
+    _fl << resetiosflags(std::ios::fixed) << std::setprecision(12)
+        << std::setw(20) << bead->getPos().x() * scale;
+    _fl << std::setw(20) << bead->getPos().y() * scale << std::setw(20)
         << bead->getPos().z() * scale << std::endl;
 
     if (mavecs > 0) {
@@ -199,9 +203,9 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
             "does not have v-data");
 
       // nm -> Angs
-      _fl << setprecision(12) << setw(20) << bead->getVel().x() * scale
-          << setw(20);
-      _fl << bead->getVel().y() * scale << setw(20)
+      _fl << std::setprecision(12) << std::setw(20)
+          << bead->getVel().x() * scale << std::setw(20);
+      _fl << bead->getVel().y() * scale << std::setw(20)
           << bead->getVel().z() * scale << std::endl;
 
       if (mavecs > 1) {
@@ -211,10 +215,10 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
               "does not have f-data");
 
         // nm -> Angs
-        _fl << setprecision(12) << setw(20) << bead->getF().x() * scale
-            << setw(20);
-        _fl << bead->getF().y() * scale << setw(20) << bead->getF().z() * scale
-            << std::endl;
+        _fl << std::setprecision(12) << std::setw(20)
+            << bead->getF().x() * scale << std::setw(20);
+        _fl << bead->getF().y() * scale << std::setw(20)
+            << bead->getF().z() * scale << std::endl;
       }
     }
   }

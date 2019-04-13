@@ -43,8 +43,7 @@ namespace csg {
 template <typename Bead_T, class Molecule_T, class Topology_T>
 class PDBWriter : public TrajectoryWriter {
  public:
-  void Open(std::string file, bool bAppend = false);
-  void Close();
+  // void Open(std::string file, bool bAppend = false);
 
   /*  void RegisteredAt(
         csg::ObjectFactory<std::string, TrajectoryWriter> &factory) {}

@@ -18,55 +18,48 @@
 #ifndef __VOTCA_CSG_XYZWRITER_H
 #define __VOTCA_CSG_XYZWRITER_H
 
+#include "../trajectorywriter.h"
+#include <Eigen/Dense>
 #include <stdio.h>
-//#include <votca/csg/csgtopology.h>
-#include <votca/csg/trajectorywriter.h>
 #include <votca/tools/constants.h>
 
 namespace votca {
 namespace csg {
-/*
+
+template <class Bead_T, class Molecule_T, class Topology_T>
 class XYZWriter : public TrajectoryWriter {
  public:
-  void Open(std::string file, bool bAppend = false);
-  void Close();
+  // void Open(std::string file, bool bAppend = false);
 
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  template <class Bead_T, class Molecule_T>
-  void Write_(TemplateTopology<Bead_T, Molecule_T> *conf);
+  void Write(void *conf);
 
-  template <class T, class Bead_T, class Molecule_T>
-  void Write_(TemplateTopology<Bead_T, Molecule_T> &top, T &container,
-              std::string header);
-
-  //  void Write(CSG_Topology &top, T &container, std::string header);
+  template <class T>
+  void Write(Topology_T &top, T &container, std::string header);
 
  private:
-  //  template <class T>
-
-  template <class Atom>
-  std::string getType(Atom &atom) {
+  template <class T>
+  std::string getType(T &atom) {
     return atom.getType();
   }
 
-  std::string getType(Bead *bead) { return bead->getType(); }
+  std::string getType(Bead_T *bead) { return bead->getType(); }
 
-  template <class Atom>
-  Eigen::Vector3d getPos(Atom &atom) {
+  template <class T>
+  Eigen::Vector3d getPos(T &atom) {
     return atom.getPos() * tools::conv::bohr2ang;
   }
 
-  Eigen::Vector3d getPos(Bead *bead) {
+  Eigen::Vector3d getPos(Bead_T *bead) {
     return bead->Pos() * tools::conv::nm2ang;
   }
 
   // The CSG Topology object is the only object that stores the beads and its
   // pointers, all other containers only store the bead ids
-  template <typename T, class Bead_T, class Molecule_T>
-  std::vector<Bead_T *> getIterable(TemplateTopology<Bead_T, Molecule_T> &top,
-                                    T &container) {
+  template <typename T>
+  std::vector<Bead_T *> getIterable(Topology_T &top, T &container) {
     std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = container.getBeadIds();
     for (int &bead_id : bead_ids) {
@@ -78,17 +71,19 @@ class XYZWriter : public TrajectoryWriter {
   std::ofstream _out;
 };
 
-template <class Bead_T, class Molecule_T>
-void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> *conf) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+void XYZWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
+  Topology_T *top = static_cast<Topology_T *>(conf);
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
-                        (conf->getStep() + 1) % conf->getTime())
+                        (top->getStep() + 1) % top->getTime())
                            .str();
-  Write_<TemplateTopology<Bead_T, Molecule_T>>(*conf, header);
+  Write(*top, *top, header);
 }
 
-template <typename T, class Bead_T, class Molecule_T>
-inline void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> &top,
-                              T &container, std::string header) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+template <typename T>
+inline void XYZWriter<Bead_T, Molecule_T, Topology_T>::Write(
+    Topology_T &top, T &container, std::string header) {
   // inline void XYZWriter::Write(CSG_Topology &top, T &container,
   //                            std::string header) {
 
@@ -98,7 +93,7 @@ inline void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> &top,
 
   boost::format fmter("%1$s%2$10.5f%3$10.5f%4$10.5f\n");
 
-  for (Bead_T &atom : atoms) {
+  for (Bead_T *atom : atoms) {
     Eigen::Vector3d r = getPos(atom);
     // truncate strings if necessary
     std::string atomtype = getType(atom);
@@ -110,7 +105,7 @@ inline void XYZWriter::Write_(TemplateTopology<Bead_T, Molecule_T> &top,
     _out << fmter % atomtype % r.x() % r.y() % r.z();
   }
   _out << std::flush;
-}*/
+}
 }  // namespace csg
 }  // namespace votca
 

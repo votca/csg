@@ -22,20 +22,19 @@
 #include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/io/dlpolytrajectoryreader.h"
 #include "../../include/votca/csg/io/gmxtrajectoryreader.h"
+#include "../../include/votca/csg/io/groreader.h"
+#include "../../include/votca/csg/io/lammpsdatareader.h"
+#include "../../include/votca/csg/io/lammpsdumpreader.h"
 #include "../../include/votca/csg/io/pdbreader.h"
 #include "../../include/votca/csg/io/xyzreader.h"
 #include "../../include/votca/csg/trajectoryreader.h"
 #ifdef H5MD
-#include "../../include/votca/csg/h5mdtrajectoryreader.h"
+#include "../../include/votca/csg/io/h5mdtrajectoryreader.h"
 #endif
-#include "../../include/votca/csg/io/groreader.h"
-#include "../../include/votca/csg/io/lammpsdatareader.h"
-#include "../../include/votca/csg/io/lammpsdumpreader.h"
 #ifdef GMX_DOUBLE
 #include "../../include/votca/csg/io/gmxtrajectoryreader.h"
 #endif
-/*
- */
+
 namespace votca {
 namespace csg {
 

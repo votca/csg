@@ -19,6 +19,7 @@
 #define VOTCA_CSG_LAMMPSDUMPWRITER_H
 
 #include "../trajectorywriter.h"
+#include <Eigen/Dense>
 #include <stdio.h>
 #include <string>
 #include <votca/tools/objectfactory.h>
@@ -48,14 +49,14 @@ void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter::Close() {
+void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Close() {
   fclose(_out);
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter::Write(void *conf) {
+void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Write(void *conf) {
   Topology_T *top = static_cast<Topology_T *>(conf);
-  Eigen::Matrix3d box = conf->getBox();
+  Eigen::Matrix3d box = top->getBox();
   fprintf(_out, "ITEM: TIMESTEP\n%i\n", top->getStep());
   fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top->BeadCount());
   fprintf(_out, "ITEM: BOX BOUNDS pp pp pp\n");
@@ -72,12 +73,12 @@ void LAMMPSDumpWriter::Write(void *conf) {
   }
   fprintf(_out, "\n");
 
-  vector<int> bead_ids = conf->getBeadIds();
+  std::vector<int> bead_ids = top->getBeadIds();
   // Sort the beads before outputing them
-  sort(bead_ids.begin(), bead_ids.end());
+  std::sort(bead_ids.begin(), bead_ids.end());
   for (const int bead_id : bead_ids) {
-    Bead *bead = conf->getBead(bead_id);
-    int bead_type_id = conf->getBeadTypeId(bead_id);
+    Bead_T *bead = top->getBead(bead_id);
+    int bead_type_id = top->getBeadTypeId(bead_id);
 
     fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
     fprintf(_out, " %f %f %f", bead->getPos().x(), bead->getPos().y(),

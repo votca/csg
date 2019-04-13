@@ -299,13 +299,13 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 
         for (int j = 0; j < repeater; j++) {
 
-          byte_t symmetry = 1;
+          tools::byte_t symmetry = 1;
 
-          Bead_T *bead =
-              top->CreateBead(symmetry, beadtype, top->BeadCount(), mi->getId(),
-                              topology_constants::unassigned_residue_id,
-                              topology_constants::unassigned_residue_type,
-                              element, mass, charge);
+          Bead_T *bead = top->CreateBead(
+              symmetry, beadtype, top->BeadCount(), mi->getId(),
+              tools::topology_constants::unassigned_residue_id,
+              tools::topology_constants::unassigned_residue_type, element, mass,
+              charge);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();
@@ -394,7 +394,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         std::vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
           Bead_T *bead = mi->getBead(bead_id);
-          byte_t symmetry = 1;
+          tools::byte_t symmetry = 1;
           Bead_T *bead_replica = top->CreateBead(
               symmetry, bead->getType(), top->BeadCount(), mi_replica->getId(),
               bead->getResidueId(), bead->getResidueType(), bead->getElement(),

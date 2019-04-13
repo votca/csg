@@ -161,7 +161,8 @@ void CGForceMatching::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
     // open the trajectory
     _trjreader_force->Open(_op_vm["trj-force"].as<string>());
     // read in first frame
-    _trjreader_force->FirstFrame(_top_force);
+    void *uncast_top = static_cast<void *>(&(this->_top_force));
+    _trjreader_force->FirstFrame(uncast_top);
   }
 }
 
@@ -460,7 +461,8 @@ void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
       _b.setZero();
     }
   }
-  if (_has_existing_forces) _trjreader_force->NextFrame(_top_force);
+  void *uncast_top = static_cast<void *>(&(this->_top_force));
+  if (_has_existing_forces) _trjreader_force->NextFrame(uncast_top);
 }
 
 void CGForceMatching::FmatchAccumulateData() {

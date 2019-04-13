@@ -18,9 +18,9 @@
 #ifndef SRC_LIBCSG_MODULES_IO_H5MDTRAJECTORYREADER_H_
 #define SRC_LIBCSG_MODULES_IO_H5MDTRAJECTORYREADER_H_
 
+#include "../topologyreader.h"
+#include "../trajectoryreader.h"
 #include "hdf5.h"
-#include "topologyreader.h"
-#include "trajectoryreader.h"
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -373,7 +373,7 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
                   // reference
   if (first_frame_) {
     first_frame_ = false;
-    Initialize(static_cast<Topology_T *>(top));
+    Initialize(*(static_cast<Topology_T *>(top)));
   }
   NextFrame(top);
   return true;

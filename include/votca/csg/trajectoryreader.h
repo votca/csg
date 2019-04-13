@@ -37,9 +37,9 @@ class TrajectoryReader {
  public:
   virtual ~TrajectoryReader() {}
   /// open a trejectory file
-  virtual bool Open(const std::string &file) = 0;
+  virtual bool Open(const std::string &file){};
 
-  virtual void Close() = 0;
+  virtual void Close(){};
 
   //  template<class Bead_T>;
 
@@ -49,6 +49,7 @@ class TrajectoryReader {
   // virtual bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
   // &top)=0;
   virtual bool FirstFrame(void *top) = 0;
+  //  virtual bool FirstFrame(void *top, bool topology) = 0;
   /// read in the next frame
   // virtual bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
   // *top) = 0;

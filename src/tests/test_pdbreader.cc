@@ -107,7 +107,8 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   string str = "Molecule1.pdb";
   reader = TopReaderFactory().Create(str);
 
-  reader->ReadTopology(str, top);
+  void* uncast_top = static_cast<void*>(&top);
+  reader->ReadTopology(str, uncast_top);
   BOOST_CHECK_EQUAL(reader != NULL, true);
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
 
@@ -205,7 +206,8 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   TopologyReader* reader;
   string str = "Molecule1.pdb";
   reader = TopReaderFactory().Create(str);
-  reader->ReadTopology(str, top);
+  void* uncast_top = static_cast<void*>(&top);
+  reader->ReadTopology(str, uncast_top);
   BOOST_CHECK_EQUAL(reader != NULL, true);
   BOOST_CHECK_EQUAL(top.BeadCount(), 10);
   delete reader;
@@ -222,7 +224,8 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   CSG_Topology top2;
   TopologyReader* reader2;
   reader2 = TopReaderFactory().Create(str2);
-  reader2->ReadTopology(str2, top2);
+  void* uncast_top2 = static_cast<void*>(&top2);
+  reader2->ReadTopology(str2, uncast_top2);
   delete reader2;
   BOOST_CHECK_EQUAL(reader2 != NULL, true);
   BOOST_CHECK_EQUAL(top2.BeadCount(), 10);

@@ -18,13 +18,13 @@
 #ifndef __VOTCA_CSG_XYZREADER_H
 #define __VOTCA_CSG_XYZREADER_H
 
+#include "../topologyreader.h"
+#include "../trajectoryreader.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <type_traits>
-#include <votca/csg/topologyreader.h>
-#include <votca/csg/trajectoryreader.h>
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 namespace votca {
@@ -37,7 +37,8 @@ namespace csg {
     for xyz files
 
 */
-/*class XYZReader : public TrajectoryReader, public TopologyReader {
+template <class Bead_T, class Molecule_T, class Topology_T>
+class XYZReader : public TrajectoryReader, public TopologyReader {
  public:
   XYZReader() {}
   ~XYZReader() {}
@@ -45,19 +46,18 @@ namespace csg {
   /// open a topology file
   //  bool ReadTopology(std::string file,
   //  TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
-  template <bool topology, class Bead_T, class Molecule_T>
-  bool ReadTopology_(std::string file,
-                     TemplateTopology<Bead_T, Molecule_T> &top);
+  template <bool topology>
+  bool ReadTopology_(std::string file, void *top);
 
   /// open a trajectory file
-  bool Open(const std::string &file);
+  // bool Open(const std::string &file);
   /// read in the first frame
-  template <bool topology, class Bead_T, class Molecule_T>
-  bool FirstFrame_(TemplateTopology<Bead_T, Molecule_T> &top);
+  //  template <bool topology>
+  //  bool FirstFrame_(void * top);
+  bool FirstFrame(void *top);
   // bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   /// read in the next frame
-  template <class Bead_T, class Molecule_T>
-  bool NextFrame_(TemplateTopology<Bead_T, Molecule_T> &top);
+  bool NextFrame(void *top);
   // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   template <class T>
@@ -67,17 +67,9 @@ namespace csg {
     }
   }
 
-  void Close();
-
  private:
   template <class T>
-  int getContainerSize(T &container) {
-    return container.size();
-  }
-
-  template <class Bead_T, template <class Bead_T2> class Molecule_T>
-  int getContainerSize(
-      TemplateTopology<Bead_T, Molecule_T<Bead_T>> &container) {
+  size_t getContainerSize(T &container) {
     return container.BeadCount();
   }
 
@@ -92,13 +84,9 @@ namespace csg {
     container.push_back(atom(id, name, pos2));
   }
 
-  template <bool topology, class Bead_T, class Molecule_T>
-  void AddAtom(TemplateTopology<Bead_T, Molecule_T> &container,
-               std::string bead_type, int bead_id, std::string element,
-               const Eigen::Vector3d &pos) {
-    // void AddAtom(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
-    // &container, std::string bead_type, int bead_id,
-    //            std::string element, const Eigen::Vector3d &pos) {
+  template <bool topology, class T>
+  void AddAtom(T &container, std::string bead_type, int bead_id,
+               std::string element, const Eigen::Vector3d &pos) {
 
     Bead_T *b;
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
@@ -130,20 +118,27 @@ namespace csg {
   int _line;
 };
 
-template <bool topology, class Bead_T, class Molecule_T>
-bool XYZReader::FirstFrame_(TemplateTopology<Bead_T, Molecule_T> &top) {
+// template <bool topology>
+template <class Bead_T, class Molecule_T, class Topology_T>
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(void *top) {
   return NextFrame(top);
 }
-template <class Bead_T, class Molecule_T>
-bool XYZReader::NextFrame_(TemplateTopology<Bead_T, Molecule_T> &top) {
-  bool success = ReadFrame<false, TemplateTopology<Bead_T, Molecule_T>>(top);
+
+template <class Bead_T, class Molecule_T, class Topology_T>
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::NextFrame(void *uncast_top) {
+
+  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+  bool success = ReadFrame<false>(*top);
   return success;
 }
 
-template <bool topology, class Bead_T, class Molecule_T>
-bool XYZReader::ReadTopology_(std::string file,
-                              TemplateTopology<Bead_T, Molecule_T> &top) {
-  top.Cleanup();
+template <class Bead_T, class Molecule_T, class Topology_T>
+template <bool topology>
+bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology_(
+    std::string file, void *uncast_top) {
+
+  Topology_T *top = static_cast<Topology_T *>(uncast_top);
+  top->Cleanup();
 
   _file = file;
   _fl.open(file);
@@ -151,15 +146,17 @@ bool XYZReader::ReadTopology_(std::string file,
     throw std::ios_base::failure("Error on open topology file: " + file);
   }
 
-  ReadFrame<true, CSG_Topology>(top);
+  ReadFrame<true, Topology_T>(*top);
 
   _fl.close();
 
   return true;
 }
 
+template <class Bead_T, class Molecule_T, class Topology_T>
 template <bool topology, class T>
-inline bool XYZReader::ReadFrame(T &container) {
+inline bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadFrame(T &container) {
+
   std::string line;
   getline(_fl, line);
   ++_line;
@@ -173,7 +170,7 @@ inline bool XYZReader::ReadFrame(T &container) {
           "First line of xyz file should contain number "
           "of atoms/beads, nothing else.");
     }
-    int natoms = boost::lexical_cast<int>(line1[0]);
+    size_t natoms = boost::lexical_cast<size_t>(line1[0]);
     if (!topology && natoms != getContainerSize(container)) {
       throw std::runtime_error(
           "number of beads in topology and trajectory differ");
@@ -217,7 +214,7 @@ inline bool XYZReader::ReadFrame(T &container) {
     }
   }
   return !_fl.eof();
-}*/
+}
 }  // namespace csg
 }  // namespace votca
 

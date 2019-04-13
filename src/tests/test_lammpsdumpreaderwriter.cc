@@ -220,7 +220,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TrajectoryReader *reader;
   reader = TrjReaderFactory().Create(lammpsdumpfilename);
   reader->Open(lammpsdumpfilename);
-  reader->FirstFrame(top);
+  void *uncast_top = static_cast<void *>(&top);
+  reader->FirstFrame(uncast_top);
   reader->Close();
   delete reader;
 
@@ -351,7 +352,8 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   TrajectoryReader *reader;
   reader = TrjReaderFactory().Create(lammpsDumpFileName);
   reader->Open(lammpsDumpFileName);
-  reader->FirstFrame(top);
+  void *uncast_top = static_cast<void *>(&top);
+  reader->FirstFrame(uncast_top);
   reader->Close();
   delete reader;
 

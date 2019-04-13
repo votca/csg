@@ -159,12 +159,20 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   std::map<std::string, double> determineBaseNameAssociatedWithMass_();
   std::map<std::string, int> determineAtomAndBeadCountBasedOnMass_(
       std::map<std::string, double> baseNamesAndMasses);
+
+  std::vector<std::string> TrimCommentsFrom_(std::vector<std::string> fields);
+  void ltrim_(std::string &s);
+  void rtrim_(std::string &s);
+  void trim_(std::string &s);
+  bool withinTolerance_(double value1, double value2, double tolerance);
+  std::string getStringGivenDoubleAndMap_(
+      double value, std::map<std::string, double> nameValue, double tolerance);
 };
 
-/*****************************************************************************
- * Internal Helper Functions                                                 *
- *****************************************************************************/
-std::vector<std::string> TrimCommentsFrom_(std::vector<std::string> fields) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+std::vector<std::string>
+    LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::TrimCommentsFrom_(
+        std::vector<std::string> fields) {
   std::vector<std::string> tempFields;
   for (auto field : fields) {
     if (field.at(0) == '#') return tempFields;
@@ -174,13 +182,15 @@ std::vector<std::string> TrimCommentsFrom_(std::vector<std::string> fields) {
 }
 
 // trim from start (in place)
-static inline void ltrim_(std::string &s) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ltrim_(std::string &s) {
   s.erase(s.begin(), std::find_if(s.begin(), s.end(),
                                   [](int ch) { return !std::isspace(ch); }));
 }
 
 // trim from end (in place)
-static inline void rtrim_(std::string &s) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::rtrim_(std::string &s) {
   s.erase(std::find_if(s.rbegin(), s.rend(),
                        [](int ch) { return !std::isspace(ch); })
               .base(),
@@ -188,18 +198,23 @@ static inline void rtrim_(std::string &s) {
 }
 
 // trim from both ends (in place)
-static inline void trim_(std::string &s) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::trim_(std::string &s) {
   ltrim_(s);
   rtrim_(s);
 }
 
-bool withinTolerance_(double value1, double value2, double tolerance) {
-  return abs(value1 - value2) / min(value1, value2) < tolerance;
+template <class Bead_T, class Molecule_T, class Topology_T>
+bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::withinTolerance_(
+    double value1, double value2, double tolerance) {
+  return abs(value1 - value2) / std::min(value1, value2) < tolerance;
 }
 
-std::string getStringGivenDoubleAndMap_(double value,
-                                        std::map<std::string, double> nameValue,
-                                        double tolerance) {
+template <class Bead_T, class Molecule_T, class Topology_T>
+std::string LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
+    getStringGivenDoubleAndMap_(double value,
+                                std::map<std::string, double> nameValue,
+                                double tolerance) {
 
   for (auto string_value_pair : nameValue) {
     if (withinTolerance_(value, string_value_pair.second, tolerance)) {
@@ -474,7 +489,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T,
 template <class Bead_T, class Molecule_T, class Topology_T>
 std::map<std::string, double> LAMMPSDataReader<
     Bead_T, Molecule_T, Topology_T>::determineBaseNameAssociatedWithMass_() {
-  Elements elements;
+
+  tools::Elements elements;
   std::map<std::string, double> baseNamesAndMasses;
   int bead_index_type = 1;
   for (auto mass : data_["Masses"]) {
@@ -596,8 +612,9 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfImpropers_(
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::lammps_format
-    LAMMPSDataReader::determineDataFileFormat_(std::string line) {
+typename LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::lammps_format
+    LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::determineDataFileFormat_(
+        std::string line) {
 
   tools::Tokenizer tok(line, " ");
   std::vector<std::string> fields;

@@ -30,6 +30,7 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/matrix.h>
+#include <votca/tools/types.h>
 
 #include <gromacs/fileio/tpxio.h>
 #include <gromacs/mdtypes/inputrec.h>
@@ -135,7 +136,7 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         // read exclusions
         t_blocka *excl = &(mol->excls);
         // insert exclusions
-        list<Bead_T *> excl_list;
+        std::list<Bead_T *> excl_list;
         for (int k = excl->index[iatom]; k < excl->index[iatom + 1]; k++) {
           excl_list.push_back(top->getBead(excl->a[k] + ifirstatom));
         }
