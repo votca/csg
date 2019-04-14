@@ -406,10 +406,10 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
   if (has_box_ == H5MDTrajectoryReader::TIMEDEPENDENT) {
     std::unique_ptr<double[]> box = std::unique_ptr<double[]>{new double[3]};
     ReadBox(ds_edges_group_, H5T_NATIVE_DOUBLE, idx_frame_, box);
-    m.ZeroMatrix();
-    m[0][0] = box.get()[0];
-    m[1][1] = box.get()[1];
-    m[2][2] = box.get()[2];
+    m = Eigen::Matrix3d::Zero();
+    m(0, 0) = box.get()[0];
+    m(1, 1) = box.get()[1];
+    m(2, 2) = box.get()[2];
     std::cout << "Time dependent box:" << std::endl;
     std::cout << m << std::endl;
   }
@@ -491,8 +491,9 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
-void H5MDTrajectoryReader::ReadBox(hid_t ds, hid_t ds_data_type, int row,
-                                   std::unique_ptr<double[]> &data_out) {
+void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::ReadBox(
+    hid_t ds, hid_t ds_data_type, int row,
+    std::unique_ptr<double[]> &data_out) {
   hsize_t offset[2];
   offset[0] = row;
   offset[1] = 0;
