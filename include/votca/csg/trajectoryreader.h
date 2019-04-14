@@ -33,68 +33,32 @@ class TrajectoryReader {
  private:
  public:
   virtual ~TrajectoryReader() {}
-  /// open a trejectory file
+  /// open a trajectory file
   virtual bool Open(const std::string &file){};
 
   virtual void Close(){};
 
-  //  template<class Bead_T>;
-
-  // template< template<class> class Bead_T>
-  //  class Molecule_T;
-
-  // virtual bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
-  // &top)=0;
   virtual bool FirstFrame(boost::any top) {
     throw std::runtime_error(
         "Cannot call FirstFrame using Trajectory reader it must be derived by "
         "child class.");
   }
-  //  virtual bool FirstFrame(void *top, bool topology) = 0;
-  /// read in the next frame
-  // virtual bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>>
-  // *top) = 0;
+
   virtual bool NextFrame(boost::any top) {
     throw std::runtime_error(
         "Cannot call NextFrame using Trajectory reader it must be derived by "
         "child class.");
   }
-  // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   static void RegisterPlugins(void);
 };
 
 // important - singleton pattern, make sure factory is created before accessed
-
 inline FileFormatFactory<TrajectoryReader> &TrjReaderFactory() {
   static FileFormatFactory<TrajectoryReader> _TrjReaderFactory;
   return _TrjReaderFactory;
 }
 
-// template <class Bead_T,  class Molecule_T, class Topology_T>
-// class PDBReader;
-
-// template <class Bead_T,  class Molecule_T, class Topology_T>
-// inline void TrajectoryReader<Bead_T, Molecule_T,
-// Topology_T>::RegisterPlugins(
-//    void) {
-/*    TrjReaderFactory().Register<LAMMPSDumpReader>("dump");
-    TrjReaderFactory().Register<LAMMPSDataReader>("data");
-    TrjReaderFactory().Register<XYZReader>("xyz");
-  #ifdef GMX_DOUBLE
-    TrjReaderFactory().Register<GMXTrajectoryReader>("trr");
-    TrjReaderFactory().Register<GMXTrajectoryReader>("xtc");
-  #endif
-    TrjReaderFactory().Register<GROReader>("gro");*/
-// TrjReaderFactory<Bead_T, Molecule_T, Topology_T>()
-//   .template Register<PDBReader<Bead_T, Molecule_T, Topology_T>>("pdb");
-/*
-TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlph");
-TrjReaderFactory().Register<DLPOLYTrajectoryReader>("dlpc");
-#ifdef H5MD
-TrjReaderFactory().Register<H5MDTrajectoryReader>("h5");
-#endif*/
-//}
 }  // namespace csg
 }  // namespace votca
 

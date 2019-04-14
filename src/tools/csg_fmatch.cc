@@ -397,10 +397,7 @@ void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
     }
   }
 
-  // SplineContainer::iterator spiter;
-  // for (spiter = _splines.begin(); spiter != _splines.end(); ++spiter) {
   for (auto &sinfo : _splines) {
-    // SplineInfo sinfo = *spiter;
     if (sinfo.bonded) {  // bonded interaction
       EvalBonded(conf, &sinfo);
     } else {  // non-bonded interaction
@@ -488,8 +485,6 @@ void CGForceMatching::FmatchAccumulateData() {
     cout << endl;
   }
 
-  // SplineContainer::iterator is;
-  // for (is = _splines.begin(); is != _splines.end(); ++is) {
   for (auto &is : _splines) {
     int &mp = is.matr_pos;
     int &ngp = is.num_gridpoints;

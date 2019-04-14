@@ -83,7 +83,6 @@ class XMLMolecule {
   std::string name;
   int nmols;
   int pid;
-  // std::vector<XMLBead> beads;
   std::map<std::string, XMLBead> name2beads;
   Molecule_T *mi;
 };
@@ -100,7 +99,6 @@ class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
   bool ReadTopology(std::string file, boost::any top);
-  ~XMLTopologyReader();
 
  private:
   typedef boost::unordered_multimap<std::string, XMLMolecule<Molecule_T>>
@@ -346,12 +344,6 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecule(
     }
   }
   _mol_index++;
-
-  // clean up
-  /*  for (std::vector<XMLBead *>::iterator itb = xmlBeads.begin();
-         itb != xmlBeads.end(); ++itb) {
-      delete (*itb);
-    }*/
 }
 
 template <class Bead_T, class Molecule_T, class Topology_T>
@@ -524,22 +516,6 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseDihedral(
           "Beads from different molecules, not supported!");
     }
   }
-}
-
-template <class Bead_T, class Molecule_T, class Topology_T>
-XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::~XMLTopologyReader() {
-  // Clean _molecules map
-  /*  for (MoleculesMap::iterator it = _molecules.begin(); it !=
-    _molecules.end();
-         ++it) {
-      XMLMolecule &xmlMolecule = it->second;
-      for (std::vector<XMLBead *>::iterator itb = xmlMolecule->beads.begin();
-           itb != xmlMolecule->beads.end(); ++itb) {
-        delete (*itb);
-      }
-      xmlMolecule->beads.clear();
-      delete xmlMolecule;
-    }*/
 }
 
 }  // namespace csg

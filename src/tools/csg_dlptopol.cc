@@ -105,23 +105,14 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
 
   // do CG mapping
 
-  // MoleculeContainer &mols = top->Molecules();
   std::vector<Molecule *> MolecularTypes;
-  // MoleculeContainer::iterator iter;
 
-  // int prv_mol_number = 1;
   unordered_set<string> previous_molecule_types;
-  // vector<int> nummols;
   unordered_map<string, int> molecules_and_count;
   vector<string> vdw_pairs;
 
   // find all unique molecular types
-
-  //  for (iter = mols.begin(); iter != mols.end(); ++iter) {
-  //    Molecule *mol = *iter;
   vector<int> molecule_ids = top->getMoleculeIds();
-  // for ( const pair<const int,Molecule> & ids_and_molecules :
-  // top->Molecules()){
   for (const int &molecule_id : molecule_ids) {
     Molecule *mol = top->getMolecule(molecule_id);
     // molecules are ignored during the mapping stage
@@ -134,8 +125,6 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
       continue;
     }
 
-    // nummols.push_back(prv_mol_number);
-    // prv_mol_number = 1;
     molecules_and_count[molecule_type] = 1;
     previous_molecule_types.insert(mol->getType());
 
@@ -149,9 +138,6 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
     vector<int> bead_ids = mol->getBeadIds();
     for (int &bead_id : bead_ids) {
       const string bead_name1 = mol->getBeadConst(bead_id)->getType();
-      // bead_name1 = bead_name1.substr(
-      //   0,
-      //  bead_name1.find_first_of("#"));  // skip #index of atom from its name
 
       for (unsigned int imt = 0; imt < MolecularTypes.size(); imt++) {
 
@@ -160,9 +146,6 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
 
           const string bead_name2 =
               MolecularTypes[imt]->getBeadConst(bead_id2)->getType();
-          // bead_name2 = bead_name2.substr(
-          //    0, bead_name2.find_first_of("#"));  // skip #index of atom from
-          // its name
 
           stringstream ss_bp1, ss_bp2;
 
@@ -187,7 +170,6 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
       }
     }
   }
-  // nummols.push_back(prv_mol_number);
 
   if (MolecularTypes.size() > 1)
     cout << "WARNING: creation of topology for multiple molecular types "
@@ -202,12 +184,9 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   fl << "molecular types " << MolecularTypes.size() << endl;
 
   for (unsigned int i = 0; i < MolecularTypes.size(); i++) {
-    // WriteMolecularType(fl, *(MolecularTypes[i]), nummols[i + 1]);
     WriteMolecularType(fl, *(MolecularTypes[i]),
                        molecules_and_count[MolecularTypes[i]->getType()]);
   }
-
-  // vdw seciton (pairwise vdw/CG interactions)
 
   if (vdw_pairs.size() > 0) {
 
@@ -237,18 +216,7 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, const Molecule &cg) {
   for (int &bead_id : bead_ids) {
     const Bead *b = cg.getBeadConst(bead_id);
 
-    // string bname = b->getName();
     const string btype = b->getType();
-
-    // bname = bname.substr(
-    //    0, bname.find_first_of("#"));  // skip #index of atom from its name
-    // btype = btype.substr(
-    //    0, btype.find_first_of("#"));  // skip #index of atom from its type
-
-    // out << format("%8s  %10f  %10f     1     0     1 %10d  %8s  %8s %10d \n")
-    // %
-    //           btype % b->getMass() % b->getQ() % (index + 1) % btype % bname
-    //           % (index + 1);
 
     out << format("%8s  %10f  %10f     1     0     1 %10d  %8s  %10d \n") %
                btype % b->getMass() % b->getQ() % (index + 1) % btype %

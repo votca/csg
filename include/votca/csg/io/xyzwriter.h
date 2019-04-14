@@ -29,8 +29,6 @@ namespace csg {
 template <class Bead_T, class Molecule_T, class Topology_T>
 class XYZWriter : public TrajectoryWriter {
  public:
-  // void Open(std::string file, bool bAppend = false);
-
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
@@ -87,8 +85,6 @@ template <class Bead_T, class Molecule_T, class Topology_T>
 template <typename T>
 inline void XYZWriter<Bead_T, Molecule_T, Topology_T>::Write(
     Topology_T &top, T &container, std::string header) {
-  // inline void XYZWriter::Write(CSG_Topology &top, T &container,
-  //                            std::string header) {
 
   std::vector<Bead_T *> atoms = getIterable(top, container);
   out_ << atoms.size() << "\n";

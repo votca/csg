@@ -44,18 +44,13 @@ namespace csg {
 template <typename Bead_T, class Molecule_T, class Topology_T>
 class PDBWriter : public TrajectoryWriter {
  public:
-  // void Open(std::string file, bool bAppend = false);
-
   void RegisteredAt(
       tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
-  //  template <class Bead_T, class Molecule_T>
-  // void Write_(Topology_T<Bead_T, Molecule_T> *conf);
   void Write(boost::any conf);
 
-  template <class T>  //, class Bead_T, class Molecule_T>
+  template <class T>
   void WriteContainer(Topology_T *conf, T &container);
-  // void WriteContainer(CSG_Topology *conf, T &container);
 
   void WriteHeader(std::string header);
 
@@ -78,8 +73,6 @@ class PDBWriter : public TrajectoryWriter {
     }
     return item.getElement();
   }
-
-  // std::string getType(Bead_T *bead) { return bead->getType(); }
 
   /**
    * @brief Get the residue type
@@ -104,27 +97,16 @@ class PDBWriter : public TrajectoryWriter {
     }
     return restype;
   }
-  // std::string getResidueType(Bead_T *bead){
-  //  return bead->getResidueType();
-  //}
 
   template <class T>
   int getId(T &item) {
     return item.getId() + 1;
   }
-  // int getId(Bead_T *bead) { return bead->getId(); }
 
   template <class T>
   int getResId(T &item) {
     return item.getResidueId() + 1;
   }
-  // int getResId(CSG_Topology &conf, Bead_T *bead) { return bead->getResnr() +
-  // 1;
-  // }
-
-  /*template <class Atom>
-  void writeSymmetry(Atom &atom) {};
-  void writeSymmetry(Bead_T & bead);*/
 
   template <class T>
   Eigen::Vector3d getPos(T &item) {
@@ -146,7 +128,6 @@ class PDBWriter : public TrajectoryWriter {
   }
 
   std::vector<Bead_T *> getIterable(Topology_T &top) {
-    // std::vector<Bead_T *> getIterable(CSG_Topology &top) {
     std::vector<Bead_T *> beads;
     std::vector<int> bead_ids = top.getBeadIds();
     for (int &bead_id : bead_ids) {
@@ -156,7 +137,6 @@ class PDBWriter : public TrajectoryWriter {
   }
 };
 
-// template<class Bead_T, class Molecule_T>
 template <class Bead_T, class Molecule_T, class Topology_T>
 template <class T>
 inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
@@ -214,9 +194,6 @@ void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
 // this it should be exact and break the pieces back into their constituent
 // atoms using the cgatomconverter class. Or you should simply use a differnt
 // file format
-/*
-  void PDBWriter::writeSymmetry(Bead_T &bead) {
-  }*/
 }  // namespace csg
 }  // namespace votca
 

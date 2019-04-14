@@ -74,12 +74,6 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
   bool v = top.HasVel();
   int pr = 3;  // precision of writeout, given by the spec
 
-  /* build format sCSG_Topologytring for printing,
-     something like "%8.3f" for x and "%8.4f" for v */
-  /*if (pr<0)
-    pr=0;
-  if (pr>30)
-    pr=30;*/
   l = pr + 5;
   vpr = pr + 1;
   if (v)
@@ -90,13 +84,12 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
 
   for (i = 0; static_cast<size_t>(i) < top.BeadCount(); i++) {
     resnr = top.getBead(i)->getResidueId();
-    std::string resname =
-        top.getBead(i)->getResidueType();  // top.getResidue(resnr)->getName();
+    std::string resname = top.getBead(i)->getResidueType();
     std::string atomname = top.getBead(i)->getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
             atomname.c_str(), (i + 1) % 100000);
-    /* next fprintf uses built format std::string */
+    // next fprintf uses built format std::string
     Eigen::Vector3d r = top.getBead(i)->getPos();
 
     if (v) {

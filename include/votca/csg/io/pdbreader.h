@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef __VOTCA_CSG_PDBREADER_H
-#define __VOTCA_CSG_PDBREADER_H
+#ifndef VOTCA_CSG_PDBREADER_H
+#define VOTCA_CSG_PDBREADER_H
 
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
@@ -29,7 +29,6 @@
 #include <unordered_map>
 #include <vector>
 #include <votca/tools/elements.h>
-//#include "templatetopology.h"
 
 namespace votca {
 namespace csg {
@@ -41,8 +40,6 @@ namespace csg {
   for pdb files
 
 */
-//    template <class Bead_T, class Molecule_T>
-
 template <class Bead_T, class Molecule_T, class Topology_T>
 class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
  public:
@@ -50,27 +47,14 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   PDBReader() {}
   /// Destructor
   ~PDBReader() {}
-  //  bool ReadTopology(std::string file, CSG_Topology &top);
-  /// open a trajectory file
-  // bool Open(const std::string &file);
   /// read in the first frame
-
-  // template <class Bead_T, class Molecule_T>
   bool FirstFrame(boost::any top);
-  // bool FirstFrame(CSG_Topology &top);
   /// read in the next frame
-  // template <class Bead_T, class Molecule_T>
   bool NextFrame(boost::any top);
-  // bool NextFrame(CSG_Topology &top);
-  // void Close();
 
   bool ReadTopology(std::string file, boost::any top);
 
  private:
-  /// open a topology file
-  // template <class Bead_T, class Molecule_T>
-  //        bool ReadTopology_(std::string file,
-  //        TemplateTopology<Bead_T,Molecule_T> &top);
   std::ifstream _fl;
   bool _topology;
 };
@@ -103,7 +87,6 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-// template <class Bead_T, class Molecule_T>
 template <typename Bead_T, class Molecule_T, class Topology_T>
 bool PDBReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top) {
   _topology = false;
@@ -533,4 +516,4 @@ bool PDBReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
 }  // namespace csg
 }  // namespace votca
 
-#endif  // __VOTCA_CSG_PDBREADER_H
+#endif  // VOTCA_CSG_PDBREADER_H

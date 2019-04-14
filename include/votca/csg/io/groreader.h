@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _VOTCA_CSG_GROREADER_H
-#define _VOTCA_CSG_GROREADER_H
+#ifndef VOTCA_CSG_GROREADER_H
+#define VOTCA_CSG_GROREADER_H
 
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
@@ -237,4 +237,4 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
 
 }  // namespace csg
 }  // namespace votca
-#endif /* _VOTCA_CSG_GROREADER_H */
+#endif  // VOTCA_CSG_GROREADER_H

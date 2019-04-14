@@ -46,21 +46,13 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   ~XYZReader() {}
 
   /// open a topology file
-  //  bool ReadTopology(std::string file,
-  //  TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   template <bool topology>
   bool ReadTopology(std::string file, boost::any top);
 
-  /// open a trajectory file
-  // bool Open(const std::string &file);
   /// read in the first frame
-  //  template <bool topology>
-  //  bool FirstFrame_(void * top);
   bool FirstFrame(boost::any top);
-  // bool FirstFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
   /// read in the next frame
   bool NextFrame(boost::any top);
-  // bool NextFrame(TemplateTopology<BaseBead,BaseMolecule<BaseBead>> &top);
 
   template <class T>
   void ReadFile(T &container) {
@@ -120,7 +112,6 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   int _line;
 };
 
-// template <bool topology>
 template <class Bead_T, class Molecule_T, class Topology_T>
 bool XYZReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top) {
   return NextFrame(top);

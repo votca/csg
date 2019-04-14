@@ -458,9 +458,6 @@ void Imc::Worker::DoBonded(CSG_Topology *top) {
 // returns a group, creates it if doesn't exist
 Imc::group_t *Imc::getGroup(const string &name) {
   cout << "calling getgroup" << endl;
-  // map<string, unique_ptr<group_t>>::iterator iter;
-  // iter = _groups.find(name);
-  // if (iter == _groups.end()) {
   if (_groups.count(name) == 0) {
     cout << "Creating new group" << endl;
     _groups[name] = unique_ptr<group_t>(new group_t);
@@ -633,7 +630,6 @@ void Imc::WriteDist(const string &suffix) {
  */
 void Imc::WriteIMCData(const string &suffix) {
   if (!_do_imc) return;
-  // map<string, interaction_t *>::iterator ic_iter;
   map<string, unique_ptr<group_t>>::iterator group_iter;
 
   // iterate over all groups
@@ -749,7 +745,6 @@ void Imc::CalcDeltaS(interaction_t *interaction,
 void Imc::WriteIMCBlock(const string &suffix) {
 
   if (!_do_imc) return;
-  // map<string, interaction_t *>::iterator ic_iter;
   map<string, unique_ptr<group_t>>::iterator group_iter;
 
   // iterate over all groups
@@ -863,7 +858,6 @@ void Imc::MergeWorker(CsgApplication::Worker *worker_) {
   Imc::Worker *worker = dynamic_cast<Imc::Worker *>(worker_);
   // update the average
   map<string, interaction_t *>::iterator ic_iter;
-  // map<string, group_t *>::iterator group_iter;
 
   ++_nframes;
   _avg_vol.Process(worker->_cur_vol);

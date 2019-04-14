@@ -136,8 +136,6 @@ void CsgDensityApp::EvalConfiguration(CSG_Topology *top,
                                       CSG_Topology *top_ref) {
   // loop over all molecules
   bool did_something = false;
-  // for (MoleculeContainer::iterator imol = top->Molecules().begin();
-  //    imol != top->Molecules().end(); ++imol) {
   vector<int> molecule_ids = top->getMoleculeIds();
   for (const int &molecule_id : molecule_ids) {
     Molecule *mol = top->getMolecule(molecule_id);

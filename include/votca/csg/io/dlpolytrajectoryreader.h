@@ -33,6 +33,7 @@
 #include <votca/csg/trajectoryreader.h>
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
+#include <votca/tools/tokenizer.h>
 
 namespace votca {
 namespace csg {

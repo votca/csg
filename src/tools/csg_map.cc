@@ -81,61 +81,6 @@ class CsgMapApp : public CsgApplication {
       // we want to combine atomistic and coarse-grained into one topology
       CSG_Topology *hybtol = new CSG_Topology();
       hybtol->Copy(*top);
-      /*MoleculeContainer::iterator it_mol;
-
-      hybtol->setBox(top->getBox());
-      hybtol->setTime(top->getTime());
-      hybtol->setStep(top->getStep());
-
-      // copy all residues from both
-      hybtol->setMoleculeNamesAndIds(top->getMoleculeNamesAndIds());
-      hybtol->setResidueIdsAndNames(top->getResidueIdsAndNames());
-
-      // copy all molecules and beads
-
-      for (it_mol = top_ref->Molecules().begin();
-           it_mol != top_ref->Molecules().end(); ++it_mol) {
-        Molecule *mi = hybtol->CreateMolecule((*it_mol)->getName());
-        vector<int> bead_ids = (*it_mol)->getBeadIds();
-        for (const int &bead_id : bead_ids) {
-
-          Bead *bi = (*it_mol)->getBead(bead_id);
-          if (!hybtol->BeadTypeExist(bi->getType())) {
-            hybtol->RegisterBeadType(bi->getType());
-          }
-
-          Bead *bn = hybtol->CreateBead(
-              bi->getSymmetry(), bi->getName(), bi->getType(),
-              bi->getResidueId(), bi->getResidueType(),
-              (*it_mol)->getName(), bi->getMass(), bi->getQ());
-
-          bn->setPos(bi->getPos());
-          if (bi->HasVel()) bn->setVel(bi->getVel());
-          if (bi->HasF()) bn->setF(bi->getF());
-
-          mi->AddBead(hybtol->Beads()[bead_id]);
-        }
-
-        if (mi->getId() < top->MoleculeCount()) {
-          // copy cg beads of molecule
-          Molecule *cgmol = top->Molecules()[mi->getId()];
-          vector<int> bead_ids = cgmol->getBeadIds();
-          for (const int &bead_id : bead_ids) {
-            Bead *bi = cgmol->getBead(bead_id);
-            Bead *bparent = (*it_mol)->getBead(0);
-            Bead *bn = hybtol->CreateBead<Bead>(
-                bi->getSymmetry(), bi->getName(), bi->getType(),
-                bparent->getResidueNumber(), bparent->getResidueName(),
-                cgmol->getName(), bi->getMass(), bi->getQ());
-
-            bn->setPos(bi->getPos());
-            if (bi->HasVel()) bn->setVel(bi->getVel());
-            mi->AddBead(bi);
-          }
-        }
-      }
-      hybtol->setBox(top_ref->getBox());
-*/
       _writer->Write(hybtol);
     }
   }

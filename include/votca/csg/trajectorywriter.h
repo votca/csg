@@ -18,9 +18,7 @@
 #ifndef VOTCA_CSG_TRAJECTORYWRITER_H
 #define VOTCA_CSG_TRAJECTORYWRITER_H
 
-//#include "basemolecule.h"
 #include "fileformatfactory.h"
-//#include "templatetopology.h"
 #include <boost/any.hpp>
 #include <fstream>
 #include <iostream>
@@ -31,12 +29,6 @@ namespace csg {
 
 class TrajectoryWriter {
  protected:
-  /*    template <class Bead_T, class Molecule_T>
-        void Write_(TemplateTopology<Bead_T, Molecule_T> *top) {
-          throw std::runtime_error(
-              "Trajectory Write method must be derived by child class");
-        }*/
-
   std::ofstream out_;
 
  public:
@@ -53,8 +45,6 @@ class TrajectoryWriter {
   }
   virtual void Close() { out_.close(); };
 
-  // void Write(CSG_Topology *top) {};
-  // template <class Bead_T, class Molecule_T>
   virtual void Write(boost::any top) = 0;
 
   static void RegisterPlugins(void);
@@ -65,22 +55,6 @@ inline FileFormatFactory<TrajectoryWriter> &TrjWriterFactory() {
   static FileFormatFactory<TrajectoryWriter> _TrjWriterFactory;
   return _TrjWriterFactory;
 }
-
-// template <class Bead_T,  class Molecule_T,class Topology_T>
-// void TrajectoryWriter<Bead_T, Molecule_T, Topology_T>::RegisterPlugins() {
-
-// j  TrjWriterFactory<Bead_T,Molecule_T,Topology_T>()
-//    .template Register<PDBWriter<Bead_T,Molecule_T,Topology_T>>("pdb");
-/*  TrjWriterFactory().Register<XYZWriter>("xyz");
-  TrjWriterFactory().Register<LAMMPSDumpWriter>("dump");
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlph");
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter>("dlpc");
-#ifdef GMX_DOUBLE
-  TrjWriterFactory().Register<GMXTrajectoryWriter>("trr");
-  TrjWriterFactory().Register<GMXTrajectoryWriter>("xtc");
-#endif
-  TrjWriterFactory().Register<GROWriter>("gro"); */
-//}
 
 }  // namespace csg
 }  // namespace votca

@@ -194,7 +194,6 @@ bool CsgApplication::ProcessData(Worker *worker) {
 }
 
 void CsgApplication::Run(void) {
-  // TopologyReader *reader;
   // create reader for atomistic topology
   unique_ptr<TopologyReader> reader =
       TopReaderFactory().Create(_op_vm["top"].as<string>());
@@ -228,7 +227,6 @@ void CsgApplication::Run(void) {
   //////////////////////////////////////////////////
   boost::any any_ptr(&master->_top);
   reader->ReadTopology(_op_vm["top"].as<string>(), any_ptr);
-  // delete reader;
 
   cout << "I have " << master->_top.BeadCount() << " beads in "
        << master->_top.MoleculeCount() << " molecules" << endl;
@@ -412,7 +410,6 @@ void CsgApplication::Run(void) {
     _threadsMutexesIn.clear();
     _threadsMutexesOut.clear();
     _traj_reader->Close();
-    // delete _traj_reader;
   }
 }
 

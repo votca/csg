@@ -84,12 +84,10 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
                                     Molecule &cg) {
   int nb = -1;
 
-  // unique_ptr<Interaction> ic;
   vector<unique_ptr<Interaction>>::const_iterator ic_iter;
   const vector<unique_ptr<Interaction>> &ics = top.BondedInteractions();
 
   for (ic_iter = ics.begin(); ic_iter != ics.end(); ++ic_iter) {
-    // ic = *iter;
     if ((*ic_iter)->getMolecule() != cg.getId()) continue;
     if (nb != (*ic_iter)->BeadCount()) {
       nb = (*ic_iter)->BeadCount();
