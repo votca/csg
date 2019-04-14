@@ -466,7 +466,7 @@ class TemplateTopology {
   bool has_force_ = false;
 
   /// The particle group (For H5MD file format)
-  std::string particle_group_;
+  std::string particle_group_ = "unassigned";
 
   /**
    * @brief Keeps track of the various different topology objects stored in
