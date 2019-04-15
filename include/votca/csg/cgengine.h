@@ -39,9 +39,6 @@ namespace csg {
 
 class CGEngine {
  public:
-  CGEngine(){};
-  ~CGEngine(){};
-
   /**
    * @brief Loads .xml files containing coarse graining stencils and mapping
    * information
