@@ -74,9 +74,7 @@ class BoundaryCondition {
    * (periodic) box \return shortest distance vector
    */
   virtual Eigen::Vector3d BCShortestConnection(
-      const Eigen::Vector3d &r_i, const Eigen::Vector3d &r_j) const {
-    throw std::runtime_error("BCShortestConnection is not implemented.");
-  }
+      const Eigen::Vector3d &r_i, const Eigen::Vector3d &r_j) const = 0;
 
   double getShortestBoxDimension() const;
 
