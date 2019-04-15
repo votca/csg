@@ -79,9 +79,7 @@ class BoundaryCondition {
   double getShortestBoxDimension() const;
 
   enum eBoxtype { typeAuto = 0, typeTriclinic, typeOrthorhombic, typeOpen };
-  virtual eBoxtype getBoxType() const {
-    throw std::runtime_error("getBoxType is not implemented.");
-  }
+  virtual eBoxtype getBoxType() const = 0;
 
  protected:
   Eigen::Matrix3d box_;
