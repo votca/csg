@@ -61,15 +61,24 @@ class BoundaryCondition;
 class BeadMap {
  public:
   virtual ~BeadMap(){};
-  virtual void Apply(const BoundaryCondition *boundaries,
-                     std::map<std::string, const Bead *> atomistic_beads,
-                     Bead *cg_bead) const = 0;
 
-  virtual void Initialize(const std::vector<std::string> subbeads,
+  /**
+   * @brief Applies mapping from atomistic positions to coarse grained bead
+   *
+   * @param boundaries - required to be a pointer to take advantage of
+   * polymorphic behavior
+   * @param atomistic_beads - pointers to the atomistic beads
+   * @param cg_bead - pointer to the cg bead
+   */
+  virtual void UpdateCGBead(const BoundaryCondition *boundaries,
+                            std::map<std::string, const Bead *> atomistic_beads,
+                            Bead *cg_bead) const = 0;
+
+  virtual void Initialize(const std::vector<std::string> &subbeads,
                           std::vector<double> weights,
                           std::vector<double> ds) = 0;
 
-  void Initialize(std::vector<std::string> subbeads,
+  void Initialize(const std::vector<std::string> &subbeads,
                   std::vector<double> weights) {
     std::vector<double> empty;
     Initialize(subbeads, weights, empty);
@@ -95,11 +104,11 @@ class BeadMap {
 
 class Map_Sphere : public BeadMap {
  public:
-  void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, const Bead *> atomistic_beads,
-             Bead *cg_bead) const override;
+  void UpdateCGBead(const BoundaryCondition *boundaries,
+                    std::map<std::string, const Bead *> atomistic_beads,
+                    Bead *cg_bead) const override;
 
-  void Initialize(const std::vector<std::string> subbeads,
+  void Initialize(const std::vector<std::string> &subbeads,
                   std::vector<double> weights, std::vector<double> ds) override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
@@ -127,9 +136,9 @@ inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
 *******************************************************/
 class Map_Ellipsoid : public Map_Sphere {
  public:
-  void Apply(const BoundaryCondition *boundaries,
-             std::map<std::string, const Bead *> atomistic_beads,
-             Bead *cg_bead) const override;
+  void UpdateCGBead(const BoundaryCondition *boundaries,
+                    std::map<std::string, const Bead *> atomistic_beads,
+                    Bead *cg_bead) const override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
     return std::unique_ptr<BeadMap>(new Map_Ellipsoid(*this));
@@ -187,8 +196,8 @@ class AtomToCGMoleculeMapper {
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
-             CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
+  void UpdateCGMolecule(CSG_Topology &atom_top, CSG_Topology &cg_top,
+                        CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
    * Gang of 3

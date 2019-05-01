@@ -15,6 +15,7 @@
  *
  */
 
+#include "../../include/votca/csg/beadmap.h"
 #include "../../include/votca/csg/boundarycondition.h"
 #include <boost/lexical_cast.hpp>
 #include <iostream>
@@ -22,7 +23,6 @@
 #include <numeric>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/csg/beadmap.h>
 #include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/vec.h>
@@ -41,7 +41,7 @@ vector<string> BeadMap::getAtomicBeadNames() const {
   return bead_names;
 }
 
-void Map_Sphere::Initialize(const vector<string> subbeads,
+void Map_Sphere::Initialize(const vector<string> &subbeads,
                             vector<double> weights, vector<double> ds) {
 
   assert(subbeads.size() == weights.size() &&
@@ -89,9 +89,9 @@ void Map_Sphere::Initialize(const vector<string> subbeads,
   }
 }
 
-void Map_Sphere::Apply(const BoundaryCondition *boundaries,
-                       map<string, const Bead *> atomic_beads,
-                       Bead *cg_bead) const {
+void Map_Sphere::UpdateCGBead(const BoundaryCondition *boundaries,
+                              map<string, const Bead *> atomic_beads,
+                              Bead *cg_bead) const {
 
   assert(cg_bead->getSymmetry() == 1 &&
          "Applying spherical bead map on a non spherical corase grained bead");
@@ -156,9 +156,9 @@ void Map_Sphere::Apply(const BoundaryCondition *boundaries,
 }
 
 /// Warning the atomistic beads must be a map they cannot be an unordered_map
-void Map_Ellipsoid::Apply(const BoundaryCondition *boundaries,
-                          std::map<string, const Bead *> atomistic_beads,
-                          Bead *cg_bead) const {
+void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
+                                 std::map<string, const Bead *> atomistic_beads,
+                                 Bead *cg_bead) const {
 
   assert(
       cg_bead->getSymmetry() == 3 &&
@@ -337,8 +337,9 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
   return *this;
 }
 
-void AtomToCGMoleculeMapper::Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
-                                   CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
+void AtomToCGMoleculeMapper::UpdateCGMolecule(
+    CSG_Topology &atom_top, CSG_Topology &cg_top,
+    CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
 
   // First int cg_molecule id
   // map
@@ -381,7 +382,7 @@ void AtomToCGMoleculeMapper::Apply(CSG_Topology &atom_top, CSG_Topology &cg_top,
     assert(cg_bead_name_and_maps_.count(bead_name) &&
            "Map for the coarse grained bead type is not known.");
 
-    cg_bead_name_and_maps_.at(bead_name)->Apply(
+    cg_bead_name_and_maps_.at(bead_name)->UpdateCGBead(
         cg_top.getBoundaryCondition(), atomic_names_and_beads, cg_bead);
   }
 }
