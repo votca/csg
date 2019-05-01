@@ -45,11 +45,10 @@ class Bead : public BaseBead {
   /**
    * destructor
    */
-  virtual ~Bead() {}
+  virtual ~Bead(){}
 
-  int getResnr() const {
-    throw std::runtime_error(
-        "getResnr() is now depricated use getResidueId() instead");
+      [[deprecated]] int getResnr() const {
+    return residue_id_;
   }
 
   /**
