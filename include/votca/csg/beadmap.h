@@ -65,6 +65,11 @@ class BeadMap {
   /**
    * @brief Applies mapping from atomistic positions to coarse grained bead
    *
+   * Note: the cg bead cannot simply be returned via the return value. The Bead
+   * map does not own the CGBead and it is only updateing some of the
+   * information in the cg bead, thus it makes sense to pass it in as a
+   * pointer.
+   *
    * @param boundaries - required to be a pointer to take advantage of
    * polymorphic behavior
    * @param atomistic_beads - pointers to the atomistic beads
@@ -75,7 +80,12 @@ class BeadMap {
                             Bead *cg_bead) const = 0;
 
   /**
-   * @brief
+   * @brief Method initializes the paramters important for describing how the
+   * atomistic beads will be mapped to the cg bead.
+   *
+   * More specifically determines how the forces acting on the individual
+   * atomistic beads will affect the coarse grained bead, by calculating force
+   * weights.
    *
    * @param subbeads
    * @param weights
