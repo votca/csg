@@ -74,14 +74,21 @@ class BeadMap {
                             std::map<std::string, const Bead *> atomistic_beads,
                             Bead *cg_bead) const = 0;
 
-  virtual void Initialize(const std::vector<std::string> &subbeads,
-                          std::vector<double> weights,
-                          std::vector<double> ds) = 0;
+  /**
+   * @brief
+   *
+   * @param subbeads
+   * @param weights
+   * @param ds
+   */
+  virtual void InitializeBeadMap(const std::vector<std::string> &subbeads,
+                                 const std::vector<double> &weights,
+                                 std::vector<double> ds) = 0;
 
-  void Initialize(const std::vector<std::string> &subbeads,
-                  std::vector<double> weights) {
+  void InitializeBeadMap(const std::vector<std::string> &subbeads,
+                         const std::vector<double> &weights) {
     std::vector<double> empty;
-    Initialize(subbeads, weights, empty);
+    InitializeBeadMap(subbeads, weights, empty);
   }
 
   std::vector<std::string> getAtomicBeadNames() const;
@@ -108,8 +115,9 @@ class Map_Sphere : public BeadMap {
                     std::map<std::string, const Bead *> atomistic_beads,
                     Bead *cg_bead) const override;
 
-  void Initialize(const std::vector<std::string> &subbeads,
-                  std::vector<double> weights, std::vector<double> ds) override;
+  void InitializeBeadMap(const std::vector<std::string> &subbeads,
+                         const std::vector<double> &weights,
+                         std::vector<double> ds) override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
     return std::unique_ptr<BeadMap>(new Map_Sphere(*this));
@@ -117,14 +125,24 @@ class Map_Sphere : public BeadMap {
 
  protected:
   Map_Sphere() {}
-  void AddElem(std::string atomic_bead_name, double weight,
-               double force_weight);
+
+  /**
+   * @brief Adds an atomistic bead with its weight to the coarse grained bead
+   *
+   * @param atomic_bead_name
+   * @param weight
+   * @param force_weight
+   */
+  void AddAtomisticBead(const std::string &atomic_bead_name,
+                        const double &weight, const double &force_weight);
 
   friend class AtomToCGMoleculeMapper;
 };
 
-inline void Map_Sphere::AddElem(std::string atomic_bead_name, double weight,
-                                double force_weight) {
+inline void Map_Sphere::AddAtomisticBead(const std::string &atomic_bead_name,
+                                         const double &weight,
+                                         const double &force_weight) {
+
   element_t el;
   el.weight_ = weight;
   el.force_weight_ = force_weight;
@@ -191,8 +209,9 @@ class AtomToCGMoleculeMapper {
         cg_molecule_type_(cg_molecule_type){};
   ~AtomToCGMoleculeMapper();
 
-  void Initialize(std::unordered_map<std::string, CGBeadStencil> bead_maps_info,
-                  std::vector<std::string> bead_order);
+  void InitializeMoleculeMap(
+      const std::unordered_map<std::string, CGBeadStencil> &bead_maps_info,
+      const std::vector<std::string> &bead_order);
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them

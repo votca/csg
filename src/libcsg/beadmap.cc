@@ -41,8 +41,9 @@ vector<string> BeadMap::getAtomicBeadNames() const {
   return bead_names;
 }
 
-void Map_Sphere::Initialize(const vector<string> &subbeads,
-                            vector<double> weights, vector<double> ds) {
+void Map_Sphere::InitializeBeadMap(const vector<string> &subbeads,
+                                   const vector<double> &weights,
+                                   vector<double> ds) {
 
   assert(subbeads.size() == weights.size() &&
          "subbeads and weights are not matched in bead map sphere.");
@@ -71,7 +72,7 @@ void Map_Sphere::Initialize(const vector<string> &subbeads,
   fweights.resize(weights.size());
   // calculate force weights by d_i/w_i
   for (size_t i = 0; i < weights.size(); ++i) {
-    if (weights[i] == 0 && ds[i] != 0) {
+    if (weights.at(i) == 0 && ds.at(i) != 0) {
       throw runtime_error(
           "A d coefficient is nonzero while weights is zero in mapping ");
     }
@@ -84,7 +85,7 @@ void Map_Sphere::Initialize(const vector<string> &subbeads,
 
   int index = 0;
   for (string name : subbeads) {
-    AddElem(name, weights.at(index), fweights.at(index));
+    AddAtomisticBead(name, weights.at(index), fweights.at(index));
     ++index;
   }
 }
@@ -267,15 +268,13 @@ AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
 }
 
 // cg_bead_order contains the order of beads names
-void AtomToCGMoleculeMapper::Initialize(
-    unordered_map<string, CGBeadStencil> bead_maps_info,
-    vector<string> cg_bead_order) {
+void AtomToCGMoleculeMapper::InitializeMoleculeMap(
+    const unordered_map<string, CGBeadStencil> &bead_maps_info,
+    const vector<string> &cg_bead_order) {
 
-  for (string &cg_bead_name : cg_bead_order) {
-    // for (pair<const string, CGBeadStencil> & bead_info : bead_maps_info) {
-    CGBeadStencil &bead_info = bead_maps_info[cg_bead_name];
+  for (string cg_bead_name : cg_bead_order) {
+    const CGBeadStencil &bead_info = bead_maps_info.at(cg_bead_name);
     int symmetry = static_cast<int>(bead_info.cg_symmetry_);
-    // string cg_bead_name = bead_info.cg_name_;
     switch (symmetry) {
       case 1:
         cg_bead_name_and_maps_.insert(
@@ -291,7 +290,8 @@ void AtomToCGMoleculeMapper::Initialize(
 
     bead_type_and_names_[bead_info.cg_bead_type_].push_back(cg_bead_name);
     cg_bead_name_and_maps_.at(cg_bead_name)
-        ->Initialize(bead_info.atomic_subbeads_, bead_info.subbead_weights_);
+        ->InitializeBeadMap(bead_info.atomic_subbeads_,
+                            bead_info.subbead_weights_);
   }
 }
 
