@@ -165,7 +165,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   vector<CGBeadStencil> beads_info =
       ParseBeads_(options.get("cg_molecule.topology"));
   // Update the stencil with the bead info
-  cg_molecule_and_stencil_.at(cg_mol_type).AddBeadStencil(beads_info);
+  cg_molecule_and_stencil_.at(cg_mol_type).AddBeadStencils(beads_info);
 
   // Convert vector to map to be used with ParseMaps
   unordered_map<string, CGBeadStencil> name_and_beads_info;

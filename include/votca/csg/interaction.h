@@ -53,6 +53,15 @@ class Interaction {
 
   virtual std::unique_ptr<Interaction> Clone() const = 0;
 
+  /**
+   * @brief Determines the magnitude of the interaction
+   *
+   * @param bc
+   * @param bead_positions provides the beads ids and pointers to their
+   * positions
+   *
+   * @return
+   */
   virtual double EvaluateVar(const BoundaryCondition &bc,
                              std::unordered_map<int, const Eigen::Vector3d *>
                                  bead_positions) const = 0;

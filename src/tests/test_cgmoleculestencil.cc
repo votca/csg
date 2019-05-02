@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
   bead_stencils.push_back(bead_stencil3);
 
   CGMoleculeStencil molecule_stencil("propane", "AtomicPropane");
-  molecule_stencil.AddBeadStencil(bead_stencils);
+  molecule_stencil.AddBeadStencils(bead_stencils);
 
   cout << "Testing getAtomicBeadNames A1" << endl;
   {

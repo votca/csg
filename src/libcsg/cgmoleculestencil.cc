@@ -36,7 +36,8 @@ using namespace std;
 // atomistic molecule with the smallest ids And the second cg_bead in the
 // vector points to the beads in the atomistic molecule with the next largest
 // ids etc...
-void CGMoleculeStencil::AddBeadStencil(const vector<CGBeadStencil> &bead_info) {
+void CGMoleculeStencil::AddBeadStencils(
+    const vector<CGBeadStencil> &bead_info) {
   bead_info_ = bead_info;
 
   for (CGBeadStencil &info : bead_info_) {

@@ -70,7 +70,7 @@ class CGMoleculeStencil {
   // atomistic molecule with the smallest ids And the second cg_bead in the
   // vector points to the beads in the atomistic molecule with the next largest
   // ids etc...
-  void AddBeadStencil(const std::vector<CGBeadStencil> &bead_info);
+  void AddBeadStencils(const std::vector<CGBeadStencil> &bead_info);
 
   /**
    * @brief Maps a vector of atomic bead id to their names

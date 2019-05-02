@@ -44,9 +44,6 @@ namespace csg {
 template <typename Bead_T, class Molecule_T, class Topology_T>
 class PDBWriter : public TrajectoryWriter {
  public:
-  void RegisteredAt(
-      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
-
   void Write(boost::any conf);
 
   template <class T>
