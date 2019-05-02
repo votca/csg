@@ -37,17 +37,13 @@ using namespace std;
 void TrajectoryWriter::RegisterPlugins() {
   TrjWriterFactory().Register<PDBWriter<CSG_Topology>>("pdb");
   TrjWriterFactory().Register<XYZWriter<CSG_Topology>>("xyz");
-  TrjWriterFactory().Register<GROWriter<Bead, Molecule, CSG_Topology>>("gro");
+  TrjWriterFactory().Register<GROWriter<CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TrjWriterFactory()
-      .Register<GMXTrajectoryWriter<Bead, Molecule, CSG_Topology>>("trr");
-  TrjWriterFactory()
-      .Register<GMXTrajectoryWriter<Bead, Molecule, CSG_Topology>>("xtc");
+  TrjWriterFactory().Register<GMXTrajectoryWriter<CSG_Topology>>("trr");
+  TrjWriterFactory().Register<GMXTrajectoryWriter<CSG_Topology>>("xtc");
 #endif
-  TrjWriterFactory()
-      .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlph");
-  TrjWriterFactory()
-      .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlpc");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<CSG_Topology>>("dlph");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<CSG_Topology>>("dlpc");
   TrjWriterFactory().Register<LAMMPSDumpWriter<CSG_Topology>>("dump");
 }
 }  // namespace csg

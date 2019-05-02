@@ -39,14 +39,12 @@ void TopologyReader::RegisterPlugins(void) {
   TopReaderFactory().Register<XMLTopologyReader<CSG_Topology>>("xml");
   TopReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
   TopReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
-  TopReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
+  TopReaderFactory().Register<GROReader<CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TopReaderFactory().Register<GMXTopologyReader<Bead, Molecule, CSG_Topology>>(
-      "tpr");
+  TopReaderFactory().Register<GMXTopologyReader<CSG_Topology>>("tpr");
 #endif
   TopReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
-  TopReaderFactory()
-      .Register<DLPOLYTopologyReader<Bead, Molecule, CSG_Topology>>("dlpf");
+  TopReaderFactory().Register<DLPOLYTopologyReader<CSG_Topology>>("dlpf");
 }
 
 }  // namespace csg

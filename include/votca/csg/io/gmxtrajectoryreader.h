@@ -49,7 +49,7 @@ namespace csg {
    trajectory reading function of gromacs
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class GMXTrajectoryReader : public TrajectoryReader {
  public:
   GMXTrajectoryReader() {}
@@ -72,21 +72,19 @@ class GMXTrajectoryReader : public TrajectoryReader {
   t_trxframe _gmx_frame;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Open(
-    const std::string &file) {
+template <class Topology_T>
+bool GMXTrajectoryReader<Topology_T>::Open(const std::string &file) {
   _filename = file;
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void GMXTrajectoryReader<Topology_T>::Close() {
   close_trx(_gmx_status);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    boost::any conf_any) {
+template <class Topology_T>
+bool GMXTrajectoryReader<Topology_T>::FirstFrame(boost::any conf_any) {
 
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
@@ -130,9 +128,8 @@ bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GMXTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    boost::any conf_any) {
+template <class Topology_T>
+bool GMXTrajectoryReader<Topology_T>::NextFrame(boost::any conf_any) {
 
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(

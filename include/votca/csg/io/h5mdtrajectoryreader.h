@@ -40,7 +40,7 @@ namespace csg {
    http://dx.doi.org/10.1016/j.cpc.2014.01.018 The current reference is
    available here: http://nongnu.org/h5md/
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class H5MDTrajectoryReader : public TrajectoryReader {
  public:
   H5MDTrajectoryReader();
@@ -178,25 +178,24 @@ class H5MDTrajectoryReader : public TrajectoryReader {
   Eigen::Matrix3d m;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::H5MDTrajectoryReader() {
+template <class Topology_T>
+H5MDTrajectoryReader<Topology_T>::H5MDTrajectoryReader() {
   has_velocity_ = H5MDTrajectoryReader::NONE;
   has_force_ = H5MDTrajectoryReader::NONE;
   has_id_group_ = H5MDTrajectoryReader::NONE;
   has_box_ = H5MDTrajectoryReader::NONE;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::~H5MDTrajectoryReader() {
+template <class Topology_T>
+H5MDTrajectoryReader<Topology_T>::~H5MDTrajectoryReader() {
   if (file_opened_) {
     H5Fclose(file_id_);
     file_opened_ = false;
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Open(
-    const std::string &file) {
+template <class Topology_T>
+bool H5MDTrajectoryReader<Topology_T>::Open(const std::string &file) {
   // Checks if we deal with hdf5 file.
   if (!H5Fis_hdf5(file.c_str())) {
     std::cout << file << " is not recognise as HDF5 file format" << std::endl;
@@ -240,17 +239,16 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Open(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void H5MDTrajectoryReader<Topology_T>::Close() {
   if (file_opened_) {
     H5Fclose(file_id_);
     file_opened_ = false;
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Initialize(
-    Topology_T &top) {
+template <class Topology_T>
+void H5MDTrajectoryReader<Topology_T>::Initialize(Topology_T &top) {
   std::string particle_group_name_ = top.getParticleGroup();
   if (particle_group_name_.compare("unassigned") == 0)
     throw std::ios_base::failure(
@@ -364,8 +362,8 @@ void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Initialize(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
+template <class Topology_T>
+bool H5MDTrajectoryReader<Topology_T>::FirstFrame(
     boost::any top_any) {  // NOLINT const
                            // reference
 
@@ -385,8 +383,8 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
 }
 
 /// Reading the data.
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
+template <class Topology_T>
+bool H5MDTrajectoryReader<Topology_T>::NextFrame(
     boost::any conf_any) {  // NOLINT const
                             // reference
   if (typeid(Topology_T *) != conf_any.type()) {
@@ -458,7 +456,7 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
 
     // Topology has to be defined in the xml file or in other
     // topology files. The h5md only stores the trajectory data.
-    Bead_T *b = top.getBead(atom_id);
+    typename Topology_T::bead_t *b = top.getBead(atom_id);
     if (b == nullptr)
       throw std::runtime_error("Bead not found: " +
                                boost::lexical_cast<std::string>(atom_id));
@@ -490,8 +488,8 @@ bool H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void H5MDTrajectoryReader<Bead_T, Molecule_T, Topology_T>::ReadBox(
+template <class Topology_T>
+void H5MDTrajectoryReader<Topology_T>::ReadBox(
     hid_t ds, hid_t ds_data_type, int row,
     std::unique_ptr<double[]> &data_out) {
   hsize_t offset[2];

@@ -46,7 +46,7 @@ namespace csg {
 
 */
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class DLPOLYTrajectoryReader : public TrajectoryReader {
  public:
   /// open original trajectory file
@@ -81,9 +81,8 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   bool _isConfig;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Open(
-    const std::string &file)
+template <class Topology_T>
+bool DLPOLYTrajectoryReader<Topology_T>::Open(const std::string &file)
 // open the original dlpoly configuration or trajectory file
 // NOTE: allowed file naming - <name>.dlpc or <name>.dlph (convention:
 // ".dlpc"="CONFIG", ".dlph"="HISTORY")
@@ -128,23 +127,21 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Open(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void DLPOLYTrajectoryReader<Topology_T>::Close() {
   _fl.close();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    boost::any &conf) {
+template <class Topology_T>
+bool DLPOLYTrajectoryReader<Topology_T>::FirstFrame(boost::any &conf) {
   _first_frame = true;
   bool res = NextFrame(conf);
   _first_frame = false;
   return res;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    boost::any &conf_any) {
+template <class Topology_T>
+bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
 
   if (typeid(Topology_T) != conf_any.type()) {
     throw std::runtime_error(
@@ -397,7 +394,7 @@ bool DLPOLYTrajectoryReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
               " but got " + boost::lexical_cast<std::string>(id));
       }
 
-      Bead_T *b = conf.getBead(i);
+      typename Topology_T::bead_t *b = conf.getBead(i);
       Eigen::Matrix3d atom_vecs = Eigen::Matrix3d::Zero();
       for (int j = 0; j < std::min(navecs, 2) + 1; j++) {
 

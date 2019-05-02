@@ -53,7 +53,7 @@ namespace csg {
    interface to fill a topolgy class
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class GMXTopologyReader : public TopologyReader {
  public:
   GMXTopologyReader() {}
@@ -64,9 +64,9 @@ class GMXTopologyReader : public TopologyReader {
  private:
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+template <class Topology_T>
+bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
+                                                 boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -108,7 +108,8 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
     t_atoms *atoms = &(mol->atoms);
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      Molecule_T *mi = top.CreateMolecule(top.MoleculeCount(), molname);
+      typename Topology_T::molecule_t *mi =
+          top.CreateMolecule(top.MoleculeCount(), molname);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -133,7 +134,7 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         }
 
         tools::byte_t symmetry = 1;
-        Bead_T *bead =
+        typename Topology_T::bead_t *bead =
             top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
                            a->resind, residue_name, element, a->m, a->q);
         mi->AddBead(bead);
@@ -144,7 +145,7 @@ bool GMXTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
         // read exclusions
         t_blocka *excl = &(mol->excls);
         // insert exclusions
-        std::list<Bead_T *> excl_list;
+        std::list<typename Topology_T::bead_t *> excl_list;
         for (int k = excl->index[iatom]; k < excl->index[iatom + 1]; k++) {
           excl_list.push_back(top.getBead(excl->a[k] + ifirstatom));
         }

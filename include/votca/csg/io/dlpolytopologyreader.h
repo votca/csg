@@ -48,7 +48,7 @@ namespace csg {
    an interface to fill a topolgy class
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class DLPOLYTopologyReader : public TopologyReader {
  public:
   DLPOLYTopologyReader() {}
@@ -79,9 +79,9 @@ class DLPOLYTopologyReader : public TopologyReader {
                  const std::string &word, int &ival);
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::string DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_NextKeyline(
-    std::ifstream &fs, const char *wspace)
+template <class Topology_T>
+std::string DLPOLYTopologyReader<Topology_T>::_NextKeyline(std::ifstream &fs,
+                                                           const char *wspace)
 // function to find and read the next line starting with a keyword/directive
 // (skipping comments starting with "#" or ";") NOTE: the line is returned
 // case-preserved, not to alter molecule/atom names (consider if --no-map is
@@ -103,8 +103,8 @@ std::string DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_NextKeyline(
   return line.substr(i_nws, line.size() - i_nws);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::string DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_NextKeyInt(
+template <class Topology_T>
+std::string DLPOLYTopologyReader<Topology_T>::_NextKeyInt(
     std::ifstream &fs, const char *wspace, const std::string &word, int &ival)
 // function to read the next line containing only a given keyword and an integer
 // value after it (only skipping comments!) NOTE: this function must only be
@@ -136,10 +136,11 @@ std::string DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_NextKeyInt(
   return sl.str();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_isKeyInt(
-    const std::string &line, const char *wspace, const std::string &word,
-    int &ival)
+template <class Topology_T>
+bool DLPOLYTopologyReader<Topology_T>::_isKeyInt(const std::string &line,
+                                                 const char *wspace,
+                                                 const std::string &word,
+                                                 int &ival)
 // function to check if the given (last read) directive line starts with a given
 // keyword and has an integer value at the end NOTE: comments are allowed beyond
 // the integer (anything after the first integer is ignored)
@@ -176,9 +177,9 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::_isKeyInt(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+template <class Topology_T>
+bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
+                                                    boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -245,7 +246,8 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      Molecule_T *mi = top.CreateMolecule(top.MoleculeCount(), mol_name);
+      typename Topology_T::molecule_t *mi =
+          top.CreateMolecule(top.MoleculeCount(), mol_name);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -308,7 +310,7 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 
           tools::byte_t symmetry = 1;
 
-          Bead_T *bead =
+          typename Topology_T::bead_t *bead =
               top.CreateBead(symmetry, beadtype, top.BeadCount(), mi->getId(),
                              tools::topology_constants::unassigned_residue_id,
                              tools::topology_constants::unassigned_residue_type,
@@ -396,13 +398,13 @@ bool DLPOLYTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
 
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
-        Molecule_T *mi_replica =
+        typename Topology_T::molecule_t *mi_replica =
             top.CreateMolecule(top.MoleculeCount(), mol_name);
         std::vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
-          Bead_T *bead = mi->getBead(bead_id);
+          typename Topology_T::bead_t *bead = mi->getBead(bead_id);
           tools::byte_t symmetry = 1;
-          Bead_T *bead_replica = top.CreateBead(
+          typename Topology_T::bead_t *bead_replica = top.CreateBead(
               symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
               bead->getResidueId(), bead->getResidueType(), bead->getElement(),
               bead->getMass(), bead->getQ());

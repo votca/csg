@@ -35,7 +35,7 @@ namespace csg {
    function
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class DLPOLYTrajectoryWriter : public TrajectoryWriter {
  public:
   // open transformed trajectory file
@@ -67,9 +67,8 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
   bool _isConfig;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Open(
-    std::string file, bool bAppend)
+template <class Topology_T>
+void DLPOLYTrajectoryWriter<Topology_T>::Open(std::string file, bool bAppend)
 // open/create a dlpoly configuration or trajectory file
 // NOTE: allowed file naming - <name>.dlpc or <name>.dlph (convention:
 // ".dlpc"="CONFIG_CGV", ".dlph"="HISTORY_CGV")
@@ -116,14 +115,13 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Open(
                                  "'");
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void DLPOLYTrajectoryWriter<Topology_T>::Close() {
   out_.close();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
-    boost::any conf_any) {
+template <class Topology_T>
+void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
 
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
@@ -181,7 +179,7 @@ void DLPOLYTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
   }
 
   for (int i = 0; static_cast<size_t>(i) < conf.BeadCount(); i++) {
-    Bead_T *bead = conf.getBead(i);
+    typename Topology_T::bead_t *bead = conf.getBead(i);
 
     // AB: DL_POLY needs bead TYPE, not name!
 

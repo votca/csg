@@ -40,7 +40,7 @@ namespace csg {
     for gro files
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class GROReader : public TrajectoryReader, public TopologyReader {
  public:
   GROReader() {}
@@ -63,9 +63,8 @@ class GROReader : public TrajectoryReader, public TopologyReader {
   bool _topology;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+template <class Topology_T>
+bool GROReader<Topology_T>::ReadTopology(std::string file, boost::any top_any) {
   _topology = true;
 
   if (typeid(Topology_T *) != top_any.type()) {
@@ -87,28 +86,28 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::Open(const std::string &file) {
+template <class Topology_T>
+bool GROReader<Topology_T>::Open(const std::string &file) {
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open trajectory file: " + file);
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GROReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void GROReader<Topology_T>::Close() {
   _fl.close();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top_any) {
+template <class Topology_T>
+bool GROReader<Topology_T>::FirstFrame(boost::any top_any) {
   _topology = false;
   NextFrame(top_any);
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
+template <class Topology_T>
+bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -160,7 +159,7 @@ bool GROReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
       hasVel = false;
     }
 
-    Bead_T *b;
+    typename Topology_T::bead_t *b;
     if (_topology) {
       int residue_number = boost::lexical_cast<int>(resNum);
       if (residue_number < 1)

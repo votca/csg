@@ -40,27 +40,20 @@ namespace csg {
 
 void TrajectoryReader::RegisterPlugins(void) {
   TrjReaderFactory().Register<PDBReader<CSG_Topology>>("pdb");
-  TrjReaderFactory()
-      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("trr");
-  TrjReaderFactory()
-      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("xtc");
-  TrjReaderFactory()
-      .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlph");
-  TrjReaderFactory()
-      .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlpc");
+  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("trr");
+  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("xtc");
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader<CSG_Topology>>("dlph");
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader<CSG_Topology>>("dlpc");
   TrjReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
 #ifdef H5MD
-  TrjReaderFactory()
-      .Register<H5MDTrajectoryReader<Bead, Molecule, CSG_Topology>>("h5");
+  TrjReaderFactory().Register<H5MDTrajectoryReader<CSG_Topology>>("h5");
 #endif
   TrjReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
   TrjReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
-  TrjReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
+  TrjReaderFactory().Register<GROReader<CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TrjReaderFactory()
-      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("trr");
-  TrjReaderFactory()
-      .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("xtc");
+  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("trr");
+  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("xtc");
 #endif
 }
 

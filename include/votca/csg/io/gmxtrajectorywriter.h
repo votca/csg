@@ -36,7 +36,7 @@
 namespace votca {
 namespace csg {
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class GMXTrajectoryWriter : public TrajectoryWriter {
  public:
   GMXTrajectoryWriter() {}
@@ -49,21 +49,19 @@ class GMXTrajectoryWriter : public TrajectoryWriter {
   t_trxstatus *_file;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
-                                                               bool bAppend) {
+template <class Topology_T>
+void GMXTrajectoryWriter<Topology_T>::Open(std::string file, bool bAppend) {
   // char c[1] = bAppend ? "a" : "w";
   _file = open_trx((char *)file.c_str(), "w");
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void GMXTrajectoryWriter<Topology_T>::Close() {
   close_trx(_file);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GMXTrajectoryWriter<Bead_T, Molecule_T, Topology_T>::Write(
-    boost::any conf_any) {
+template <class Topology_T>
+void GMXTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
 
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(

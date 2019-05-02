@@ -28,7 +28,7 @@
 namespace votca {
 namespace csg {
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class GROWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
@@ -40,9 +40,8 @@ class GROWriter : public TrajectoryWriter {
   FILE *_out = nullptr;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GROWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
-                                                     bool bAppend) {
+template <class Topology_T>
+void GROWriter<Topology_T>::Open(std::string file, bool bAppend) {
   if (_out != nullptr) {
     throw std::runtime_error(
         "Cannot open file until you have closed the previously opend gro "
@@ -51,14 +50,14 @@ void GROWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GROWriter<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void GROWriter<Topology_T>::Close() {
   fclose(_out);
   _out = nullptr;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void GROWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
+template <class Topology_T>
+void GROWriter<Topology_T>::Write(boost::any conf_any) {
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
         "Error Cannot read topology using growriter write, incorrect topology "
