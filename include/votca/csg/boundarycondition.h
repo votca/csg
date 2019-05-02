@@ -61,7 +61,7 @@ class BoundaryCondition {
    * get the simulation box
    * \return triclinic box matrix
    */
-  const Eigen::Matrix3d &getBox() { return box_; };
+  const Eigen::Matrix3d &getBox() const { return box_; };
 
   /**
    * get the volume of the box

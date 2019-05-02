@@ -74,7 +74,7 @@ class CGEngine {
    * \param ident identifyier of molecule
    * \return true if is ignored
    */
-  bool IsIgnored(std::string molecule_type);
+  bool IsIgnored(std::string molecule_type) const;
 
  private:
   std::unordered_set<std::string> file_names_;
@@ -82,10 +82,9 @@ class CGEngine {
   std::list<std::string> _ignores;
 };
 
-inline bool CGEngine::IsIgnored(std::string molecule_type) {
-  for (std::list<std::string>::iterator iter = _ignores.begin();
-       iter != _ignores.end(); ++iter) {
-    if (tools::wildcmp(iter->c_str(), molecule_type.c_str())) return true;
+inline bool CGEngine::IsIgnored(std::string molecule_type) const {
+  for (const std::string& ignore : _ignores) {
+    if (tools::wildcmp(ignore.c_str(), molecule_type.c_str())) return true;
   }
   return false;
 }

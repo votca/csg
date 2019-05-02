@@ -65,8 +65,6 @@ class CGMoleculeStencil {
       : cg_molecule_type_(cg_molecule_type),
         atomistic_molecule_type_(atomistic_molecule_type){};
 
-  ~CGMoleculeStencil(){};
-
   // This assumes that the vector is ordered according to the creation of the
   // beads in the molecule Such the the first cg_bead points to the atoms in the
   // atomistic molecule with the smallest ids And the second cg_bead in the
