@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-
+#pragma once
 #ifndef VOTCA_CSG_BEADMAP_H
 #define VOTCA_CSG_BEADMAP_H
 
@@ -88,11 +88,12 @@ class BeadMap {
    * weights.
    *
    * @param subbeads
-   * @param weights
+   * @param weights - passed by copy, because they are temporary renormalized
+   * within the method
    * @param ds
    */
   virtual void InitializeBeadMap(const std::vector<std::string> &subbeads,
-                                 const std::vector<double> &weights,
+                                 std::vector<double> weights,
                                  std::vector<double> ds) = 0;
 
   void InitializeBeadMap(const std::vector<std::string> &subbeads,
@@ -106,6 +107,10 @@ class BeadMap {
   virtual std::unique_ptr<BeadMap> Clone() const = 0;
 
  protected:
+  /**
+   * @brief BeadMap constructor is hidden to help with encapsulation, only the
+   * AtomToCGMoleculeMapper class can now manipulate the BeadMap.
+   */
   BeadMap(){};
   struct element_t {
     double weight_;
@@ -126,7 +131,7 @@ class Map_Sphere : public BeadMap {
                     Bead *cg_bead) const override;
 
   void InitializeBeadMap(const std::vector<std::string> &subbeads,
-                         const std::vector<double> &weights,
+                         std::vector<double> weights,
                          std::vector<double> ds) override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
@@ -148,16 +153,6 @@ class Map_Sphere : public BeadMap {
 
   friend class AtomToCGMoleculeMapper;
 };
-
-inline void Map_Sphere::AddAtomisticBead(const std::string &atomic_bead_name,
-                                         const double &weight,
-                                         const double &force_weight) {
-
-  element_t el;
-  el.weight_ = weight;
-  el.force_weight_ = force_weight;
-  matrix_[atomic_bead_name] = el;
-}
 
 /*******************************************************
     Linear map for ellipsoidal bead
@@ -212,12 +207,10 @@ typedef std::pair<int, std::map<int, std::vector<std::pair<std::string, int>>>>
  */
 class AtomToCGMoleculeMapper {
  public:
-  AtomToCGMoleculeMapper(){};
   AtomToCGMoleculeMapper(std::string atom_molecule_type,
                          std::string cg_molecule_type)
       : atom_molecule_type_(atom_molecule_type),
         cg_molecule_type_(cg_molecule_type){};
-  ~AtomToCGMoleculeMapper();
 
   void InitializeMoleculeMap(
       const std::unordered_map<std::string, CGBeadStencil> &bead_maps_info,
@@ -229,16 +222,23 @@ class AtomToCGMoleculeMapper {
                         CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
-   * Gang of 3
+   * Gang of 5
    **************************/
   /**
-   * @brief Note that the gang of 3 must be explicity defined because the bead
+   * @brief Note that the gang of 5 must be explicity defined because the bead
    * maps are stored as unique_ptrs, unique pointers are used so that the
    * BeadMaps can be treated polymorphically.
    */
+
+  /// Copy Constructor
   AtomToCGMoleculeMapper(const AtomToCGMoleculeMapper &other);
-  AtomToCGMoleculeMapper &operator=(AtomToCGMoleculeMapper &&other);
-  AtomToCGMoleculeMapper &operator=(const AtomToCGMoleculeMapper other);
+  /// Move Constructor
+  AtomToCGMoleculeMapper(AtomToCGMoleculeMapper &&other) noexcept;
+  /// Move Assignment
+  AtomToCGMoleculeMapper &operator=(AtomToCGMoleculeMapper &&other) noexcept;
+  /// Copy Assignment
+  AtomToCGMoleculeMapper &operator=(const AtomToCGMoleculeMapper &other);
+  ~AtomToCGMoleculeMapper();
 
  protected:
   // Molecule atomistic_molecule_, cg_molecule_;

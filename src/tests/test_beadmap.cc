@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   vector<double> weights = {12.0, 1.0, 1.0};
   vector<double> ds;
   TestBeadSphere test_sphere;
-  test_sphere.Initialize(subbeads, weights, ds);
+  test_sphere.InitializeBeadMap(subbeads, weights, ds);
 
   vector<string> subbeads_names = test_sphere.getAtomicBeadNames();
   vector<bool> found_bead(3, false);
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   cg_bead.setMass(0.0);
   cg_bead.setSymmetry(1);  // For sphere
 
-  test_sphere.Apply(&boundaries, atomic_beads, &cg_bead);
+  test_sphere.UpdateCGBead(&boundaries, atomic_beads, &cg_bead);
 
   cout << cg_bead.getF() << endl;
   cout << cg_bead.getVel() << endl;
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
   vector<double> weights = {12.0, 1.0, 1.0};
   vector<double> ds;
   TestBeadEllipsoid test_ellip;
-  test_ellip.Initialize(subbeads, weights, ds);
+  test_ellip.InitializeBeadMap(subbeads, weights, ds);
 
   vector<string> subbeads_names = test_ellip.getAtomicBeadNames();
   vector<bool> found_bead(3, false);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
   cg_bead.setW(initialize);
   cg_bead.setMass(0.0);
 
-  test_ellip.Apply(&boundaries, atomic_beads, &cg_bead);
+  test_ellip.UpdateCGBead(&boundaries, atomic_beads, &cg_bead);
 
   cout << cg_bead.getF() << endl;
   cout << cg_bead.getVel() << endl;
@@ -568,7 +568,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   AtomToCGMoleculeMapper mapper(atomic_mol_type, cg_mol_type);
 
   vector<string> bead_stencil_order = {"A1", "B1", "A2"};
-  mapper.Initialize(all_molecule_bead_stencils, bead_stencil_order);
+  mapper.InitializeMoleculeMap(all_molecule_bead_stencils, bead_stencil_order);
 
   pair<int, map<int, vector<pair<string, int>>>>
       cgmolid_cgbeadid_atomname_and_id;
@@ -608,7 +608,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
 
   // This should update the cg beads with the appropriate atomistic bead pos,
   // velocity etc
-  mapper.Apply(atom_top, cg_top, cgmolid_cgbeadid_atomname_and_id);
+  mapper.UpdateCGMolecule(atom_top, cg_top, cgmolid_cgbeadid_atomname_and_id);
 
   BOOST_CHECK_CLOSE(A1->getPos().x(), 0.933333, 1E-4);
   BOOST_CHECK_CLOSE(A1->getPos().y(), 1.0, 1E-4);

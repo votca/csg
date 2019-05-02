@@ -42,8 +42,7 @@ vector<string> BeadMap::getAtomicBeadNames() const {
 }
 
 void Map_Sphere::InitializeBeadMap(const vector<string> &subbeads,
-                                   const vector<double> &weights,
-                                   vector<double> ds) {
+                                   vector<double> weights, vector<double> ds) {
 
   assert(subbeads.size() == weights.size() &&
          "subbeads and weights are not matched in bead map sphere.");
@@ -88,6 +87,16 @@ void Map_Sphere::InitializeBeadMap(const vector<string> &subbeads,
     AddAtomisticBead(name, weights.at(index), fweights.at(index));
     ++index;
   }
+}
+
+void Map_Sphere::AddAtomisticBead(const std::string &atomic_bead_name,
+                                  const double &weight,
+                                  const double &force_weight) {
+
+  element_t el;
+  el.weight_ = weight;
+  el.force_weight_ = force_weight;
+  matrix_[atomic_bead_name] = el;
 }
 
 void Map_Sphere::UpdateCGBead(const BoundaryCondition *boundaries,
@@ -298,18 +307,28 @@ void AtomToCGMoleculeMapper::InitializeMoleculeMap(
 /// Copy Constructor
 AtomToCGMoleculeMapper::AtomToCGMoleculeMapper(
     const AtomToCGMoleculeMapper &other) {
-  atom_molecule_type_ = other.atom_molecule_type_;
-  cg_molecule_type_ = other.cg_molecule_type_;
-
   for (const std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
        other.cg_bead_name_and_maps_) {
     cg_bead_name_and_maps_.at(pr.first) = pr.second->Clone();
   }
+  atom_molecule_type_ = other.atom_molecule_type_;
+  cg_molecule_type_ = other.cg_molecule_type_;
 }
 
-// Move assignment
+/// Move Constructor
+AtomToCGMoleculeMapper::AtomToCGMoleculeMapper(
+    AtomToCGMoleculeMapper &&other) noexcept {
+  for (std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
+       other.cg_bead_name_and_maps_) {
+    cg_bead_name_and_maps_.at(pr.first) = std::move(pr.second);
+  }
+  atom_molecule_type_ = other.atom_molecule_type_;
+  cg_molecule_type_ = other.cg_molecule_type_;
+}
+
+/// Move assignment
 AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
-    AtomToCGMoleculeMapper &&other) {
+    AtomToCGMoleculeMapper &&other) noexcept {
   if (this != &other) {
     cg_bead_name_and_maps_.clear();
     for (std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :
@@ -322,9 +341,9 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
   return *this;
 }
 
-// Copy assignment
+/// Copy Assignment
 AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
-    const AtomToCGMoleculeMapper other) {
+    const AtomToCGMoleculeMapper &other) {
   if (this != &other) {
     cg_bead_name_and_maps_.clear();
     for (const std::pair<const std::string, std::unique_ptr<BeadMap>> &pr :

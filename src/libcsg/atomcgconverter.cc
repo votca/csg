@@ -122,7 +122,7 @@ void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
     // Call the appropriate molecule mapper
     mol_names_and_maps_.at(atomic_mol_type)
         .at(cg_mol_type)
-        .Apply(atomic_top, cg_top, cg_mol_with_info);
+        .UpdateCGMolecule(atomic_top, cg_top, cg_mol_with_info);
   }
 }
 
@@ -188,7 +188,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   // Initialize the mapper
   mol_names_and_maps_.at(atom_mol_type)
       .at(cg_mol_type)
-      .Initialize(name_and_beads_info, order_of_beads);
+      .InitializeMoleculeMap(name_and_beads_info, order_of_beads);
 }
 
 std::unordered_map<int, string>

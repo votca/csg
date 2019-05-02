@@ -47,11 +47,7 @@ namespace csg {
 class AtomCGConverter {
  public:
   /// Constructor
-  AtomCGConverter(){};
   AtomCGConverter(std::vector<std::string> ignore_atomistic_molecule_types);
-
-  /// Destructor
-  ~AtomCGConverter(){};
 
   /**
    * @brief Loads the .xml file describing the cg molecule
