@@ -35,8 +35,8 @@ namespace csg {
 
 using namespace std;
 void TrajectoryWriter::RegisterPlugins() {
-  TrjWriterFactory().Register<PDBWriter<Bead, Molecule, CSG_Topology>>("pdb");
-  TrjWriterFactory().Register<XYZWriter<Bead, Molecule, CSG_Topology>>("xyz");
+  TrjWriterFactory().Register<PDBWriter<CSG_Topology>>("pdb");
+  TrjWriterFactory().Register<XYZWriter<CSG_Topology>>("xyz");
   TrjWriterFactory().Register<GROWriter<Bead, Molecule, CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
   TrjWriterFactory()
@@ -48,8 +48,7 @@ void TrajectoryWriter::RegisterPlugins() {
       .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlph");
   TrjWriterFactory()
       .Register<DLPOLYTrajectoryWriter<Bead, Molecule, CSG_Topology>>("dlpc");
-  TrjWriterFactory().Register<LAMMPSDumpWriter<Bead, Molecule, CSG_Topology>>(
-      "dump");
+  TrjWriterFactory().Register<LAMMPSDumpWriter<CSG_Topology>>("dump");
 }
 }  // namespace csg
 }  // namespace votca

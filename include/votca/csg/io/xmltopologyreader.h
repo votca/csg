@@ -94,14 +94,15 @@ class XMLMolecule {
  * \todo should be extended to also read beads, ...
  *
  */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
   bool ReadTopology(std::string file, boost::any top);
 
  private:
-  typedef boost::unordered_multimap<std::string, XMLMolecule<Molecule_T>>
+  typedef boost::unordered_multimap<
+      std::string, XMLMolecule<typename Topology_T::molecule_t>>
       MoleculesMap;
 
   void ReadTopolFile(std::string file);
@@ -128,9 +129,9 @@ class XMLTopologyReader : public TopologyReader {
   bool _has_base_topology;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string filename, boost::any top_any) {
+template <class Topology_T>
+bool XMLTopologyReader<Topology_T>::ReadTopology(std::string filename,
+                                                 boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -147,9 +148,8 @@ bool XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopolFile(
-    std::string file) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ReadTopolFile(std::string file) {
   std::unique_ptr<TopologyReader> reader = TopReaderFactory().Create(file);
   if (!reader) throw std::runtime_error(file + ": unknown topology format");
 
@@ -158,9 +158,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ReadTopolFile(
   // Clean XML molecules and beads.
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseRoot(
-    tools::Property &property) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseRoot(tools::Property &property) {
   _has_base_topology = false;
   if (property.hasAttribute("base")) {
     ReadTopolFile(property.getAttribute<std::string>("base"));
@@ -188,9 +187,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseRoot(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBox(
-    tools::Property &p) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseBox(tools::Property &p) {
   Eigen::Matrix3d m = Eigen::Matrix3d::Zero();
   m(0, 0) = p.getAttribute<double>("xx");
   m(1, 1) = p.getAttribute<double>("yy");
@@ -198,9 +196,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBox(
   _top->setBox(m);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecules(
-    tools::Property &p) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseMolecules(tools::Property &p) {
   for (tools::Property::iterator it = p.begin(); it != p.end(); ++it) {
     if (it->name() == "clear") {
       _top->ClearMoleculeList();
@@ -241,9 +238,10 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecules(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecule(
-    tools::Property &p, std::string molecule_type_, int nbeads, int nmols) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
+                                                  std::string molecule_type_,
+                                                  int nbeads, int nmols) {
   std::vector<XMLBead> xmlBeads;
   std::vector<int> xmlResidues;
   for (tools::Property::iterator it = p.begin(); it != p.end(); ++it) {
@@ -299,10 +297,10 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecule(
 
   tools::Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
-    Molecule_T *mi =
+    typename Topology_T::molecule_t *mi =
         _top->CreateMolecule(_top->MoleculeCount(), molecule_type_);
-    XMLMolecule<Molecule_T> xmlMolecule =
-        XMLMolecule<Molecule_T>(molecule_type_, nmols);
+    XMLMolecule<typename Topology_T::molecule_t> xmlMolecule =
+        XMLMolecule<typename Topology_T::molecule_t>(molecule_type_, nmols);
     xmlMolecule.pid = mi->getId();
     xmlMolecule.mi = mi;
     _molecules.insert(make_pair(molecule_type_, xmlMolecule));
@@ -325,7 +323,7 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecule(
       } else if (elements.isEleFull(name_all_caps)) {
         element = elements.getEleShort(name_all_caps);
       }
-      Bead_T *bead = _top->CreateBead(
+      typename Topology_T::bead_t *bead = _top->CreateBead(
           symmetry, b.type, _top->BeadCount(), xmlMolecule.pid,
           b.residue_number, tools::topology_constants::unassigned_residue_type,
           element, b.mass, b.q);
@@ -346,9 +344,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseMolecule(
   _mol_index++;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBeadTypes(
-    tools::Property &el) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseBeadTypes(tools::Property &el) {
   for (tools::Property::iterator it = el.begin(); it != el.end(); ++it) {
     if (it->name() == "rename") {
       std::string bead_type = it->getAttribute<std::string>("name");
@@ -368,9 +365,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBeadTypes(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBonded(
-    tools::Property &el) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseBonded(tools::Property &el) {
   for (tools::Property::iterator it = el.begin(); it != el.end(); ++it) {
     if (it->name() == "bond") {
       ParseBond(*it);
@@ -384,9 +380,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBonded(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBond(
-    tools::Property &p) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseBond(tools::Property &p) {
   std::string interaction_group = p.get("name").as<std::string>();
   std::string beads = p.get("beads").as<std::string>();
   tools::Tokenizer tok(beads, " \n\t");
@@ -409,7 +404,7 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBond(
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         ic = _top->CreateInteraction(
@@ -425,9 +420,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseBond(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseAngle(
-    tools::Property &p) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseAngle(tools::Property &p) {
   std::string interaction_group = p.get("name").as<std::string>();
   std::string beads = p.get("beads").as<std::string>();
   tools::Tokenizer tok(beads, " \n\t");
@@ -452,7 +446,7 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseAngle(
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = xmlMolecule.name2beads[b3.atom_type_];
@@ -469,9 +463,8 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseAngle(
     }
   }
 }
-template <class Bead_T, class Molecule_T, class Topology_T>
-void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseDihedral(
-    tools::Property &p) {
+template <class Topology_T>
+void XMLTopologyReader<Topology_T>::ParseDihedral(tools::Property &p) {
   std::string interaction_group = p.get("name").as<std::string>();
   std::string beads = p.get("beads").as<std::string>();
   tools::Tokenizer tok(beads, " \n\t");
@@ -498,7 +491,7 @@ void XMLTopologyReader<Bead_T, Molecule_T, Topology_T>::ParseDihedral(
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<Molecule_T> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = xmlMolecule.name2beads[b3.atom_type_];

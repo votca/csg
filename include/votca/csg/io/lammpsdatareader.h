@@ -42,7 +42,7 @@ namespace csg {
     for lammps data files
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
  public:
   LAMMPSDataReader() {}
@@ -171,10 +171,9 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
       double value, std::map<std::string, double> nameValue, double tolerance);
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::vector<std::string>
-    LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::TrimCommentsFrom_(
-        std::vector<std::string> fields) {
+template <class Topology_T>
+std::vector<std::string> LAMMPSDataReader<Topology_T>::TrimCommentsFrom_(
+    std::vector<std::string> fields) {
   std::vector<std::string> tempFields;
   for (auto field : fields) {
     if (field.at(0) == '#') return tempFields;
@@ -184,15 +183,15 @@ std::vector<std::string>
 }
 
 // trim from start (in place)
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ltrim_(std::string &s) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ltrim_(std::string &s) {
   s.erase(s.begin(), std::find_if(s.begin(), s.end(),
                                   [](int ch) { return !std::isspace(ch); }));
 }
 
 // trim from end (in place)
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::rtrim_(std::string &s) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::rtrim_(std::string &s) {
   s.erase(std::find_if(s.rbegin(), s.rend(),
                        [](int ch) { return !std::isspace(ch); })
               .base(),
@@ -200,23 +199,22 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::rtrim_(std::string &s) {
 }
 
 // trim from both ends (in place)
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::trim_(std::string &s) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::trim_(std::string &s) {
   ltrim_(s);
   rtrim_(s);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::withinTolerance_(
-    double value1, double value2, double tolerance) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::withinTolerance_(double value1,
+                                                    double value2,
+                                                    double tolerance) {
   return abs(value1 - value2) / std::min(value1, value2) < tolerance;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::string LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
-    getStringGivenDoubleAndMap_(double value,
-                                std::map<std::string, double> nameValue,
-                                double tolerance) {
+template <class Topology_T>
+std::string LAMMPSDataReader<Topology_T>::getStringGivenDoubleAndMap_(
+    double value, std::map<std::string, double> nameValue, double tolerance) {
 
   for (auto string_value_pair : nameValue) {
     if (withinTolerance_(value, string_value_pair.second, tolerance)) {
@@ -234,9 +232,9 @@ std::string LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
  * Public Facing Methods                                                     *
  *****************************************************************************/
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::ReadTopology(std::string file,
+                                                boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -280,9 +278,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::Open(
-    const std::string &file) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::Open(const std::string &file) {
   fl_.open(file.c_str());
   if (!fl_.is_open())
     throw std::ios_base::failure("Error on open trajectory file: " + file);
@@ -290,22 +287,20 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::Open(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::Close() {
   fl_.close();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    boost::any top) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::FirstFrame(boost::any top) {
   topology_ = false;
   NextFrame(top);
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    boost::any top_any) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::NextFrame(boost::any top_any) {
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
         "Error Cannot read topology using lammps data reader next frame, "
@@ -350,8 +345,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
  * Private Facing Methods                                                    *
  *****************************************************************************/
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchOneFieldLabel_(
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::MatchOneFieldLabel_(
     std::vector<std::string> fields, Topology_T &top) {
 
   if (fields.at(0) == "Masses") {
@@ -372,8 +367,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchOneFieldLabel_(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchTwoFieldLabels_(
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::MatchTwoFieldLabels_(
     std::vector<std::string> fields, Topology_T &top) {
 
   std::string label = fields.at(0) + " " + fields.at(1);
@@ -402,8 +397,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchTwoFieldLabels_(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchThreeFieldLabels_(
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::MatchThreeFieldLabels_(
     std::vector<std::string> fields, Topology_T &top) {
   std::string label = fields.at(1) + " " + fields.at(2);
   if (label == "atom types") {
@@ -422,8 +417,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchThreeFieldLabels_(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchFourFieldLabels_(
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::MatchFourFieldLabels_(
     std::vector<std::string> fields, Topology_T &top) {
   std::string label = fields.at(2) + " " + fields.at(3);
   if (label == "xlo xhi") {
@@ -434,10 +429,9 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::MatchFourFieldLabels_(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
-    MatchFieldsTimeStepLabel_(std::vector<std::string> fields,
-                              Topology_T &top) {
+template <class Topology_T>
+bool LAMMPSDataReader<Topology_T>::MatchFieldsTimeStepLabel_(
+    std::vector<std::string> fields, Topology_T &top) {
   size_t index = 0;
   for (auto field : fields) {
     if (field == "timestep" && (index + 2) < fields.size()) {
@@ -449,9 +443,8 @@ bool LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
   return false;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T,
-                      Topology_T>::InitializeAtomAndBeadTypes_() {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::InitializeAtomAndBeadTypes_() {
   if (!data_.count("Masses")) {
     std::string err =
         "Masses must first be parsed before the atoms can be read.";
@@ -499,9 +492,9 @@ void LAMMPSDataReader<Bead_T, Molecule_T,
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::map<std::string, double> LAMMPSDataReader<
-    Bead_T, Molecule_T, Topology_T>::determineBaseNameAssociatedWithMass_() {
+template <class Topology_T>
+std::map<std::string, double>
+    LAMMPSDataReader<Topology_T>::determineBaseNameAssociatedWithMass_() {
 
   tools::Elements elements;
   std::map<std::string, double> baseNamesAndMasses;
@@ -520,9 +513,9 @@ std::map<std::string, double> LAMMPSDataReader<
   return baseNamesAndMasses;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-std::map<std::string, int> LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
-    determineAtomAndBeadCountBasedOnMass_(
+template <class Topology_T>
+std::map<std::string, int>
+    LAMMPSDataReader<Topology_T>::determineAtomAndBeadCountBasedOnMass_(
         std::map<std::string, double> baseNamesAndMasses) {
 
   std::map<std::string, int> countSameElementOrBead;
@@ -540,9 +533,9 @@ std::map<std::string, int> LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::
   return countSameElementOrBead;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadBox_(
-    std::vector<std::string> fields, Topology_T &top) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadBox_(std::vector<std::string> fields,
+                                            Topology_T &top) {
   Eigen::Matrix3d m = Eigen::Matrix3d::Zero();
   m(0, 0) = stod(fields.at(1)) - stod(fields.at(0));
 
@@ -560,9 +553,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadBox_(
   top.setBox(m);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::SortIntoDataGroup_(
-    std::string tag) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::SortIntoDataGroup_(std::string tag) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -586,48 +578,47 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::SortIntoDataGroup_(
   data_[tag] = group;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumTypes_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumTypes_(
     std::vector<std::string> fields, std::string type) {
   numberOfDifferentTypes_[type] = stoi(fields.at(0));
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfAtoms_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumOfAtoms_(
     std::vector<std::string> fields, Topology_T &top) {
   numberOf_["atoms"] = stoi(fields.at(0));
   if (!topology_ && static_cast<size_t>(numberOf_["atoms"]) != top.BeadCount())
     std::runtime_error("Number of beads in topology and trajectory differ");
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfBonds_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumOfBonds_(
     std::vector<std::string> fields) {
   numberOf_["bonds"] = stoi(fields.at(0));
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfAngles_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumOfAngles_(
     std::vector<std::string> fields) {
   numberOf_["angles"] = stoi(fields.at(0));
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfDihedrals_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumOfDihedrals_(
     std::vector<std::string> fields) {
   numberOf_["dihedrals"] = stoi(fields.at(0));
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadNumOfImpropers_(
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadNumOfImpropers_(
     std::vector<std::string> fields) {
   numberOf_["impropers"] = stoi(fields.at(0));
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-typename LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::lammps_format
-    LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::determineDataFileFormat_(
-        std::string line) {
+template <class Topology_T>
+typename LAMMPSDataReader<Topology_T>::lammps_format
+    LAMMPSDataReader<Topology_T>::determineDataFileFormat_(std::string line) {
 
   tools::Tokenizer tok(line, " ");
   std::vector<std::string> fields;
@@ -647,9 +638,8 @@ typename LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::lammps_format
   return format;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAtoms_(
-    Topology_T &top) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
 
   std::string line;
   getline(fl_, line);
@@ -717,12 +707,12 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAtoms_(
 
     // We want to start with an index of 0 not 1
     // atomId;
-    Bead_T *b;
+    typename Topology_T::bead_t *b;
     if (topology_) {
 
       atomIdToIndex_[atomId] = atomIndex - startingIndex;
       atomIdToMoleculeId_[atomId] = moleculeId;
-      Molecule_T *mol;
+      typename Topology_T::molecule_t *mol;
       if (!molecules_.count(moleculeId)) {
         mol = top.CreateMolecule(
             moleculeId, tools::topology_constants::unassigned_molecule_type);
@@ -769,9 +759,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAtoms_(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadBonds_(
-    Topology_T &top) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadBonds_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -799,8 +788,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadBonds_(
       int atom1Index = atomIdToIndex_[atom1Id];
       int atom2Index = atomIdToIndex_[atom2Id];
 
-      Bead_T *b = top.getBead(atom1Index);
-      Molecule_T *mi = top.getMolecule(b->getMoleculeId());
+      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::molecule_t *mi = top.getMolecule(b->getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
           InteractionType::bond, "BONDS", bondId, mi->getId(),
@@ -825,9 +814,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadBonds_(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAngles_(
-    Topology_T &top) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -859,8 +847,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAngles_(
       int atom2Index = atomIdToIndex_[atom2Id];
       int atom3Index = atomIdToIndex_[atom3Id];
 
-      Bead_T *b = top.getBead(atom1Index);
-      Molecule_T *mi = top.getMolecule(b->getMoleculeId());
+      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::molecule_t *mi = top.getMolecule(b->getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
           InteractionType::angle, "ANGLES", angleId, mi->getId(),
@@ -886,9 +874,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadAngles_(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadDihedrals_(
-    Topology_T &top) {
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::ReadDihedrals_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
@@ -922,8 +909,8 @@ void LAMMPSDataReader<Bead_T, Molecule_T, Topology_T>::ReadDihedrals_(
       int atom3Index = atomIdToIndex_[atom3Id];
       int atom4Index = atomIdToIndex_[atom4Id];
 
-      Bead_T *b = top.getBead(atom1Index);
-      Molecule_T *mi = top.getMolecule(b->getMoleculeId());
+      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::molecule_t *mi = top.getMolecule(b->getMoleculeId());
       Interaction *ic = top.CreateInteraction(
           InteractionType::dihedral, "DIHEDRALS", dihedralId, mi->getId(),
           std::vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});

@@ -39,7 +39,7 @@ namespace votca {
 namespace csg {
 
 void TrajectoryReader::RegisterPlugins(void) {
-  TrjReaderFactory().Register<PDBReader<Bead, Molecule, CSG_Topology>>("pdb");
+  TrjReaderFactory().Register<PDBReader<CSG_Topology>>("pdb");
   TrjReaderFactory()
       .Register<GMXTrajectoryReader<Bead, Molecule, CSG_Topology>>("trr");
   TrjReaderFactory()
@@ -48,15 +48,13 @@ void TrajectoryReader::RegisterPlugins(void) {
       .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlph");
   TrjReaderFactory()
       .Register<DLPOLYTrajectoryReader<Bead, Molecule, CSG_Topology>>("dlpc");
-  TrjReaderFactory().Register<XYZReader<Bead, Molecule, CSG_Topology>>("xyz");
+  TrjReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
 #ifdef H5MD
   TrjReaderFactory()
       .Register<H5MDTrajectoryReader<Bead, Molecule, CSG_Topology>>("h5");
 #endif
-  TrjReaderFactory().Register<LAMMPSDumpReader<Bead, Molecule, CSG_Topology>>(
-      "dump");
-  TrjReaderFactory().Register<LAMMPSDataReader<Bead, Molecule, CSG_Topology>>(
-      "data");
+  TrjReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
+  TrjReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
   TrjReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
   TrjReaderFactory()

@@ -62,6 +62,8 @@ class TemplateTopology {
   }
   ~TemplateTopology();
 
+  typedef Molecule_T molecule_t;
+  typedef Bead_T bead_t;
   /**
    * \brief Cleans up all the stored data
    */

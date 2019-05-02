@@ -35,19 +35,16 @@ namespace votca {
 namespace csg {
 
 void TopologyReader::RegisterPlugins(void) {
-  TopReaderFactory().Register<PDBReader<Bead, Molecule, CSG_Topology>>("pdb");
-  TopReaderFactory().Register<XMLTopologyReader<Bead, Molecule, CSG_Topology>>(
-      "xml");
-  TopReaderFactory().Register<XYZReader<Bead, Molecule, CSG_Topology>>("xyz");
-  TopReaderFactory().Register<LAMMPSDumpReader<Bead, Molecule, CSG_Topology>>(
-      "dump");
+  TopReaderFactory().Register<PDBReader<CSG_Topology>>("pdb");
+  TopReaderFactory().Register<XMLTopologyReader<CSG_Topology>>("xml");
+  TopReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
+  TopReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
   TopReaderFactory().Register<GROReader<Bead, Molecule, CSG_Topology>>("gro");
 #ifdef GMX_DOUBLE
   TopReaderFactory().Register<GMXTopologyReader<Bead, Molecule, CSG_Topology>>(
       "tpr");
 #endif
-  TopReaderFactory().Register<LAMMPSDataReader<Bead, Molecule, CSG_Topology>>(
-      "data");
+  TopReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
   TopReaderFactory()
       .Register<DLPOLYTopologyReader<Bead, Molecule, CSG_Topology>>("dlpf");
 }

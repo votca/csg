@@ -28,7 +28,7 @@
 namespace votca {
 namespace csg {
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class LAMMPSDumpWriter : public TrajectoryWriter {
  public:
   void Open(std::string file, bool bAppend = false);
@@ -43,20 +43,18 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
   FILE *_out;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Open(std::string file,
-                                                            bool bAppend) {
+template <class Topology_T>
+void LAMMPSDumpWriter<Topology_T>::Open(std::string file, bool bAppend) {
   _out = fopen(file.c_str(), bAppend ? "at" : "wt");
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void LAMMPSDumpWriter<Topology_T>::Close() {
   fclose(_out);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Write(
-    boost::any conf_any) {
+template <class Topology_T>
+void LAMMPSDumpWriter<Topology_T>::Write(boost::any conf_any) {
 
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
@@ -85,7 +83,7 @@ void LAMMPSDumpWriter<Bead_T, Molecule_T, Topology_T>::Write(
   // Sort the beads before outputing them
   std::sort(bead_ids.begin(), bead_ids.end());
   for (const int bead_id : bead_ids) {
-    Bead_T *bead = top.getBead(bead_id);
+    typename Topology_T::bead_t *bead = top.getBead(bead_id);
     int bead_type_id = top.getBeadTypeId(bead_id);
 
     fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);

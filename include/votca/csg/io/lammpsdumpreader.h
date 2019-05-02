@@ -42,7 +42,7 @@ namespace csg {
     for lammps dump files
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
  public:
   LAMMPSDumpReader() {}
@@ -72,9 +72,9 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   int number_of_atoms_ = 0;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+template <class Topology_T>
+bool LAMMPSDumpReader<Topology_T>::ReadTopology(std::string file,
+                                                boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -97,9 +97,8 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::Open(
-    const std::string &file) {
+template <class Topology_T>
+bool LAMMPSDumpReader<Topology_T>::Open(const std::string &file) {
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open trajectory file: " + file);
@@ -107,22 +106,20 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::Open(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::Close() {
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::Close() {
   _fl.close();
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(
-    boost::any top) {
+template <class Topology_T>
+bool LAMMPSDumpReader<Topology_T>::FirstFrame(boost::any top) {
   read_topology_data_ = false;
   NextFrame(top);
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
-    boost::any top_any) {
+template <class Topology_T>
+bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -162,18 +159,18 @@ bool LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::NextFrame(
   ;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadTimestep(
-    Topology_T &top, const std::string &itemline) {
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::ReadTimestep(Topology_T &top,
+                                                const std::string &itemline) {
   std::string s;
   getline(_fl, s);
   top.setStep(boost::lexical_cast<int>(s));
   std::cout << "Reading frame, timestep " << top.getStep() << std::endl;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadBox(
-    Topology_T &top, const std::string &itemline) {
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::ReadBox(Topology_T &top,
+                                           const std::string &itemline) {
   std::string s;
 
   Eigen::Matrix3d m = Eigen::Matrix3d::Zero();
@@ -190,9 +187,9 @@ void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadBox(
   top.setBox(m);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadNumAtoms(
-    Topology_T &top, const std::string &itemline) {
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::ReadNumAtoms(Topology_T &top,
+                                                const std::string &itemline) {
   std::string s;
   getline(_fl, s);
   number_of_atoms_ = boost::lexical_cast<int>(s);
@@ -202,9 +199,9 @@ void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadNumAtoms(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadAtoms(
-    Topology_T &top, std::string itemline) {
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
+                                             std::string itemline) {
 
   bool pos = false;
   bool force = false;
@@ -329,7 +326,7 @@ void LAMMPSDumpReader<Bead_T, Molecule_T, Topology_T>::ReadAtoms(
           atom_attributes_string["element"], atom_attributes_double["mass"],
           atom_attributes_double["q"]);
     }
-    Bead_T *b = top.getBead(atom_attributes_int["id"]);
+    typename Topology_T::bead_t *b = top.getBead(atom_attributes_int["id"]);
     b->HasPos(pos);
     b->HasF(force);
     b->HasVel(vel);

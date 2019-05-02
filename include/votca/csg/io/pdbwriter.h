@@ -41,7 +41,7 @@ namespace csg {
  * Further note that pdb files store the ids, serical numbers and indices
  * starting at 1, votca uses ids, indices and serial numbers starting at 0.
  */
-template <typename Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class PDBWriter : public TrajectoryWriter {
  public:
   void Write(boost::any conf);
@@ -95,6 +95,17 @@ class PDBWriter : public TrajectoryWriter {
     return restype;
   }
 
+  /**
+   * @brief Gets the id of the internal VOTCA class instance and adds one
+   *
+   * This is necessary becasue ids in VOTCA are stored starting with id 0,
+   * whereas the pdb files store the ids starting at integer values of 1.
+   *
+   * @tparam T
+   * @param item
+   *
+   * @return equivalent id for pdb file
+   */
   template <class T>
   int getId(T &item) {
     return item.getId() + 1;
@@ -110,13 +121,14 @@ class PDBWriter : public TrajectoryWriter {
     return item.getPos() * tools::conv::bohr2ang;
   }
 
-  Eigen::Vector3d getPos(Bead_T &bead) {
+  Eigen::Vector3d getPos(typename Topology_T::bead_t &bead) {
     return bead.Pos() * tools::conv::nm2ang;
   }
 
   template <class T>
-  std::vector<Bead_T *> getIterable(Topology_T &top, T &container) {
-    std::vector<Bead_T *> beads;
+  std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top,
+                                                         T &container) {
+    std::vector<typename Topology_T::bead_t *> beads;
     std::vector<int> bead_ids = container.getBeadIds();
     for (int &bead_id : bead_ids) {
       beads.push_back(top.getBead(bead_id));
@@ -124,8 +136,8 @@ class PDBWriter : public TrajectoryWriter {
     return beads;
   }
 
-  std::vector<Bead_T *> getIterable(Topology_T &top) {
-    std::vector<Bead_T *> beads;
+  std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top) {
+    std::vector<typename Topology_T::bead_t *> beads;
     std::vector<int> bead_ids = top.getBeadIds();
     for (int &bead_id : bead_ids) {
       beads.push_back(top.getBead(bead_id));
@@ -134,10 +146,10 @@ class PDBWriter : public TrajectoryWriter {
   }
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 template <class T>
-inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
-    Topology_T *conf, T &container) {
+inline void PDBWriter<Topology_T>::WriteContainer(Topology_T *conf,
+                                                  T &container) {
 
   if (out_.is_open()) {
     boost::format atomfrmt(
@@ -145,8 +157,9 @@ inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
         "  "
         "           %9$+2s\n");
 
-    std::vector<Bead_T *> atoms = getIterable(*conf, container);
-    for (Bead_T *atom : atoms) {
+    std::vector<typename Topology_T::bead_t *> atoms =
+        getIterable(*conf, container);
+    for (typename Topology_T::bead_t *atom : atoms) {
       int atomid = getId(*atom);
       std::string resname = getResidueType(*atom);
       int residueid = getResId(*atom);
@@ -168,8 +181,8 @@ inline void PDBWriter<Bead_T, Molecule_T, Topology_T>::WriteContainer(
   }
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-void PDBWriter<Bead_T, Molecule_T, Topology_T>::Write(boost::any conf_any) {
+template <class Topology_T>
+void PDBWriter<Topology_T>::Write(boost::any conf_any) {
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
         "Error Cannot read topology using pdb writer write, incorrect topology "

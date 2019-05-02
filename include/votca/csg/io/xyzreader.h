@@ -39,7 +39,7 @@ namespace csg {
     for xyz files
 
 */
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 class XYZReader : public TrajectoryReader, public TopologyReader {
  public:
   XYZReader() {}
@@ -82,7 +82,7 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   void AddAtom(T &container, std::string bead_type, int bead_id,
                std::string element, const Eigen::Vector3d &pos) {
 
-    Bead_T *b;
+    typename Topology_T::bead_t *b;
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
     if (topology) {
 
@@ -112,13 +112,13 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   int _line;
 };
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::FirstFrame(boost::any top) {
+template <class Topology_T>
+bool XYZReader<Topology_T>::FirstFrame(boost::any top) {
   return NextFrame(top);
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
+template <class Topology_T>
+bool XYZReader<Topology_T>::NextFrame(boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -131,10 +131,9 @@ bool XYZReader<Bead_T, Molecule_T, Topology_T>::NextFrame(boost::any top_any) {
   return success;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 template <bool topology>
-bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
-    std::string file, boost::any top_any) {
+bool XYZReader<Topology_T>::ReadTopology(std::string file, boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
@@ -157,9 +156,9 @@ bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadTopology(
   return true;
 }
 
-template <class Bead_T, class Molecule_T, class Topology_T>
+template <class Topology_T>
 template <bool topology, class T>
-inline bool XYZReader<Bead_T, Molecule_T, Topology_T>::ReadFrame(T &container) {
+inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
 
   std::string line;
   getline(_fl, line);
