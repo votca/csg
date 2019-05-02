@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef VOTCA_CSG_ATOMTOCGCONVERTER_H
 #define VOTCA_CSG_ATOMTOCGCONVERTER_H
 
@@ -48,6 +49,9 @@ class AtomCGConverter {
  public:
   /// Constructor
   AtomCGConverter(std::vector<std::string> ignore_atomistic_molecule_types);
+
+  /// Define parameterless constructor
+  AtomCGConverter(){};
 
   /**
    * @brief Loads the .xml file describing the cg molecule

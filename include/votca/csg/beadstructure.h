@@ -90,7 +90,7 @@ class BeadStructure {
    *
    * @return const pointer to the bead
    */
-  const T *getBeadConst(int id) const;
+  const T *getBead(int id) const;
   /**
    * \brief Create a connection between two beads in the structure
    *
@@ -307,7 +307,7 @@ T *BeadStructure<T>::getBead(int bead_id) {
 }
 
 template <class T>
-const T *BeadStructure<T>::getBeadConst(int bead_id) const {
+const T *BeadStructure<T>::getBead(int bead_id) const {
   assert(beads_.count(bead_id));
   return beads_.at(bead_id);
 }

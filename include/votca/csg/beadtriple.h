@@ -18,8 +18,8 @@
 #ifndef VOTCA_CSG_BEADTRIPLE_H
 #define VOTCA_CSG_BEADTRIPLE_H
 
+#include <Eigen/Dense>
 #include <tuple>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
