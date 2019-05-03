@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+#pragma once
 #ifndef VOTCA_CSG_CGBEADSTENCIL
 #define VOTCA_CSG_CGBEADSTENCIL
 #include <string>

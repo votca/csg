@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef _VOTCA_CSG_BASEMOLECULE_H
 #define _VOTCA_CSG_BASEMOLECULE_H
 

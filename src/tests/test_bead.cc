@@ -25,7 +25,6 @@
 #include <votca/csg/bead.h>
 #include <votca/csg/csgtopology.h>
 #include <votca/tools/constants.h>
-#include <votca/tools/vec.h>
 
 using namespace std;
 using namespace votca::csg;

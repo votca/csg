@@ -54,6 +54,7 @@
 
  */
 
+#pragma once
 #ifndef _VOTCA_CSG_VERSION_H
 #define _VOTCA_CSG_VERSION_H
 

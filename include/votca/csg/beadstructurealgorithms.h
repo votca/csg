@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef VOTCA_CSG_BEADSTRUCTUREALGORITHMS_H
 #define VOTCA_CSG_BEADSTRUCTUREALGORITHMS_H
 #include "basebead.h"

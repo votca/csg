@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef _VOTCA_CSG_NBLISTGRID_3BODY_H
 #define _VOTCA_CSG_NBLISTGRID_3BODY_H
 

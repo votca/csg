@@ -87,9 +87,9 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
     if (topology) {
 
-      tools::StructureParameters params;
-      tools::byte_t symmetry = 1;
-      params.set(tools::StructureParameter::Symmetry, symmetry);
+      // tools::StructureParameters params;
+      // tools::byte_t symmetry = 1;
+      // params.set(tools::StructureParameter::Symmetry, symmetry);
       /* double mass = 0.0;
        params.set(tools::StructureParameter::Mass,mass);
        double charge = 0.0;
@@ -104,7 +104,8 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
            tools::topology_constants::unassigned_residue_type;
        params.set(tools::StructureParameter::ResidueType,residue_type);
        */
-      b = container.CreateBead(params);
+      // b = container.CreateBead(params);
+      std::cout << "Test" << std::endl;
 
     } else {
       b = container.getBead(bead_id);

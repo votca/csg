@@ -18,6 +18,9 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE pdbreader_test
+#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topologyreader.h"
+#include "../../include/votca/csg/trajectorywriter.h"
 #include <boost/any.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
@@ -25,12 +28,8 @@
 #include <fstream>
 #include <stddef.h>
 #include <string>
-#include <votca/csg/csgtopology.h>
-#include <votca/csg/topologyreader.h>
-#include <votca/csg/trajectorywriter.h>
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
-#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
 class Bead;
@@ -236,7 +235,7 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
   vector<double> z = {-0.000, -0.0141, 0.0255, -0.0904, 0.079,
                       -0.000, 0.0051,  0.0467, -0.1024, 0.0507};
   Bead* bd;
-  vec v;
+  Eigen::Vector3d v;
   for (int i = 0; i < 10; i++) {
     bd = top2.getBead(i);
     BOOST_CHECK_EQUAL(bd->getId(), i);

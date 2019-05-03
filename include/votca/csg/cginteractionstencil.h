@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+#pragma once
 #ifndef VOTCA_CSG_CGINTERACTIONSTENCIL
 #define VOTCA_CSG_CGINTERACTIONSTENCIL
 #include <string>

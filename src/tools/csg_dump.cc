@@ -22,7 +22,6 @@
 #include <votca/csg/boundarycondition.h>
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/exclusionlist.h>
-#include <votca/tools/matrix.h>
 
 using namespace std;
 using namespace votca::csg;

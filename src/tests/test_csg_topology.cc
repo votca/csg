@@ -23,9 +23,7 @@
 #include <math.h>
 #include <string>
 #include <votca/tools/constants.h>
-#include <votca/tools/matrix.h>
 #include <votca/tools/types.h>
-#include <votca/tools/vec.h>
 
 #include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/interaction.h"
