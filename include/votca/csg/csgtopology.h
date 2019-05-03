@@ -14,10 +14,11 @@
  * limitations under the License.
  *
  */
-
+#pragma once
 #ifndef VOTCA_CSG_CSGTOPOLOGY_H
 #define VOTCA_CSG_CSGTOPOLOGY_H
 
+#include <votca/tools/structureparameters.h>
 #include <votca/tools/types.h>
 
 #include "bead.h"
@@ -31,6 +32,14 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
  public:
   CSG_Topology(){};
   ~CSG_Topology(){};
+
+  Molecule* CreateMolecule(tools::StructureParameters& params) {
+    std::string molecule_type =
+        params.get<std::string>(tools::StructureParameter::MoleculeType);
+    int molecule_id = params.get<int>(tools::StructureParameter::MoleculeId);
+    return CreateMolecule(molecule_id, molecule_type);
+  }
+
   Molecule* CreateMolecule(int id, std::string molecule_type) {
     if (!type_container_.MoleculeTypeExist(molecule_type)) {
       type_container_.AddMoleculeType(molecule_type);
@@ -44,6 +53,24 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     return &molecules_[id];
   }
 
+  Bead* CreateBead(tools::StructureParameters& params) {
+    tools::byte_t symmetry =
+        params.get<tools::byte_t>(tools::StructureParameter::Symmetry);
+    std::string bead_type =
+        params.get<std::string>(tools::StructureParameter::BeadType);
+    int bead_id = params.get<int>(tools::StructureParameter::BeadId);
+    int molecule_id = params.get<int>(tools::StructureParameter::MoleculeId);
+    int residue_id = params.get<int>(tools::StructureParameter::ResidueId);
+    std::string residue_type =
+        params.get<std::string>(tools::StructureParameter::ResidueType);
+    std::string element =
+        params.get<std::string>(tools::StructureParameter::Element);
+    double mass = params.get<double>(tools::StructureParameter::Mass);
+    double charge = params.get<double>(tools::StructureParameter::Charge);
+
+    return CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
+  }
   Bead* CreateBead(tools::byte_t symmetry, std::string bead_type, int bead_id,
                    int molecule_id, int residue_id, std::string residue_type,
                    std::string element_symbol, double mass, double charge) {

@@ -15,11 +15,10 @@
  *
  */
 
+#include <Eigen/Dense>
 #include <votca/csg/triclinicbox.h>
-#include <votca/tools/vec.h>
 namespace votca {
 namespace csg {
-using namespace votca::tools;
 /*
  This way of determining the shortest distance is only working for a set of
  triclinic boxes, in particular

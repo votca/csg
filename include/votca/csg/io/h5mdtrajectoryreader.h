@@ -27,7 +27,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <votca/tools/matrix.h>
 
 namespace votca {  // NOLINT
 namespace csg {

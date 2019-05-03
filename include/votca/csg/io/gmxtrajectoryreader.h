@@ -34,7 +34,6 @@
 #include <gromacs/utility/programcontext.h>
 #include <stdexcept>
 #include <string>
-#include <votca/tools/matrix.h>
 // this one is needed because of bool is defined in one of the headers included
 // by gmx
 #undef bool

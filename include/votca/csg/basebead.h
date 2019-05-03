@@ -23,7 +23,6 @@
 #include <votca/tools/eigen.h>
 #include <votca/tools/identity.h>
 #include <votca/tools/name.h>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {

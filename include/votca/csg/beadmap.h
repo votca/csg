@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include <votca/tools/property.h>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {

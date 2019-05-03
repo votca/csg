@@ -23,9 +23,7 @@
 #include <numeric>
 #include <string>
 #include <votca/csg/bead.h>
-#include <votca/tools/matrix.h>
 #include <votca/tools/tokenizer.h>
-#include <votca/tools/vec.h>
 
 using namespace votca::tools;
 using namespace std;
@@ -135,7 +133,7 @@ void Map_Sphere::UpdateCGBead(const BoundaryCondition *boundaries,
 
     if (boundaries->getBoxType() != BoundaryCondition::eBoxtype::typeOpen) {
       double max_dist = 0.5 * boundaries->getShortestBoxDimension();
-      if (abs(shortest_distance_beween_beads) > max_dist) {
+      if ((shortest_distance_beween_beads).norm() > max_dist) {
         throw std::runtime_error(
             "coarse-grained atom is bigger than half the box \n (atoms " +
             bead_type + " (id " + boost::lexical_cast<string>(bead_id + 1) +
@@ -203,7 +201,7 @@ void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
         boundaries->BCShortestConnection(reference_position, atom->getPos());
     if (boundaries->getBoxType() != BoundaryCondition::eBoxtype::typeOpen) {
       double max_dist = 0.5 * boundaries->getShortestBoxDimension();
-      if (abs(shortest_distance_beween_beads) > max_dist) {
+      if (shortest_distance_beween_beads.norm() > max_dist) {
         throw std::runtime_error(
             "coarse-grained atom is bigger than half the box");
       }

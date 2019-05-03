@@ -31,7 +31,6 @@
 
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
-#include <votca/tools/matrix.h>
 #include <votca/tools/types.h>
 
 #include <gromacs/fileio/tpxio.h>

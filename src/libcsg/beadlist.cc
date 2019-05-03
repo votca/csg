@@ -19,6 +19,7 @@
 #include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/molecule.h"
+#include <Eigen/Dense>
 #include <string>
 #include <votca/tools/tokenizer.h>
 
@@ -72,7 +73,7 @@ int BeadList::GenerateInSphericalSubvolume(CSG_Topology &top,
   vector<int> bead_ids = top.getBeadIds();
   for (int &bead_id : bead_ids) {
     Bead *bead_ptr = top.getBead(bead_id);
-    if (abs(top.BCShortestConnection(ref, bead_ptr->getPos())) > radius)
+    if (top.BCShortestConnection(ref, bead_ptr->getPos()).norm() > radius)
       continue;
     if (!selectByName) {
       if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {

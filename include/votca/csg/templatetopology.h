@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-
+#pragma once
 #ifndef VOTCA_CSG_TOPOLOGY_H
 #define VOTCA_CSG_TOPOLOGY_H
 
@@ -35,9 +35,7 @@
 #include "topologytypecontainer.h"
 #include "triclinicbox.h"
 
-#include <votca/tools/matrix.h>
 #include <votca/tools/rangeparser.h>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {

@@ -15,8 +15,8 @@
  *
  */
 
+#include <Eigen/Dense>
 #include <votca/csg/orthorhombicbox.h>
-#include <votca/tools/vec.h>
 
 namespace votca {
 namespace csg {
