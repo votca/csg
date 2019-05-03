@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef VOTCA_CSG_DLPTOPOLOGYREADER_H
 #define VOTCA_CSG_DLPTOPOLOGYREADER_H
 
@@ -35,6 +36,7 @@
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/types.h>
 
+#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif

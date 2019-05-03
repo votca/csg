@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef VOTCA_CSG_PDBREADER_H
 #define VOTCA_CSG_PDBREADER_H
 
@@ -449,6 +450,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         molecule_atms.erase(obsolete_mol);
       }
     }
+#pragma once
 #ifndef NDEBUG
     std::cerr << "Consistency check for pdbreader" << std::endl;
     int i = 0;

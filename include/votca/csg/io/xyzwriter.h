@@ -15,6 +15,7 @@
  *
  */
 
+#pragma once
 #ifndef __VOTCA_CSG_XYZWRITER_H
 #define __VOTCA_CSG_XYZWRITER_H
 

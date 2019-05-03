@@ -15,9 +15,11 @@
  *
  */
 
+#pragma once
 #ifndef VOTCA_CSG_GMXTOPOLOGYREADER_H
 #define VOTCA_CSG_GMXTOPOLOGYREADER_H
 
+#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif

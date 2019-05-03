@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+#pragma once
 #ifndef _VOTCA_CSG_LAMMPSDUMPREADER_H
 #define _VOTCA_CSG_LAMMPSDUMPREADER_H
 

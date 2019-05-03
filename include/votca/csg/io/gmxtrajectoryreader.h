@@ -15,9 +15,11 @@
  *
  */
 
+#pragma once
 #ifndef _gmxtrajectoryreader_H
 #define _gmxtrajectoryreader_H
 
+#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif
