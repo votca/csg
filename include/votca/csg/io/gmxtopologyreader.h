@@ -31,6 +31,7 @@
 
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
+#include <votca/tools/structureparameters.h>
 #include <votca/tools/types.h>
 
 #include <gromacs/fileio/tpxio.h>
@@ -107,8 +108,10 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
     t_atoms *atoms = &(mol->atoms);
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
-      typename Topology_T::molecule_t *mi =
-          top.CreateMolecule(top.MoleculeCount(), molname);
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::MoleculeId, top.MoleculeCount());
+      params.set(tools::StructureParameter::MoleculeType, molname);
+      typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -133,9 +136,17 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
         }
 
         tools::byte_t symmetry = 1;
-        typename Topology_T::bead_t *bead =
-            top.CreateBead(symmetry, bead_type, a->atomnumber, mi->getId(),
-                           a->resind, residue_name, element, a->m, a->q);
+        tools::StructureParameters params;
+        params.set(tools::StructureParameter::Symmetry, symmetry);
+        params.set(tools::StructureParameter::Mass, a->m);
+        params.set(tools::StructureParameter::Charge, a->q);
+        params.set(tools::StructureParameter::Element, element);
+        params.set(tools::StructureParameter::BeadId, a->atomnumber);
+        params.set(tools::StructureParameter::BeadType, bead_type);
+        params.set(tools::StructureParameter::ResidueId, a->resind);
+        params.set(tools::StructureParameter::ResidueType, residue_name);
+        params.set(tools::StructureParameter::MoleculeId, mi->getId());
+        typename Topology_T::bead_t *bead = top.CreateBead(params);
         mi->AddBead(bead);
       }
 

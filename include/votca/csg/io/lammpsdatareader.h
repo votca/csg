@@ -31,6 +31,7 @@
 
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
+#include <votca/tools/structureparameters.h>
 
 namespace votca {
 namespace csg {
@@ -714,8 +715,11 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       atomIdToMoleculeId_[atomId] = moleculeId;
       typename Topology_T::molecule_t *mol;
       if (!molecules_.count(moleculeId)) {
-        mol = top.CreateMolecule(
-            moleculeId, tools::topology_constants::unassigned_molecule_type);
+        tools::StructureParameters params;
+        params.set(tools::StructureParameter::MoleculeId, moleculeId);
+        params.set(tools::StructureParameter::MoleculeType,
+                   tools::topology_constants::unassigned_molecule_type);
+        mol = top.CreateMolecule(params);
         molecules_[moleculeId] = mol;
       } else {
         mol = molecules_[moleculeId];
@@ -732,10 +736,19 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       }
       std::string atom_type = atomtypes_.at(atomTypeId).at(0);
       std::string element = atomtypes_[atomTypeId].at(2);
-      b = top.CreateBead(symmetry, atom_type, atomId, mol->getId(),
-                         tools::topology_constants::unassigned_residue_id,
-                         tools::topology_constants::unassigned_residue_type,
-                         element, mass, charge);
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass, mass);
+      params.set(tools::StructureParameter::Charge, charge);
+      params.set(tools::StructureParameter::Element, element);
+      params.set(tools::StructureParameter::BeadId, atomId);
+      params.set(tools::StructureParameter::BeadType, atom_type);
+      params.set(tools::StructureParameter::ResidueId,
+                 tools::topology_constants::unassigned_residue_id);
+      params.set(tools::StructureParameter::ResidueType,
+                 tools::topology_constants::unassigned_residue_type);
+      params.set(tools::StructureParameter::MoleculeId, mol->getId());
+      b = top.CreateBead(params);
       mol->AddBead(b);
       b->setMoleculeId(mol->getId());
 

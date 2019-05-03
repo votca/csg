@@ -87,25 +87,27 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
     Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
     if (topology) {
 
-      // tools::StructureParameters params;
-      // tools::byte_t symmetry = 1;
-      // params.set(tools::StructureParameter::Symmetry, symmetry);
-      /* double mass = 0.0;
-       params.set(tools::StructureParameter::Mass,mass);
-       double charge = 0.0;
-       params.set(tools::StructureParameter::Charge,charge);
-       std::string element = tools::topology_constants::unassigned_element;
-       params.set(tools::StructureParameter::Element,element);
-       int molecule_id = tools::topology_constants::unassigned_molecule_id;
-       params.set(tools::StructureParameter::MoleculeId,molecule_id);
-       int residue_id = tools::topology_constants::unassigned_residue_id;
-       params.set(tools::StructureParameter::ResidueId,residue_id);
-       std::string residue_type =
-           tools::topology_constants::unassigned_residue_type;
-       params.set(tools::StructureParameter::ResidueType,residue_type);
-       */
-      // b = container.CreateBead(params);
-      std::cout << "Test" << std::endl;
+      tools::byte_t symmetry = 1;
+      double mass = 0.0;
+      double charge = 0.0;
+      std::string element = tools::topology_constants::unassigned_element;
+      int molecule_id = tools::topology_constants::unassigned_molecule_id;
+      int residue_id = tools::topology_constants::unassigned_residue_id;
+      std::string residue_type =
+          tools::topology_constants::unassigned_residue_type;
+
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass, mass);
+      params.set(tools::StructureParameter::Charge, charge);
+      params.set(tools::StructureParameter::Element, element);
+      params.set(tools::StructureParameter::MoleculeId, molecule_id);
+      params.set(tools::StructureParameter::ResidueId, residue_id);
+      params.set(tools::StructureParameter::ResidueType, residue_type);
+      params.set(tools::StructureParameter::BeadId, bead_id);
+      params.set(tools::StructureParameter::BeadType, bead_type);
+
+      b = container.CreateBead(params);
 
     } else {
       b = container.getBead(bead_id);

@@ -35,6 +35,7 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/parsexml.h>
+#include <votca/tools/structureparameters.h>
 
 namespace votca {
 namespace csg {
@@ -297,8 +298,13 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
 
   tools::Elements elements;
   for (int mn = 0; mn < nmols; mn++) {
-    typename Topology_T::molecule_t *mi =
-        _top->CreateMolecule(_top->MoleculeCount(), molecule_type_);
+
+    tools::StructureParameters params_mol;
+    params_mol.set(tools::StructureParameter::MoleculeId,
+                   _top->MoleculeCount());
+    params_mol.set(tools::StructureParameter::MoleculeType, molecule_type_);
+
+    typename Topology_T::molecule_t *mi = _top->CreateMolecule(params_mol);
     XMLMolecule<typename Topology_T::molecule_t> xmlMolecule =
         XMLMolecule<typename Topology_T::molecule_t>(molecule_type_, nmols);
     xmlMolecule.pid = mi->getId();
@@ -323,10 +329,20 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
       } else if (elements.isEleFull(name_all_caps)) {
         element = elements.getEleShort(name_all_caps);
       }
-      typename Topology_T::bead_t *bead = _top->CreateBead(
-          symmetry, b.type, _top->BeadCount(), xmlMolecule.pid,
-          b.residue_number, tools::topology_constants::unassigned_residue_type,
-          element, b.mass, b.q);
+
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass, b.mass);
+      params.set(tools::StructureParameter::Charge, b.q);
+      params.set(tools::StructureParameter::Element, element);
+      params.set(tools::StructureParameter::MoleculeId, xmlMolecule.pid);
+      params.set(tools::StructureParameter::ResidueId, b.residue_number);
+      params.set(tools::StructureParameter::ResidueType,
+                 tools::topology_constants::unassigned_residue_type);
+      params.set(tools::StructureParameter::BeadId, _top->BeadCount());
+      params.set(tools::StructureParameter::BeadType, b.type);
+
+      typename Topology_T::bead_t *bead = _top->CreateBead(params);
 
       bead->setMoleculeId(_mol_index);
       mi->AddBead(bead);

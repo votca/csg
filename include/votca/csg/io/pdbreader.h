@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <vector>
 #include <votca/tools/elements.h>
-
+#include <votca/tools/structureparameters.h>
 namespace votca {
 namespace csg {
 
@@ -326,10 +326,20 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         //
         // res -1 as internal number starts with 0
         tools::byte_t symmetry = 1;
-        b = top.CreateBead(symmetry, atom_type, atom_number,
-                           tools::topology_constants::unassigned_molecule_id,
-                           residue_id, residue_type, element_symbol,
-                           elements.getMass(element_symbol), charge);
+
+        tools::StructureParameters params;
+        params.set(tools::StructureParameter::Symmetry, symmetry);
+        params.set(tools::StructureParameter::Mass,
+                   elements.getMass(element_symbol));
+        params.set(tools::StructureParameter::Charge, charge);
+        params.set(tools::StructureParameter::Element, element_symbol);
+        params.set(tools::StructureParameter::BeadId, atom_number);
+        params.set(tools::StructureParameter::BeadType, atom_type);
+        params.set(tools::StructureParameter::MoleculeId,
+                   tools::topology_constants::unassigned_molecule_id);
+        params.set(tools::StructureParameter::ResidueId, residue_id);
+        params.set(tools::StructureParameter::ResidueType, residue_type);
+        b = top.CreateBead(params);
       } else {
         b = top.getBead(atom_number);
       }
@@ -467,8 +477,11 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
          molecule_atms) {
 
       int molecule_id = mol_and_atom_ids.first;
-      typename Topology_T::molecule_t *mi = top.CreateMolecule(
-          molecule_id, tools::topology_constants::unassigned_molecule_type);
+      tools::StructureParameters params_mol;
+      params_mol.set(tools::StructureParameter::MoleculeId, molecule_id);
+      params_mol.set(tools::StructureParameter::MoleculeType,
+                     tools::topology_constants::unassigned_molecule_type);
+      typename Topology_T::molecule_t *mi = top.CreateMolecule(params_mol);
       mol_map[molecule_id] = mi;
 
       // Add all the atoms to the appropriate molecule object

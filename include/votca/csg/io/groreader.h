@@ -29,6 +29,7 @@
 #include <string>
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
+#include <votca/tools/structureparameters.h>
 
 namespace votca {
 namespace csg {
@@ -182,10 +183,18 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
         element = atName;
         atom_weight = elements.getMass(element);
       }
-      b = top.CreateBead(symmetry, atName, atom_number,
-                         tools::topology_constants::unassigned_molecule_id,
-                         residue_number - 1, resName, element, atom_weight,
-                         atom_charge);
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass, atom_weight);
+      params.set(tools::StructureParameter::Charge, atom_charge);
+      params.set(tools::StructureParameter::Element, element);
+      params.set(tools::StructureParameter::BeadId, atom_number);
+      params.set(tools::StructureParameter::BeadType, atName);
+      params.set(tools::StructureParameter::ResidueId, residue_number - 1);
+      params.set(tools::StructureParameter::ResidueType, resName);
+      params.set(tools::StructureParameter::MoleculeId,
+                 tools::topology_constants::unassigned_molecule_id);
+      b = top.CreateBead(params);
     } else {
       b = top.getBead(i);
     }

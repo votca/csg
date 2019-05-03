@@ -22,6 +22,7 @@
 
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
+#include <votca/tools/structureparameters.h>
 
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
@@ -319,11 +320,22 @@ void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
       std::string residue_type =
           tools::topology_constants::unassigned_residue_type;
       int residue_id = tools::topology_constants::unassigned_residue_id;
-      top.CreateBead(
-          symmetry, atom_attributes_string["type"], atom_attributes_int["id"],
-          atom_attributes_int["mol"], residue_id, residue_type,
-          atom_attributes_string["element"], atom_attributes_double["mass"],
-          atom_attributes_double["q"]);
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass,
+                 atom_attributes_double["mass"]);
+      params.set(tools::StructureParameter::Charge,
+                 atom_attributes_double["q"]);
+      params.set(tools::StructureParameter::BeadId, atom_attributes_int["id"]);
+      params.set(tools::StructureParameter::BeadType,
+                 atom_attributes_string["type"]);
+      params.set(tools::StructureParameter::Element,
+                 atom_attributes_string["element"]);
+      params.set(tools::StructureParameter::ResidueId, residue_id);
+      params.set(tools::StructureParameter::ResidueType, residue_type);
+      params.set(tools::StructureParameter::MoleculeId,
+                 atom_attributes_string["mol"]);
+      top.CreateBead(params);
     }
     typename Topology_T::bead_t *b = top.getBead(atom_attributes_int["id"]);
     b->HasPos(pos);

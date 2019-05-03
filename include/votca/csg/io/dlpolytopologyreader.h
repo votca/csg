@@ -31,6 +31,7 @@
 
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
+#include <votca/tools/structureparameters.h>
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/types.h>
 
@@ -246,8 +247,10 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
-      typename Topology_T::molecule_t *mi =
-          top.CreateMolecule(top.MoleculeCount(), mol_name);
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::MoleculeId, top.MoleculeCount());
+      params.set(tools::StructureParameter::MoleculeType, mol_name);
+      typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -310,11 +313,19 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
 
           tools::byte_t symmetry = 1;
 
-          typename Topology_T::bead_t *bead =
-              top.CreateBead(symmetry, beadtype, top.BeadCount(), mi->getId(),
-                             tools::topology_constants::unassigned_residue_id,
-                             tools::topology_constants::unassigned_residue_type,
-                             element, mass, charge);
+          tools::StructureParameters params;
+          params.set(tools::StructureParameter::Symmetry, symmetry);
+          params.set(tools::StructureParameter::Mass, mass);
+          params.set(tools::StructureParameter::Charge, charge);
+          params.set(tools::StructureParameter::Element, element);
+          params.set(tools::StructureParameter::BeadId, top.BeadCount());
+          params.set(tools::StructureParameter::BeadType, beadtype);
+          params.set(tools::StructureParameter::ResidueId,
+                     tools::topology_constants::unassigned_residue_id);
+          params.set(tools::StructureParameter::ResidueType,
+                     tools::topology_constants::unassigned_residue_type);
+          params.set(tools::StructureParameter::MoleculeId, mi->getId());
+          typename Topology_T::bead_t *bead = top.CreateBead(params);
 
           mi->AddBead(bead);
           id_map[i] = bead->getId();
@@ -398,16 +409,31 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
 
       // replicate molecule
       for (int replica = 1; replica < nreplica; replica++) {
+        tools::StructureParameters params_mol;
+        params_mol.set(tools::StructureParameter::MoleculeId,
+                       top.MoleculeCount());
+        params_mol.set(tools::StructureParameter::MoleculeType, mol_name);
         typename Topology_T::molecule_t *mi_replica =
-            top.CreateMolecule(top.MoleculeCount(), mol_name);
+            top.CreateMolecule(params_mol);
         std::vector<int> bead_ids = mi->getBeadIds();
         for (const int &bead_id : bead_ids) {
           typename Topology_T::bead_t *bead = mi->getBead(bead_id);
           tools::byte_t symmetry = 1;
-          typename Topology_T::bead_t *bead_replica = top.CreateBead(
-              symmetry, bead->getType(), top.BeadCount(), mi_replica->getId(),
-              bead->getResidueId(), bead->getResidueType(), bead->getElement(),
-              bead->getMass(), bead->getQ());
+
+          tools::StructureParameters params;
+          params.set(tools::StructureParameter::Symmetry, symmetry);
+          params.set(tools::StructureParameter::Mass, bead->getMass());
+          params.set(tools::StructureParameter::Charge, bead->getQ());
+          params.set(tools::StructureParameter::Element, bead->getElement());
+          params.set(tools::StructureParameter::BeadId, top.BeadCount());
+          params.set(tools::StructureParameter::BeadType, bead->getType());
+          params.set(tools::StructureParameter::ResidueId,
+                     bead->getResidueId());
+          params.set(tools::StructureParameter::ResidueType,
+                     bead->getResidueType());
+          params.set(tools::StructureParameter::MoleculeId,
+                     mi_replica->getId());
+          typename Topology_T::bead_t *bead_replica = top.CreateBead(params);
           mi_replica->AddBead(bead_replica);
         }
         matoms += mi->BeadCount();
