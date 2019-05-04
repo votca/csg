@@ -43,8 +43,6 @@ namespace csg {
  **/
 class TopologyTypeContainer {
  public:
-  TopologyTypeContainer(){};
-
   /**
    * @brief Determines if a molecule of type **molecule_type** is present in
    * this type container
