@@ -29,6 +29,15 @@
 namespace votca {
 namespace csg {
 
+/**
+ * @brief Topology Reader reads the topology
+ *
+ * NOTE The topology class cannot be made into a pure abstract class because
+ * it is instantiated by a factory method with a call to new and an abstract
+ * class is not allowed to be instantiated. The factory method makes use of
+ * the polymorphic behavior which is why it is needed.
+ */
+
 class TopologyReader {
  public:
   virtual ~TopologyReader() {}

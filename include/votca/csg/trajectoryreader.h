@@ -26,9 +26,14 @@ namespace votca {
 namespace csg {
 
 /**
-    \brief trajectoryreader interface
-
-    This typename defines the interface a trajectory reader has to implement
+ * \brief trajectoryreader interface
+ *
+ * This typename defines the interface a trajectory reader has to implement
+ *
+ * NOTE: The trajectory reader cannot use pure virtual methods, because in its
+ * current form it is used by a factory method which makes use of the
+ * polymorphic behavior of this class and a pure abstract class cannot be
+ * instantiated.
  */
 class TrajectoryReader {
  private:
