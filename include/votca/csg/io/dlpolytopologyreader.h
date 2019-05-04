@@ -250,7 +250,8 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
 
       mol_name = _NextKeyline(fl, WhiteSpace);
       tools::StructureParameters params;
-      params.set(tools::StructureParameter::MoleculeId, top.MoleculeCount());
+      params.set(tools::StructureParameter::MoleculeId,
+                 static_cast<int>(top.MoleculeCount()));
       params.set(tools::StructureParameter::MoleculeType, mol_name);
       typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
 
@@ -320,7 +321,8 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
           params.set(tools::StructureParameter::Mass, mass);
           params.set(tools::StructureParameter::Charge, charge);
           params.set(tools::StructureParameter::Element, element);
-          params.set(tools::StructureParameter::BeadId, top.BeadCount());
+          params.set(tools::StructureParameter::BeadId,
+                     static_cast<int>(top.BeadCount()));
           params.set(tools::StructureParameter::BeadType, beadtype);
           params.set(tools::StructureParameter::ResidueId,
                      tools::topology_constants::unassigned_residue_id);
@@ -427,7 +429,8 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
           params.set(tools::StructureParameter::Mass, bead->getMass());
           params.set(tools::StructureParameter::Charge, bead->getQ());
           params.set(tools::StructureParameter::Element, bead->getElement());
-          params.set(tools::StructureParameter::BeadId, top.BeadCount());
+          params.set(tools::StructureParameter::BeadId,
+                     static_cast<int>(top.BeadCount()));
           params.set(tools::StructureParameter::BeadType, bead->getType());
           params.set(tools::StructureParameter::ResidueId,
                      bead->getResidueId());

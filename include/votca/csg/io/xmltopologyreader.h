@@ -302,7 +302,7 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
 
     tools::StructureParameters params_mol;
     params_mol.set(tools::StructureParameter::MoleculeId,
-                   _top->MoleculeCount());
+                   static_cast<int>(_top->MoleculeCount()));
     params_mol.set(tools::StructureParameter::MoleculeType, molecule_type_);
 
     typename Topology_T::molecule_t *mi = _top->CreateMolecule(params_mol);
@@ -340,7 +340,8 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
       params.set(tools::StructureParameter::ResidueId, b.residue_number);
       params.set(tools::StructureParameter::ResidueType,
                  tools::topology_constants::unassigned_residue_type);
-      params.set(tools::StructureParameter::BeadId, _top->BeadCount());
+      params.set(tools::StructureParameter::BeadId,
+                 static_cast<int>(_top->BeadCount()));
       params.set(tools::StructureParameter::BeadType, b.type);
 
       typename Topology_T::bead_t *bead = _top->CreateBead(params);

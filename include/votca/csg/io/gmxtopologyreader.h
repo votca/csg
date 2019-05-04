@@ -111,7 +111,8 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
 
     for (int imol = 0; imol < mtop.molblock[iblock].nmol; ++imol) {
       tools::StructureParameters params;
-      params.set(tools::StructureParameter::MoleculeId, top.MoleculeCount());
+      params.set(tools::StructureParameter::MoleculeId,
+                 static_cast<int>(top.MoleculeCount()));
       params.set(tools::StructureParameter::MoleculeType, molname);
       typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
 
