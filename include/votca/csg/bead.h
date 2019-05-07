@@ -19,13 +19,13 @@
 #ifndef VOTCA_CSG_BEAD_H
 #define VOTCA_CSG_BEAD_H
 
+#include "basebead.h"
 #include <cassert>
 #include <sstream>
 #include <string>
 #include <votca/tools/property.h>
+#include <votca/tools/structureparameters.h>
 #include <votca/tools/types.h>
-
-#include "basebead.h"
 
 namespace votca {
 namespace csg {
@@ -52,6 +52,7 @@ class Bead : public BaseBead {
     return residue_id_;
   }
 
+  tools::StructureParameters getParameters() const;
   /**
    * Get The residue number of the bead, not the residue number is not the same
    * as the molecule number. Residues are components of molecules.
@@ -70,17 +71,13 @@ class Bead : public BaseBead {
    * get the mass of the bead
    * \return bead mass
    */
-  const double &getM() const {
-    std::cerr << "WARNING getM is depricated use getMass" << std::endl;
-    return getMass();
-  }
+  [[deprecated]] const double &getM() const { return getMass(); }
 
-  /**
-   * set the mass of the bead
-   * \param m bead mass
-   */
-  void setM(const double &m) {
-    std::cerr << "WARNING setM is depricated use setMass" << std::endl;
+      /**
+       * set the mass of the bead
+       * \param m bead mass
+       */
+      [[deprecated]] void setM(const double &m) {
     setMass(m);
   }
 
@@ -360,6 +357,22 @@ class Bead : public BaseBead {
   friend class CSG_Topology;
   friend class Molecule;
 };
+
+tools::StructureParameters Bead::getParameters() const {
+  tools::StructureParameters params;
+  params.set(tools::StructureParameter::BeadId, getId());
+  params.set(tools::StructureParameter::BeadType, getType());
+  params.set(tools::StructureParameter::ResidueId, residue_id_);
+  params.set(tools::StructureParameter::MoleculeId, molecule_id_.getId());
+  params.set(tools::StructureParameter::Element, element_symbol_.getName());
+  params.set(tools::StructureParameter::Mass, getMass());
+  params.set(tools::StructureParameter::Charge, charge_);
+  params.set(tools::StructureParameter::Symmetry, symmetry_);
+  if (bead_position_set_) {
+    params.set(tools::StructureParameter::Position, getPos());
+  }
+  return params;
+}
 
 inline void Bead::setVel(const Eigen::Vector3d &r) {
   bead_velocity_set_ = true;
