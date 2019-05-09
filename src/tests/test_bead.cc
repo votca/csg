@@ -18,12 +18,12 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE bead_test
+#include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/csgtopology.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <math.h>
 #include <string>
-#include <votca/csg/bead.h>
-#include <votca/csg/csgtopology.h>
 #include <votca/tools/constants.h>
 
 using namespace std;
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead(
+  Bead* b = &top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
 
@@ -92,14 +92,14 @@ BOOST_AUTO_TEST_CASE(test_bead_setters) {
   double mass = 1.21;
   double charge = -0.87;
 
-  Bead* b = top.CreateBead(
+  Bead* b = &top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
 
   double newMass = 9.4;
   double newCharge = 2.6;
 
-  b->setM(newMass);
+  b->setMass(newMass);
   b->setQ(newCharge);
 
   Eigen::Vector3d xyz(0.1, 0.2, 0.3);

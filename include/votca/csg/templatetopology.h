@@ -60,8 +60,21 @@ class TemplateTopology {
   }
   ~TemplateTopology();
 
-  typedef Molecule_T molecule_t;
+  //  typedef Molecule_T molecule_t;
   typedef Bead_T bead_t;
+  typedef Molecule_T container_t;
+  typename std::unordered_map<int, Molecule_T>::iterator begin() {
+    return molecules_.begin();
+  }
+  typename std::unordered_map<int, Molecule_T>::iterator end() {
+    return molecules_.end();
+  }
+  typename std::unordered_map<int, Molecule_T>::const_iterator begin() const {
+    return molecules_.begin();
+  }
+  typename std::unordered_map<int, Molecule_T>::const_iterator end() const {
+    return molecules_.end();
+  }
   /**
    * \brief Cleans up all the stored data
    */
@@ -96,7 +109,7 @@ class TemplateTopology {
    * access  containter with all molecules
    * @return molecule container
    */
-  const std::unordered_map<int, Molecule_T> &Molecules() { return molecules_; }
+  const std::vector<Molecule_T> &Molecules() { return molecules_; }
 
   /**
    * access containter with all bonded interactions
@@ -170,11 +183,11 @@ class TemplateTopology {
    *
    * @return raw pointer to the molecule
    */
-  Molecule_T *getMolecule(const int id) {
+  Molecule_T &getMolecule(const int id) {
     assert(molecules_.count(id) &&
            "Cannot access molecule with provided id because it is not stored "
            "in the topology object.");
-    return &molecules_.at(id);
+    return molecules_.at(id);
   }
 
   /**
@@ -184,17 +197,20 @@ class TemplateTopology {
    *
    * @return const pointer to the molecule
    */
-  const Molecule_T *getMoleculeConst(const int id) const {
+  const Molecule_T &getMoleculeConst(const int id) const {
     assert(molecules_.count(id) &&
            "Cannot access const molecule with provided id because it is not "
            "stored in the topology object.");
-    return &molecules_.at(id);
+    return molecules_.at(id);
   }
 
   /**
    * delete all molecule information
    */
-  void ClearMoleculeList() { molecules_.clear(); }
+  void ClearMoleculeList() {
+    molecules_.clear();
+    molecules_.clear();
+  }
 
   /**
    * \brief copy topology data of different topology
@@ -421,23 +437,23 @@ class TemplateTopology {
   const std::unordered_map<std::string, int> getMoleculeTypes() const {
     return type_container_.getMoleculeTypes();
   }
+  /*
+    BaseBead *CreateBead(tools::byte_t symmetry, std::string bead_type,
+                         int bead_id, int molecule_id, int residue_id,
+                         std::string residue_type, std::string element_symbol,
+                         double mass, double charge) {
 
-  BaseBead *CreateBead(tools::byte_t symmetry, std::string bead_type,
-                       int bead_id, int molecule_id, int residue_id,
-                       std::string residue_type, std::string element_symbol,
-                       double mass, double charge) {
+      throw std::runtime_error(
+          "CreateBead must be overwritten by derived type it may not be called "
+          "from template");
+    }
 
-    throw std::runtime_error(
-        "CreateBead must be overwritten by derived type it may not be called "
-        "from template");
-  }
-
-  template <class Bead_T2, template <class Bead_T3> class Molecule_T2>
-  Molecule_T2<Bead_T2> *CreateMolecule(int id, std::string molecule_type) {
-    throw std::runtime_error(
-        "CreateMolecule must be overwritten by derived type it may not be "
-        "called from template");
-  }
+    template <class Bead_T2, template <class Bead_T3> class Molecule_T2>
+    Molecule_T2<Bead_T2> *CreateMolecule(int id, std::string molecule_type) {
+      throw std::runtime_error(
+          "CreateMolecule must be overwritten by derived type it may not be "
+          "called from template");
+    }*/
 
  protected:
   std::unique_ptr<BoundaryCondition> bc_;
@@ -449,6 +465,8 @@ class TemplateTopology {
   std::unordered_map<int, Bead_T> beads_;
 
   /// molecules in the topology
+  // std::unordered_map<int, Molecule_T *> molecules_map_;
+  // std::vector<Molecule_T>  molecules_;
   std::unordered_map<int, Molecule_T> molecules_;
 
   /// bonded interactions in the topology
@@ -487,6 +505,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 
   beads_.clear();
   molecules_.clear();
+  // molecules_map_.clear();
   type_container_.Clear();
   interactions_.clear();
   bc_ = OpenBox().Clone();
@@ -512,6 +531,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
   has_force_ = top.has_force_;
   beads_ = top.beads_;
   molecules_ = top.molecules_;
+  // molecules_map_ = top.molecules_map_;
   bc_ = top.bc_->Clone();
   type_container_ = top.type_container_;
   particle_group_ = top.particle_group_;
@@ -571,7 +591,7 @@ void TemplateTopology<Bead_T, Molecule_T>::RenameMoleculesType(
       throw std::runtime_error(
           std::string("RenameMoleculesType: num molecules smaller than"));
     }
-    getMolecule(*molecule_id_ptr)->setType(type);
+    getMolecule(*molecule_id_ptr).setType(type);
   }
 }
 
@@ -603,9 +623,11 @@ void TemplateTopology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
   std::unordered_map<std::string, size_t>
       number_of_beads_in_each_molecular_type;
 
-  for (const std::pair<const int, Molecule_T> &id_and_molecule : molecules_) {
-    std::string type = id_and_molecule.second.getType();
-    size_t bead_count = id_and_molecule.second.BeadCount();
+  // for (const std::pair<const int, Molecule_T> &id_and_molecule : molecules_)
+  // {
+  for (const std::pair<int, Molecule_T> &molecule : molecules_) {
+    std::string type = molecule.second.getType();
+    size_t bead_count = molecule.second.BeadCount();
     if (number_of_beads_in_each_molecular_type.count(type)) {
       if (number_of_beads_in_each_molecular_type.at(type) != bead_count) {
         throw std::runtime_error(
@@ -676,6 +698,7 @@ std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getBeadIds() const {
 template <class Bead_T, class Molecule_T>
 std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getMoleculeIds() const {
   std::vector<int> molecule_ids;
+  // for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
   for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
     molecule_ids.push_back(id_and_molecule.first);
   }

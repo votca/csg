@@ -17,11 +17,11 @@
 
 #include "../../include/votca/csg/csgapplication.h"
 #include "../../include/votca/csg/cgengine.h"
+#include "../../include/votca/csg/topologyreader.h"
+#include "../../include/votca/csg/trajectoryreader.h"
+#include "../../include/votca/csg/trajectorywriter.h"
+#include "../../include/votca/csg/version.h"
 #include <boost/algorithm/string/trim.hpp>
-#include <votca/csg/topologyreader.h>
-#include <votca/csg/trajectoryreader.h>
-#include <votca/csg/trajectorywriter.h>
-#include <votca/csg/version.h>
 
 namespace votca {
 namespace csg {

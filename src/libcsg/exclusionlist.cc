@@ -15,9 +15,9 @@
  *
  */
 
+#include "../../include/votca/csg/exclusionlist.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include <algorithm>
-#include <votca/csg/exclusionlist.h>
 
 namespace votca {
 namespace csg {

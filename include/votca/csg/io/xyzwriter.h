@@ -16,9 +16,11 @@
  */
 
 #pragma once
-#ifndef __VOTCA_CSG_XYZWRITER_H
-#define __VOTCA_CSG_XYZWRITER_H
+#ifndef VOTCA_CSG_XYZWRITER_H
+#define VOTCA_CSG_XYZWRITER_H
 
+#include "../csgtopology.h"
+#include "../molecule.h"
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
 #include <boost/any.hpp>
@@ -31,44 +33,66 @@ namespace csg {
 template <class Topology_T>
 class XYZWriter : public TrajectoryWriter {
  public:
-  void RegisteredAt(
-      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
-
   void Write(boost::any conf);
 
   template <class T>
-  void Write(Topology_T &top, T &container, std::string header);
+  void WriteContainer(T &container);
+
+  void WriteHeader(std::string header, int number_atoms);
 
  private:
+  template <class T>
+  void WriteContainer_(T &container);
+  /*
   template <class T>
   std::string getType(T &atom) {
     return atom.getType();
   }
 
-  std::string getType(typename Topology_T::bead_t *bead) {
-    return bead->getType();
-  }
-
   template <class T>
   Eigen::Vector3d getPos(T &atom) {
     return atom.getPos() * tools::conv::bohr2ang;
-  }
-
-  Eigen::Vector3d getPos(typename Topology_T::bead_t *bead) {
-    return bead->Pos() * tools::conv::nm2ang;
-  }
+  }*/
 
   // The CSG Topology object is the only object that stores the beads and its
   // pointers, all other containers only store the bead ids
+  /*  template <typename T>
+    std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top,
+                                                           T &container) {
+      std::vector<typename Topology_T::bead_t *> beads;
+      std::vector<int> bead_ids = container.getBeadIds();
+      for (int &bead_id : bead_ids) {
+        beads.push_back(top.getBead(bead_id));
+      }
+      return beads;
+    }*/
+
+  template <class T>
+  int getAtomCount(T &container) {
+    return static_cast<int>(container.size());
+  }
+
+  int getAtomCount(Topology_T &container) {
+    return static_cast<int>(container.BeadCount());
+  }
+
+  template <class T>
+  T &getIterable(T &container) {
+    return container;
+  }
+
+  std::vector<typename Molecule::bead_t> getIterable(Molecule &container) {
+    return container.getBeads();
+  }
+
   template <typename T>
-  std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top,
-                                                         T &container) {
-    std::vector<typename Topology_T::bead_t *> beads;
-    std::vector<int> bead_ids = container.getBeadIds();
-    for (int &bead_id : bead_ids) {
-      beads.push_back(top.getBead(bead_id));
-    }
-    return beads;
+  T *ptr(T *obj) {
+    return obj;
+  }
+
+  template <typename T>
+  T *ptr(T &obj) {
+    return &obj;
   }
 };
 
@@ -83,25 +107,43 @@ void XYZWriter<Topology_T>::Write(boost::any conf_any) {
   std::string header = (boost::format("frame: %1$d time: %2$f\n") %
                         (top.getStep() + 1) % top.getTime())
                            .str();
-  Write(top, top, header);
+
+  WriteHeader(header, getAtomCount(top));
+  for (auto &container : top) {
+    WriteContainer_(container.second);
+  }
+}
+
+template <class Topology_T>
+inline void XYZWriter<Topology_T>::WriteHeader(std::string header,
+                                               int number_atoms) {
+  out_ << number_atoms << "\n";
+  out_ << header << "\n";
 }
 
 template <class Topology_T>
 template <typename T>
-inline void XYZWriter<Topology_T>::Write(Topology_T &top, T &container,
-                                         std::string header) {
+inline void XYZWriter<Topology_T>::WriteContainer(T &container) {
+  WriteHeader("", getAtomCount(container));
+  WriteContainer_(container);
+}
 
-  std::vector<typename Topology_T::bead_t *> atoms =
-      getIterable(top, container);
-  out_ << atoms.size() << "\n";
-  out_ << header << "\n";
+template <class Topology_T>
+template <typename T>
+inline void XYZWriter<Topology_T>::WriteContainer_(T &container) {
 
   boost::format fmter("%1$s%2$10.5f%3$10.5f%4$10.5f\n");
-
-  for (typename Topology_T::bead_t *atom : atoms) {
-    Eigen::Vector3d r = getPos(atom);
+  std::vector<int> ids = container.getBeadIds();
+  for (const int &id : ids) {
+    //  for (auto & atom : getIterable(container)) {
+    //    auto atom_ptr = ptr(atom);
+    auto atom_ptr = container.getBead(id);
+    tools::StructureParameters params = atom_ptr->getParameters();
+    Eigen::Vector3d r = params.get<Eigen::Vector3d>(
+        tools::StructureParameter::Position);  // getPos(atom);
     // truncate strings if necessary
-    std::string atomtype = getType(atom);
+    std::string atomtype = params.get<std::string>(
+        tools::StructureParameter::BeadType);  // getType(atom);
     if (atomtype.size() > 3) {
       atomtype = atomtype.substr(0, 3);
     }
@@ -111,6 +153,7 @@ inline void XYZWriter<Topology_T>::Write(Topology_T &top, T &container,
   }
   out_ << std::flush;
 }
+
 }  // namespace csg
 }  // namespace votca
 

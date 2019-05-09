@@ -89,7 +89,7 @@ bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
 
     cout << "\nList of molecules:\n";
     for (const int &molecule_id : molecule_ids) {
-      Molecule *mol = top->getMolecule(molecule_id);
+      Molecule *mol = &top->getMolecule(molecule_id);
       cout << "molecule: " << molecule_id + 1 << " " << mol->getType();
       cout << " beads: " << mol->BeadCount() << endl;
 

@@ -307,15 +307,15 @@ class Bead : public BaseBead {
    *
    * ResidueNumber:ResidueType:BeadType
    **/
-  std::string getLabel() {
+  std::string getLabel() const {
     std::stringstream label;
     label << molecule_id_.getId() << ":" << getResidueType() << ":"
           << getType();
     return label.str();
   };
 
- protected:
-  std::vector<int> parent_beads_;
+  [[deprecated]] std::string getName() const { return getLabel(); } protected
+      : std::vector<int> parent_beads_;
 
   tools::Name residue_type_;
 
@@ -358,7 +358,7 @@ class Bead : public BaseBead {
   friend class Molecule;
 };
 
-tools::StructureParameters Bead::getParameters() const {
+inline tools::StructureParameters Bead::getParameters() const {
   tools::StructureParameters params;
   params.set(tools::StructureParameter::BeadId, getId());
   params.set(tools::StructureParameter::BeadType, getType());

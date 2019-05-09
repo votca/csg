@@ -30,8 +30,8 @@
 #include <string>
 #include <vector>
 
-#include <votca/csg/boundarycondition.h>
-#include <votca/csg/trajectoryreader.h>
+#include "../boundarycondition.h"
+#include "../trajectoryreader.h"
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>
 #include <votca/tools/tokenizer.h>

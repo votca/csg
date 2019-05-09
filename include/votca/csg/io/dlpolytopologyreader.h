@@ -36,7 +36,6 @@
 #include <votca/tools/tokenizer.h>
 #include <votca/tools/types.h>
 
-#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif
@@ -253,7 +252,7 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
       params.set(tools::StructureParameter::MoleculeId,
                  static_cast<int>(top.MoleculeCount()));
       params.set(tools::StructureParameter::MoleculeType, mol_name);
-      typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
+      typename Topology_T::container_t &mi = top.CreateMolecule(params);
 
       int nreplica = 1;
       line = _NextKeyInt(fl, WhiteSpace, "NUMMOL", nreplica);
@@ -328,15 +327,15 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
                      tools::topology_constants::unassigned_residue_id);
           params.set(tools::StructureParameter::ResidueType,
                      tools::topology_constants::unassigned_residue_type);
-          params.set(tools::StructureParameter::MoleculeId, mi->getId());
-          typename Topology_T::bead_t *bead = top.CreateBead(params);
+          params.set(tools::StructureParameter::MoleculeId, mi.getId());
+          typename Topology_T::bead_t &bead = top.CreateBead(params);
 
-          mi->AddBead(bead);
-          id_map[i] = bead->getId();
+          mi.AddBead(&bead);
+          id_map[i] = bead.getId();
           i++;
 #ifdef DEBUG
-          std::cout << "Atom identification in maps '" << bead->getLabel()
-                    << "'" << std::endl;
+          std::cout << "Atom identification in maps '" << bead.getLabel() << "'"
+                    << std::endl;
 #endif
         }
         matoms += repeater;
@@ -375,7 +374,7 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
               int bead_id2 = id_map[ids[1] - 1];
               ic = top.CreateInteraction(
                   InteractionType::bond, interaction_group, interaction_id,
-                  mi->getId(), std::vector<int>{bead_id1, bead_id2});
+                  mi.getId(), std::vector<int>{bead_id1, bead_id2});
             } else if (interaction_group == "ANGLES") {
               sl >> ids[2];
               int bead_id1 = id_map[ids[0] - 1];
@@ -383,7 +382,7 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
               int bead_id3 = id_map[ids[2] - 1];
               ic = top.CreateInteraction(
                   InteractionType::angle, interaction_group, interaction_id,
-                  mi->getId(), std::vector<int>{bead_id1, bead_id2, bead_id3});
+                  mi.getId(), std::vector<int>{bead_id1, bead_id2, bead_id3});
             } else if (interaction_group.substr(0, 6) == "DIHEDR") {
               interaction_group = "DIHEDRALS";
               sl >> ids[2];
@@ -394,14 +393,14 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
               int bead_id4 = id_map[ids[3] - 1];
               ic = top.CreateInteraction(
                   InteractionType::dihedral, interaction_group, interaction_id,
-                  mi->getId(),
+                  mi.getId(),
                   std::vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
             } else {
               throw std::runtime_error(
                   "Error: interaction_group should be BONDS, ANGLES or "
                   "DIHEDRALS");
             }
-            mi->AddInteraction(ic);
+            mi.AddInteraction(ic);
           }
         }
       }
@@ -417,11 +416,11 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
         params_mol.set(tools::StructureParameter::MoleculeId,
                        top.MoleculeCount());
         params_mol.set(tools::StructureParameter::MoleculeType, mol_name);
-        typename Topology_T::molecule_t *mi_replica =
+        typename Topology_T::container_t &mi_replica =
             top.CreateMolecule(params_mol);
-        std::vector<int> bead_ids = mi->getBeadIds();
+        std::vector<int> bead_ids = mi.getBeadIds();
         for (const int &bead_id : bead_ids) {
-          typename Topology_T::bead_t *bead = mi->getBead(bead_id);
+          typename Topology_T::bead_t *bead = mi.getBead(bead_id);
           tools::byte_t symmetry = 1;
 
           tools::StructureParameters params;
@@ -436,31 +435,29 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
                      bead->getResidueId());
           params.set(tools::StructureParameter::ResidueType,
                      bead->getResidueType());
-          params.set(tools::StructureParameter::MoleculeId,
-                     mi_replica->getId());
-          typename Topology_T::bead_t *bead_replica = top.CreateBead(params);
-          mi_replica->AddBead(bead_replica);
+          params.set(tools::StructureParameter::MoleculeId, mi_replica.getId());
+          typename Topology_T::bead_t &bead_replica = top.CreateBead(params);
+          mi_replica.AddBead(&bead_replica);
         }
-        matoms += mi->BeadCount();
-        std::vector<Interaction *> ics = mi->Interactions();
+        matoms += mi.BeadCount();
+        std::vector<Interaction *> ics = mi.Interactions();
         for (std::vector<Interaction *>::iterator ic = ics.begin();
              ic != ics.end(); ++ic) {
           Interaction *ic_replica = NULL;
-          int offset =
-              mi_replica->getBead(0)->getId() - mi->getBead(0)->getId();
+          int offset = mi_replica.getBead(0)->getId() - mi.getBead(0)->getId();
           if ((*ic)->BeadCount() == 2) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
             int bead_id2 = (*ic)->getBeadId(1) + offset;
             ic_replica = top.CreateInteraction(
                 InteractionType::bond, (*ic)->getGroup(), (*ic)->getIndex(),
-                mi_replica->getId(), std::vector<int>{bead_id1, bead_id2});
+                mi_replica.getId(), std::vector<int>{bead_id1, bead_id2});
           } else if ((*ic)->BeadCount() == 3) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
             int bead_id2 = (*ic)->getBeadId(1) + offset;
             int bead_id3 = (*ic)->getBeadId(2) + offset;
             ic_replica = top.CreateInteraction(
                 InteractionType::angle, (*ic)->getGroup(), (*ic)->getIndex(),
-                mi_replica->getId(),
+                mi_replica.getId(),
                 std::vector<int>{bead_id1, bead_id2, bead_id3});
           } else if ((*ic)->BeadCount() == 4) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
@@ -469,12 +466,12 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(std::string file,
             int bead_id4 = (*ic)->getBeadId(3) + offset;
             ic_replica = top.CreateInteraction(
                 InteractionType::dihedral, (*ic)->getGroup(), (*ic)->getIndex(),
-                mi_replica->getId(),
+                mi_replica.getId(),
                 std::vector<int>{bead_id1, bead_id2, bead_id3, bead_id4});
           } else {
             throw std::runtime_error("Error: BeadCount not equal 2, 3 or 4");
           }
-          mi_replica->AddInteraction(ic_replica);
+          mi_replica.AddInteraction(ic_replica);
         }
       }
     }

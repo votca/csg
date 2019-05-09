@@ -138,7 +138,7 @@ void CsgDensityApp::EvalConfiguration(CSG_Topology *top,
   bool did_something = false;
   vector<int> molecule_ids = top->getMoleculeIds();
   for (const int &molecule_id : molecule_ids) {
-    Molecule *mol = top->getMolecule(molecule_id);
+    Molecule *mol = &(top->getMolecule(molecule_id));
     if (!wildcmp(_molname.c_str(), mol->getType().c_str())) continue;
     int N = mol->BeadCount();
     for (int i = 0; i < N; i++) {

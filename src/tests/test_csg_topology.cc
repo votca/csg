@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(create_bead) {
   double mass = 1.1;
   double charge = 0.3;
 
-  auto bead_ptr = top.CreateBead(
+  Bead* bead_ptr = &top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
 
@@ -113,20 +113,20 @@ BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
   double charge = 0.3;
 
   // Create 3 beads
-  auto bead_ptr = top.CreateBead(
+  Bead* bead_ptr = &top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
   bead_ptr->setId(0);
 
   bead_id = 1;
-  auto bead_ptr2 = top.CreateBead(
+  Bead* bead_ptr2 = &top.CreateBead(
       symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
   bead_ptr2->setId(1);
 
   bead_id = 2;
   string bead_type3 = "bead_test3";
-  auto bead_ptr3 = top.CreateBead(
+  Bead* bead_ptr3 = &top.CreateBead(
       symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
       topology_constants::unassigned_element, mass, charge);
   bead_ptr3->setId(2);

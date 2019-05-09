@@ -15,15 +15,15 @@
  *
  */
 
+#include "../../include/votca/csg/atomcgconverter.h"
+#include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/beadmap.h"
+#include "../../include/votca/csg/interaction.h"
 #include <numeric>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <votca/csg/atomcgconverter.h>
-#include <votca/csg/bead.h>
-#include <votca/csg/interaction.h>
 
 #include <votca/tools/constants.h>
 #include <votca/tools/property.h>
@@ -70,22 +70,25 @@ void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
          "box types of topology in and out differ");
 
   // Grab all the molecules
-  const unordered_map<int, Molecule> &atomistic_mols =
-      atomic_top_in.Molecules();
+  // const unordered_map<int, Molecule> &atomistic_mols =
+  //    atomic_top_in.Molecules();
 
   // Cycle through the atomistic molecules
-  for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
-    const Molecule *atomistic_mol = &(id_and_molecule.second);
+  // for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
+  for (const pair<int, Molecule> &atomistic_mol : atomic_top_in) {
+    // const Molecule *atomistic_mol = &(id_and_molecule.second);
+    // const Molecule *atomistic_mol = &(id_and_molecule.second);
 
-    string atomistic_mol_type = atomistic_mol->getType();
+    string atomistic_mol_type = atomistic_mol.second.getType();
     if (atomic_mol_types_to_ignore_.count(atomistic_mol_type)) {
       continue;
     }
 
     if (AtomisticMoleculeTypeExist(atomistic_mol_type) == false) {
       cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << atomistic_mol->getType()
-           << "\" with id " << atomistic_mol->getId() << " in topology" << endl
+           << "WARNING: unknown molecule \"" << atomistic_mol.second.getType()
+           << "\" with id " << atomistic_mol.second.getId() << " in topology"
+           << endl
            << "molecule will not be mapped to CG representation\n"
            << "Check weather a mapping file for all molecule exists, was "
            << "specified in --cg separated by ; and the ident tag in xml-file "
@@ -94,8 +97,8 @@ void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
       continue;
     }
 
-    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(*atomistic_mol, cg_top_out,
-                                                    atomic_top_in);
+    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atomistic_mol.second,
+                                                    cg_top_out, atomic_top_in);
   }
   cg_top_out.RebuildExclusions();
 
@@ -117,8 +120,8 @@ void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
        cgmolid_cgbeadid_atomicbeadnames_and_ids_) {
 
     int molecule_id = cg_mol_with_info.first;
-    string cg_mol_type = cg_top.getMolecule(molecule_id)->getType();
-    string atomic_mol_type = atomic_top.getMolecule(molecule_id)->getType();
+    string cg_mol_type = cg_top.getMolecule(molecule_id).getType();
+    string atomic_mol_type = atomic_top.getMolecule(molecule_id).getType();
     // Call the appropriate molecule mapper
     mol_names_and_maps_.at(atomic_mol_type)
         .at(cg_mol_type)
@@ -207,6 +210,9 @@ std::unordered_map<int, string>
         atomic_and_cg_molecule_types_.left.at(cg_or_atomic_molecule_type);
   }
 
+  for (auto be_id : bead_ids) {
+    cout << "Bead id " << be_id << endl;
+  }
   return cg_molecule_and_stencil_.at(cg_mol_type)
       .MapAtomicBeadIdsToAtomicBeadNames(bead_ids);
 }
@@ -393,22 +399,25 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
 
   map<string, int> cg_bead_name_and_id;
   for (const CGBeadStencil &bead_info : stencil.getBeadStencil()) {
-    Bead *bead;
 
     string bead_type = bead_info.cg_bead_type_;
-    bead = cg_top_out.CreateBead(
+    Bead &bead = cg_top_out.CreateBead(
         bead_info.cg_symmetry_, bead_type, cg_top_out.BeadCount(),
         cg_mol->getId(), topology_constants::unassigned_residue_id,
         topology_constants::unassigned_residue_type,
         topology_constants::unassigned_element, 0.0, 0.0);
 
-    cg_bead_name_and_id[bead_info.cg_name_] = bead->getId();
-    cg_mol->AddBead(bead);
+    cg_bead_name_and_id[bead_info.cg_name_] = bead.getId();
+    cg_mol->AddBead(&bead);
   }
 
   // cg_bead_id, vector< atom_name, atom_bead_id >
-  Molecule *atom_mol = atom_top.getMolecule(cg_mol->getId());
+  Molecule *atom_mol = &atom_top.getMolecule(cg_mol->getId());
   vector<int> atom_bead_ids = atom_mol->getBeadIds();
+  cout << "Calling get mol " << endl;
+  for (auto be_id : atom_bead_ids) {
+    cout << be_id << endl;
+  }
   sort(atom_bead_ids.begin(), atom_bead_ids.end());
   unordered_map<int, string> atom_ids_and_names =
       MapAtomicBeadIdsToAtomicBeadNames_(atom_mol->getType(), atom_bead_ids);
@@ -500,13 +509,13 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateMolecule_(
     string cg_mol_type, int molecule_id, CSG_Topology &cg_top_out,
     CSG_Topology &atom_top) {
 
-  Molecule *cg_mol = cg_top_out.CreateMolecule(molecule_id, cg_mol_type);
+  Molecule &cg_mol = cg_top_out.CreateMolecule(molecule_id, cg_mol_type);
   CGMoleculeStencil &cg_mol_stencil = cg_molecule_and_stencil_.at(cg_mol_type);
 
   map<int, vector<pair<std::string, int>>> bead_name_to_id =
-      CreateBeads_(cg_mol, cg_mol_stencil, cg_top_out, atom_top);
+      CreateBeads_(&cg_mol, cg_mol_stencil, cg_top_out, atom_top);
 
-  CreateInteractions_(cg_mol, cg_mol_stencil, cg_top_out, bead_name_to_id);
+  CreateInteractions_(&cg_mol, cg_mol_stencil, cg_top_out, bead_name_to_id);
 
   return bead_name_to_id;
 }

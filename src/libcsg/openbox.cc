@@ -15,8 +15,8 @@
  *
  */
 
+#include "../../include/votca/csg/openbox.h"
 #include <Eigen/Dense>
-#include <votca/csg/openbox.h>
 namespace votca {
 namespace csg {
 

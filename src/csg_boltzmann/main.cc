@@ -85,8 +85,8 @@ bool CsgBoltzmann::EvaluateTopology(CSG_Topology *top_cg,
               "multiple molecules, using only first molecule\n";
 
     vector<int> molecule_ids = top_atomistic->getMoleculeIds();
-    Molecule *mol_atomistic = top_atomistic->getMolecule(molecule_ids.at(0));
-    Molecule *mol_cg = top_cg->getMolecule(molecule_ids.at(0));
+    Molecule *mol_atomistic = &top_atomistic->getMolecule(molecule_ids.at(0));
+    Molecule *mol_cg = &top_cg->getMolecule(molecule_ids.at(0));
     cout << "Writing exclusion list for atomistic molecule "
          << mol_atomistic->getType() << " in coarse grained representation "
          << mol_cg->getType() << endl;

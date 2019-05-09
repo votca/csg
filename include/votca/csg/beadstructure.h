@@ -56,6 +56,7 @@ class BeadStructure {
  public:
   ~BeadStructure() {}
 
+  typedef T *bead_t;
   /**
    * \brief Determine if the bead structure consists of a single connected
    * structure
@@ -84,6 +85,7 @@ class BeadStructure {
    **/
   T *getBead(int id);
 
+  std::vector<T *> getBeads() const;
   /**
    * @brief Grabs the const version of the bead pointer
    *
@@ -305,6 +307,15 @@ template <class T>
 T *BeadStructure<T>::getBead(int bead_id) {
   assert(beads_.count(bead_id));
   return beads_[bead_id];
+}
+
+template <class T>
+std::vector<T *> BeadStructure<T>::getBeads() const {
+  std::vector<T *> beads;
+  for (std::pair<int, T *> bead_pr : beads_) {
+    beads.push_back(bead_pr.second);
+  }
+  return beads;
 }
 
 template <class T>

@@ -19,13 +19,16 @@
 #ifndef VOTCA_CSG_PDBWRITER_H
 #define VOTCA_CSG_PDBWRITER_H
 
+#include "../molecule.h"
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
 #include <boost/any.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <stdio.h>
+#include <type_traits>
 #include <votca/tools/constants.h>
+#include <votca/tools/structureparameters.h>
 
 namespace votca {
 namespace csg {
@@ -48,7 +51,7 @@ class PDBWriter : public TrajectoryWriter {
   void Write(boost::any conf);
 
   template <class T>
-  void WriteContainer(Topology_T *conf, T &container);
+  void WriteContainer(T &container);
 
   void WriteHeader(std::string header);
 
@@ -122,35 +125,42 @@ class PDBWriter : public TrajectoryWriter {
     return item.getPos() * tools::conv::bohr2ang;
   }
 
-  Eigen::Vector3d getPos(typename Topology_T::bead_t &bead) {
-    return bead.Pos() * tools::conv::nm2ang;
-  }
+  /*  Eigen::Vector3d getPos(typename Topology_T::bead_t &bead) {
+      return bead.Pos() * tools::conv::nm2ang;
+    }*/
 
   template <class T>
-  std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top,
-                                                         T &container) {
-    std::vector<typename Topology_T::bead_t *> beads;
-    std::vector<int> bead_ids = container.getBeadIds();
-    for (int &bead_id : bead_ids) {
-      beads.push_back(top.getBead(bead_id));
-    }
-    return beads;
+  T &getIterable(T &container) {
+    return container;
   }
 
-  std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top) {
-    std::vector<typename Topology_T::bead_t *> beads;
-    std::vector<int> bead_ids = top.getBeadIds();
-    for (int &bead_id : bead_ids) {
-      beads.push_back(top.getBead(bead_id));
-    }
-    return beads;
+  std::vector<typename Molecule::bead_t> getIterable(Molecule &container) {
+    return container.getBeads();
+  }
+  /*
+    std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top) {
+      std::vector<typename Topology_T::bead_t *> beads;
+      std::vector<int> bead_ids = top.getBeadIds();
+      for (int &bead_id : bead_ids) {
+        beads.push_back(top.getBead(bead_id));
+      }
+      return beads;
+    }*/
+
+  template <typename T>
+  T *ptr(T *obj) {
+    return obj;
+  }
+
+  template <typename T>
+  T *ptr(T &obj) {
+    return &obj;
   }
 };
 
 template <class Topology_T>
 template <class T>
-inline void PDBWriter<Topology_T>::WriteContainer(Topology_T *conf,
-                                                  T &container) {
+inline void PDBWriter<Topology_T>::WriteContainer(T &container) {
 
   if (out_.is_open()) {
     boost::format atomfrmt(
@@ -158,16 +168,29 @@ inline void PDBWriter<Topology_T>::WriteContainer(Topology_T *conf,
         "  "
         "           %9$+2s\n");
 
-    std::vector<typename Topology_T::bead_t *> atoms =
-        getIterable(*conf, container);
-    for (typename Topology_T::bead_t *atom : atoms) {
-      int atomid = getId(*atom);
-      std::string resname = getResidueType(*atom);
-      int residueid = getResId(*atom);
-      std::string atomtype = getType(*atom);
-      std::string element = getElement(*atom);
-      Eigen::Vector3d r = getPos(*atom);
-
+    for (auto &atom : getIterable(container)) {
+      auto atom_ptr = ptr(atom);
+      tools::StructureParameters params = atom_ptr->getParameters();
+      int atomid = params.get<int>(tools::StructureParameter::BeadId);
+      std::string resname = tools::topology_constants::unassigned_residue_type;
+      if (params.ParameterExist(tools::StructureParameter::ResidueType)) {
+        resname =
+            params.get<std::string>(tools::StructureParameter::ResidueType);
+      }
+      int residueid = params.get<int>(tools::StructureParameter::ResidueId);
+      std::string atomtype =
+          params.get<std::string>(tools::StructureParameter::BeadType);
+      std::string element =
+          params.get<std::string>(tools::StructureParameter::Element);
+      Eigen::Vector3d r =
+          params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
+      /*      int atomid = getId(*atom);
+            std::string resname = getResidueType(*atom);
+            int residueid = getResId(*atom);
+            std::string atomtype = getType(*atom);
+            std::string element = getElement(*atom);
+            Eigen::Vector3d r = getPos(*atom);
+      */
       out_ << atomfrmt % (atomid % 100000)    // atom serial number
                   % atomtype % resname % " "  // chain identifier 1 char
                   % residueid                 // residue sequence number
@@ -183,6 +206,15 @@ inline void PDBWriter<Topology_T>::WriteContainer(Topology_T *conf,
 }
 
 template <class Topology_T>
+void PDBWriter<Topology_T>::WriteHeader(std::string header) {
+  if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
+    out_ << "HEADER    ";
+  }
+  out_ << header;
+  if (header.back() != '\n') out_ << "\n";
+}
+
+template <class Topology_T>
 void PDBWriter<Topology_T>::Write(boost::any conf_any) {
   if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
@@ -193,7 +225,10 @@ void PDBWriter<Topology_T>::Write(boost::any conf_any) {
   if (out_.is_open()) {
     out_ << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
          << std::flush;
-    WriteContainer<Topology_T>(&conf, conf);
+    for (std::pair<const int, typename Topology_T::container_t> &container :
+         conf) {
+      WriteContainer(container.second);
+    }
     out_ << "ENDMDL" << std::endl;
   } else {
     throw std::runtime_error(

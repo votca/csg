@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  */
+#include "../../include/votca/csg/nematicorder.h"
 #include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/csgtopology.h"
-#include <votca/csg/nematicorder.h>
 #include <votca/tools/tokenizer.h>
 
 namespace votca {

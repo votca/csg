@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
+#include "../../include/votca/csg/nblistgrid_3body.h"
 #include "../../include/votca/csg/csgtopology.h"
-#include <votca/csg/nblistgrid_3body.h>
 
 namespace votca {
 namespace csg {

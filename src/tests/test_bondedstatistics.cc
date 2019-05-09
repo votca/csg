@@ -20,11 +20,11 @@
 #define BOOST_TEST_MODULE bondedstatistics_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/molecule.h"
 #include "../csg_boltzmann/bondedstatistics.h"
 #include <iostream>
 #include <map>
 #include <string>
-#include <votca/csg/molecule.h>
 #include <votca/tools/constants.h>
 
 using namespace std;
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
 
     // Create 3 beads
     Eigen::Vector3d pos_bead1(5.0, 3.0, 5.0);
-    auto bead_ptr = top.CreateBead(
+    Bead *bead_ptr = &top.CreateBead(
         symmetry, bead_type, bead_id, molecule_id, residue_id, residue_type,
         topology_constants::unassigned_element, mass, charge);
     bead_ptr->setPos(pos_bead1);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     bead_id = 1;
     string bead_type2 = "bead_test2";
     Eigen::Vector3d pos_bead2(5.0, 4.0, 5.0);
-    auto bead_ptr2 = top.CreateBead(
+    Bead *bead_ptr2 = &top.CreateBead(
         symmetry, bead_type2, bead_id, molecule_id, residue_id, residue_type,
         topology_constants::unassigned_element, mass, charge);
     bead_ptr2->setPos(pos_bead2);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
     bead_id = 2;
     string bead_type3 = "bead_test3";
     Eigen::Vector3d pos_bead3(5.0, 6.0, 5.0);
-    auto bead_ptr3 = top.CreateBead(
+    Bead *bead_ptr3 = &top.CreateBead(
         symmetry, bead_type3, bead_id, molecule_id, residue_id, residue_type,
         topology_constants::unassigned_element, mass, charge);
     bead_ptr3->setPos(pos_bead3);

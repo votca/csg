@@ -15,11 +15,11 @@
  *
  */
 
+#include "../../include/votca/csg/csgapplication.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <iostream>
-#include <votca/csg/csgapplication.h>
 
 using namespace votca::csg;
 using namespace std;
@@ -64,7 +64,7 @@ bool GmxTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   ofstream fl;
   fl.open((OptionsMap()["out"].as<string>() + ".top").c_str());
   vector<int> molecule_ids = top->getMoleculeIds();
-  WriteMolecule(fl, *top, *(top->getMolecule(molecule_ids.at(0))));
+  WriteMolecule(fl, *top, (top->getMolecule(molecule_ids.at(0))));
   fl.close();
   return true;
 }

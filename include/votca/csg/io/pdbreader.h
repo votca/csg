@@ -171,7 +171,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       std::vector<std::string> bonded_atms;
       std::string atm1;
       // Keep track of the number of bonds
-      int num_bonds = 0;
+      int num_bonded_atoms = 0;
       try {
         // If the CONECT keyword is found then there must be at least
         // two atom identifiers, more than that is optional.
@@ -182,34 +182,38 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         // 11 -  7       Real(5)        atm1           (ID)
         ss >> atm1;
         std::string temp_atm;
-        ss >> temp_atm;
-        bonded_atms.push_back(temp_atm);
-        num_bonds = 1;
-        ss >> temp_atm;
+        num_bonded_atoms = 1;
+        while (ss >> temp_atm) {
+          boost::algorithm::trim(temp_atm);
+          bonded_atms.push_back(temp_atm);
+          ++num_bonded_atoms;
+        }
       } catch (std::out_of_range &err) {
         throw std::runtime_error("Misformated pdb file in CONECT line\n" +
                                  line);
       }
 
-      std::vector<int> row(2);
       boost::algorithm::trim(atm1);
       // Atom ids are stored internally starting at 0 but are stored in pdb
       // files starting at 1
       int at1 = boost::lexical_cast<int>(atm1) - 1;
-      row.at(0) = at1;
 
-      for (auto bonded_atm = bonded_atms.begin();
-           bonded_atm != bonded_atms.end(); bonded_atm++) {
+      int index = 0;
+      while (index < bonded_atms.size()) {
+
         // Atom ids are stored internally starting at 0 but are stored in pdb
         // files starting at 1
-        int at2 = boost::lexical_cast<int>(*bonded_atm) - 1;
-        row.at(1) = at2;
+        int at2 = boost::lexical_cast<int>(bonded_atms.at(index)) - 1;
+        std::vector<int> row = {at1, at2};
         // Because every bond will be counted twice in a .pdb file
         // we will only add bonds where the id (atm1) is less than the
         // bonded_atm
         if (at1 < at2) {
+          std::cout << "Adding bond pair " << row.at(0) << " " << row.at(1)
+                    << std::endl;
           bond_pairs.push_back(row);
         }
+        ++index;
       }
     }
 
@@ -222,8 +226,8 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       std::string charge_str, element_symbol;
       // std::string atom_id_pdb;
       try {
-        /* Some pdb don't include all this, read only what we really need*/
-        /* leave this here in case we need more later*/
+        // Some pdb don't include all this, read only what we really need
+        // leave this here in case we need more later
 
         // str       ,  "ATOM", "HETATM"
         // std::string recType    (line,( 1-1),6);
@@ -340,7 +344,8 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
                    tools::topology_constants::unassigned_molecule_id);
         params.set(tools::StructureParameter::ResidueId, residue_id);
         params.set(tools::StructureParameter::ResidueType, residue_type);
-        b = top.CreateBead(params);
+        std::cout << "Creating Bead " << atom_number << std::endl;
+        b = &(top.CreateBead(params));
       } else {
         b = top.getBead(atom_number);
       }
@@ -354,7 +359,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       break;
     }
   }  // while std::getline
-
   if (!_topology && (bead_count > 0) && bead_count != top.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and trajectory differ");
@@ -363,7 +367,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
   // Sort data and determine atom structure, connect with top.molecules,
   // bonds)
   ////////////////////////////////////////////////////////////////////////////////
-
   // Extra processing is done if the file is a topology file, in which case the
   // atoms must be sorted into molecules and the bond interactions recorded
   if (_topology) {
@@ -397,6 +400,8 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         std::list<int> atms_in_mol;
         atms_in_mol.push_back(atm_id1);
         atms_in_mol.push_back(atm_id2);
+        //        std::cout << "Molecule " << mol_index << "Adding atom " <<
+        //        atms_in_mol << std::endl;
         molecule_atms[mol_index] = atms_in_mol;
         // Associate atm1 and atm2 with the molecule index
         atm_molecule[atm_id1] = mol_index;
@@ -450,7 +455,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         molecule_atms.erase(obsolete_mol);
       }
     }
-#pragma once
 #ifndef NDEBUG
     std::cerr << "Consistency check for pdbreader" << std::endl;
     int i = 0;
@@ -473,8 +477,9 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
     // Molecule map
     // First int - is the index of the molecule
     // Molecule* - is a pointer to the Molecule object
-    std::map<int, typename Topology_T::molecule_t *> mol_map;
-
+    std::map<int, typename Topology_T::container_t *> mol_map;
+    std::unordered_map<int, std::vector<typename Topology_T::bead_t *>>
+        molecule_beads;
     for (const std::pair<const int, std::list<int>> &mol_and_atom_ids :
          molecule_atms) {
 
@@ -483,43 +488,52 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       params_mol.set(tools::StructureParameter::MoleculeId, molecule_id);
       params_mol.set(tools::StructureParameter::MoleculeType,
                      tools::topology_constants::unassigned_molecule_type);
-      typename Topology_T::molecule_t *mi = top.CreateMolecule(params_mol);
-      mol_map[molecule_id] = mi;
+      mol_map[molecule_id] = &(top.CreateMolecule(params_mol));
 
       // Add all the atoms to the appropriate molecule object
-      for (const int &atm_temp : mol_and_atom_ids.second) {
-        mi->AddBead(top.getBead(atm_temp));
+      for (int atm_temp : mol_and_atom_ids.second) {
+        molecule_beads[molecule_id].push_back(top.getBead(atm_temp));
+      }
+    }
+
+    for (std::pair<int, std::vector<typename Topology_T::bead_t *>> mol_b :
+         molecule_beads) {
+      for (typename Topology_T::bead_t *bead_f : mol_b.second) {
+        mol_map[mol_b.first]->AddBead(bead_f);
       }
     }
 
     // Cyle through the bonds and add them to the appropriate molecule
-    int bond_index = 0;
-    for (auto bond_pair = bond_pairs.begin(); bond_pair != bond_pairs.end();
-         bond_pair++) {
+    for (std::vector<int> &bond_pair : bond_pairs) {
 
-      int atm_id1 = bond_pair->at(0);
-      int atm_id2 = bond_pair->at(1);
-      // Should be able to just look at one of the atoms the bond is attached
-      // too because the other will also be attached to the same molecule.
-      int mol_ind = atm_molecule[atm_id1];
-      typename Topology_T::molecule_t *mi = mol_map[mol_ind];
-      // Grab the id of the bead associated with the atom
-      // It may be the case that the atom id's and bead id's are different
-      int bead_id1 = atm_id1;
-      int bead_id2 = atm_id2;
-      mi->ConnectBeads(bead_id1, bead_id2);
+      int atm_id1 = bond_pair.at(0);
+      int bond_index = 1;
+      while (bond_index < bond_pair.size()) {
+        int atm_id2 = bond_pair.at(bond_index);
 
-      Interaction *ic = top.CreateInteraction(
-          InteractionType::bond, "BONDS", bond_index, mi->getId(),
-          std::vector<int>{bead_id1, bead_id2});
-      mi->AddInteraction(ic);
-      ++bond_index;
+        // Should be able to just look at one of the atoms the bond is attached
+        // too because the other will also be attached to the same molecule.
+        int mol_ind = atm_molecule[atm_id1];
+
+        typename Topology_T::container_t *mi = mol_map[mol_ind];
+
+        // Grab the id of the bead associated with the atom
+        // It may be the case that the atom id's and bead id's are different
+        int bead_id1 = atm_id1;
+        int bead_id2 = atm_id2;
+        mi->ConnectBeads(bead_id1, bead_id2);
+
+        Interaction *ic = top.CreateInteraction(
+            InteractionType::bond, "BONDS", bond_index, mi->getId(),
+            std::vector<int>{bead_id1, bead_id2});
+        mi->AddInteraction(ic);
+        ++bond_index;
+      }
     }
 
     // Finally we want to build an exclusion matrix
     top.RebuildExclusions();
   }
-
   return !_fl.eof();
 }
 

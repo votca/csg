@@ -104,7 +104,7 @@ class XMLTopologyReader : public TopologyReader {
 
  private:
   typedef boost::unordered_multimap<
-      std::string, XMLMolecule<typename Topology_T::molecule_t>>
+      std::string, XMLMolecule<typename Topology_T::container_t>>
       MoleculesMap;
 
   void ReadTopolFile(std::string file);
@@ -305,9 +305,9 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
                    static_cast<int>(_top->MoleculeCount()));
     params_mol.set(tools::StructureParameter::MoleculeType, molecule_type_);
 
-    typename Topology_T::molecule_t *mi = _top->CreateMolecule(params_mol);
-    XMLMolecule<typename Topology_T::molecule_t> xmlMolecule =
-        XMLMolecule<typename Topology_T::molecule_t>(molecule_type_, nmols);
+    typename Topology_T::container_t *mi = &(_top->CreateMolecule(params_mol));
+    XMLMolecule<typename Topology_T::container_t> xmlMolecule =
+        XMLMolecule<typename Topology_T::container_t>(molecule_type_, nmols);
     xmlMolecule.pid = mi->getId();
     xmlMolecule.mi = mi;
     _molecules.insert(make_pair(molecule_type_, xmlMolecule));
@@ -344,7 +344,7 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
                  static_cast<int>(_top->BeadCount()));
       params.set(tools::StructureParameter::BeadType, b.type);
 
-      typename Topology_T::bead_t *bead = _top->CreateBead(params);
+      typename Topology_T::bead_t *bead = &(_top->CreateBead(params));
 
       bead->setMoleculeId(_mol_index);
       mi->AddBead(bead);
@@ -422,7 +422,8 @@ void XMLTopologyReader<Topology_T>::ParseBond(tools::Property &p) {
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::container_t> &xmlMolecule =
+            itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         ic = _top->CreateInteraction(
@@ -464,7 +465,8 @@ void XMLTopologyReader<Topology_T>::ParseAngle(tools::Property &p) {
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::container_t> &xmlMolecule =
+            itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = xmlMolecule.name2beads[b3.atom_type_];
@@ -509,7 +511,8 @@ void XMLTopologyReader<Topology_T>::ParseDihedral(tools::Property &p) {
       MRange mRange = _molecules.equal_range(b1.molecule_type_);
       for (typename MoleculesMap::iterator itm = mRange.first;
            itm != mRange.second; ++itm) {
-        XMLMolecule<typename Topology_T::molecule_t> &xmlMolecule = itm->second;
+        XMLMolecule<typename Topology_T::container_t> &xmlMolecule =
+            itm->second;
         XMLBead &xmlBead1 = xmlMolecule.name2beads[b1.atom_type_];
         XMLBead &xmlBead2 = xmlMolecule.name2beads[b2.atom_type_];
         XMLBead &xmlBead3 = xmlMolecule.name2beads[b3.atom_type_];

@@ -195,7 +195,7 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
       params.set(tools::StructureParameter::ResidueType, resName);
       params.set(tools::StructureParameter::MoleculeId,
                  tools::topology_constants::unassigned_molecule_id);
-      b = top.CreateBead(params);
+      b = &(top.CreateBead(params));
     } else {
       b = top.getBead(i);
     }

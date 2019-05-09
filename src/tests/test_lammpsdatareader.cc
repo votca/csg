@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   auto last_bead_pos = lastBead->getPos();
   BOOST_CHECK(last_bead_correct_pos.isApprox(last_bead_pos, 1e-3));
 
-  auto mol = top.getMolecule(0);
+  auto mol = &top.getMolecule(0);
   BOOST_CHECK_EQUAL(mol->BeadCount(), 100);
 
   BOOST_CHECK_EQUAL(top.getStep(), 961);

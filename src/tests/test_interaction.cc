@@ -20,11 +20,11 @@
 #define BOOST_TEST_MODULE interaction_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/interaction.h"
+#include "../../include/votca/csg/molecule.h"
 #include <string>
-#include <votca/csg/bead.h>
-#include <votca/csg/csgtopology.h>
-#include <votca/csg/interaction.h>
-#include <votca/csg/molecule.h>
 #include <votca/tools/constants.h>
 
 using namespace std;
@@ -139,13 +139,15 @@ BOOST_AUTO_TEST_CASE(bond_test) {
   double mass = 1.0;
   double charge = 1.0;
 
-  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead1 =
+      &(top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                       residue_type, element, mass, charge));
   Eigen::Vector3d pos1 = Eigen::Vector3d(1, 0, 0);
   bead1->setPos(pos1);
   bead_id = 1;
-  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead2 =
+      &(top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                       residue_type, element, mass, charge));
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
   InteractionType interaction_type = InteractionType::bond;
@@ -195,19 +197,22 @@ BOOST_AUTO_TEST_CASE(angle_test) {
   string residue_type = "H3";
   double mass = 1.0;
   double charge = 1.0;
-  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead1 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos1(1, 0, 0);
   bead1->setPos(pos1);
   bead_id = 1;
-  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead2 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
 
   bead_id = 2;
-  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead3 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos3(0, 1, 0);
   bead3->setPos(pos3);
 
@@ -269,25 +274,29 @@ BOOST_AUTO_TEST_CASE(dihedral_test) {
   double mass = 1.0;
   double charge = 1.0;
   // Bead* bead1 = top.CreateBead(0, "a1", "C", resid, mass, charge);
-  Bead* bead1 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead1 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos1(1, 0, 0);
   bead1->setPos(pos1);
   bead_id = 1;
-  Bead* bead2 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead2 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos2(0, 0, 0);
   bead2->setPos(pos2);
 
   bead_id = 2;
-  Bead* bead3 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead3 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos3(0, 1, 0);
   bead3->setPos(pos3);
 
   bead_id = 3;
-  Bead* bead4 = top.CreateBead(symmetry, bead_type, bead_id, molecule_id,
-                               residue_id, residue_type, element, mass, charge);
+  Bead* bead4 =
+      &top.CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
+                      residue_type, element, mass, charge);
   Eigen::Vector3d pos4 = Eigen::Vector3d(-1, 1, 1);
   bead4->setPos(pos4);
   InteractionType interaction_type = InteractionType::dihedral;

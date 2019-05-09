@@ -19,7 +19,6 @@
 #ifndef VOTCA_CSG_GMXTOPOLOGYREADER_H
 #define VOTCA_CSG_GMXTOPOLOGYREADER_H
 
-#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif
@@ -114,7 +113,7 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
       params.set(tools::StructureParameter::MoleculeId,
                  static_cast<int>(top.MoleculeCount()));
       params.set(tools::StructureParameter::MoleculeType, molname);
-      typename Topology_T::molecule_t *mi = top.CreateMolecule(params);
+      typename Topology_T::container_t &mi = top.CreateMolecule(params);
 
 #if GROMACS_VERSION >= 20190000
       size_t natoms_mol = mtop.moltype[mtop.molblock[iblock].type].atoms.nr;
@@ -148,9 +147,9 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(std::string file,
         params.set(tools::StructureParameter::BeadType, bead_type);
         params.set(tools::StructureParameter::ResidueId, a->resind);
         params.set(tools::StructureParameter::ResidueType, residue_name);
-        params.set(tools::StructureParameter::MoleculeId, mi->getId());
-        typename Topology_T::bead_t *bead = top.CreateBead(params);
-        mi->AddBead(bead);
+        params.set(tools::StructureParameter::MoleculeId, mi.getId());
+        typename Topology_T::bead_t &bead = top.CreateBead(params);
+        mi.AddBead(&bead);
       }
 
       // add exclusions

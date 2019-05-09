@@ -19,7 +19,6 @@
 #ifndef VOTCA_CSG_GMXTRAJECTORYWRITER_H
 #define VOTCA_CSG_GMXTRAJECTORYWRITER_H
 
-#pragma once
 #ifndef HAVE_NO_CONFIG
 #include <votca_config.h>
 #endif

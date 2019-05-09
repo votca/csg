@@ -418,112 +418,112 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   int mol_id = 0;
   string atomic_mol_type = "propane";
   byte_t atom_bead_sym = 1;
-  Molecule* atom_mol = atom_top.CreateMolecule(mol_id, atomic_mol_type);
+  Molecule* atom_mol = &atom_top.CreateMolecule(mol_id, atomic_mol_type);
   int bead_id = 1;
-  Bead* C1 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "C", 12, 0.0);
+  Bead* C1 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "C", 12, 0.0);
   C1->setPos(pos_c1);
   C1->setVel(initialize);
   C1->setF(initialize);
   atom_mol->AddBead(C1);
 
   bead_id = 2;
-  Bead* C2 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "C", 12, 0.0);
+  Bead* C2 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "C", 12, 0.0);
   C2->setPos(pos_c2);
   C2->setVel(initialize);
   C2->setF(initialize);
   atom_mol->AddBead(C2);
 
   bead_id = 3;
-  Bead* C3 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "C", 12, 0.0);
+  Bead* C3 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "C", 12, 0.0);
   C3->setPos(pos_c3);
   C3->setVel(initialize);
   C3->setF(initialize);
   atom_mol->AddBead(C3);
 
   bead_id = 4;
-  Bead* H4 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H4 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H4->setPos(pos_h4);
   H4->setVel(vel_h4);
   H4->setF(force_h4);
   atom_mol->AddBead(H4);
 
   bead_id = 5;
-  Bead* H5 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H5 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H5->setPos(pos_h5);
   H5->setVel(initialize);
   H5->setF(initialize);
   atom_mol->AddBead(H5);
 
   bead_id = 6;
-  Bead* H6 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H6 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H6->setPos(pos_h6);
   H6->setVel(initialize);
   H6->setF(initialize);
   atom_mol->AddBead(H6);
 
   bead_id = 7;
-  Bead* H7 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H7 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H7->setPos(pos_h7);
   H7->setVel(initialize);
   H7->setF(initialize);
   atom_mol->AddBead(H7);
 
   bead_id = 8;
-  Bead* H8 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H8 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H8->setPos(pos_h8);
   H8->setVel(initialize);
   H8->setF(initialize);
   atom_mol->AddBead(H8);
 
   bead_id = 9;
-  Bead* H9 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                 topology_constants::unassigned_residue_id,
-                                 topology_constants::unassigned_residue_type,
-                                 "H", 12, 0.0);
+  Bead* H9 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
   H9->setPos(pos_h9);
   H9->setVel(initialize);
   H9->setF(initialize);
   atom_mol->AddBead(H9);
 
   bead_id = 10;
-  Bead* H10 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
+  Bead* H10 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
   H10->setPos(pos_h10);
   H10->setVel(initialize);
   H10->setF(initialize);
   atom_mol->AddBead(H10);
 
   bead_id = 11;
-  Bead* H11 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
+  Bead* H11 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
   H11->setPos(pos_h11);
   H11->setVel(vel_h11);
   H11->setF(force_h11);
@@ -531,9 +531,9 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
 
   CSG_Topology cg_top;
   string cg_mol_type = "propane";
-  Molecule* cg_mol = cg_top.CreateMolecule(mol_id, cg_mol_type);
+  Molecule* cg_mol = &cg_top.CreateMolecule(mol_id, cg_mol_type);
   int cg_bead_id = 1;
-  Bead* A1 = cg_top.CreateBead(
+  Bead* A1 = &cg_top.CreateBead(
       bead_stencil1.cg_symmetry_, bead_stencil1.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   cg_mol->AddBead(A1);
 
   cg_bead_id = 2;
-  Bead* B1 = cg_top.CreateBead(
+  Bead* B1 = &cg_top.CreateBead(
       bead_stencil2.cg_symmetry_, bead_stencil2.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,
@@ -555,7 +555,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   cg_mol->AddBead(B1);
 
   cg_bead_id = 3;
-  Bead* A2 = cg_top.CreateBead(
+  Bead* A2 = &cg_top.CreateBead(
       bead_stencil3.cg_symmetry_, bead_stencil3.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,

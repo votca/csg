@@ -367,7 +367,7 @@ void AtomToCGMoleculeMapper::UpdateCGMolecule(
 
   // Grab the correct cg molecule
   int cg_mol_id = cgmolid_cgbeadid_atomicbeadids.first;
-  Molecule *cg_mol = cg_top.getMolecule(cg_mol_id);
+  Molecule *cg_mol = &cg_top.getMolecule(cg_mol_id);
 
   // Ensure that the type molecule type is correct
   assert(cg_mol->getType() == cg_molecule_type_ &&

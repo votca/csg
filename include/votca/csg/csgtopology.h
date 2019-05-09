@@ -33,14 +33,25 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
   CSG_Topology(){};
   ~CSG_Topology(){};
 
-  Molecule* CreateMolecule(tools::StructureParameters& params) {
+  /// Define rule of 3
+  /// Copy constructor
+  CSG_Topology(const CSG_Topology& top) { this->Copy(top); }
+
+  CSG_Topology& operator=(const CSG_Topology& top) {
+    this->Copy(top);
+    return *this;
+  }
+
+  Molecule& CreateMolecule(tools::StructureParameters& params) {
     std::string molecule_type =
         params.get<std::string>(tools::StructureParameter::MoleculeType);
     int molecule_id = params.get<int>(tools::StructureParameter::MoleculeId);
-    return CreateMolecule(molecule_id, molecule_type);
+    CreateMolecule(molecule_id, molecule_type);
+    // std::cout << &(molecules_.back()) << std::endl;
+    return molecules_[molecule_id];
   }
 
-  Molecule* CreateMolecule(int id, std::string molecule_type) {
+  Molecule& CreateMolecule(int id, std::string molecule_type) {
     if (!type_container_.MoleculeTypeExist(molecule_type)) {
       type_container_.AddMoleculeType(molecule_type);
     }
@@ -48,12 +59,16 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     assert(!molecules_.count(id) &&
            "molecule with the provided id already exists within the topology!");
 
-    Molecule molecule = Molecule(id, molecule_type);
-    molecules_[id] = molecule;
-    return &molecules_[id];
+    //    Molecule molecule = Molecule(id, molecule_type);
+    // size_t index = molecules_.size();
+    //    molecules_.push_back(molecule);
+    // molecules_.resize(index+1);
+    molecules_[id] = Molecule(id, molecule_type);
+    // molecules_map_[id] = &(molecules_[index]);
+    return molecules_[id];
   }
 
-  Bead* CreateBead(tools::StructureParameters& params) {
+  Bead& CreateBead(tools::StructureParameters& params) {
     tools::byte_t symmetry =
         params.get<tools::byte_t>(tools::StructureParameter::Symmetry);
     std::string bead_type =
@@ -71,7 +86,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     return CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
                       residue_type, element, mass, charge);
   }
-  Bead* CreateBead(tools::byte_t symmetry, std::string bead_type, int bead_id,
+  Bead& CreateBead(tools::byte_t symmetry, std::string bead_type, int bead_id,
                    int molecule_id, int residue_id, std::string residue_type,
                    std::string element_symbol, double mass, double charge) {
 
@@ -90,7 +105,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
                      molecule_id, element_symbol, mass, charge);
 
     beads_[bead_id] = bead;
-    return &beads_.at(bead_id);
+    return beads_.at(bead_id);
   }
 
   Interaction* CreateInteraction(InteractionType type, std::string group,

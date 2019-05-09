@@ -19,11 +19,13 @@
 #ifndef __VOTCA_CSG_XYZREADER_H
 #define __VOTCA_CSG_XYZREADER_H
 
+#include "../csgtopology.h"
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/any.hpp>
 
+#include "../molecule.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -66,55 +68,87 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
  private:
   template <class T>
   size_t getContainerSize(T &container) {
-    return container.BeadCount();
+    return container.size();
   }
 
+  size_t getContainerSize(Topology_T &top) { return top.BeadCount(); }
+
   template <bool topology, class T>
-  void AddAtom(T &container, std::string name, int id,
-               const Eigen::Vector3d &pos) {
+  void AddAtom(T &container, tools::StructureParameters &params) {
     // the typedef returns the type of the objects the container holds
     typedef
         typename std::iterator_traits<decltype(container.begin())>::value_type
             atom;
-    Eigen::Vector3d pos2 = pos * tools::conv::ang2bohr;
-    container.push_back(atom(id, name, pos2));
+    Eigen::Vector3d pos2 =
+        params.get<Eigen::Vector3d>(tools::StructureParameter::Position) *
+        tools::conv::ang2bohr;
+    params.set(tools::StructureParameter::Position, pos2);
+    // container.push_back(atom(id, name, pos2));
+    container.push_back(atom(params));
   }
 
-  template <bool topology, class T>
-  void AddAtom(T &container, std::string bead_type, int bead_id,
-               std::string element, const Eigen::Vector3d &pos) {
+  template <bool topology>
+  void AddAtom(Molecule *molecule, tools::StructureParameters &params) {}
+
+  template <bool topology>
+  void AddAtom(Topology_T &container, tools::StructureParameters &params) {
 
     typename Topology_T::bead_t *b;
-    Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
+    Eigen::Vector3d posnm =
+        params.get<Eigen::Vector3d>(tools::StructureParameter::Position) *
+        tools::conv::ang2nm;
     if (topology) {
-
-      tools::byte_t symmetry = 1;
-      double mass = 0.0;
-      double charge = 0.0;
-      std::string element = tools::topology_constants::unassigned_element;
-      int molecule_id = tools::topology_constants::unassigned_molecule_id;
-      int residue_id = tools::topology_constants::unassigned_residue_id;
-      std::string residue_type =
-          tools::topology_constants::unassigned_residue_type;
-
-      tools::StructureParameters params;
-      params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass, mass);
-      params.set(tools::StructureParameter::Charge, charge);
-      params.set(tools::StructureParameter::Element, element);
-      params.set(tools::StructureParameter::MoleculeId, molecule_id);
-      params.set(tools::StructureParameter::ResidueId, residue_id);
-      params.set(tools::StructureParameter::ResidueType, residue_type);
-      params.set(tools::StructureParameter::BeadId, bead_id);
-      params.set(tools::StructureParameter::BeadType, bead_type);
-
-      b = container.CreateBead(params);
-
+      b = &(container.CreateBead(params));
     } else {
-      b = container.getBead(bead_id);
+      b = container.getBead(params.get<int>(tools::StructureParameter::BeadId));
     }
     b->setPos(posnm);
   }
+
+  /// For adding to xtp topology assume adding all the atoms to a single segment
+  /*template<bool topology>
+    void AddAtom(Topology_T & top, tools::StructureParameters params){
+      if(top.Segments.size()==0){
+        top.AddSegment(tools::topology_constants::unassigned_segment_type);
+      }else{
+        top.begin()->push_back(top.bead_t(params));
+      }
+    }*/
+  /*  template <bool topology, class T>
+    void AddAtom(T &container, std::string bead_type, int bead_id,
+                 std::string element, const Eigen::Vector3d &pos) {
+
+      typename Topology_T::bead_t *b;
+      Eigen::Vector3d posnm = pos * tools::conv::ang2nm;
+      if (topology) {
+
+        tools::byte_t symmetry = 1;
+        double mass = 0.0;
+        double charge = 0.0;
+        std::string element = tools::topology_constants::unassigned_element;
+        int molecule_id = tools::topology_constants::unassigned_molecule_id;
+        int residue_id = tools::topology_constants::unassigned_residue_id;
+        std::string residue_type =
+            tools::topology_constants::unassigned_residue_type;
+
+        tools::StructureParameters params;
+        params.set(tools::StructureParameter::Symmetry, symmetry);
+        params.set(tools::StructureParameter::Mass, mass);
+        params.set(tools::StructureParameter::Charge, charge);
+        params.set(tools::StructureParameter::Element, element);
+        params.set(tools::StructureParameter::MoleculeId, molecule_id);
+        params.set(tools::StructureParameter::ResidueId, residue_id);
+        params.set(tools::StructureParameter::ResidueType, residue_type);
+        params.set(tools::StructureParameter::BeadId, bead_id);
+        params.set(tools::StructureParameter::BeadType, bead_type);
+
+        b = container.CreateBead(params);
+
+      } else {
+        b = container.getBead(bead_id);
+      }
+      b->setPos(posnm);
+    }*/
 
   template <bool topology, class T>
   bool ReadFrame(T &container);
@@ -225,7 +259,27 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
                           boost::lexical_cast<double>(fields[2]),
                           boost::lexical_cast<double>(fields[3]));
 
-      AddAtom<topology, T>(container, fields[0], bead_id, element, pos);
+      tools::byte_t symmetry = 1;
+      double mass = 0.0;
+      double charge = 0.0;
+      int molecule_id = tools::topology_constants::unassigned_molecule_id;
+      int residue_id = tools::topology_constants::unassigned_residue_id;
+      std::string residue_type =
+          tools::topology_constants::unassigned_residue_type;
+
+      tools::StructureParameters params;
+      params.set(tools::StructureParameter::Symmetry, symmetry);
+      params.set(tools::StructureParameter::Mass, mass);
+      params.set(tools::StructureParameter::Charge, charge);
+      params.set(tools::StructureParameter::Element, element);
+      params.set(tools::StructureParameter::MoleculeId, molecule_id);
+      params.set(tools::StructureParameter::ResidueId, residue_id);
+      params.set(tools::StructureParameter::ResidueType, residue_type);
+      params.set(tools::StructureParameter::BeadId, bead_id);
+      params.set(tools::StructureParameter::BeadType, fields[0]);
+      params.set(tools::StructureParameter::Position, pos);
+
+      AddAtom<topology>(container, params);
     }
   }
   return !_fl.eof();

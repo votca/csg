@@ -198,10 +198,10 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
     if (elements.isEleShort(atom_type)) {
       element_symbol = atom_type;
     }
-    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
-                             topology_constants::unassigned_molecule_id,
-                             residue_id, residue_type, element_symbol,
-                             elements.getMass(atom_type), charge);
+    Bead *b = &top.CreateBead(symmetry, atom_type, atom_id,
+                              topology_constants::unassigned_molecule_id,
+                              residue_id, residue_type, element_symbol,
+                              elements.getMass(atom_type), charge);
 
     Eigen::Vector3d xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
                         atom_xyz.at(ind).at(2));
@@ -314,10 +314,10 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
     if (elements.isEleShort(atom_type)) {
       element_symbol = atom_type;
     }
-    Bead *b = top.CreateBead(symmetry, atom_type, atom_id,
-                             topology_constants::unassigned_molecule_id,
-                             residue_id, residue_type, element_symbol,
-                             elements.getMass(atom_types.at(ind)), charge);
+    Bead *b = &top.CreateBead(symmetry, atom_type, atom_id,
+                              topology_constants::unassigned_molecule_id,
+                              residue_id, residue_type, element_symbol,
+                              elements.getMass(atom_types.at(ind)), charge);
 
     Eigen::Vector3d xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
                         atom_xyz.at(ind).at(2));

@@ -20,6 +20,7 @@
 #define BOOST_TEST_MODULE tabulatedpotential_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/csgtopology.h"
 #include "../csg_boltzmann/tabulatedpotential.h"
 #include <cstdlib>
 #include <map>
@@ -105,10 +106,10 @@ BOOST_AUTO_TEST_CASE(test_command) {
           ++residue_id;
 
           Eigen::Vector3d bead_pos(x, y, z);
-          Bead *bead_ptr = top.CreateBead(
+          Bead *bead_ptr = &(top.CreateBead(
               symmetry, bead_type, bead_id, number_of_H2_molecules, residue_id,
               topology_constants::unassigned_residue_type,
-              topology_constants::unassigned_element, mass, charge);
+              topology_constants::unassigned_element, mass, charge));
           bead_ptr->setPos(bead_pos);
           ++number_of_H2_molecules;
           ++bead_id;

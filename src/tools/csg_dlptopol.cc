@@ -15,10 +15,10 @@
  *
  */
 
+#include "../../include/votca/csg/csgapplication.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <iostream>
-#include <votca/csg/csgapplication.h>
 
 using namespace votca::csg;
 using namespace std;
@@ -114,7 +114,7 @@ bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
   // find all unique molecular types
   vector<int> molecule_ids = top->getMoleculeIds();
   for (const int &molecule_id : molecule_ids) {
-    Molecule *mol = top->getMolecule(molecule_id);
+    Molecule *mol = &top->getMolecule(molecule_id);
     // molecules are ignored during the mapping stage
     // i.e. the ignored ones do not enter the CG topology (*top) - ?
     // if( IsIgnored(mol->getName()) ) continue;

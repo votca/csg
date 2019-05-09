@@ -20,12 +20,12 @@
 #define BOOST_TEST_MODULE nblist_3body_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/bead.h"
+#include "../../include/votca/csg/beadlist.h"
+#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/nblistgrid_3body.h"
 #include <string>
 #include <vector>
-#include <votca/csg/bead.h>
-#include <votca/csg/beadlist.h>
-#include <votca/csg/csgtopology.h>
-#include <votca/csg/nblistgrid_3body.h>
 #include <votca/tools/constants.h>
 
 using namespace std;
@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
 
   Molecule *mol;
   int molecule_id = 1;
-  mol = top.CreateMolecule(molecule_id,
-                           topology_constants::unassigned_molecule_type);
+  mol = &top.CreateMolecule(molecule_id,
+                            topology_constants::unassigned_molecule_type);
 
   int bead_id0 = 0;
   string bead_type = "CG";
@@ -63,9 +63,9 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   double mass = 1.0;
   double charge = -1.0;
   Bead *b;
-  b = top.CreateBead(symmetry, bead_type, bead_id0, molecule_id, residue_id,
-                     residue_type, topology_constants::unassigned_element, mass,
-                     charge);
+  b = &top.CreateBead(symmetry, bead_type, bead_id0, molecule_id, residue_id,
+                      residue_type, topology_constants::unassigned_element,
+                      mass, charge);
   pos[0] = 0.0;
   pos[1] = 0.0;
   pos[2] = 0.0;
@@ -78,9 +78,9 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   residue_id = 0;
   mass = 2.0;
   charge = -2.0;
-  b = top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
-                     residue_type, topology_constants::unassigned_element, mass,
-                     charge);
+  b = &top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
+                      residue_type, topology_constants::unassigned_element,
+                      mass, charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;
@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   residue_id = 0;
   mass = 3.0;
   charge = -3.0;
-  b = top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
-                     residue_type, topology_constants::unassigned_element, mass,
-                     charge);
+  b = &top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
+                      residue_type, topology_constants::unassigned_element,
+                      mass, charge);
   mol->AddBead(b);
   b->setMoleculeId(mol->getId());
   pos[0] = 1.0;

@@ -15,9 +15,9 @@
  *
  */
 
+#include "../../include/votca/csg/nblistgrid.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include <cassert>
-#include <votca/csg/nblistgrid.h>
 
 namespace votca {
 namespace csg {

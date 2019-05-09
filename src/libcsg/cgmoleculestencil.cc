@@ -52,6 +52,8 @@ void CGMoleculeStencil::AddBeadStencils(
 // Assumes that the bead_ids when sorted line up with the CGBeadStencil vector
 unordered_map<int, string> CGMoleculeStencil::MapAtomicBeadIdsToAtomicBeadNames(
     vector<int> bead_ids) const {
+  std::cout << bead_ids.size() << " " << cg_and_atom_names_.right.size()
+            << std::endl;
   assert(bead_ids.size() == cg_and_atom_names_.right.size() &&
          "number of bead_ids is not consistent with the number of atomic "
          "beads stored in the atomic molecule.");
