@@ -502,7 +502,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         mol_map[mol_b.first]->AddBead(bead_f);
       }
     }
-
     // Cyle through the bonds and add them to the appropriate molecule
     for (std::vector<int> &bond_pair : bond_pairs) {
 

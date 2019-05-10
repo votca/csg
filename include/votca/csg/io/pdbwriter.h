@@ -67,14 +67,18 @@ class PDBWriter : public TrajectoryWriter {
     return type;
   }
 
-  template <class T>
-  std::string getElement(T &item) {
-    if (item.getElement() == tools::topology_constants::unassigned_element) {
-      return "";
+  /*  template <class T>
+    std::string getElement(T &item) {
+      if (item.getElement() == tools::topology_constants::unassigned_element) {
+        return "";
+      }
+      return item.getElement();
+    }*/
+  void formatELement(std::string &element) {
+    if (element.compare(tools::topology_constants::unassigned_element) == 0) {
+      element = "";
     }
-    return item.getElement();
   }
-
   /**
    * @brief Get the residue type
    *
@@ -88,15 +92,24 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return
    */
-  template <class T>
-  std::string getResidueType(T &item) {
-    std::string restype = item.getResidueType();
-    if (restype == tools::topology_constants::unassigned_residue_type) {
+  /*  template <class T>
+    std::string getResidueType(T &item) {
+      std::string restype = item.getResidueType();
+      if
+    (restype.compare(tools::topology_constants::unassigned_residue_type)==0) {
+        restype = "UNK";
+      } else if (restype.size() > 3) {
+        restype = restype.substr(0, 3);
+      }
+      return restype;
+    }*/
+  void formatResidueType(std::string &restype) {
+    if (restype.compare(tools::topology_constants::unassigned_residue_type) ==
+        0) {
       restype = "UNK";
     } else if (restype.size() > 3) {
       restype = restype.substr(0, 3);
     }
-    return restype;
   }
 
   /**
@@ -110,21 +123,24 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return equivalent id for pdb file
    */
-  template <class T>
-  int getId(T &item) {
-    return item.getId() + 1;
-  }
+  /* template <class T>
+   int getId(T &item) {
+     return item.getId() + 1;
+   }*/
+  void formatId(int &id) { id = id + 1; }
 
-  template <class T>
-  int getResId(T &item) {
-    return item.getResidueId() + 1;
-  }
+  /*  template <class T>
+    int getResId(T &item) {
+      return item.getResidueId() + 1;
+    }*/
+  void formatResId(int &resId) { resId = resId + 1; }
 
+  /*
   template <class T>
   Eigen::Vector3d getPos(T &item) {
     return item.getPos() * tools::conv::bohr2ang;
-  }
-
+  }*/
+  void formatPos(Eigen::Vector3d &pos) { pos *= tools::conv::nm2ang; }
   /*  Eigen::Vector3d getPos(typename Topology_T::bead_t &bead) {
       return bead.Pos() * tools::conv::nm2ang;
     }*/
@@ -184,6 +200,12 @@ inline void PDBWriter<Topology_T>::WriteContainer(T &container) {
           params.get<std::string>(tools::StructureParameter::Element);
       Eigen::Vector3d r =
           params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
+
+      formatResidueType(resname);
+      formatId(atomid);
+      formatResId(residueid);
+      formatPos(r);
+      formatELement(element);
       /*      int atomid = getId(*atom);
             std::string resname = getResidueType(*atom);
             int residueid = getResId(*atom);

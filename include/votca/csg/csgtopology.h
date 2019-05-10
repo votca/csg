@@ -48,7 +48,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     int molecule_id = params.get<int>(tools::StructureParameter::MoleculeId);
     CreateMolecule(molecule_id, molecule_type);
     // std::cout << &(molecules_.back()) << std::endl;
-    return molecules_[molecule_id];
+    return *(molecules_map_[molecule_id]);
   }
 
   Molecule& CreateMolecule(int id, std::string molecule_type) {
@@ -66,7 +66,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
     size_t index = molecules_.size();
     molecules_.push_back(Molecule(id, molecule_type));
     molecules_map_[id] = &(molecules_[index]);
-    return molecules_[index];
+    return *(molecules_map_[id]);
   }
 
   Bead& CreateBead(tools::StructureParameters& params) {
