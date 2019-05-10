@@ -56,16 +56,17 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
       type_container_.AddMoleculeType(molecule_type);
     }
 
-    assert(!molecules_.count(id) &&
+    assert(!molecules_map_.count(id) &&
            "molecule with the provided id already exists within the topology!");
 
     //    Molecule molecule = Molecule(id, molecule_type);
     // size_t index = molecules_.size();
     //    molecules_.push_back(molecule);
     // molecules_.resize(index+1);
-    molecules_[id] = Molecule(id, molecule_type);
-    // molecules_map_[id] = &(molecules_[index]);
-    return molecules_[id];
+    size_t index = molecules_.size();
+    molecules_.push_back(Molecule(id, molecule_type));
+    molecules_map_[id] = &(molecules_[index]);
+    return molecules_[index];
   }
 
   Bead& CreateBead(tools::StructureParameters& params) {

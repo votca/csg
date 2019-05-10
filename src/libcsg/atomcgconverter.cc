@@ -75,20 +75,20 @@ void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
 
   // Cycle through the atomistic molecules
   // for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
-  for (const pair<int, Molecule> &atomistic_mol : atomic_top_in) {
-    // const Molecule *atomistic_mol = &(id_and_molecule.second);
-    // const Molecule *atomistic_mol = &(id_and_molecule.second);
+  // for (const pair<int, Molecule> &atomistic_mol : atomic_top_in) {
+  // const Molecule *atomistic_mol = &(id_and_molecule.second);
+  // const Molecule *atomistic_mol = &(id_and_molecule.second);
 
-    string atomistic_mol_type = atomistic_mol.second.getType();
+  for (const Molecule &atomistic_mol : atomic_top_in) {
+    string atomistic_mol_type = atomistic_mol.getType();
     if (atomic_mol_types_to_ignore_.count(atomistic_mol_type)) {
       continue;
     }
 
     if (AtomisticMoleculeTypeExist(atomistic_mol_type) == false) {
       cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << atomistic_mol.second.getType()
-           << "\" with id " << atomistic_mol.second.getId() << " in topology"
-           << endl
+           << "WARNING: unknown molecule \"" << atomistic_mol.getType()
+           << "\" with id " << atomistic_mol.getId() << " in topology" << endl
            << "molecule will not be mapped to CG representation\n"
            << "Check weather a mapping file for all molecule exists, was "
            << "specified in --cg separated by ; and the ident tag in xml-file "
@@ -97,8 +97,8 @@ void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
       continue;
     }
 
-    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atomistic_mol.second,
-                                                    cg_top_out, atomic_top_in);
+    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atomistic_mol, cg_top_out,
+                                                    atomic_top_in);
   }
   cg_top_out.RebuildExclusions();
 

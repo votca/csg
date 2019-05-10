@@ -35,6 +35,7 @@
 #include "topologytypecontainer.h"
 #include "triclinicbox.h"
 
+#include <boost/container/stable_vector.hpp>
 #include <votca/tools/rangeparser.h>
 
 namespace votca {
@@ -63,16 +64,18 @@ class TemplateTopology {
   //  typedef Molecule_T molecule_t;
   typedef Bead_T bead_t;
   typedef Molecule_T container_t;
-  typename std::unordered_map<int, Molecule_T>::iterator begin() {
+  typename boost::container::stable_vector<Molecule_T>::iterator begin() {
     return molecules_.begin();
   }
-  typename std::unordered_map<int, Molecule_T>::iterator end() {
+  typename boost::container::stable_vector<Molecule_T>::iterator end() {
     return molecules_.end();
   }
-  typename std::unordered_map<int, Molecule_T>::const_iterator begin() const {
+  typename boost::container::stable_vector<Molecule_T>::const_iterator begin()
+      const {
     return molecules_.begin();
   }
-  typename std::unordered_map<int, Molecule_T>::const_iterator end() const {
+  typename boost::container::stable_vector<Molecule_T>::const_iterator end()
+      const {
     return molecules_.end();
   }
   /**
@@ -151,7 +154,7 @@ class TemplateTopology {
    * @return true if it does exist, else false
    */
   bool MoleculeExist(const int molecule_id) const {
-    return molecules_.count(molecule_id);
+    return molecules_map_.count(molecule_id);
   }
 
   bool BeadTypeExist(const std::string bead_type) const {
@@ -184,10 +187,10 @@ class TemplateTopology {
    * @return raw pointer to the molecule
    */
   Molecule_T &getMolecule(const int id) {
-    assert(molecules_.count(id) &&
+    assert(molecules_map_.count(id) &&
            "Cannot access molecule with provided id because it is not stored "
            "in the topology object.");
-    return molecules_.at(id);
+    return *(molecules_map_[id]);
   }
 
   /**
@@ -201,7 +204,7 @@ class TemplateTopology {
     assert(molecules_.count(id) &&
            "Cannot access const molecule with provided id because it is not "
            "stored in the topology object.");
-    return molecules_.at(id);
+    return *(molecules_.at(id));
   }
 
   /**
@@ -209,7 +212,7 @@ class TemplateTopology {
    */
   void ClearMoleculeList() {
     molecules_.clear();
-    molecules_.clear();
+    molecules_map_.clear();
   }
 
   /**
@@ -466,8 +469,8 @@ class TemplateTopology {
 
   /// molecules in the topology
   // std::unordered_map<int, Molecule_T *> molecules_map_;
-  // std::vector<Molecule_T>  molecules_;
-  std::unordered_map<int, Molecule_T> molecules_;
+  boost::container::stable_vector<Molecule_T> molecules_;
+  std::unordered_map<int, Molecule_T *> molecules_map_;
 
   /// bonded interactions in the topology
   std::vector<std::unique_ptr<Interaction>> interactions_;
@@ -505,7 +508,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Cleanup() {
 
   beads_.clear();
   molecules_.clear();
-  // molecules_map_.clear();
+  molecules_map_.clear();
   type_container_.Clear();
   interactions_.clear();
   bc_ = OpenBox().Clone();
@@ -531,7 +534,7 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
   has_force_ = top.has_force_;
   beads_ = top.beads_;
   molecules_ = top.molecules_;
-  // molecules_map_ = top.molecules_map_;
+  molecules_map_ = top.molecules_map_;
   bc_ = top.bc_->Clone();
   type_container_ = top.type_container_;
   particle_group_ = top.particle_group_;
@@ -625,9 +628,10 @@ void TemplateTopology<Bead_T, Molecule_T>::CheckMoleculeNaming(void) const {
 
   // for (const std::pair<const int, Molecule_T> &id_and_molecule : molecules_)
   // {
-  for (const std::pair<int, Molecule_T> &molecule : molecules_) {
-    std::string type = molecule.second.getType();
-    size_t bead_count = molecule.second.BeadCount();
+  //  for (const std::pair<int, Molecule_T> &molecule : molecules_) {
+  for (const Molecule_T &molecule : molecules_) {
+    std::string type = molecule.getType();
+    size_t bead_count = molecule.BeadCount();
     if (number_of_beads_in_each_molecular_type.count(type)) {
       if (number_of_beads_in_each_molecular_type.at(type) != bead_count) {
         throw std::runtime_error(
@@ -699,7 +703,8 @@ template <class Bead_T, class Molecule_T>
 std::vector<int> TemplateTopology<Bead_T, Molecule_T>::getMoleculeIds() const {
   std::vector<int> molecule_ids;
   // for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
-  for (const std::pair<const int, Molecule_T> id_and_molecule : molecules_) {
+  for (const std::pair<const int, Molecule_T *> id_and_molecule :
+       molecules_map_) {
     molecule_ids.push_back(id_and_molecule.first);
   }
   return molecule_ids;
@@ -710,10 +715,10 @@ std::map<int, std::string>
     TemplateTopology<Bead_T, Molecule_T>::getResidueIdsAndTypesInMolecule(
         int molecule_id) const {
 
-  assert(molecules_.count(molecule_id) &&
+  assert(molecules_map_.count(molecule_id) &&
          "Molecule id does not exist in topology object");
   std::map<int, std::string> id_and_residue_type;
-  std::vector<int> bead_ids = molecules_.at(molecule_id).getBeadIds();
+  std::vector<int> bead_ids = molecules_map_.at(molecule_id)->getBeadIds();
   for (const int &bead_id : bead_ids) {
     id_and_residue_type[beads_.at(bead_id).getResidueId()] =
         beads_.at(bead_id).getResidueType();

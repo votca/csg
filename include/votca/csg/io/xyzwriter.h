@@ -110,7 +110,7 @@ void XYZWriter<Topology_T>::Write(boost::any conf_any) {
 
   WriteHeader(header, getAtomCount(top));
   for (auto &container : top) {
-    WriteContainer_(container.second);
+    WriteContainer_(container);
   }
 }
 

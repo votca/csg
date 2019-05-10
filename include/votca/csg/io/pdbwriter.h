@@ -225,9 +225,8 @@ void PDBWriter<Topology_T>::Write(boost::any conf_any) {
   if (out_.is_open()) {
     out_ << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
          << std::flush;
-    for (std::pair<const int, typename Topology_T::container_t> &container :
-         conf) {
-      WriteContainer(container.second);
+    for (auto &container : conf) {
+      WriteContainer(container);
     }
     out_ << "ENDMDL" << std::endl;
   } else {
