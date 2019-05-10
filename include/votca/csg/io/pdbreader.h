@@ -64,9 +64,9 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   tools::UnitConverter converter_;
 
   tools::Elements elements_;
-  void formatId(int &id);
-  void formatElement(std::string &element, const std::string &atom_type);
-  void formatDistance(double &distance);
+  void formatId_(int &id);
+  void formatElement_(std::string &element, const std::string &atom_type);
+  void formatDistance_(double &distance);
 };
 
 }  // namespace csg

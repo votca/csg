@@ -63,10 +63,8 @@ class PDBWriter : public TrajectoryWriter {
  private:
   tools::UnitConverter converter_;
 
-  template <class T>
-  std::string getType(T &atom);
-
-  void formatELement(std::string &element);
+  void formatType_(std::string &atom_type);
+  void formatElement_(std::string &element);
   /**
    * @brief Get the residue type
    *
@@ -80,7 +78,7 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return
    */
-  void formatResidueType(std::string &restype);
+  void formatResidueType_(std::string &restype);
   /**
    * @brief Gets the id of the internal VOTCA class instance and adds one
    *
@@ -92,9 +90,9 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return equivalent id for pdb file
    */
-  void formatId(int &id) noexcept;
-  void formatResId(int &resId) noexcept;
-  void formatPos(Eigen::Vector3d &pos);
+  void formatId_(int &id) noexcept;
+  void formatResId_(int &resId) noexcept;
+  void formatPos_(Eigen::Vector3d &pos);
 
   template <class T>
   T &getIterable(T &container);
