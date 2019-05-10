@@ -29,6 +29,7 @@
 #include <type_traits>
 #include <votca/tools/constants.h>
 #include <votca/tools/structureparameters.h>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -57,28 +58,15 @@ class PDBWriter : public TrajectoryWriter {
 
   void WriteBox(const Eigen::Matrix3d &box);
 
- private:
-  template <class T>
-  std::string getType(T &atom) {
-    std::string type = atom.getType();
-    if (type.size() > 4) {
-      type = type.substr(0, 4);
-    }
-    return type;
-  }
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
 
-  /*  template <class T>
-    std::string getElement(T &item) {
-      if (item.getElement() == tools::topology_constants::unassigned_element) {
-        return "";
-      }
-      return item.getElement();
-    }*/
-  void formatELement(std::string &element) {
-    if (element.compare(tools::topology_constants::unassigned_element) == 0) {
-      element = "";
-    }
-  }
+ private:
+  tools::UnitConverter converter_;
+
+  template <class T>
+  std::string getType(T &atom);
+
+  void formatELement(std::string &element);
   /**
    * @brief Get the residue type
    *
@@ -92,26 +80,7 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return
    */
-  /*  template <class T>
-    std::string getResidueType(T &item) {
-      std::string restype = item.getResidueType();
-      if
-    (restype.compare(tools::topology_constants::unassigned_residue_type)==0) {
-        restype = "UNK";
-      } else if (restype.size() > 3) {
-        restype = restype.substr(0, 3);
-      }
-      return restype;
-    }*/
-  void formatResidueType(std::string &restype) {
-    if (restype.compare(tools::topology_constants::unassigned_residue_type) ==
-        0) {
-      restype = "UNK";
-    } else if (restype.size() > 3) {
-      restype = restype.substr(0, 3);
-    }
-  }
-
+  void formatResidueType(std::string &restype);
   /**
    * @brief Gets the id of the internal VOTCA class instance and adds one
    *
@@ -123,145 +92,25 @@ class PDBWriter : public TrajectoryWriter {
    *
    * @return equivalent id for pdb file
    */
-  /* template <class T>
-   int getId(T &item) {
-     return item.getId() + 1;
-   }*/
-  void formatId(int &id) { id = id + 1; }
-
-  /*  template <class T>
-    int getResId(T &item) {
-      return item.getResidueId() + 1;
-    }*/
-  void formatResId(int &resId) { resId = resId + 1; }
-
-  /*
-  template <class T>
-  Eigen::Vector3d getPos(T &item) {
-    return item.getPos() * tools::conv::bohr2ang;
-  }*/
-  void formatPos(Eigen::Vector3d &pos) { pos *= tools::conv::nm2ang; }
-  /*  Eigen::Vector3d getPos(typename Topology_T::bead_t &bead) {
-      return bead.Pos() * tools::conv::nm2ang;
-    }*/
+  void formatId(int &id) noexcept;
+  void formatResId(int &resId) noexcept;
+  void formatPos(Eigen::Vector3d &pos);
 
   template <class T>
-  T &getIterable(T &container) {
-    return container;
-  }
+  T &getIterable(T &container);
 
-  std::vector<typename Molecule::bead_t> getIterable(Molecule &container) {
-    return container.getBeads();
-  }
-  /*
-    std::vector<typename Topology_T::bead_t *> getIterable(Topology_T &top) {
-      std::vector<typename Topology_T::bead_t *> beads;
-      std::vector<int> bead_ids = top.getBeadIds();
-      for (int &bead_id : bead_ids) {
-        beads.push_back(top.getBead(bead_id));
-      }
-      return beads;
-    }*/
+  std::vector<typename Molecule::bead_t> getIterable(Molecule &container);
 
   template <typename T>
-  T *ptr(T *obj) {
-    return obj;
-  }
+  T *ptr(T *obj);
 
   template <typename T>
-  T *ptr(T &obj) {
-    return &obj;
-  }
+  T *ptr(T &obj);
 };
 
-template <class Topology_T>
-template <class T>
-inline void PDBWriter<Topology_T>::WriteContainer(T &container) {
-
-  if (out_.is_open()) {
-    boost::format atomfrmt(
-        "ATOM  %1$5d %2$-4s %3$-3s %4$1s%5$4d    %6$8.3f%7$8.3f%8$8.3f         "
-        "  "
-        "           %9$+2s\n");
-
-    for (auto &atom : getIterable(container)) {
-      auto atom_ptr = ptr(atom);
-      tools::StructureParameters params = atom_ptr->getParameters();
-      int atomid = params.get<int>(tools::StructureParameter::BeadId);
-      std::string resname = tools::topology_constants::unassigned_residue_type;
-      if (params.ParameterExist(tools::StructureParameter::ResidueType)) {
-        resname =
-            params.get<std::string>(tools::StructureParameter::ResidueType);
-      }
-      int residueid = params.get<int>(tools::StructureParameter::ResidueId);
-      std::string atomtype =
-          params.get<std::string>(tools::StructureParameter::BeadType);
-      std::string element =
-          params.get<std::string>(tools::StructureParameter::Element);
-      Eigen::Vector3d r =
-          params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
-
-      formatResidueType(resname);
-      formatId(atomid);
-      formatResId(residueid);
-      formatPos(r);
-      formatELement(element);
-      /*      int atomid = getId(*atom);
-            std::string resname = getResidueType(*atom);
-            int residueid = getResId(*atom);
-            std::string atomtype = getType(*atom);
-            std::string element = getElement(*atom);
-            Eigen::Vector3d r = getPos(*atom);
-      */
-      out_ << atomfrmt % (atomid % 100000)    // atom serial number
-                  % atomtype % resname % " "  // chain identifier 1 char
-                  % residueid                 // residue sequence number
-                  % r.x() % r.y() % r.z() % element;
-
-      // we skip the charge
-      // writeSymmetry(*atom);
-    }
-    out_ << std::flush;
-  } else {
-    throw std::runtime_error("Cannot write container to file it is not open.");
-  }
-}
-
-template <class Topology_T>
-void PDBWriter<Topology_T>::WriteHeader(std::string header) {
-  if (header.size() < 10 || header.substr(0, 10) != "HEADER    ") {
-    out_ << "HEADER    ";
-  }
-  out_ << header;
-  if (header.back() != '\n') out_ << "\n";
-}
-
-template <class Topology_T>
-void PDBWriter<Topology_T>::Write(boost::any conf_any) {
-  if (typeid(Topology_T *) != conf_any.type()) {
-    throw std::runtime_error(
-        "Error Cannot read topology using pdb writer write, incorrect topology "
-        "type provided.");
-  }
-  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
-  if (out_.is_open()) {
-    out_ << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
-         << std::flush;
-    for (auto &container : conf) {
-      WriteContainer(container);
-    }
-    out_ << "ENDMDL" << std::endl;
-  } else {
-    throw std::runtime_error(
-        "Cannot write topology to file, file is not open.");
-  }
-}
-// Super Hacky does not follow the pdb file convention, essentially is breaking
-// up coarse grained beads into arbitraty pieces, if we are going to allow
-// this it should be exact and break the pieces back into their constituent
-// atoms using the cgatomconverter class. Or you should simply use a differnt
-// file format
 }  // namespace csg
 }  // namespace votca
+
+#include "../../../../src/libcsg/modules/io/pdbwriter_priv.h"
 
 #endif  // VOTCA_CSG_PDBWRITER_H
