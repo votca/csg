@@ -33,6 +33,8 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/structureparameters.h>
+#include <votca/tools/unitconverter.h>
+
 namespace votca {
 namespace csg {
 
@@ -50,8 +52,7 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   ~XYZReader() {}
 
   /// open a topology file
-  template <bool topology>
-  bool ReadTopology(std::string file, boost::any top);
+  bool ReadTopology(const std::string &file, boost::any top);
 
   /// read in the first frame
   bool FirstFrame(boost::any top);
@@ -61,7 +62,14 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
   template <class T>
   void ReadFile(T &container);
 
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+
  private:
+  tools::UnitConverter converter_;
+  tools::Elements elements_;
+
+  void formatElement(std::string &element);
+  void formatDistance(double &dist);
   template <class T>
   size_t getContainerSize(T &container);
 

@@ -21,7 +21,8 @@ foreach(PROG
   test_nblistgrid_3body
   test_pdbreader
   test_tabulatedpotential
-  test_triplelist )
+  test_triplelist
+  test_xyzreaderwriter)
 
   file(GLOB ${PROG}_SOURCES ${PROG}.cc)
   add_executable(unit_${PROG} ${${PROG}_SOURCES})

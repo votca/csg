@@ -27,6 +27,8 @@
 #include <boost/format.hpp>
 #include <stdio.h>
 #include <votca/tools/constants.h>
+#include <votca/tools/unitconverter.h>
+
 namespace votca {
 namespace csg {
 
@@ -40,7 +42,14 @@ class XYZWriter : public TrajectoryWriter {
 
   void WriteHeader(std::string header, int number_atoms);
 
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+
  private:
+  tools::UnitConverter converter_;
+
+  void formatType(std::string &atom_type);
+  void formatPosition(Eigen::Vector3d &position);
+
   template <class T>
   void WriteContainer_(T &container);
 

@@ -42,7 +42,9 @@ class TopologyReader {
  public:
   virtual ~TopologyReader() {}
 
-  virtual bool ReadTopology(std::string file, boost::any top) { return false; }
+  virtual bool ReadTopology(const std::string& file, boost::any top) {
+    return false;
+  }
 
   static void RegisterPlugins(void);
 };

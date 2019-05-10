@@ -50,7 +50,7 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   ~LAMMPSDumpReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, boost::any top);
+  bool ReadTopology(const std::string &file, boost::any top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
@@ -74,7 +74,7 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 };
 
 template <class Topology_T>
-bool LAMMPSDumpReader<Topology_T>::ReadTopology(std::string file,
+bool LAMMPSDumpReader<Topology_T>::ReadTopology(const std::string &file,
                                                 boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {

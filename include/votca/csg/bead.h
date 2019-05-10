@@ -369,7 +369,7 @@ inline tools::StructureParameters Bead::getParameters() const {
   params.set(tools::StructureParameter::Charge, charge_);
   params.set(tools::StructureParameter::Symmetry, symmetry_);
   if (bead_position_set_) {
-    params.set(tools::StructureParameter::Position, getPos());
+    params.set(tools::StructureParameter::Position, bead_position_);
   }
   return params;
 }

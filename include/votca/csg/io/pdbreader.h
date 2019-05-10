@@ -54,7 +54,7 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   /// read in the next frame
   bool NextFrame(boost::any top);
 
-  bool ReadTopology(std::string file, boost::any top);
+  bool ReadTopology(const std::string &file, boost::any top);
 
   const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
 
