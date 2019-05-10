@@ -31,6 +31,7 @@
 #include <vector>
 #include <votca/tools/elements.h>
 #include <votca/tools/structureparameters.h>
+#include <votca/tools/unitconverter.h>
 namespace votca {
 namespace csg {
 
@@ -55,10 +56,44 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
 
   bool ReadTopology(std::string file, boost::any top);
 
+  constexpr static tools::DistanceUnit distance_unit =
+      tools::DistanceUnit::angstroms;
+
  private:
   std::ifstream _fl;
   bool _topology;
+  tools::UnitConverter converter_;
+
+  tools::Elements elements_;
+  void formatId(int &id);
+  void formatElement(std::string &element, const std::string &atom_type);
+  void formatDistance(double &distance);
 };
+
+template <class Topology_T>
+constexpr tools::DistanceUnit PDBReader<Topology_T>::distance_unit;
+
+template <class Topology_T>
+void PDBReader<Topology_T>::formatId(int &id) {
+  --id;
+}
+
+template <class Topology_T>
+void PDBReader<Topology_T>::formatElement(std::string &element_symbol,
+                                          const std::string &atom_type) {
+  if (!elements_.isEleShort(element_symbol)) {
+    if (elements_.isEleShort(atom_type)) {
+      element_symbol = atom_type;
+    } else {
+      element_symbol = tools::topology_constants::unassigned_element;
+    }
+  }
+}
+
+template <class Topology_T>
+void PDBReader<Topology_T>::formatDistance(double &distance) {
+  distance *= converter_.convert(distance_unit, Topology_T::distance_unit);
+}
 
 template <class Topology_T>
 bool PDBReader<Topology_T>::ReadTopology(std::string file, boost::any top_any) {
@@ -99,7 +134,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
   }
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string line;
-  tools::Elements elements;
   // Two column vector for storing all bonds
   // 1 - id of first atom
   // 2 - id of second atom
@@ -159,9 +193,13 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         throw std::runtime_error(
             "Non cubical box in pdb file not implemented, yet!");
       }
-      double aa = stod(a) / 10.0;
-      double bb = stod(b) / 10.0;
-      double cc = stod(c) / 10.0;
+      double aa = stod(a);
+      double bb = stod(b);
+      double cc = stod(c);
+      formatDistance(aa);
+      formatDistance(bb);
+      formatDistance(cc);
+
       Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
       box.diagonal() = Eigen::Vector3d(aa, bb, cc);
       top.setBox(box);
@@ -196,7 +234,8 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       boost::algorithm::trim(atm1);
       // Atom ids are stored internally starting at 0 but are stored in pdb
       // files starting at 1
-      int at1 = boost::lexical_cast<int>(atm1) - 1;
+      int at1 = boost::lexical_cast<int>(atm1);
+      formatId(at1);
 
       int index = 0;
       while (index < bonded_atms.size()) {
@@ -285,41 +324,37 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       boost::algorithm::trim(element_symbol);
       boost::algorithm::trim(charge_str);
 
-      if (!elements.isEleShort(element_symbol)) {
-        if (elements.isEleShort(atom_type)) {
-          element_symbol = atom_type;
-        } else {
-          element_symbol = tools::topology_constants::unassigned_element;
-        }
-      }
-
       // Atom number is stored internally starting at 0 but .pdb files start at
       // ids of 1
-      int atom_number = boost::lexical_cast<int>(atom_id_pdb) - 1;
+      int atom_number = boost::lexical_cast<int>(atom_id_pdb);
       ++bead_count;
+
+      formatElement(element_symbol, atom_type);
+      formatId(atom_number);
 
       typename Topology_T::bead_t *b;
       // Only read the CONECT keyword if the topology is set too true
       if (_topology) {
-        int residue_id, residue_id_pdb;
+        int residue_id;
         try {
-          residue_id_pdb = boost::lexical_cast<int>(residue_id_pdb_str);
+          residue_id = boost::lexical_cast<int>(residue_id_pdb_str);
         } catch (boost::bad_lexical_cast &) {
           throw std::runtime_error(
               "Cannot convert residue_id_pdb='" + residue_id_pdb_str +
               "' to int, that usallly means: misformated pdb file");
         }
-        if (residue_id_pdb < 1)
+        if (residue_id < 1)
           throw std::runtime_error(
-              "Misformated pdb file, residue_id_pdb has to be > 0");
+              "Misformated pdb file, residue_id has to be > 0");
 
-        residue_id = residue_id_pdb - 1;
         // Determine if the charge_str has been provided in the .pdb file or if
         // we will be assuming it is 0
         double charge = 0;
         if (charge_str != "") {
           charge = boost::lexical_cast<double>(charge_str);
         }
+
+        formatId(residue_id);
         // CreateBead takes 6 parameters in the following order
         // 1 - symmetry of the bead (1-indicates sphere, 3-indicates
         // ellipsoidal)
@@ -335,7 +370,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         tools::StructureParameters params;
         params.set(tools::StructureParameter::Symmetry, symmetry);
         params.set(tools::StructureParameter::Mass,
-                   elements.getMass(element_symbol));
+                   elements_.getMass(element_symbol));
         params.set(tools::StructureParameter::Charge, charge);
         params.set(tools::StructureParameter::Element, element_symbol);
         params.set(tools::StructureParameter::BeadId, atom_number);
@@ -350,9 +385,14 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         b = top.getBead(atom_number);
       }
       // convert to nm from A
-      b->setPos(Eigen::Vector3d(stod(x) * tools::conv::ang2nm,
-                                stod(y) * tools::conv::ang2nm,
-                                stod(z) * tools::conv::ang2nm));
+      double x_pos = stod(x);
+      double y_pos = stod(y);
+      double z_pos = stod(z);
+
+      formatDistance(x_pos);
+      formatDistance(y_pos);
+      formatDistance(z_pos);
+      b->setPos(Eigen::Vector3d(x_pos, y_pos, z_pos));
     }
 
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {
