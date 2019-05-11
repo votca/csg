@@ -31,6 +31,7 @@
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 #include <votca/tools/structureparameters.h>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -59,6 +60,10 @@ class GROReader : public TrajectoryReader, public TopologyReader {
   bool NextFrame(boost::any top);
 
   void Close();
+
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::nanometers;
+  const tools::VelocityUnit velocity_unit =
+      tools::VelocityUnit::nanometers_per_picosecond;
 
  private:
   std::ifstream _fl;
