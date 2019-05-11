@@ -20,17 +20,17 @@
 #define BOOST_TEST_MODULE lammpdatatopologyreaderwriter_test
 #include <boost/test/unit_test.hpp>
 
+#include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/orthorhombicbox.h"
+#include "../../include/votca/csg/topologyreader.h"
+#include "../../include/votca/csg/trajectoryreader.h"
+#include "../../include/votca/csg/trajectorywriter.h"
 #include <boost/any.hpp>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
 #include <string>
-#include <votca/csg/bead.h>
-#include <votca/csg/orthorhombicbox.h>
-#include <votca/csg/topologyreader.h>
-#include <votca/csg/trajectoryreader.h>
-#include <votca/csg/trajectorywriter.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/types.h>
 using namespace std;
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
  * using the topology reader. A trajectory reader is then used to read
  * a second data file. This leads to updating the positions of the atoms
  */
-/*
+
 BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   string lammpsdatafilename = "test_polymer3.data";
@@ -118,12 +118,11 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   CSG_Topology top;
 
   TopologyReader::RegisterPlugins();
-  TopologyReader *lammpsDataReader;
-  lammpsDataReader = TopReaderFactory().Create("test.data");
+  unique_ptr<TopologyReader> lammpsDataReader =
+      TopReaderFactory().Create("test.data");
   CSG_Topology *top_ptr = &top;
   boost::any any_ptr(&top);
   lammpsDataReader->ReadTopology(lammpsdatafilename, any_ptr);
-//  delete lammpsDataReader;
 
   string lammpsdatafilename2 = "test_polymer4.data";
   if (fexists_(lammpsdatafilename2)) {
@@ -132,14 +131,13 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   printTestFile2_(lammpsdatafilename2);
 
   TrajectoryReader::RegisterPlugins();
-  TrajectoryReader *lammpsDataReaderTrj;
+  unique_ptr<TrajectoryReader> lammpsDataReaderTrj;
   lammpsDataReaderTrj = TrjReaderFactory().Create("test.data");
 
   lammpsDataReaderTrj->Open(lammpsdatafilename2);
   boost::any any_ptr2(&top);
   lammpsDataReaderTrj->FirstFrame(any_ptr2);
   lammpsDataReaderTrj->Close();
- // delete lammpsDataReaderTrj;
 
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
 
@@ -159,8 +157,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   cout << last_bead_pos << endl;
   BOOST_CHECK(last_bead_correct_pos.isApprox(last_bead_pos, 1e-3));
 
-  auto mol = top.getMolecule(0);
-  BOOST_CHECK_EQUAL(mol->BeadCount(), 100);
+  Molecule mol = top.getMolecule(0);
+  BOOST_CHECK_EQUAL(mol.BeadCount(), 100);
 
   BOOST_CHECK_EQUAL(top.getStep(), 1010);
 

@@ -464,8 +464,9 @@ class TemplateTopology {
   BoundaryCondition::eBoxtype autoDetectBoxType_(
       const Eigen::Matrix3d &box) const;
 
-  /// beads in the topology
-  std::unordered_map<int, Bead_T> beads_;
+  /// beads in the topology, must be a stable map, (unordered map does not work
+  // because the pointers get invalidated any time the unordered_map is resized)
+  std::map<int, Bead_T> beads_;
 
   /// molecules in the topology
   // std::unordered_map<int, Molecule_T *> molecules_map_;

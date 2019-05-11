@@ -33,6 +33,7 @@
 #include <votca/tools/elements.h>
 #include <votca/tools/getline.h>
 #include <votca/tools/structureparameters.h>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -62,11 +63,19 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   /// close the topology file
   void Close();
 
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+  const tools::TimeUnit time_unit = tools::TimeUnit::femtoseconds;
+  const tools::MassUnit mass_unit = tools::MassUnit::grams_per_mole;
+  const tools::EnergyUnit energy_unit =
+      tools::EnergyUnit::kilocalories_per_mole;
+  const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+
  private:
   std::ifstream fl_;
   std::string fname_;
   bool topology_;
 
+  tools::UnitConverter converter_;
   std::map<std::string, std::vector<std::vector<std::string>>> data_;
 
   // int - atom type starting index of 0
@@ -92,6 +101,11 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
 
   // First int is the atom id second the atom index
   std::map<int, int> atomIdToIndex_;
+
+  void formatDistance(double &distance);
+  void formatId(int &id);
+  void formatMass(double &mass);
+  void formatCharge(double &mass);
 
   bool MatchOneFieldLabel_(std::vector<std::string> fields, Topology_T &top);
   bool MatchTwoFieldLabels_(std::vector<std::string> fields, Topology_T &top);
@@ -164,15 +178,44 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   std::map<std::string, int> determineAtomAndBeadCountBasedOnMass_(
       std::map<std::string, double> baseNamesAndMasses);
 
-  std::vector<std::string> TrimCommentsFrom_(std::vector<std::string> fields);
-  void ltrim_(std::string &s);
-  void rtrim_(std::string &s);
-  void trim_(std::string &s);
+  /// Remove comments and padded spaces
+  void stripLine(std::string &line);
+  //  std::vector<std::string> TrimCommentsFrom_(std::vector<std::string>
+  //  fields); void ltrim_(std::string &s); void rtrim_(std::string &s); void
+  //  trim_(std::string &s);
   bool withinTolerance_(double value1, double value2, double tolerance);
   std::string getStringGivenDoubleAndMap_(
       double value, std::map<std::string, double> nameValue, double tolerance);
 };
 
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::formatDistance(double &distance) {
+  distance *=
+      converter_.convert(this->distance_unit, Topology_T::distance_unit);
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::formatId(int &id) {
+  --id;
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::formatMass(double &mass) {
+  mass *= converter_.convert(this->mass_unit, Topology_T::mass_unit);
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::formatCharge(double &charge) {
+  charge *= converter_.convert(this->charge_unit, Topology_T::charge_unit);
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::stripLine(std::string &line) {
+  // Remove comments
+  line = line.substr(0, line.find("#", 0));
+  boost::algorithm::trim(line);
+}
+/*
 template <class Topology_T>
 std::vector<std::string> LAMMPSDataReader<Topology_T>::TrimCommentsFrom_(
     std::vector<std::string> fields) {
@@ -182,10 +225,10 @@ std::vector<std::string> LAMMPSDataReader<Topology_T>::TrimCommentsFrom_(
     tempFields.push_back(field);
   }
   return tempFields;
-}
+}*/
 
 // trim from start (in place)
-template <class Topology_T>
+/*template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::ltrim_(std::string &s) {
   s.erase(s.begin(), std::find_if(s.begin(), s.end(),
                                   [](int ch) { return !std::isspace(ch); }));
@@ -206,7 +249,7 @@ void LAMMPSDataReader<Topology_T>::trim_(std::string &s) {
   ltrim_(s);
   rtrim_(s);
 }
-
+*/
 template <class Topology_T>
 bool LAMMPSDataReader<Topology_T>::withinTolerance_(double value1,
                                                     double value2,
@@ -264,6 +307,15 @@ bool LAMMPSDataReader<Topology_T>::ReadTopology(const std::string &file,
   std::cout << "atom-ID atom-type x y z" << std::endl;
   std::cout << "atom-ID atom-type x y z nx ny nz" << std::endl;
   std::cout << std::endl;
+  std::cout << "WARNING: Currently the votca lammps data reader only suppots ";
+  std::cout << "lammps units specified by the 'units real' ";
+  std::cout << "command." << std::endl;
+  std::cout << "mass: grams/mole" << std::endl;
+  std::cout << "distance: angstroms" << std::endl;
+  std::cout << "time: femtoseconds" << std::endl;
+  std::cout << "energy: Kcal/mole" << std::endl;
+  std::cout << "charge: e" << std::endl;
+  std::cout << std::endl;
 
   topology_ = true;
   top.Cleanup();
@@ -313,11 +365,13 @@ bool LAMMPSDataReader<Topology_T>::NextFrame(boost::any top_any) {
   getline(fl_, line);
   while (!fl_.eof()) {
 
+    // Remove all comments
+    stripLine(line);
     bool labelMatched = false;
     tools::Tokenizer tok(line, " ");
     std::vector<std::string> fields;
     tok.ToVector(fields);
-    fields = TrimCommentsFrom_(fields);
+    // fields = TrimCommentsFrom_(fields);
     // If not check the size of the vector and parse according
     // to the number of fields
     if (fields.size() == 1) {
@@ -544,13 +598,17 @@ void LAMMPSDataReader<Topology_T>::ReadBox_(std::vector<std::string> fields,
   for (int i = 1; i < 3; ++i) {
     std::string line;
     getline(fl_, line);
+    // line = line.substr(0,line.find("#",0));
+    stripLine(line);
     tools::Tokenizer tok(line, " ");
     tok.ConvertToVector(fields);
     if (fields.size() != 4) {
       throw std::runtime_error("invalid box format in the lammps data file");
     }
 
-    m(i, i) = stod(fields.at(1)) - stod(fields.at(0));
+    double distance = stod(fields.at(1)) - stod(fields.at(0));
+    formatDistance(distance);
+    m(i, i) = distance;
   }
   top.setBox(m);
 }
@@ -560,21 +618,25 @@ void LAMMPSDataReader<Topology_T>::SortIntoDataGroup_(std::string tag) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
+  stripLine(line);
+  // line = line.substr(0,line.find("#",0));
 
   std::vector<std::vector<std::string>> group;
   std::string data_elem;
   while (!line.empty()) {
     std::vector<std::string> mini_group;
-    trim_(line);
+    // trim_(line);
     tools::Tokenizer tok(line, " ");
     std::vector<std::string> fields;
     tok.ToVector(fields);
     for (auto field : fields) {
-      trim_(field);
+      // trim_(field);
       mini_group.push_back(field);
     }
     group.push_back(mini_group);
     getline(fl_, line);
+    stripLine(line);
+    // line = line.substr(0,line.find("#",0));
   }
 
   data_[tag] = group;
@@ -646,6 +708,7 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
+  stripLine(line);
 
   lammps_format format = determineDataFileFormat_(line);
   bool chargeRead = false;
@@ -666,7 +729,9 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
   }
   sorted_file[startingIndex] = line;
   getline(fl_, line);
-  trim_(line);
+  stripLine(line);
+  // line = line.substr(0,line.find("#",0));
+  // trim_(line);
 
   int atomId = 0;
   int moleculeId = tools::topology_constants::unassigned_molecule_id;
@@ -678,7 +743,9 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
     }
     sorted_file[atomId] = line;
     getline(fl_, line);
-    trim_(line);
+    stripLine(line);
+    // line = line.substr(0,line.find("#",0));
+    // trim_(line);
     if (atomId < startingIndex) startingIndex = atomId;
     if (moleculeId < startingIndexMolecule) startingIndexMolecule = moleculeId;
   }
@@ -702,10 +769,12 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
     iss >> y;
     iss >> z;
 
+    moleculeId = startingIndexMolecule;
+
     // Exclusion list assumes beads start with ids of 0
-    --atomId;
-    --atomTypeId;
-    moleculeId -= startingIndexMolecule;
+    formatId(atomId);
+    formatId(atomTypeId);
+    formatId(moleculeId);
 
     // We want to start with an index of 0 not 1
     // atomId;
@@ -735,6 +804,10 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
             "may be uninitialized";
         throw std::runtime_error(err);
       }
+
+      formatMass(mass);
+      formatCharge(charge);
+
       std::string atom_type = atomtypes_.at(atomTypeId).at(0);
       std::string element = atomtypes_[atomTypeId].at(2);
       tools::StructureParameters params;
@@ -757,7 +830,11 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       b = top.getBead(atomIndex - startingIndex);
     }
 
+    formatDistance(x);
+    formatDistance(y);
+    formatDistance(z);
     Eigen::Vector3d xyz_pos(x, y, z);
+
     b->setPos(xyz_pos);
   }
 
@@ -778,7 +855,9 @@ void LAMMPSDataReader<Topology_T>::ReadBonds_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
-  trim_(line);
+  stripLine(line);
+  // line = line.substr(0,line.find("#",0));
+  // trim_(line);
 
   int bondId;
   int bondTypeId;
@@ -814,7 +893,10 @@ void LAMMPSDataReader<Topology_T>::ReadBonds_(Topology_T &top) {
 
     ++bond_count;
     getline(fl_, line);
-    trim_(line);
+    stripLine(line);
+    // line = line.substr(0,line.find("#",0));
+
+    // trim_(line);
   }
 
   if (bond_count != numberOf_["bonds"]) {
@@ -834,7 +916,9 @@ void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
-  trim_(line);
+  stripLine(line);
+  // line = line.substr(0,line.find("#",0));
+  // trim_(line);
 
   int angleId;
   int angleTypeId;
@@ -875,7 +959,10 @@ void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
     ++angle_count;
 
     getline(fl_, line);
-    trim_(line);
+    stripLine(line);
+
+    // line = line.substr(0,line.find("#",0));
+    // trim_(line);
   }
 
   if (angle_count != numberOf_["angles"]) {
@@ -895,7 +982,9 @@ void LAMMPSDataReader<Topology_T>::ReadDihedrals_(Topology_T &top) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
-  trim_(line);
+  stripLine(line);
+  // line = line.substr(0,line.find("#",0));
+  // trim_(line);
 
   int dihedralId;
   int dihedralTypeId;
@@ -935,7 +1024,9 @@ void LAMMPSDataReader<Topology_T>::ReadDihedrals_(Topology_T &top) {
     }
     ++dihedral_count;
     getline(fl_, line);
-    trim_(line);
+    stripLine(line);
+    // line = line.substr(0,line.find("#",0));
+    // trim_(line);
   }
 
   if (dihedral_count != numberOf_["dihedrals"]) {
