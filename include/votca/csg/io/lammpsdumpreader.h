@@ -62,6 +62,7 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   void Close();
 
  private:
+  void formatId(int &id);
   void ReadTimestep(Topology_T &top, const std::string &itemline);
   void ReadBox(Topology_T &top, const std::string &itemline);
   void ReadNumAtoms(Topology_T &top, const std::string &itemline);
@@ -72,6 +73,11 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
   bool read_topology_data_ = false;
   int number_of_atoms_ = 0;
 };
+
+template <class Topology_T>
+void LAMMPSDumpReader<Topology_T>::formatId(int &id) {
+  --id;
+}
 
 template <class Topology_T>
 bool LAMMPSDumpReader<Topology_T>::ReadTopology(const std::string &file,
@@ -249,7 +255,9 @@ void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
     std::vector<std::string> fields2;
     tok.ToVector(fields2);
     // Lammps starts with ids at 1 we handle ids internally at 0
-    int atom_id = boost::lexical_cast<int>(fields2[id]) - 1;
+    int atom_id = boost::lexical_cast<int>(fields2[id]);
+    formatId(atom_id);
+
     if (atom_id > number_of_atoms_) {
       throw std::runtime_error(
           "Error: found atom with id " +

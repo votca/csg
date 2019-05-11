@@ -100,7 +100,7 @@ template <class Topology_T>
 class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
-  bool ReadTopology(std::string file, boost::any top);
+  bool ReadTopology(const std::string &file, boost::any top);
 
  private:
   typedef boost::unordered_multimap<
@@ -132,8 +132,8 @@ class XMLTopologyReader : public TopologyReader {
 };
 
 template <class Topology_T>
-bool XMLTopologyReader<Topology_T>::ReadTopology(std::string filename,
-                                                 boost::any top_any) {
+inline bool XMLTopologyReader<Topology_T>::ReadTopology(
+    const std::string &filename, boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(

@@ -49,7 +49,7 @@ class GROReader : public TrajectoryReader, public TopologyReader {
   ~GROReader() {}
 
   /// open a topology file
-  bool ReadTopology(std::string file, boost::any top);
+  bool ReadTopology(const std::string &file, boost::any top);
 
   /// open a trejectory file
   bool Open(const std::string &file);
@@ -66,7 +66,8 @@ class GROReader : public TrajectoryReader, public TopologyReader {
 };
 
 template <class Topology_T>
-bool GROReader<Topology_T>::ReadTopology(std::string file, boost::any top_any) {
+bool GROReader<Topology_T>::ReadTopology(const std::string &file,
+                                         boost::any top_any) {
   _topology = true;
 
   if (typeid(Topology_T *) != top_any.type()) {
