@@ -62,11 +62,28 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 
   void Close();
 
+  /// Assuming units are using 'units real' lammps command
   const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+  const tools::TimeUnit time_unit = tools::TimeUnit::femtoseconds;
+  const tools::MassUnit mass_unit = tools::MassUnit::grams_per_mole;
+  const tools::EnergyUnit energy_unit =
+      tools::EnergyUnit::kilocalories_per_mole;
+  const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilocalories_per_mole_ansgtrom;
+  const tools::VelocityUnit velocity_unit =
+      tools::VelocityUnit::angstroms_per_femtosecond;
 
  private:
-  void formatId(int &id);
-  void formatDistance(double &distance);
+  tools::UnitConverter converter_;
+
+  int formatId_(const int &id);
+  double formatDistance_(const double &distance);
+  double formatForce_(const double &force);
+  double formatVelocity_(const double &velocity);
+  double formatCharge_(const double &charge);
+  double formatMass_(const double &mass);
+
   void ReadTimestep(Topology_T &top, const std::string &itemline);
   void ReadBox(Topology_T &top, const std::string &itemline);
   void ReadNumAtoms(Topology_T &top, const std::string &itemline);
@@ -80,4 +97,6 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 
 }  // namespace csg
 }  // namespace votca
+
+#include "../../../../src/libcsg/modules/io/lammpsdumpreader_priv.h"
 #endif  // VOTCA_CSG_LAMMPSDUMPREADER_H

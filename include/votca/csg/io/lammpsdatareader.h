@@ -69,6 +69,8 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   const tools::EnergyUnit energy_unit =
       tools::EnergyUnit::kilocalories_per_mole;
   const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilocalories_per_mole_ansgtrom;
 
  private:
   std::ifstream fl_;
@@ -188,8 +190,8 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
       double value, std::map<std::string, double> nameValue, double tolerance);
 };
 
-#include "../../../../src/libcsg/modules/io/lammpsdatareader_priv.h"
-
 }  // namespace csg
 }  // namespace votca
+
+#include "../../../../src/libcsg/modules/io/lammpsdatareader_priv.h"
 #endif  // VOTCA_CSG_LAMMPSDATAREADER_H

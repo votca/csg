@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -37,90 +38,26 @@ class GROWriter : public TrajectoryWriter {
 
   void Write(boost::any conf);
 
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::nanometers;
+  const tools::MassUnit mass_unit = tools::MassUnit::atomic_mass_units;
+  const tools::TimeUnit time_unit = tools::TimeUnit::picoseconds;
+  const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+  const tools::EnergyUnit energy_unit = tools::EnergyUnit::kilojoules_per_mole;
+  const tools::VelocityUnit velocity_unit =
+      tools::VelocityUnit::nanometers_per_picosecond;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilojoules_per_mole_nanometer;
+
  private:
+  tools::UnitConverter converter_;
+  double formatDistance_(const double &distance);
+  double formatVelocity_(const double &velocity);
+  int formatId_(const int &id);
   FILE *_out = nullptr;
 };
 
-template <class Topology_T>
-void GROWriter<Topology_T>::Open(std::string file, bool bAppend) {
-  if (_out != nullptr) {
-    throw std::runtime_error(
-        "Cannot open file until you have closed the previously opend gro "
-        "file.");
-  }
-  _out = fopen(file.c_str(), bAppend ? "at" : "wt");
-}
-
-template <class Topology_T>
-void GROWriter<Topology_T>::Close() {
-  fclose(_out);
-  _out = nullptr;
-}
-
-template <class Topology_T>
-void GROWriter<Topology_T>::Write(boost::any conf_any) {
-  if (typeid(Topology_T *) != conf_any.type()) {
-    throw std::runtime_error(
-        "Error Cannot read topology using growriter write, incorrect topology "
-        "type provided.");
-  }
-  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
-  char format[100];
-  int i, resnr, l, vpr;
-
-  fprintf(_out, "%s\n", "what a nice title");
-  fprintf(_out, "%5d\n", static_cast<int>(top.BeadCount()));
-
-  bool v = top.HasVel();
-  int pr = 3;  // precision of writeout, given by the spec
-
-  l = pr + 5;
-  vpr = pr + 1;
-  if (v)
-    sprintf(format, "%%%d.%df%%%d.%df%%%d.%df%%%d.%df%%%d.%df%%%d.%df\n", l, pr,
-            l, pr, l, pr, l, vpr, l, vpr, l, vpr);
-  else
-    sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
-
-  for (i = 0; static_cast<size_t>(i) < top.BeadCount(); i++) {
-    resnr = top.getBead(i)->getResidueId();
-    std::string resname = top.getBead(i)->getResidueType();
-    std::string atomname = top.getBead(i)->getType();
-
-    fprintf(_out, "%5d%-5.5s%5.5s%5d", (resnr + 1) % 100000, resname.c_str(),
-            atomname.c_str(), (i + 1) % 100000);
-    // next fprintf uses built format std::string
-    Eigen::Vector3d r = top.getBead(i)->getPos();
-
-    if (v) {
-      Eigen::Vector3d vv = top.getBead(i)->getVel();
-      fprintf(_out, format, r.x(), r.y(), r.z(), vv.x(), vv.y(), vv.z());
-    } else {
-      fprintf(_out, format, r.x(), r.y(), r.z());
-    }
-  }
-
-  // write the boy
-  Eigen::Matrix3d box = top.getBox();
-
-  if (pr < 5) pr = 5;
-  l = pr + 5;
-
-  if (box(0, 1) || box(0, 2) || box(1, 0) || box(1, 2) || box(2, 0) ||
-      box(2, 1)) {
-    sprintf(format,
-            "%%%d.%df%%%d.%df%%%d.%df"
-            "%%%d.%df%%%d.%df%%%d.%df%%%d.%df%%%d.%df%%%d.%df\n",
-            l, pr, l, pr, l, pr, l, pr, l, pr, l, pr, l, pr, l, pr, l, pr);
-    fprintf(_out, format, box(0, 0), box(1, 1), box(2, 2), box(1, 0), box(2, 0),
-            box(0, 1), box(2, 1), box(0, 2), box(1, 2));
-  } else {
-    sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
-    fprintf(_out, format, box(0, 0), box(1, 1), box(2, 2));
-  }
-  fflush(_out);
-}
-
 }  // namespace csg
 }  // namespace votca
+
+#include "../../../../src/libcsg/modules/io/growriter_priv.h"
 #endif  // VOTCA_CSG_GROWRITER_H

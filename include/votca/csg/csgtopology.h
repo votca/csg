@@ -37,6 +37,7 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
   static const tools::ChargeUnit charge_unit;
   static const tools::EnergyUnit energy_unit;
   static const tools::VelocityUnit velocity_unit;
+  static const tools::ForceUnit force_unit;
   CSG_Topology(){};
   ~CSG_Topology(){};
 

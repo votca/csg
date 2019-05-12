@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string>
 #include <votca/tools/objectfactory.h>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -35,74 +36,27 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
   void Open(std::string file, bool bAppend = false);
   void Close();
 
-  void RegisteredAt(
-      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
+  //  void RegisteredAt(
+  //      tools::ObjectFactory<std::string, TrajectoryWriter> &factory) {}
 
   void Write(boost::any conf);
+
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+  const tools::TimeUnit time_unit = tools::TimeUnit::femtoseconds;
+  const tools::MassUnit mass_unit = tools::MassUnit::grams_per_mole;
+  const tools::EnergyUnit energy_unit =
+      tools::EnergyUnit::kilocalories_per_mole;
+  const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilocalories_per_mole_ansgtrom;
 
  private:
   FILE *_out;
 };
 
-template <class Topology_T>
-void LAMMPSDumpWriter<Topology_T>::Open(std::string file, bool bAppend) {
-  _out = fopen(file.c_str(), bAppend ? "at" : "wt");
-}
-
-template <class Topology_T>
-void LAMMPSDumpWriter<Topology_T>::Close() {
-  fclose(_out);
-}
-
-template <class Topology_T>
-void LAMMPSDumpWriter<Topology_T>::Write(boost::any conf_any) {
-
-  if (typeid(Topology_T *) != conf_any.type()) {
-    throw std::runtime_error(
-        "Error Cannot read topology using lammps dump writer, incorrect "
-        "topology type provided.");
-  }
-  Topology_T &top = *boost::any_cast<Topology_T *>(conf_any);
-  Eigen::Matrix3d box = top.getBox();
-  fprintf(_out, "ITEM: TIMESTEP\n%i\n", top.getStep());
-  fprintf(_out, "ITEM: NUMBER OF ATOMS\n%i\n", (int)top.BeadCount());
-  fprintf(_out, "ITEM: BOX BOUNDS pp pp pp\n");
-  fprintf(_out, "0 %f\n0 %f\n0 %f\n", box(0, 0), box(1, 1), box(2, 2));
-
-  fprintf(_out, "ITEM: ATOMS id type x y z");
-  bool v = top.HasVel();
-  if (v) {
-    fprintf(_out, " vx vy vz");
-  }
-  bool f = top.HasForce();
-  if (f) {
-    fprintf(_out, " fx fy fz");
-  }
-  fprintf(_out, "\n");
-
-  std::vector<int> bead_ids = top.getBeadIds();
-  // Sort the beads before outputing them
-  std::sort(bead_ids.begin(), bead_ids.end());
-  for (const int bead_id : bead_ids) {
-    typename Topology_T::bead_t *bead = top.getBead(bead_id);
-    int bead_type_id = top.getBeadTypeId(bead_id);
-
-    fprintf(_out, "%i %i", bead->getId() + 1, bead_type_id);
-    fprintf(_out, " %f %f %f", bead->getPos().x(), bead->getPos().y(),
-            bead->getPos().z());
-    if (v) {
-      fprintf(_out, " %f %f %f", bead->getVel().x(), bead->getVel().y(),
-              bead->getVel().z());
-    }
-    if (f) {
-      fprintf(_out, " %f %f %f", bead->getF().x(), bead->getF().y(),
-              bead->getF().z());
-    }
-    fprintf(_out, "\n");
-  }
-  fflush(_out);
-}
-
 }  // namespace csg
 }  // namespace votca
+
+#include "../../../../src/libcsg/modules/io/lammpsdumpwriter_priv.h"
+
 #endif  // VOTCA_CSG_LAMMPSDUMPWRITER_H
