@@ -32,6 +32,7 @@
 #include <votca/csg/trajectorywriter.h>
 #include <votca/tools/elements.h>
 #include <votca/tools/types.h>
+#include <votca/tools/unitconverter.h>
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;
@@ -85,12 +86,27 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
       {-2.56388268, 0.61198783, -0.94726998},
       {-2.12173485, 0.73285944, 1.65650560}};
 
+  for (size_t i = 0; i < atom_xyz_file.size(); ++i) {
+    for (size_t j = 0; j < atom_xyz_file.at(0).size(); ++j) {
+      atom_xyz_file.at(i).at(j) *= conv::ang2nm;
+    }
+  }
   // Forces
   vector<vector<double>> atom_forces_file = {
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1},
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1},
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1},
       {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}, {0.1, 0.1, 0.1}};
+
+  // Convert forces from units real to csg units
+  UnitConverter converter;
+  for (size_t i = 0; i < atom_forces_file.size(); ++i) {
+    for (size_t j = 0; j < atom_forces_file.at(0).size(); ++j) {
+      atom_forces_file.at(i).at(j) *=
+          converter.convert(ForceUnit::kilocalories_per_mole_ansgtrom,
+                            ForceUnit::kilojoules_per_mole_nanometer);
+    }
+  }
 
   outfile << "ITEM: TIMESTEP" << endl;
   outfile << "1" << endl;
@@ -153,7 +169,9 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   vector<string> atom_types = {"C", "C", "C", "C", "H", "S", "H", "H",
                                "C", "S", "C", "H", "C", "C", "H", "H"};
 
-  // Atom Coordinates
+  // Atom Coordinates these numbers are in units of angstroms they must
+  // be converted to nm before they can be compared with the values read into
+  // the topology object
   vector<vector<double>> atom_xyz = {{3.57166300, -1.91232800, 1.62799100},
                                      {2.70277100, -0.74647700, 1.72415900},
                                      {1.44813500, -1.02583600, 1.30856000},
@@ -171,6 +189,11 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
                                      {-1.56388268, 1.61198783, 0.94726998},
                                      {-1.12173485, 1.73285944, 2.65650560}};
 
+  for (size_t i = 0; i < atom_xyz.size(); ++i) {
+    for (size_t j = 0; j < atom_xyz.at(0).size(); ++j) {
+      atom_xyz.at(i).at(j) *= conv::ang2nm;
+    }
+  }
   // Atom Velocities
   vector<vector<double>> atom_vel = {
       {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0},
@@ -218,14 +241,12 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   }
 
   TrajectoryReader::RegisterPlugins();
-  // TrajectoryReader *reader;
   std::unique_ptr<TrajectoryReader> reader =
       TrjReaderFactory().Create(lammpsdumpfilename);
   reader->Open(lammpsdumpfilename);
   boost::any any_ptr(&top);
   reader->FirstFrame(any_ptr);
   reader->Close();
-  // delete reader;
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);

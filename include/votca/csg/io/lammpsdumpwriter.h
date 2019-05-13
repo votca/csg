@@ -49,8 +49,15 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
   const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
   const tools::ForceUnit force_unit =
       tools::ForceUnit::kilocalories_per_mole_ansgtrom;
+  const tools::VelocityUnit velocity_unit =
+      tools::VelocityUnit::angstroms_per_femtosecond;
 
  private:
+  tools::UnitConverter converter_;
+  int formatId_(const int &id);
+  double formatDistance_(const double &distance);
+  double formatForce_(const double &force);
+  double formatVelocity_(const double &velocity);
   FILE *_out;
 };
 
