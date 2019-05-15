@@ -93,5 +93,5 @@ class GMXTrajectoryReader : public TrajectoryReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/gmxtrajectoryreader_priv.h"
+#include "gmxtrajectoryreader_priv.h"
 #endif  // VOTCA_CSG_GMXTRAJECTORYREADER_H

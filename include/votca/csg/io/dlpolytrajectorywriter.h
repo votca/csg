@@ -71,5 +71,5 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/dlpolytrajectorywriter_priv.h"
+#include "dlpolytrajectorywriter_priv.h"
 #endif  // VOTCA_CSG_DLPOLYTRAJECTORYWRITER_H

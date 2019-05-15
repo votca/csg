@@ -59,5 +59,5 @@ class GROWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/growriter_priv.h"
+#include "growriter_priv.h"
 #endif  // VOTCA_CSG_GROWRITER_H

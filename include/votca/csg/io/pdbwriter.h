@@ -109,6 +109,6 @@ class PDBWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/pdbwriter_priv.h"
+#include "pdbwriter_priv.h"
 
 #endif  // VOTCA_CSG_PDBWRITER_H

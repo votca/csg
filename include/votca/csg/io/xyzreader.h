@@ -92,6 +92,6 @@ class XYZReader : public TrajectoryReader, public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/xyzreader_priv.h"
+#include "xyzreader_priv.h"
 
 #endif

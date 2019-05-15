@@ -96,5 +96,5 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/dlpolytrajectoryreader_priv.h"
+#include "dlpolytrajectoryreader_priv.h"
 #endif  // VOTCA_CSG_DLPOLYTRAJECTORYREADER_H

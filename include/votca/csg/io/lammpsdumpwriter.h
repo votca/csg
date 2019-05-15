@@ -64,6 +64,6 @@ class LAMMPSDumpWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/lammpsdumpwriter_priv.h"
+#include "lammpsdumpwriter_priv.h"
 
 #endif  // VOTCA_CSG_LAMMPSDUMPWRITER_H

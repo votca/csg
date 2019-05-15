@@ -70,5 +70,5 @@ class GMXTrajectoryWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/gmxtrajectorywriter_priv.h"
+#include "gmxtrajectorywriter_priv.h"
 #endif  // VOTCA_CSG_GMXTRAJECTORYWRITER_H

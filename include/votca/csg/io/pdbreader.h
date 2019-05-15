@@ -72,6 +72,6 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/pdbreader_priv.h"
+#include "pdbreader_priv.h"
 
 #endif  // VOTCA_CSG_PDBREADER_H

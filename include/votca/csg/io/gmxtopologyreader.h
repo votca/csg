@@ -86,5 +86,5 @@ class GMXTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/gmxtopologyreader_priv.h"
+#include "gmxtopologyreader_priv.h"
 #endif  // VOTCA_CSG_GMXTOPOLOGYREADER_H

@@ -98,5 +98,5 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/lammpsdumpreader_priv.h"
+#include "lammpsdumpreader_priv.h"
 #endif  // VOTCA_CSG_LAMMPSDUMPREADER_H

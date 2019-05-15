@@ -97,5 +97,5 @@ class DLPOLYTopologyReader : public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/dlpolytopologyreader_priv.h"
+#include "dlpolytopologyreader_priv.h"
 #endif  // VOTCA_CSG_DLPTOPOLOGYREADER_H

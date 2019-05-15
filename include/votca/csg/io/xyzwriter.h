@@ -73,6 +73,6 @@ class XYZWriter : public TrajectoryWriter {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/xyzwriter_priv.h"
+#include "xyzwriter_priv.h"
 
 #endif

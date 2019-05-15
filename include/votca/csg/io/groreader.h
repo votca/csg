@@ -86,5 +86,5 @@ class GROReader : public TrajectoryReader, public TopologyReader {
 }  // namespace csg
 }  // namespace votca
 
-#include "../../../../src/libcsg/modules/io/groreader_priv.h"
+#include "groreader_priv.h"
 #endif  // VOTCA_CSG_GROREADER_H
