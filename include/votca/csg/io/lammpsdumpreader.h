@@ -19,7 +19,6 @@
 #define VOTCA_CSG_LAMMPSDUMPREADER_H
 
 #include <boost/any.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <votca/tools/constants.h>
 #include <votca/tools/getline.h>

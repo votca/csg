@@ -120,8 +120,8 @@ bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
   std::string line;
   getline(_fl, line);
-  std::cout << "Reading lammps dump file" << std::endl;
   while (!_fl.eof()) {
+
     if (line.substr(0, 5) != "ITEM:")
       throw std::ios_base::failure("unexpected line in lammps file:\n" + line);
     if (line.substr(6, 8) == "TIMESTEP") {
@@ -129,7 +129,6 @@ bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
     } else if (line.substr(6, 15) == "NUMBER OF ATOMS") {
       ReadNumAtoms(top, line);
     } else if (line.substr(6, 10) == "BOX BOUNDS") {
-      std::cout << "Reading box bounds " << std::endl;
       ReadBox(top, line);
     } else if (line.substr(6, 5) == "ATOMS") {
       ReadAtoms(top, line);
@@ -155,8 +154,8 @@ void LAMMPSDumpReader<Topology_T>::ReadTimestep(Topology_T &top,
                                                 const std::string &itemline) {
   std::string s;
   getline(_fl, s);
+  boost::algorithm::trim(s);
   top.setStep(boost::lexical_cast<int>(s));
-  std::cout << "Reading frame, timestep " << top.getStep() << std::endl;
 }
 
 template <class Topology_T>
@@ -172,9 +171,8 @@ void LAMMPSDumpReader<Topology_T>::ReadBox(Topology_T &top,
     std::vector<double> v;
     tok.ConvertToVector(v);
     if (v.size() != 2) throw std::ios_base::failure("invalid box format");
-    m(i, i) = v[1] - v[0];
+    m(i, i) = formatDistance_(v[1] - v[0]);
   }
-  std::cout << "Reading dump file box and setting " << std::endl;
   top.setBox(m);
 }
 
@@ -183,6 +181,7 @@ void LAMMPSDumpReader<Topology_T>::ReadNumAtoms(Topology_T &top,
                                                 const std::string &itemline) {
   std::string s;
   getline(_fl, s);
+  boost::algorithm::trim(s);
   number_of_atoms_ = boost::lexical_cast<int>(s);
   if (!read_topology_data_ &&
       static_cast<size_t>(number_of_atoms_) != top.BeadCount()) {
@@ -239,6 +238,7 @@ void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
     std::vector<std::string> fields2;
     tok.ToVector(fields2);
     // Lammps starts with ids at 1 we handle ids internally at 0
+
     int atom_id = boost::lexical_cast<int>(fields2[id]);
 
     if (atom_id > number_of_atoms_) {
