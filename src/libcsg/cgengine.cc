@@ -43,7 +43,7 @@ unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
     CSG_Topology &atomistic_top_in, CSG_Topology &cg_top_out) {
 
   unique_ptr<AtomCGConverter> converter =
-      unique_ptr<AtomCGConverter>(new AtomCGConverter);
+      unique_ptr<AtomCGConverter>(new AtomCGConverter(ignores_));
   for (string file : file_names_) {
     converter->LoadMoleculeStencil(file);
   }

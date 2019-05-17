@@ -33,7 +33,7 @@ using namespace votca::tools;
 BOOST_AUTO_TEST_SUITE(atomcgconverter_test)
 
 BOOST_AUTO_TEST_CASE(test_atomcgconverter_constructor) {
-  AtomCGConverter converter;
+  AtomCGConverter converter(vector<string> empty);
 }
 
 BOOST_AUTO_TEST_CASE(test_load) {
@@ -214,9 +214,6 @@ BOOST_AUTO_TEST_CASE(test_load) {
     pos_h11 += translate;
     pos_h9 += translate;
     pos_h10 += translate;
-
-    // cout << atom_top.getMolecule(1).BeadCount() << endl;
-    // cout << atom_top.getMolecule(1) << endl;
   }
 
   BOOST_CHECK_EQUAL(atom_top.BeadCount(), 22);

@@ -110,8 +110,6 @@ class AtomCGConverter {
   bool AtomisticMoleculeTypeExist(std::string atomistic_molecule_type);
 
  private:
-  std::unordered_set<std::string> file_names_;
-
   std::map<int, std::map<int, std::vector<std::pair<std::string, int>>>>
       cgmolid_cgbeadid_atomicbeadnames_and_ids_;
 

@@ -67,7 +67,7 @@ class CGEngine {
    * \param molecule_type glob molecule_type for molecule molecule_type
    */
   void AddIgnore(std::string molecule_type) {
-    _ignores.push_back(molecule_type);
+    ignores_.push_back(molecule_type);
   }
 
   /**
@@ -80,11 +80,11 @@ class CGEngine {
  private:
   std::unordered_set<std::string> file_names_;
 
-  std::list<std::string> _ignores;
+  std::vector<std::string> ignores_;
 };
 
 inline bool CGEngine::IsIgnored(std::string molecule_type) const {
-  for (const std::string& ignore : _ignores) {
+  for (const std::string& ignore : ignores_) {
     if (tools::wildcmp(ignore.c_str(), molecule_type.c_str())) return true;
   }
   return false;
