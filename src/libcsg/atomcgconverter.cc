@@ -93,12 +93,13 @@ CSG_Topology AtomCGConverter::Convert(CSG_Topology &atomic_top_in) {
   }
   cg_top_out.RebuildExclusions();
 
-  Map(atomic_top_in, cg_top_out);
+  Update(atomic_top_in, cg_top_out);
 
   return cg_top_out;
 }
 
-void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
+void AtomCGConverter::Update(const CSG_Topology &atomic_top,
+                             CSG_Topology &cg_top) {
 
   assert(atomic_top.getBoxType() == cg_top.getBoxType() &&
          "box types of topology in and out differ");
@@ -114,7 +115,7 @@ void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
 
     int molecule_id = cg_mol_with_info.first;
     string cg_mol_type = cg_top.getMolecule(molecule_id).getType();
-    string atomic_mol_type = atomic_top.getMolecule(molecule_id).getType();
+    string atomic_mol_type = atomic_top.getMoleculeConst(molecule_id).getType();
     // Call the appropriate molecule mapper
     mol_names_and_maps_.at(atomic_mol_type)
         .at(cg_mol_type)

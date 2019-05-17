@@ -217,7 +217,7 @@ class AtomToCGMoleculeMapper {
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void UpdateCGMolecule(CSG_Topology &atom_top, CSG_Topology &cg_top,
+  void UpdateCGMolecule(const CSG_Topology &atom_top, CSG_Topology &cg_top,
                         CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************

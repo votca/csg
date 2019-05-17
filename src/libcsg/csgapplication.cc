@@ -185,7 +185,7 @@ bool CsgApplication::ProcessData(Worker *worker) {
   }
   // evaluate
   if (_do_mapping) {
-    worker->converter_->Map(worker->_top, worker->_top_cg);
+    worker->converter_->Update(worker->_top, worker->_top_cg);
     worker->EvalConfiguration(&worker->_top_cg, &worker->_top);
   } else
     worker->EvalConfiguration(&worker->_top);
@@ -298,7 +298,7 @@ void CsgApplication::Run(void) {
     cout << "I have " << master->_top_cg.BeadCount() << " beads in "
          << master->_top_cg.MoleculeCount()
          << " molecules for the coarsegraining" << endl;
-    master->converter_->Map(master->_top, master->_top_cg);
+    master->converter_->Update(master->_top, master->_top_cg);
   } else {
     master->_top_cg.CopyBoundaryConditions(master->_top);
   }
@@ -349,7 +349,7 @@ void CsgApplication::Run(void) {
 
     // notify all observers that coarse graining has begun
     if (_do_mapping) {
-      master->converter_->Map(master->_top, master->_top_cg);
+      master->converter_->Update(master->_top, master->_top_cg);
       BeginEvaluate(&master->_top_cg, &master->_top);
     } else {
       BeginEvaluate(&master->_top);

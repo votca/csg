@@ -102,7 +102,7 @@ class AtomCGConverter {
    * @param atomic_top_in
    * @param cg_top_out
    */
-  void Map(CSG_Topology &atomic_top_in, CSG_Topology &cg_top_out);
+  void Update(const CSG_Topology &atomic_top_in, CSG_Topology &cg_top_out);
 
   std::vector<std::string> getAtomicBeadNamesOfCGBead(
       std::string cg_molecule_type, std::string cg_bead_type);

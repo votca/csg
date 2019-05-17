@@ -355,7 +355,7 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
 }
 
 void AtomToCGMoleculeMapper::UpdateCGMolecule(
-    CSG_Topology &atom_top, CSG_Topology &cg_top,
+    const CSG_Topology &atom_top, CSG_Topology &cg_top,
     CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
 
   // First int cg_molecule id
