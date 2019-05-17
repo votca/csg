@@ -18,6 +18,7 @@
 #include "../../include/votca/csg/cgengine.h"
 #include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/version.h"
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <unordered_map>
@@ -35,8 +36,13 @@ void CGEngine::LoadFiles(string filename) {
   for (iter = tok.begin(); iter != tok.end(); ++iter) {
     string file = *iter;
     boost::trim(file);
-    file_names_.insert(file);
+    file_names_.push_back(file);
   }
+
+  /// Remove dupilcates
+  sort(file_names_.begin(), file_names_.end());
+  file_names_.erase(unique(file_names_.begin(), file_names_.end()),
+                    file_names_.end());
 }
 
 unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(

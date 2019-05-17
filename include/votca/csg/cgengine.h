@@ -78,7 +78,7 @@ class CGEngine {
   bool IsIgnored(std::string molecule_type) const;
 
  private:
-  std::unordered_set<std::string> file_names_;
+  std::vector<std::string> file_names_;
 
   std::vector<std::string> ignores_;
 };
