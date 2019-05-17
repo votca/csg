@@ -299,9 +299,6 @@ void CsgApplication::Run(void) {
          << master->_top_cg.MoleculeCount()
          << " molecules for the coarsegraining" << endl;
     master->converter_->Map(master->_top, master->_top_cg);
-    /*    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
-      } else if (!EvaluateTopology(&master->_top)) {
-        return;*/
   } else {
     master->_top_cg.CopyBoundaryConditions(master->_top);
   }
