@@ -116,8 +116,8 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
         tools::byte_t symmetry = 1;
         tools::StructureParameters params;
         params.set(tools::StructureParameter::Symmetry, symmetry);
-        params.set(tools::StructureParameter::Mass, formatMass_(a->m));
-        params.set(tools::StructureParameter::Charge, formatCharge_(a->q));
+        params.set(tools::StructureParameter::CSG_Mass, formatMass_(a->m));
+        params.set(tools::StructureParameter::CSG_Charge, formatCharge_(a->q));
         params.set(tools::StructureParameter::Element, element);
         params.set(tools::StructureParameter::BeadId, a->atomnumber);
         params.set(tools::StructureParameter::BeadType, bead_type);

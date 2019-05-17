@@ -110,7 +110,7 @@ inline void PDBWriter<Topology_T>::WriteContainer(T &container) {
       std::string element =
           params.get<std::string>(tools::StructureParameter::Element);
       Eigen::Vector3d r =
-          params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
+          params.get<Eigen::Vector3d>(tools::StructureParameter::CSG_Position);
 
       formatType_(atomtype);
       formatResidueType_(resname);

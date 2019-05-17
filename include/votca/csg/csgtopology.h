@@ -117,8 +117,8 @@ inline Bead& CSG_Topology::CreateBead(tools::StructureParameters& params) {
       params.get<std::string>(tools::StructureParameter::ResidueType);
   std::string element =
       params.get<std::string>(tools::StructureParameter::Element);
-  double mass = params.get<double>(tools::StructureParameter::Mass);
-  double charge = params.get<double>(tools::StructureParameter::Charge);
+  double mass = params.get<double>(tools::StructureParameter::CSG_Mass);
+  double charge = params.get<double>(tools::StructureParameter::CSG_Charge);
 
   return CreateBead(symmetry, bead_type, bead_id, molecule_id, residue_id,
                     residue_type, element, mass, charge);

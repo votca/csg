@@ -602,8 +602,8 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       std::string element = atomtypes_[atomTypeId].at(2);
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass, mass);
-      params.set(tools::StructureParameter::Charge, charge);
+      params.set(tools::StructureParameter::CSG_Mass, mass);
+      params.set(tools::StructureParameter::CSG_Charge, charge);
       params.set(tools::StructureParameter::Element, element);
       params.set(tools::StructureParameter::BeadId, atomId);
       params.set(tools::StructureParameter::BeadType, atom_type);

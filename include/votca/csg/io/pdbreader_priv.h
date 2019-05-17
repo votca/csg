@@ -319,9 +319,9 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
 
         tools::StructureParameters params;
         params.set(tools::StructureParameter::Symmetry, symmetry);
-        params.set(tools::StructureParameter::Mass,
+        params.set(tools::StructureParameter::CSG_Mass,
                    elements_.getMass(element_symbol));
-        params.set(tools::StructureParameter::Charge, charge);
+        params.set(tools::StructureParameter::CSG_Charge, charge);
         params.set(tools::StructureParameter::Element, element_symbol);
         params.set(tools::StructureParameter::BeadId, atom_number);
         params.set(tools::StructureParameter::BeadType, atom_type);

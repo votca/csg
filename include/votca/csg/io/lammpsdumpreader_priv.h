@@ -332,9 +332,9 @@ void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
       int residue_id = tools::topology_constants::unassigned_residue_id;
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass,
+      params.set(tools::StructureParameter::CSG_Mass,
                  atom_attributes_double["mass"]);
-      params.set(tools::StructureParameter::Charge,
+      params.set(tools::StructureParameter::CSG_Charge,
                  atom_attributes_double["q"]);
       params.set(tools::StructureParameter::BeadId, atom_attributes_int["id"]);
       params.set(tools::StructureParameter::BeadType,

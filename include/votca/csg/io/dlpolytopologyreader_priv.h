@@ -267,8 +267,9 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
 
           tools::StructureParameters params;
           params.set(tools::StructureParameter::Symmetry, symmetry);
-          params.set(tools::StructureParameter::Mass, formatMass_(mass));
-          params.set(tools::StructureParameter::Charge, formatCharge_(charge));
+          params.set(tools::StructureParameter::CSG_Mass, formatMass_(mass));
+          params.set(tools::StructureParameter::CSG_Charge,
+                     formatCharge_(charge));
           params.set(tools::StructureParameter::Element, element);
           params.set(tools::StructureParameter::BeadId,
                      static_cast<int>(top.BeadCount()));
@@ -375,8 +376,8 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
 
           tools::StructureParameters params;
           params.set(tools::StructureParameter::Symmetry, symmetry);
-          params.set(tools::StructureParameter::Mass, bead->getMass());
-          params.set(tools::StructureParameter::Charge, bead->getQ());
+          params.set(tools::StructureParameter::CSG_Mass, bead->getMass());
+          params.set(tools::StructureParameter::CSG_Charge, bead->getQ());
           params.set(tools::StructureParameter::Element, bead->getElement());
           params.set(tools::StructureParameter::BeadId,
                      static_cast<int>(top.BeadCount()));

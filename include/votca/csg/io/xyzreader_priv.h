@@ -55,7 +55,7 @@ inline void XYZReader<Topology_T>::AddAtom(Topology_T &container,
 
   typename Topology_T::bead_t *b;
   Eigen::Vector3d posnm =
-      params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
+      params.get<Eigen::Vector3d>(tools::StructureParameter::CSG_Position);
   if (topology) {
     b = &(container.CreateBead(params));
     container.CreateMolecule(params).AddBead(b);
@@ -203,8 +203,8 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
 
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass, mass);
-      params.set(tools::StructureParameter::Charge, charge);
+      params.set(tools::StructureParameter::CSG_Mass, mass);
+      params.set(tools::StructureParameter::CSG_Charge, charge);
       params.set(tools::StructureParameter::Element, element);
       params.set(tools::StructureParameter::MoleculeId, molecule_id);
       params.set(tools::StructureParameter::MoleculeType, molecule_type);
@@ -212,7 +212,7 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
       params.set(tools::StructureParameter::ResidueType, residue_type);
       params.set(tools::StructureParameter::BeadId, bead_id);
       params.set(tools::StructureParameter::BeadType, atom_type);
-      params.set(tools::StructureParameter::Position, pos);
+      params.set(tools::StructureParameter::CSG_Position, pos);
 
       std::cout << "Adding atom " << bead_id << std::endl;
       AddAtom<topology>(container, params);

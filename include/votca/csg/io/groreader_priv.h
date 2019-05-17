@@ -175,8 +175,8 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
       double atom_weight = formatMass_(element);
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass, atom_weight);
-      params.set(tools::StructureParameter::Charge, atom_charge);
+      params.set(tools::StructureParameter::CSG_Mass, atom_weight);
+      params.set(tools::StructureParameter::CSG_Charge, atom_charge);
       params.set(tools::StructureParameter::Element, element);
       params.set(tools::StructureParameter::BeadId, atom_number);
       params.set(tools::StructureParameter::BeadType, atName);

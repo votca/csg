@@ -59,6 +59,8 @@ class Molecule : public BaseMolecule<Bead> {
     return _interactions;
   }
 
+  tools::StructureParameters getParameters() const;
+
  private:
   std::vector<Interaction *> _interactions;
 
@@ -80,6 +82,13 @@ inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
     }
   }
   return bead_ids;
+}
+
+inline tools::StructureParameters Molecule::getParameters() const {
+  tools::StructureParameters params;
+  params.set(tools::StructureParameter::MoleculeId, getId());
+  params.set(tools::StructureParameter::MoleculeType, getType());
+  return params;
 }
 
 }  // namespace csg

@@ -333,8 +333,8 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
 
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
-      params.set(tools::StructureParameter::Mass, b.mass);
-      params.set(tools::StructureParameter::Charge, b.q);
+      params.set(tools::StructureParameter::CSG_Mass, b.mass);
+      params.set(tools::StructureParameter::CSG_Charge, b.q);
       params.set(tools::StructureParameter::Element, element);
       params.set(tools::StructureParameter::MoleculeId, xmlMolecule.pid);
       params.set(tools::StructureParameter::ResidueId, b.residue_number);

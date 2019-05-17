@@ -61,7 +61,6 @@ class TemplateTopology {
   }
   ~TemplateTopology();
 
-  //  typedef Molecule_T molecule_t;
   typedef Bead_T bead_t;
   typedef Molecule_T container_t;
   typename boost::container::stable_vector<Molecule_T>::iterator begin() {

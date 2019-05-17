@@ -365,11 +365,11 @@ inline tools::StructureParameters Bead::getParameters() const {
   params.set(tools::StructureParameter::ResidueId, residue_id_);
   params.set(tools::StructureParameter::MoleculeId, molecule_id_.getId());
   params.set(tools::StructureParameter::Element, element_symbol_.getName());
-  params.set(tools::StructureParameter::Mass, getMass());
-  params.set(tools::StructureParameter::Charge, charge_);
+  params.set(tools::StructureParameter::CSG_Mass, getMass());
+  params.set(tools::StructureParameter::CSG_Charge, charge_);
   params.set(tools::StructureParameter::Symmetry, symmetry_);
   if (bead_position_set_) {
-    params.set(tools::StructureParameter::Position, bead_position_);
+    params.set(tools::StructureParameter::CSG_Position, bead_position_);
   }
   return params;
 }
