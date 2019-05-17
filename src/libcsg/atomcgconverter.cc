@@ -63,21 +63,12 @@ const std::string &AtomCGConverter::getAtomisticMoleculeType(
   return atomic_and_cg_molecule_types_.right.at(cg_mol_type);
 }
 
-void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
-                              CSG_Topology &cg_top_out) {
+CSG_Topology AtomCGConverter::Convert(CSG_Topology &atomic_top_in) {
 
-  assert(atomic_top_in.getBoxType() == cg_top_out.getBoxType() &&
-         "box types of topology in and out differ");
-
-  // Grab all the molecules
-  // const unordered_map<int, Molecule> &atomistic_mols =
-  //    atomic_top_in.Molecules();
-
-  // Cycle through the atomistic molecules
-  // for (const pair<int, Molecule> &id_and_molecule : atomistic_mols) {
-  // for (const pair<int, Molecule> &atomistic_mol : atomic_top_in) {
-  // const Molecule *atomistic_mol = &(id_and_molecule.second);
-  // const Molecule *atomistic_mol = &(id_and_molecule.second);
+  CSG_Topology cg_top_out;
+  cg_top_out.CopyBoundaryConditions(atomic_top_in);
+  cg_top_out.setStep(atomic_top_in.getStep());
+  cg_top_out.setTime(atomic_top_in.getTime());
 
   for (const Molecule &atomistic_mol : atomic_top_in) {
     string atomistic_mol_type = atomistic_mol.getType();
@@ -103,6 +94,8 @@ void AtomCGConverter::Convert(CSG_Topology &atomic_top_in,
   cg_top_out.RebuildExclusions();
 
   Map(atomic_top_in, cg_top_out);
+
+  return cg_top_out;
 }
 
 void AtomCGConverter::Map(CSG_Topology &atomic_top, CSG_Topology &cg_top) {
@@ -210,9 +203,6 @@ std::unordered_map<int, string>
         atomic_and_cg_molecule_types_.left.at(cg_or_atomic_molecule_type);
   }
 
-  for (auto be_id : bead_ids) {
-    cout << "Bead id " << be_id << endl;
-  }
   return cg_molecule_and_stencil_.at(cg_mol_type)
       .MapAtomicBeadIdsToAtomicBeadNames(bead_ids);
 }
@@ -414,10 +404,6 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
   // cg_bead_id, vector< atom_name, atom_bead_id >
   Molecule *atom_mol = &atom_top.getMolecule(cg_mol->getId());
   vector<int> atom_bead_ids = atom_mol->getBeadIds();
-  cout << "Calling get mol " << endl;
-  for (auto be_id : atom_bead_ids) {
-    cout << be_id << endl;
-  }
   sort(atom_bead_ids.begin(), atom_bead_ids.end());
   unordered_map<int, string> atom_ids_and_names =
       MapAtomicBeadIdsToAtomicBeadNames_(atom_mol->getType(), atom_bead_ids);

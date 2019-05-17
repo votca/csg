@@ -91,7 +91,7 @@ class AtomCGConverter {
    * @param atomic_top_in
    * @param cg_top_out
    */
-  void Convert(CSG_Topology &atomic_top_in, CSG_Topology &cg_top_out);
+  CSG_Topology Convert(CSG_Topology &atomic_top_in);
 
   /**
    * @brief Updates the cg topology object using the atomistic topology

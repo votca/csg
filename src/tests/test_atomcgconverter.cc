@@ -294,9 +294,10 @@ BOOST_AUTO_TEST_CASE(test_load) {
 
   // Create an empty topology
   CSG_Topology cg_top;
-  cg_top.setStep(0);
 
-  converter.Convert(atom_top, cg_top);
+  cg_top = converter.Convert(atom_top);
+
+  cg_top.setStep(0);
 
   vector<int> molecule_ids = cg_top.getMoleculeIds();
   sort(molecule_ids.begin(), molecule_ids.end());
@@ -309,8 +310,10 @@ BOOST_AUTO_TEST_CASE(test_load) {
 
   vector<int> bead_ids_mol_1 =
       cg_top.getMolecule(molecule_ids.at(0)).getBeadIds();
+  BOOST_CHECK_EQUAL(bead_ids_mol_1.size(), 3);
   vector<int> bead_ids_mol_2 =
       cg_top.getMolecule(molecule_ids.at(1)).getBeadIds();
+  BOOST_CHECK_EQUAL(bead_ids_mol_2.size(), 3);
   sort(bead_ids_mol_1.begin(), bead_ids_mol_1.end());
   sort(bead_ids_mol_2.begin(), bead_ids_mol_2.end());
 

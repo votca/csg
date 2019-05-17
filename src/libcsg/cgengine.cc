@@ -47,7 +47,8 @@ unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
   for (string file : file_names_) {
     converter->LoadMoleculeStencil(file);
   }
-  converter->Convert(atomistic_top_in, cg_top_out);
+  cg_top_out = converter->Convert(atomistic_top_in);
+  assert(cg_top_out.BeadCount() > 0);
 
   return converter;
 }

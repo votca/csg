@@ -533,8 +533,13 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
   has_vel_ = top.has_vel_;
   has_force_ = top.has_force_;
   beads_ = top.beads_;
-  molecules_ = top.molecules_;
-  molecules_map_ = top.molecules_map_;
+
+  molecules_.resize(top.molecules_.size());
+  for (auto &molecule : top.molecules_) {
+    molecules_.push_back(molecule);
+    molecules_map_[molecule.getId()] = &(molecules_.back());
+  }
+
   bc_ = top.bc_->Clone();
   type_container_ = top.type_container_;
   particle_group_ = top.particle_group_;

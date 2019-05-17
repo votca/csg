@@ -220,8 +220,6 @@ void CsgApplication::Run(void) {
   master->setId(0);
   _myWorkers.push_back(master);
 
-  CGEngine cg;
-
   //////////////////////////////////////////////////
   // read in the topology for master
   //////////////////////////////////////////////////
@@ -232,6 +230,7 @@ void CsgApplication::Run(void) {
        << master->_top.MoleculeCount() << " molecules" << endl;
   master->_top.CheckMoleculeNaming();
 
+  CGEngine cg;
   if (_do_mapping) {
     // read in the coarse graining definitions (xml files)
     cg.LoadFiles(_op_vm["cg"].as<string>());
@@ -283,7 +282,7 @@ void CsgApplication::Run(void) {
     // which may otherwise not be stored in the _top object
     boost::any any_ptr(&master->_top);
     _traj_reader->FirstFrame(any_ptr);
-    master->_top_cg.CopyBoundaryConditions(master->_top);
+    //    master->_top_cg.CopyBoundaryConditions(master->_top);
   }
 
   if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {
@@ -300,9 +299,11 @@ void CsgApplication::Run(void) {
          << master->_top_cg.MoleculeCount()
          << " molecules for the coarsegraining" << endl;
     master->converter_->Map(master->_top, master->_top_cg);
-    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
-  } else if (!EvaluateTopology(&master->_top)) {
-    return;
+    /*    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
+      } else if (!EvaluateTopology(&master->_top)) {
+        return;*/
+  } else {
+    master->_top_cg.CopyBoundaryConditions(master->_top);
   }
 
   if (DoTrajectory() && _op_vm.count("trj")) {
@@ -353,12 +354,14 @@ void CsgApplication::Run(void) {
     if (_do_mapping) {
       master->converter_->Map(master->_top, master->_top_cg);
       BeginEvaluate(&master->_top_cg, &master->_top);
-    } else
+    } else {
       BeginEvaluate(&master->_top);
+    }
 
     _is_first_frame = true;
     /////////////////////////////////////////////////////////////////////////
     // start threads
+
     if (DoThreaded()) {
       for (size_t thread = 0; thread < _myWorkers.size(); thread++) {
 
