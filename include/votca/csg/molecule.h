@@ -50,7 +50,7 @@ class Molecule : public BaseMolecule<Bead> {
    *
    * @return an unordered set with the ids of the beads that match the label
    */
-  std::unordered_set<int> getBeadIdsByLabel(const std::string &label) const;
+  std::vector<int> getBeadIdsByLabel(const std::string &label) const;
 
   /// Add an interaction to the molecule
   void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
@@ -73,12 +73,12 @@ class Molecule : public BaseMolecule<Bead> {
   friend class CSG_Topology;
 };
 
-inline std::unordered_set<int> Molecule::getBeadIdsByLabel(
+inline std::vector<int> Molecule::getBeadIdsByLabel(
     const std::string &label) const {
-  std::unordered_set<int> bead_ids;
+  std::vector<int> bead_ids;
   for (const std::pair<const int, Bead *> &id_and_bead : beads_) {
     if (label.compare(id_and_bead.second->getLabel()) == 0) {
-      bead_ids.insert(id_and_bead.first);
+      bead_ids.push_back(id_and_bead.first);
     }
   }
   return bead_ids;

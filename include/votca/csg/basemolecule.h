@@ -23,7 +23,6 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 #include "basebead.h"
@@ -66,18 +65,18 @@ class BaseMolecule : public BeadStructure<T> {
    *
    * @param[in] name
    *
-   * @return unordered set of all the ids
+   * @return vector of all the ids
    */
-  std::unordered_set<int> getBeadIdsByName(const std::string &name) const;
+  std::vector<int> getBeadIdsByName(const std::string &name) const;
 
   /**
    * @brief Returns the ids of the beads that have the type given by name
    *
    * @param[in] name
    *
-   * @return unordered set with the ids of the beads
+   * @return vector with the ids of the beads
    */
-  std::unordered_set<int> getBeadIdsByType(const std::string &name) const;
+  std::vector<int> getBeadIdsByType(const std::string &name) const;
 
   /**
    * @brief Returns the bead type of the bead given by id
@@ -110,7 +109,7 @@ class BaseMolecule : public BeadStructure<T> {
   tools::Identity<int> id_;
   tools::Name type_;
 
-  std::unordered_map<std::string, std::unordered_set<int>> bead_type_and_ids_;
+  std::unordered_map<std::string, std::vector<int>> bead_type_and_ids_;
 };
 
 template <class T>
@@ -120,7 +119,7 @@ void BaseMolecule<T>::AddBead(T *bead) {
          " when it has been previously added.");
 
   BeadStructure<T>::AddBead(bead);
-  bead_type_and_ids_[bead->getType()].insert(bead->getId());
+  bead_type_and_ids_[bead->getType()].push_back(bead->getId());
   bead->setMoleculeId(getId());
 }
 
@@ -149,7 +148,7 @@ const Eigen::Vector3d &BaseMolecule<T>::getBeadPosition(const int &id) const {
 }
 
 template <class T>
-std::unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
+std::vector<int> BaseMolecule<T>::getBeadIdsByName(
     const std::string &name) const {
   assert(bead_type_and_ids_.count(name) &&
          "BaseMolecule does not contain any "
@@ -158,14 +157,14 @@ std::unordered_set<int> BaseMolecule<T>::getBeadIdsByName(
 }
 
 template <class T>
-std::unordered_set<int> BaseMolecule<T>::getBeadIdsByType(
+std::vector<int> BaseMolecule<T>::getBeadIdsByType(
     const std::string &type) const {
 
-  std::unordered_set<int> bead_ids;
+  std::vector<int> bead_ids;
   for (const std::pair<const int, T *> &id_and_bead :
        BeadStructure<T>::beads_) {
     if (type.compare(id_and_bead.second->getType()) == 0) {
-      bead_ids.insert(id_and_bead.first);
+      bead_ids.push_back(id_and_bead.first);
     }
   }
   return bead_ids;

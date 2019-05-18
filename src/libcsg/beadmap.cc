@@ -22,6 +22,7 @@
 #include <memory>
 #include <numeric>
 #include <string>
+#include <unordered_set>
 #include <votca/csg/bead.h>
 #include <votca/tools/tokenizer.h>
 
