@@ -300,11 +300,11 @@ void CsgApplication::Run(void) {
          << " molecules for the coarsegraining" << endl;
     master->converter_->Update(master->_top, master->_top_cg);
 
+    if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
   } else {
     master->_top_cg.CopyBoundaryConditions(master->_top);
+    if (!EvaluateTopology(&master->_top)) return;
   }
-
-  if (!EvaluateTopology(&master->_top_cg, &master->_top)) return;
 
   if (DoTrajectory() && _op_vm.count("trj")) {
     //////////////////////////////////////////////////
