@@ -575,17 +575,14 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
 
       atomIdToIndex_[atomId] = atomIndex - startingIndex;
       atomIdToMoleculeId_[atomId] = moleculeId;
-      typename Topology_T::container_t *mol;
       if (!molecules_.count(moleculeId)) {
         tools::StructureParameters params;
         params.set(tools::StructureParameter::MoleculeId, moleculeId);
         params.set(tools::StructureParameter::MoleculeType,
                    tools::topology_constants::unassigned_molecule_type);
-        mol = &(top.CreateMolecule(params));
-        molecules_[moleculeId] = mol;
-      } else {
-        mol = molecules_[moleculeId];
+        molecules_[moleculeId] = &(top.CreateMolecule(params));
       }
+      typename Topology_T::container_t &mol = *molecules_[moleculeId];
       tools::byte_t symmetry = 1;  // spherical
       double mass =
           boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
@@ -613,8 +610,8 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
                  tools::topology_constants::unassigned_residue_id);
       params.set(tools::StructureParameter::ResidueType,
                  tools::topology_constants::unassigned_residue_type);
-      params.set(tools::StructureParameter::MoleculeId, mol->getId());
-      mol->AddBead(top.CreateBead(params));
+      params.set(tools::StructureParameter::MoleculeId, mol.getId());
+      mol.AddBead(top.CreateBead(params));
     }
     typename Topology_T::bead_t &b = top.getBead(atomId);
 

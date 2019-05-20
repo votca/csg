@@ -305,11 +305,11 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
                    static_cast<int>(_top->MoleculeCount()));
     params_mol.set(tools::StructureParameter::MoleculeType, molecule_type_);
 
-    typename Topology_T::container_t *mi = &(_top->CreateMolecule(params_mol));
+    typename Topology_T::container_t &mi = _top->CreateMolecule(params_mol);
     XMLMolecule<typename Topology_T::container_t> xmlMolecule =
         XMLMolecule<typename Topology_T::container_t>(molecule_type_, nmols);
-    xmlMolecule.pid = mi->getId();
-    xmlMolecule.mi = mi;
+    xmlMolecule.pid = mi.getId();
+    xmlMolecule.mi = &mi;
     _molecules.insert(make_pair(molecule_type_, xmlMolecule));
     std::unordered_map<std::string, int> residuename_residuenumber;
     for (XMLBead &xml_bead : xmlBeads) {
@@ -347,7 +347,7 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
       typename Topology_T::bead_t &bead = (_top->CreateBead(params));
 
       bead.setMoleculeId(_mol_index);
-      mi->AddBead(bead);
+      mi.AddBead(bead);
 
       // Data for bonded terms.
       XMLBead b_rep = XMLBead(b);
