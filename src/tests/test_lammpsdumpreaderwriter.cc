@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE lammpdumpstrajectoryreaderwriter_test
 #include <boost/test/unit_test.hpp>
 
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <boost/any.hpp>
 #include <cmath>
 #include <cstdio>
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   outfile.close();
 
-  CSG_Topology top;
+  Topology top;
 
   // Make square box
   Eigen::Matrix3d box = 10 * Eigen::Matrix3d::Identity();
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   // Create a topology object with a simple system (2-bonded thiophene monomers)
   // and write it to a lammps dump file
-  CSG_Topology top;
+  Topology top;
 
   // Make square box
   Eigen::Matrix3d box = 10 * Eigen::Matrix3d::Identity();

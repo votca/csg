@@ -15,7 +15,7 @@
  *
  */
 
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <fstream>
 #include <stddef.h>
 #include <stdexcept>
@@ -70,8 +70,8 @@ class CsgMapApp : public CsgApplication {
     return true;
   }
 
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
+  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void EvalConfiguration(Topology *top, Topology *top_ref) {
     if (!_do_hybrid) {
       // simply write the topology mapped by csgapplication class
       if (_do_vel) top->SetHasVel(true);
@@ -79,7 +79,7 @@ class CsgMapApp : public CsgApplication {
       _writer->Write(top);
     } else {
       // we want to combine atomistic and coarse-grained into one topology
-      CSG_Topology *hybtol = new CSG_Topology();
+      Topology *hybtol = new Topology();
       hybtol->Copy(*top);
       _writer->Write(hybtol);
     }
@@ -94,7 +94,7 @@ class CsgMapApp : public CsgApplication {
   bool _do_force;
 };
 
-void CsgMapApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void CsgMapApp::BeginEvaluate(Topology *top, Topology *top_atom) {
   string out = OptionsMap()["out"].as<string>();
   cout << "writing coarse-grained trajectory to " << out << endl;
   _writer = TrjWriterFactory().Create(out);

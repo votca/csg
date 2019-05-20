@@ -18,7 +18,7 @@
 #include <math.h>
 
 #include "../../include/votca/csg/csgapplication.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 
 #include <votca/tools/histogramnew.h>
 #include <votca/tools/tokenizer.h>
@@ -44,8 +44,8 @@ class CsgDensityApp : public CsgApplication {
 
   // write out results in EndEvaluate
   void EndEvaluate();
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
+  void BeginEvaluate(Topology *top, Topology *top_atom);
+  void EvalConfiguration(Topology *top, Topology *top_ref);
 
   bool EvaluateOptions() {
     CsgApplication::EvaluateOptions();
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgDensityApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void CsgDensityApp::BeginEvaluate(Topology *top, Topology *top_atom) {
 
   Eigen::Matrix3d box = top->getBox();
   Eigen::Vector3d a = box.col(0);
@@ -132,8 +132,7 @@ void CsgDensityApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   _nblock = 0;
 }
 
-void CsgDensityApp::EvalConfiguration(CSG_Topology *top,
-                                      CSG_Topology *top_ref) {
+void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref) {
   // loop over all molecules
   bool did_something = false;
   vector<int> molecule_ids = top->getMoleculeIds();

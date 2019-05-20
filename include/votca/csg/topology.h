@@ -29,7 +29,7 @@
 namespace votca {
 namespace csg {
 
-class CSG_Topology : public TemplateTopology<Bead, Molecule> {
+class Topology : public TemplateTopology<Bead, Molecule> {
  public:
   static const tools::DistanceUnit distance_unit;
   static const tools::MassUnit mass_unit;
@@ -38,14 +38,14 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
   static const tools::EnergyUnit energy_unit;
   static const tools::VelocityUnit velocity_unit;
   static const tools::ForceUnit force_unit;
-  CSG_Topology(){};
-  ~CSG_Topology(){};
+  Topology(){};
+  ~Topology(){};
 
   /// Define rule of 3
   /// Copy constructor
-  CSG_Topology(const CSG_Topology& top);
+  Topology(const Topology& top);
 
-  CSG_Topology& operator=(const CSG_Topology& top);
+  Topology& operator=(const Topology& top);
 
   Molecule& CreateMolecule(tools::StructureParameters& params);
 
@@ -62,22 +62,21 @@ class CSG_Topology : public TemplateTopology<Bead, Molecule> {
                                  std::vector<int> bead_ids);
 };
 
-// const tools::DistanceUnit CSG_Topology::distance_unit = ;
-// const tools::MassUnit CSG_Topology::mass_unit ;
-// const tools::ChargeUnit CSG_Topology::charge_unit;
-// const tools::TimeUnit CSG_Topology::time_unit;
+// const tools::DistanceUnit Topology::distance_unit = ;
+// const tools::MassUnit Topology::mass_unit ;
+// const tools::ChargeUnit Topology::charge_unit;
+// const tools::TimeUnit Topology::time_unit;
 
 /// Define rule of 3
 /// Copy constructor
-inline CSG_Topology::CSG_Topology(const CSG_Topology& top) { this->Copy(top); }
+inline Topology::Topology(const Topology& top) { this->Copy(top); }
 
-inline CSG_Topology& CSG_Topology::operator=(const CSG_Topology& top) {
+inline Topology& Topology::operator=(const Topology& top) {
   this->Copy(top);
   return *this;
 }
 
-inline Molecule& CSG_Topology::CreateMolecule(
-    tools::StructureParameters& params) {
+inline Molecule& Topology::CreateMolecule(tools::StructureParameters& params) {
   std::string molecule_type =
       params.get<std::string>(tools::StructureParameter::MoleculeType);
   int molecule_id = params.get<int>(tools::StructureParameter::MoleculeId);
@@ -86,8 +85,7 @@ inline Molecule& CSG_Topology::CreateMolecule(
   return *(molecules_map_[molecule_id]);
 }
 
-inline Molecule& CSG_Topology::CreateMolecule(int id,
-                                              std::string molecule_type) {
+inline Molecule& Topology::CreateMolecule(int id, std::string molecule_type) {
   if (!type_container_.MoleculeTypeExist(molecule_type)) {
     type_container_.AddMoleculeType(molecule_type);
   }
@@ -105,7 +103,7 @@ inline Molecule& CSG_Topology::CreateMolecule(int id,
   return *(molecules_map_[id]);
 }
 
-inline Bead& CSG_Topology::CreateBead(tools::StructureParameters& params) {
+inline Bead& Topology::CreateBead(tools::StructureParameters& params) {
   tools::byte_t symmetry =
       params.get<tools::byte_t>(tools::StructureParameter::Symmetry);
   std::string bead_type =
@@ -124,12 +122,11 @@ inline Bead& CSG_Topology::CreateBead(tools::StructureParameters& params) {
                     residue_type, element, mass, charge);
 }
 
-inline Bead& CSG_Topology::CreateBead(tools::byte_t symmetry,
-                                      std::string bead_type, int bead_id,
-                                      int molecule_id, int residue_id,
-                                      std::string residue_type,
-                                      std::string element_symbol, double mass,
-                                      double charge) {
+inline Bead& Topology::CreateBead(tools::byte_t symmetry, std::string bead_type,
+                                  int bead_id, int molecule_id, int residue_id,
+                                  std::string residue_type,
+                                  std::string element_symbol, double mass,
+                                  double charge) {
 
   assert(bead_id >= 0 && "Bead id is invalid");
   if (!type_container_.ResidueTypeExist(residue_type)) {
@@ -149,11 +146,10 @@ inline Bead& CSG_Topology::CreateBead(tools::byte_t symmetry,
   return beads_.at(bead_id);
 }
 
-inline Interaction* CSG_Topology::CreateInteraction(InteractionType type,
-                                                    std::string group,
-                                                    int bond_id,
-                                                    int molecule_id,
-                                                    std::vector<int> bead_ids) {
+inline Interaction* Topology::CreateInteraction(InteractionType type,
+                                                std::string group, int bond_id,
+                                                int molecule_id,
+                                                std::vector<int> bead_ids) {
   assert(beads_.size() > 0 &&
          "Cannot create interactions before beads have been initialized");
 

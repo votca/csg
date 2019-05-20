@@ -25,8 +25,8 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/types.h>
 
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/interaction.h"
+#include "../../include/votca/csg/topology.h"
 
 using namespace std;
 using namespace votca::tools;
@@ -34,13 +34,13 @@ using namespace votca::csg;
 
 BOOST_AUTO_TEST_SUITE(csg_topology_test)
 
-BOOST_AUTO_TEST_CASE(constructors_test) { CSG_Topology top; }
+BOOST_AUTO_TEST_CASE(constructors_test) { Topology top; }
 
 BOOST_AUTO_TEST_CASE(box_test) {
 
   Eigen::Matrix3d box = 2 * Eigen::Matrix3d::Identity();
 
-  CSG_Topology top;
+  Topology top;
   top.setBox(box);
 
   auto vol = top.BoxVolume();
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(box_test) {
 
 BOOST_AUTO_TEST_CASE(simple_test) {
 
-  CSG_Topology top;
+  Topology top;
   top.setStep(1);
   BOOST_CHECK_EQUAL(top.getStep(), 1);
   top.setTime(1.21);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(simple_test) {
  * bead has the correct properties.
  **/
 BOOST_AUTO_TEST_CASE(create_bead) {
-  CSG_Topology top;
+  Topology top;
   // 1 - for spherical bead
   byte_t symmetry = 1;
 
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(create_bead) {
  * interactions are then checked to be sure they hold the right information.
  **/
 BOOST_AUTO_TEST_CASE(add_bonded_interation_test) {
-  CSG_Topology top;
+  Topology top;
   // 1 - for spherical bead
   byte_t symmetry = 1;
 

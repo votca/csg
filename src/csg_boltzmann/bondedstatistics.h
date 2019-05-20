@@ -36,10 +36,10 @@ namespace csg {
  **/
 class BondedStatistics : public votca::csg::CGObserver {
  public:
-  void BeginCG(CSG_Topology *top, CSG_Topology *top_atom = 0);
+  void BeginCG(Topology *top, Topology *top_atom = 0);
   void EndCG();
 
-  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom = 0);
+  void EvalConfiguration(Topology *conf, Topology *conf_atom = 0);
 
   TOOLS::DataCollection<double> &BondedValues() { return _bonded_values; }
 

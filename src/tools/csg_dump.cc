@@ -15,7 +15,7 @@
  *
  */
 
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <iostream>
 #include <map>
 #include <string>
@@ -38,7 +38,7 @@ class CsgDumpApp : public CsgApplication {
         "excl", "  display exclusion list instead of molecule list");
   }
 
-  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
+  bool EvaluateTopology(Topology *top, Topology *top_ref);
 
   bool DoMapping() { return true; }
   bool DoMappingDefault(void) { return false; }
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-bool CsgDumpApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
+bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
   if (!OptionsMap().count("excl")) {
     cout << "Boundary Condition: ";
     if (top->getBoxType() == BoundaryCondition::typeAuto) {

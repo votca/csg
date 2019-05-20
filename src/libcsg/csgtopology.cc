@@ -15,21 +15,20 @@
  *
  */
 
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 namespace votca {
 namespace csg {
 
-const tools::DistanceUnit CSG_Topology::distance_unit =
+const tools::DistanceUnit Topology::distance_unit =
     tools::DistanceUnit::nanometers;
-const tools::MassUnit CSG_Topology::mass_unit =
-    tools::MassUnit::atomic_mass_units;
-const tools::TimeUnit CSG_Topology::time_unit = tools::TimeUnit::picoseconds;
-const tools::ChargeUnit CSG_Topology::charge_unit = tools::ChargeUnit::e;
-const tools::EnergyUnit CSG_Topology::energy_unit =
+const tools::MassUnit Topology::mass_unit = tools::MassUnit::atomic_mass_units;
+const tools::TimeUnit Topology::time_unit = tools::TimeUnit::picoseconds;
+const tools::ChargeUnit Topology::charge_unit = tools::ChargeUnit::e;
+const tools::EnergyUnit Topology::energy_unit =
     tools::EnergyUnit::kilojoules_per_mole;
-const tools::VelocityUnit CSG_Topology::velocity_unit =
+const tools::VelocityUnit Topology::velocity_unit =
     tools::VelocityUnit::nanometers_per_picosecond;
-const tools::ForceUnit CSG_Topology::force_unit =
+const tools::ForceUnit Topology::force_unit =
     tools::ForceUnit::kilojoules_per_mole_nanometer;
 
 }  // namespace csg

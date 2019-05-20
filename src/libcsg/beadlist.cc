@@ -17,8 +17,8 @@
 
 #include "../../include/votca/csg/beadlist.h"
 #include "../../include/votca/csg/bead.h"
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/molecule.h"
+#include "../../include/votca/csg/topology.h"
 #include <Eigen/Dense>
 #include <string>
 #include <votca/tools/tokenizer.h>
@@ -29,7 +29,7 @@ namespace csg {
 using namespace votca::tools;
 using namespace std;
 
-int BeadList::Generate(CSG_Topology &top, const string &select) {
+int BeadList::Generate(Topology &top, const string &select) {
   topology_ = &top;
   bool selectByName = false;
   string pSelect;  // parsed selection string
@@ -55,8 +55,7 @@ int BeadList::Generate(CSG_Topology &top, const string &select) {
   return size();
 }
 
-int BeadList::GenerateInSphericalSubvolume(CSG_Topology &top,
-                                           const string &select,
+int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select,
                                            Eigen::Vector3d ref, double radius) {
   topology_ = &(top);
   bool selectByName = false;

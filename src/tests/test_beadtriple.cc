@@ -24,8 +24,8 @@
 #include <tuple>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
-#include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
+#include <votca/csg/topology.h>
 #include <votca/tools/constants.h>
 
 using namespace std;
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(beadtriple_test)
 
 BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "CG";
 

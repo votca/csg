@@ -19,7 +19,6 @@
 #include <votca_config.h>
 #endif
 
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/io/dlpolytrajectoryreader.h"
 #include "../../include/votca/csg/io/gmxtrajectoryreader.h"
 #include "../../include/votca/csg/io/groreader.h"
@@ -27,6 +26,7 @@
 #include "../../include/votca/csg/io/lammpsdumpreader.h"
 #include "../../include/votca/csg/io/pdbreader.h"
 #include "../../include/votca/csg/io/xyzreader.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/trajectoryreader.h"
 #ifdef H5MD
 #include "../../include/votca/csg/io/h5mdtrajectoryreader.h"
@@ -39,21 +39,21 @@ namespace votca {
 namespace csg {
 
 void TrajectoryReader::RegisterPlugins(void) {
-  TrjReaderFactory().Register<PDBReader<CSG_Topology>>("pdb");
-  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("trr");
-  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("xtc");
-  TrjReaderFactory().Register<DLPOLYTrajectoryReader<CSG_Topology>>("dlph");
-  TrjReaderFactory().Register<DLPOLYTrajectoryReader<CSG_Topology>>("dlpc");
-  TrjReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
+  TrjReaderFactory().Register<PDBReader<Topology>>("pdb");
+  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("trr");
+  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("xtc");
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader<Topology>>("dlph");
+  TrjReaderFactory().Register<DLPOLYTrajectoryReader<Topology>>("dlpc");
+  TrjReaderFactory().Register<XYZReader<Topology>>("xyz");
 #ifdef H5MD
-  TrjReaderFactory().Register<H5MDTrajectoryReader<CSG_Topology>>("h5");
+  TrjReaderFactory().Register<H5MDTrajectoryReader<Topology>>("h5");
 #endif
-  TrjReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
-  TrjReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
-  TrjReaderFactory().Register<GROReader<CSG_Topology>>("gro");
+  TrjReaderFactory().Register<LAMMPSDumpReader<Topology>>("dump");
+  TrjReaderFactory().Register<LAMMPSDataReader<Topology>>("data");
+  TrjReaderFactory().Register<GROReader<Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("trr");
-  TrjReaderFactory().Register<GMXTrajectoryReader<CSG_Topology>>("xtc");
+  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("trr");
+  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("xtc");
 #endif
 }
 

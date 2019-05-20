@@ -162,7 +162,7 @@ class IBond : public Interaction {
     bead_ids_ = bead_ids;
     interaction_type_ = InteractionType::bond;
   }
-  friend class CSG_Topology;
+  friend class Topology;
 };
 
 /**
@@ -189,7 +189,7 @@ class IAngle : public Interaction {
     bead_ids_ = bead_ids;
     interaction_type_ = InteractionType::angle;
   }
-  friend class CSG_Topology;
+  friend class Topology;
 };
 
 /**
@@ -216,7 +216,7 @@ class IDihedral : public Interaction {
     bead_ids_ = bead_ids;
     interaction_type_ = InteractionType::dihedral;
   }
-  friend class CSG_Topology;
+  friend class Topology;
 };
 
 inline double IBond::EvaluateVar(

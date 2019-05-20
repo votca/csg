@@ -19,7 +19,7 @@
 #ifndef VOTCA_CSG_XYZREADER_H
 #define VOTCA_CSG_XYZREADER_H
 
-#include "../csgtopology.h"
+#include "../topology.h"
 #include "../topologyreader.h"
 #include "../trajectoryreader.h"
 #include <boost/algorithm/string.hpp>

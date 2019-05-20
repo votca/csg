@@ -23,7 +23,7 @@ using namespace votca::tools;
 namespace votca {
 namespace csg {
 
-void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
+void BondedStatistics::BeginCG(Topology *top, Topology *top_atom) {
   const vector<unique_ptr<Interaction>> &interactions =
       top->BondedInteractions();
   vector<unique_ptr<Interaction>>::const_iterator ia;
@@ -36,8 +36,7 @@ void BondedStatistics::BeginCG(CSG_Topology *top, CSG_Topology *top_atom) {
 
 void BondedStatistics::EndCG() {}
 
-void BondedStatistics::EvalConfiguration(CSG_Topology *conf,
-                                         CSG_Topology *conv_atom) {
+void BondedStatistics::EvalConfiguration(Topology *conf, Topology *conv_atom) {
   const vector<unique_ptr<Interaction>> &interactions =
       conf->BondedInteractions();
   vector<unique_ptr<Interaction>>::const_iterator ia;

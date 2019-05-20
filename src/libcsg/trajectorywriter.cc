@@ -19,10 +19,10 @@
 #include <votca_config.h>
 #endif
 
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/io/growriter.h"
 #include "../../include/votca/csg/io/pdbwriter.h"
 #include "../../include/votca/csg/io/xyzwriter.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/trajectorywriter.h"
 #ifdef GMX_DOUBLE
 #include "../../include/votca/csg/io/gmxtrajectorywriter.h"
@@ -35,16 +35,16 @@ namespace csg {
 
 using namespace std;
 void TrajectoryWriter::RegisterPlugins() {
-  TrjWriterFactory().Register<PDBWriter<CSG_Topology>>("pdb");
-  TrjWriterFactory().Register<XYZWriter<CSG_Topology>>("xyz");
-  TrjWriterFactory().Register<GROWriter<CSG_Topology>>("gro");
+  TrjWriterFactory().Register<PDBWriter<Topology>>("pdb");
+  TrjWriterFactory().Register<XYZWriter<Topology>>("xyz");
+  TrjWriterFactory().Register<GROWriter<Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TrjWriterFactory().Register<GMXTrajectoryWriter<CSG_Topology>>("trr");
-  TrjWriterFactory().Register<GMXTrajectoryWriter<CSG_Topology>>("xtc");
+  TrjWriterFactory().Register<GMXTrajectoryWriter<Topology>>("trr");
+  TrjWriterFactory().Register<GMXTrajectoryWriter<Topology>>("xtc");
 #endif
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<CSG_Topology>>("dlph");
-  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<CSG_Topology>>("dlpc");
-  TrjWriterFactory().Register<LAMMPSDumpWriter<CSG_Topology>>("dump");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<Topology>>("dlph");
+  TrjWriterFactory().Register<DLPOLYTrajectoryWriter<Topology>>("dlpc");
+  TrjWriterFactory().Register<LAMMPSDumpWriter<Topology>>("dump");
 }
 }  // namespace csg
 }  // namespace votca

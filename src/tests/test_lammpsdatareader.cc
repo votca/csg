@@ -21,8 +21,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../../include/votca/csg/bead.h"
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/orthorhombicbox.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/topologyreader.h"
 #include "../../include/votca/csg/trajectoryreader.h"
 #include "../../include/votca/csg/trajectorywriter.h"
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   }
   printTestFile1_(lammpsdatafilename);
 
-  CSG_Topology top;
+  Topology top;
 
   TopologyReader::RegisterPlugins();
   std::unique_ptr<TopologyReader> lammpsDataReader =
@@ -118,12 +118,12 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   }
   printTestFile1_(lammpsdatafilename);
 
-  CSG_Topology top;
+  Topology top;
 
   TopologyReader::RegisterPlugins();
   unique_ptr<TopologyReader> lammpsDataReader =
       TopReaderFactory().Create("test.data");
-  CSG_Topology *top_ptr = &top;
+  Topology *top_ptr = &top;
   boost::any any_ptr(&top);
   lammpsDataReader->ReadTopology(lammpsdatafilename, any_ptr);
 

@@ -21,7 +21,7 @@
 
 #include "atomcgconverter.h"
 #include "cgobserver.h"
-#include "csgtopology.h"
+#include "topology.h"
 #include <boost/program_options.hpp>
 #include <list>
 #include <map>
@@ -60,7 +60,7 @@ class CGEngine {
    * positions vectors and forces of the coarse grained representation
    */
   std::unique_ptr<AtomCGConverter> PopulateCGTopology(
-      CSG_Topology& atomistic_top_in, CSG_Topology& cg_top);
+      Topology& atomistic_top_in, Topology& cg_top);
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process

@@ -50,11 +50,11 @@ class CGForceMatching : public CsgApplication {
   bool EvaluateOptions();
 
   /// \brief called before the first frame
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
+  void BeginEvaluate(Topology *top, Topology *top_atom);
   /// \brief called after the last frame
   void EndEvaluate();
   /// \brief called for each frame which is mapped
-  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom = 0);
+  void EvalConfiguration(Topology *conf, Topology *conf_atom = 0);
   /// \brief load options from the input file
   void LoadOptions(const std::string &file);
 
@@ -182,19 +182,19 @@ class CGForceMatching : public CsgApplication {
   void FmatchAssignSmoothCondsToMatrix(Eigen::MatrixXd &Matrix);
   /// \brief For each trajectory frame writes equations for bonded interactions
   /// to matrix _A
-  void EvalBonded(CSG_Topology *conf, SplineInfo *sinfo);
+  void EvalBonded(Topology *conf, SplineInfo *sinfo);
   /// \brief For each trajectory frame writes equations for non-bonded
   /// interactions to matrix _A
-  void EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo);
+  void EvalNonbonded(Topology *conf, SplineInfo *sinfo);
   /// \brief For each trajectory frame writes equations for non-bonded threebody
   /// interactions to matrix _A
-  void EvalNonbonded_Threebody(CSG_Topology *conf, SplineInfo *sinfo);
+  void EvalNonbonded_Threebody(Topology *conf, SplineInfo *sinfo);
   /// \brief Write results to output files
   void WriteOutFiles();
 
   void OpenForcesTrajectory();
 
-  CSG_Topology _top_force;
+  Topology _top_force;
   std::unique_ptr<TrajectoryReader> _trjreader_force = nullptr;
 };
 }  // namespace csg

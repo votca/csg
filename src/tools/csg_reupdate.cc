@@ -86,7 +86,7 @@ void CsgREupdate::LoadOptions(const string &file) {
   _nonbonded = _options.Select("cg.non-bonded");
 }
 
-void CsgREupdate::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void CsgREupdate::BeginEvaluate(Topology *top, Topology *top_atom) {
 
   // initializing non-bonded interactions
   _nlamda = 0;
@@ -510,8 +510,7 @@ void CsgREupdate::MergeWorker(Worker *worker) {
   _HS += myCsgREupdateWorker->_HS;
 }
 
-void CsgREupdateWorker::EvalConfiguration(CSG_Topology *conf,
-                                          CSG_Topology *conf_atom) {
+void CsgREupdateWorker::EvalConfiguration(Topology *conf, Topology *conf_atom) {
 
   /* as per Relative Entropy Ref.  J. Chem. Phys. 134, 094112, 2011
    * for each CG we need to compute dU/dlamda and d2U/dlamda_i dlamda_j
@@ -554,8 +553,7 @@ void CsgREupdateWorker::EvalConfiguration(CSG_Topology *conf,
 
 // do nonbonded potential related update stuff for the current frame in
 // evalconfig
-void CsgREupdateWorker::EvalNonbonded(CSG_Topology *conf,
-                                      PotentialInfo *potinfo) {
+void CsgREupdateWorker::EvalNonbonded(Topology *conf, PotentialInfo *potinfo) {
 
   BeadList beads1, beads2;
   beads1.Generate(*conf, potinfo->type1);
@@ -643,7 +641,7 @@ void CsgREupdateWorker::EvalNonbonded(CSG_Topology *conf,
 }
 
 // do bonded potential related update stuff for the current frame in evalconfig
-void CsgREupdateWorker::EvalBonded(CSG_Topology *conf, PotentialInfo *potinfo) {
+void CsgREupdateWorker::EvalBonded(Topology *conf, PotentialInfo *potinfo) {
   // coming soon!
 }
 

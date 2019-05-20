@@ -16,7 +16,7 @@
  */
 
 #include "../../include/votca/csg/cgengine.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/version.h"
 #include <algorithm>
 #include <cassert>
@@ -46,7 +46,7 @@ void CGEngine::LoadFiles(string filename) {
 }
 
 unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
-    CSG_Topology &atomistic_top_in, CSG_Topology &cg_top_out) {
+    Topology &atomistic_top_in, Topology &cg_top_out) {
 
   unique_ptr<AtomCGConverter> converter =
       unique_ptr<AtomCGConverter>(new AtomCGConverter(ignores_));

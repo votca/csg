@@ -51,11 +51,10 @@ class CsgBoltzmann : public CsgApplication {
   void Run();
 
   void InteractiveMode();
-  bool EvaluateTopology(CSG_Topology *top_cg, CSG_Topology *top_atomistic);
+  bool EvaluateTopology(Topology *top_cg, Topology *top_atomistic);
 
  protected:
-  ExclusionList *CreateExclusionList(CSG_Topology &top_atomistic,
-                                     CSG_Topology &top_cg,
+  ExclusionList *CreateExclusionList(Topology &top_atomistic, Topology &top_cg,
                                      Molecule &mol_atomistic, Molecule &mol_cg);
   BondedStatistics _bs;
 };
@@ -76,8 +75,7 @@ bool CsgBoltzmann::EvaluateOptions() {
   return true;
 }
 
-bool CsgBoltzmann::EvaluateTopology(CSG_Topology *top_cg,
-                                    CSG_Topology *top_atomistic) {
+bool CsgBoltzmann::EvaluateTopology(Topology *top_cg, Topology *top_atomistic) {
   if (OptionsMap().count("excl")) {
     ExclusionList *ex;
     if (top_atomistic->MoleculeCount() > 1)
@@ -106,8 +104,8 @@ bool CsgBoltzmann::EvaluateTopology(CSG_Topology *top_cg,
   return true;
 }
 
-ExclusionList *CsgBoltzmann::CreateExclusionList(CSG_Topology &top_atomistic,
-                                                 CSG_Topology &top_cg,
+ExclusionList *CsgBoltzmann::CreateExclusionList(Topology &top_atomistic,
+                                                 Topology &top_cg,
                                                  Molecule &mol_atomistic,
                                                  Molecule &mol_cg) {
   ExclusionList *ex = new ExclusionList();

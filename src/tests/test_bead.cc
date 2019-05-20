@@ -19,7 +19,7 @@
 
 #define BOOST_TEST_MODULE bead_test
 #include "../../include/votca/csg/bead.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <math.h>
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(bead_test)
 
 BOOST_AUTO_TEST_CASE(test_bead_constructor) {
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "C1";
   int symmetry = 1;
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_bead_constructor) {
 
 BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "C1";
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_bead_getters) {
 
 BOOST_AUTO_TEST_CASE(test_bead_setters) {
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "C1";
 

@@ -33,16 +33,16 @@ namespace csg {
 
 */
 
-class CSG_Topology;
+class Topology;
 class Bead;
 
 class BeadList {
  public:
   /// \brief Select all beads of type <select>
-  int Generate(CSG_Topology &top, const std::string &select);
+  int Generate(Topology &top, const std::string &select);
   /// \brief Select all beads of type <select> withn a radius <radius> of
   /// reference vector <ref>
-  int GenerateInSphericalSubvolume(CSG_Topology &top, const std::string &select,
+  int GenerateInSphericalSubvolume(Topology &top, const std::string &select,
                                    Eigen::Vector3d ref, double radius);
 
   int size() const { return _beads.size(); }
@@ -57,12 +57,12 @@ class BeadList {
   iterator end() { return _beads.end(); }
 
   /// Get the csg topology object
-  const CSG_Topology *getCSGTopologyConst() const { return topology_; }
-  CSG_Topology *getCSGTopology() const { return topology_; }
+  const Topology *getTopologyConst() const { return topology_; }
+  Topology *getTopology() const { return topology_; }
 
  private:
   std::vector<Bead *> _beads;
-  CSG_Topology *topology_;
+  Topology *topology_;
 };
 
 }  // namespace csg

@@ -16,7 +16,7 @@
  */
 
 #include "../../include/votca/csg/csgapplication.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <iostream>
@@ -42,12 +42,12 @@ class GmxTopolApp : public CsgApplication {
     CheckRequired("out", "no output topology specified");
     return true;
   }
-  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
+  bool EvaluateTopology(Topology *top, Topology *top_ref);
 
  protected:
   void WriteAtoms(ostream &out, Molecule &cg);
-  void WriteInteractions(ostream &out, CSG_Topology &top, Molecule &cg);
-  void WriteMolecule(ostream &out, CSG_Topology &top, Molecule &cg);
+  void WriteInteractions(ostream &out, Topology &top, Molecule &cg);
+  void WriteMolecule(ostream &out, Topology &top, Molecule &cg);
 };
 
 void GmxTopolApp::Initialize(void) {
@@ -57,7 +57,7 @@ void GmxTopolApp::Initialize(void) {
       "output topology (will create .top and in future also .itp)");
 }
 
-bool GmxTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
+bool GmxTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
   if (top->MoleculeCount() > 1)
     cout << "WARNING: cannot create topology for topology with"
             "multiple molecules, using only first molecule\n";
@@ -80,8 +80,7 @@ void GmxTopolApp::WriteAtoms(ostream &out, Molecule &cg) {
   out << endl;
 }
 
-void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
-                                    Molecule &cg) {
+void GmxTopolApp::WriteInteractions(ostream &out, Topology &top, Molecule &cg) {
   int nb = -1;
 
   vector<unique_ptr<Interaction>>::const_iterator ic_iter;
@@ -117,7 +116,7 @@ void GmxTopolApp::WriteInteractions(ostream &out, CSG_Topology &top,
   }
 }
 
-void GmxTopolApp::WriteMolecule(ostream &out, CSG_Topology &top, Molecule &cg) {
+void GmxTopolApp::WriteMolecule(ostream &out, Topology &top, Molecule &cg) {
   out << "[ moleculetype ]\n";
   out << cg.getType() << " 3\n\n";
 

@@ -15,7 +15,7 @@
  *
  */
 #include "../../include/votca/csg/nblistgrid_3body.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 
 namespace votca {
 namespace csg {
@@ -32,10 +32,10 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
   if (list3.empty()) return;
 
   // check if all bead lists "have" the same topology
-  assert(list1.getCSGTopology() == list2.getCSGTopology());
-  assert(list1.getCSGTopology() == list3.getCSGTopology());
-  assert(list2.getCSGTopology() == list3.getCSGTopology());
-  CSG_Topology *top = _top = list1.getCSGTopology();
+  assert(list1.getTopology() == list2.getCSGTopology());
+  assert(list1.getTopology() == list3.getCSGTopology());
+  assert(list2.getTopology() == list3.getCSGTopology());
+  Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());
 
@@ -66,8 +66,8 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
   if (list2.empty()) return;
 
   // check if both bead lists "have" the same topology
-  assert(list1.getCSGTopology() == list2.getCSGTopology());
-  CSG_Topology *top = _top = list1.getCSGTopology();
+  assert(list1.getTopology() == list2.getCSGTopology());
+  Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());
 
@@ -97,7 +97,7 @@ void NBListGrid_3Body::Generate(BeadList &list, bool do_exclusions) {
   _do_exclusions = do_exclusions;
   if (list.empty()) return;
 
-  CSG_Topology *top = _top = list.getCSGTopology();
+  Topology *top = _top = list.getTopology();
 
   InitializeGrid(top->getBox());
 

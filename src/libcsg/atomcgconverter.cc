@@ -63,9 +63,9 @@ const std::string &AtomCGConverter::getAtomisticMoleculeType(
   return atomic_and_cg_molecule_types_.right.at(cg_mol_type);
 }
 
-CSG_Topology AtomCGConverter::Convert(CSG_Topology &atomic_top_in) {
+Topology AtomCGConverter::Convert(Topology &atomic_top_in) {
 
-  CSG_Topology cg_top_out;
+  Topology cg_top_out;
   cg_top_out.CopyBoundaryConditions(atomic_top_in);
   cg_top_out.setStep(atomic_top_in.getStep());
   cg_top_out.setTime(atomic_top_in.getTime());
@@ -98,8 +98,7 @@ CSG_Topology AtomCGConverter::Convert(CSG_Topology &atomic_top_in) {
   return cg_top_out;
 }
 
-void AtomCGConverter::Update(const CSG_Topology &atomic_top,
-                             CSG_Topology &cg_top) {
+void AtomCGConverter::Update(const Topology &atomic_top, Topology &cg_top) {
 
   assert(atomic_top.getBoxType() == cg_top.getBoxType() &&
          "box types of topology in and out differ");
@@ -124,8 +123,7 @@ void AtomCGConverter::Update(const CSG_Topology &atomic_top,
 }
 
 void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-    const Molecule &atomistic_mol, CSG_Topology &cg_top_out,
-    CSG_Topology &atom_top) {
+    const Molecule &atomistic_mol, Topology &cg_top_out, Topology &atom_top) {
 
   string atom_mol_type = atomistic_mol.getType();
   int molecule_id = atomistic_mol.getId();
@@ -385,8 +383,8 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(
 // from an .xml file
 //
 map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
-    Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
-    CSG_Topology &atom_top) {
+    Molecule *cg_mol, CGMoleculeStencil stencil, Topology &cg_top_out,
+    Topology &atom_top) {
 
   map<string, int> cg_bead_name_and_id;
   for (const CGBeadStencil &bead_info : stencil.getBeadStencil()) {
@@ -446,7 +444,7 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
 }
 
 void AtomCGConverter::CreateInteractions_(
-    Molecule *cg_mol, CGMoleculeStencil stencil, CSG_Topology &cg_top_out,
+    Molecule *cg_mol, CGMoleculeStencil stencil, Topology &cg_top_out,
     map<int, vector<pair<std::string, int>>> cg_id_and_bead_name_to_id) {
 
   // Convert to a map of the atomic bead names and their ids
@@ -493,8 +491,8 @@ void AtomCGConverter::CreateInteractions_(
 // Should return the id of the cg bead
 // followed by the vector< atom name, atom id>
 map<int, vector<pair<string, int>>> AtomCGConverter::CreateMolecule_(
-    string cg_mol_type, int molecule_id, CSG_Topology &cg_top_out,
-    CSG_Topology &atom_top) {
+    string cg_mol_type, int molecule_id, Topology &cg_top_out,
+    Topology &atom_top) {
 
   Molecule &cg_mol = cg_top_out.CreateMolecule(molecule_id, cg_mol_type);
   CGMoleculeStencil &cg_mol_stencil = cg_molecule_and_stencil_.at(cg_mol_type);

@@ -64,7 +64,7 @@ class CsgTestApp : public CsgApplication {
   //      return false;
   //  }
 
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
+  void BeginEvaluate(Topology *top, Topology *top_ref);
   void EndEvaluate();
 
   // ForkWorker is the function you need to override and initialize your workers
@@ -85,7 +85,7 @@ class RDFWorker : public CsgApplication::Worker {
  public:
   ~RDFWorker(){};
   // override EvalConfiguration with your analysis routine
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(Topology *top, Topology *top_ref);
   // data belonging to this particular worker
   HistogramNew _rdf;
   double _cut_off;
@@ -104,7 +104,7 @@ void CsgTestApp::Initialize() {
       "the cutoff");
 }
 
-void CsgTestApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
+void CsgTestApp::BeginEvaluate(Topology *top, Topology *top_ref) {
   _cut_off = OptionsMap()["c"].as<double>();
   _rdf.Initialize(0, _cut_off, 50);
 }
@@ -124,7 +124,7 @@ CsgApplication::Worker *CsgTestApp::ForkWorker() {
 
 // EvalConfiguration does the actual calculation
 // you won't see any explicit threaded stuff here
-void RDFWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
+void RDFWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
   BeadList b;
   b.Generate(*top, "*");
   NBListGrid nb;

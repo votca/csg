@@ -19,8 +19,8 @@
 #ifndef VOTCA_CSG_XYZWRITER_H
 #define VOTCA_CSG_XYZWRITER_H
 
-#include "../csgtopology.h"
 #include "../molecule.h"
+#include "../topology.h"
 #include "../trajectorywriter.h"
 #include <Eigen/Dense>
 #include <boost/any.hpp>

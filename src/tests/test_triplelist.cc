@@ -23,7 +23,7 @@
 #include <string>
 #include <votca/csg/bead.h>
 #include <votca/csg/beadtriple.h>
-#include <votca/csg/csgtopology.h>
+#include <votca/csg/topology.h>
 #include <votca/csg/triplelist.h>
 #include <votca/tools/constants.h>
 
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(triplelist_constructor) {
 BOOST_AUTO_TEST_CASE(triplelist_add_triple) {
   TripleList<Bead *, BeadTriple> triplelist;
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "CG";
 

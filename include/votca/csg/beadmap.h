@@ -19,8 +19,8 @@
 #define VOTCA_CSG_BEADMAP_H
 
 #include "cgbeadstencil.h"
-#include "csgtopology.h"
 #include "molecule.h"
+#include "topology.h"
 #include <string>
 #include <vector>
 #include <votca/tools/property.h>
@@ -217,7 +217,7 @@ class AtomToCGMoleculeMapper {
 
   // Pass in a map containing the names of all the atomistic beads in the
   // molecule and pointers to them
-  void UpdateCGMolecule(const CSG_Topology &atom_top, CSG_Topology &cg_top,
+  void UpdateCGMolecule(const Topology &atom_top, Topology &cg_top,
                         CGMolToAtom cgmolid_cgbeadid_atomicbeadnames_ids);
 
   /***************************
@@ -261,7 +261,7 @@ class AtomToCGMoleculeMapper {
    * @return map with the atomic bead names and the pointers to them
    */
   std::map<std::string, const Bead *> getAtomicNamesAndBeads_(
-      const CSG_Topology &atom_top,
+      const Topology &atom_top,
       const std::vector<std::pair<std::string, int>> &atomic_names_and_ids)
       const;
 };

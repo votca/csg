@@ -71,7 +71,7 @@ void Imc::Initialize() {
   if (_do_imc) InitializeGroups();
 };
 
-void Imc::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void Imc::BeginEvaluate(Topology *top, Topology *top_atom) {
   // we didn't process any frames so far
   _nframes = 0;
   _nblock = 0;
@@ -233,7 +233,7 @@ void Imc::LoadOptions(const string &file) {
 }
 
 // evaluate current conformation
-void Imc::Worker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_atom) {
+void Imc::Worker::EvalConfiguration(Topology *top, Topology *top_atom) {
 
   _cur_vol = top->BoxVolume();
   // process non-bonded interactions
@@ -275,7 +275,7 @@ class IMCNBSearchHandler {
 };
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoNonbonded(CSG_Topology *top) {
+void Imc::Worker::DoNonbonded(Topology *top) {
   for (Property *prop : _imc->_nonbonded) {
     string name = prop->get("name").value();
 
@@ -430,7 +430,7 @@ void Imc::Worker::DoNonbonded(CSG_Topology *top) {
 }  // namespace votca
 
 // process non-bonded interactions for current frame
-void Imc::Worker::DoBonded(CSG_Topology *top) {
+void Imc::Worker::DoBonded(Topology *top) {
   for (Property *prop : _imc->_bonded) {
     string name = prop->get("name").value();
 

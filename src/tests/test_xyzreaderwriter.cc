@@ -18,7 +18,7 @@
 #define BOOST_TEST_MAIN
 
 #define BOOST_TEST_MODULE xyzreaderwriter_test
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/topologyreader.h"
 #include "../../include/votca/csg/trajectorywriter.h"
 #include <boost/any.hpp>
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   Elements ele;
 
-  CSG_Topology top;
+  Topology top;
   TopologyReader::RegisterPlugins();
   string str = "Molecule1.xyz";
   unique_ptr<TopologyReader> reader = TopReaderFactory().Create(str);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   Elements ele;
 
-  CSG_Topology top;
+  Topology top;
   TopologyReader::RegisterPlugins();
   string str = "Molecule1.xyz";
   unique_ptr<TopologyReader> reader = TopReaderFactory().Create(str);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
   writer->Write(&top);
   writer->Close();
 
-  CSG_Topology top2;
+  Topology top2;
   unique_ptr<TopologyReader> reader2 = TopReaderFactory().Create(str2);
   boost::any any_ptr2(&top2);
   reader2->ReadTopology(str2, any_ptr2);

@@ -414,7 +414,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   // Used to initialize all other forces and velocities
   Eigen::Vector3d initialize(0.0, 0.0, 0.0);
 
-  CSG_Topology atom_top;
+  Topology atom_top;
   int mol_id = 0;
   string atomic_mol_type = "propane";
   byte_t atom_bead_sym = 1;
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   H11->setF(force_h11);
   atom_mol->AddBead(H11);
 
-  CSG_Topology cg_top;
+  Topology cg_top;
   string cg_mol_type = "propane";
   Molecule* cg_mol = &cg_top.CreateMolecule(mol_id, cg_mol_type);
   int cg_bead_id = 1;

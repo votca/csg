@@ -57,7 +57,7 @@ class DLPTopolApp : public CsgApplication {
     CheckRequired("out", "no output topology specified");
     return true;
   }
-  bool EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref);
+  bool EvaluateTopology(Topology *top, Topology *top_ref);
 
  protected:
   void WriteMoleculeAtoms(ostream &out, const Molecule &cg);
@@ -76,7 +76,7 @@ void DLPTopolApp::Initialize(void) {
                       "  output topology in dlpoly format");
 }
 
-bool DLPTopolApp::EvaluateTopology(CSG_Topology *top, CSG_Topology *top_ref) {
+bool DLPTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
   // check the file names from options
 
   string fname = OptionsMap()["top"].as<string>();

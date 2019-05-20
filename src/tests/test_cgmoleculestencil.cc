@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE cgmoleculestencil_test
 #include "../../include/votca/csg/cgbeadstencil.h"
 #include "../../include/votca/csg/cgmoleculestencil.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <fstream>

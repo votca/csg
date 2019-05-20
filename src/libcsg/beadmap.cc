@@ -356,7 +356,7 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
 }
 
 void AtomToCGMoleculeMapper::UpdateCGMolecule(
-    const CSG_Topology &atom_top, CSG_Topology &cg_top,
+    const Topology &atom_top, Topology &cg_top,
     CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
 
   // First int cg_molecule id
@@ -406,7 +406,7 @@ void AtomToCGMoleculeMapper::UpdateCGMolecule(
 }
 
 map<string, const Bead *> AtomToCGMoleculeMapper::getAtomicNamesAndBeads_(
-    const CSG_Topology &atom_top,
+    const Topology &atom_top,
     const vector<pair<string, int>> &atomic_names_and_ids) const {
 
   map<string, const Bead *> atomic_names_and_beads;

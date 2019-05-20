@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_constructor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
-  CSG_Topology top;
+  Topology top;
 
   byte_t symmetry = 1;
   string bead_type = "C";
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
 }
 
 BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
-  CSG_Topology top;
+  Topology top;
 
   // Setup topology class
   {

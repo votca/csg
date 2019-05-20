@@ -16,7 +16,7 @@
  */
 #include "../../include/votca/csg/nematicorder.h"
 #include "../../include/votca/csg/bead.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <votca/tools/tokenizer.h>
 
 namespace votca {
@@ -25,7 +25,7 @@ namespace csg {
 using namespace std;
 using namespace votca::tools;
 
-void NematicOrder::Process(CSG_Topology &top, const string &filter) {
+void NematicOrder::Process(Topology &top, const string &filter) {
   _mu = Eigen::Matrix3d::Zero();
   _mv = Eigen::Matrix3d::Zero();
   _mw = Eigen::Matrix3d::Zero();

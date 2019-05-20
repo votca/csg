@@ -16,7 +16,7 @@
  */
 
 #include "../../include/votca/csg/nblist.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <iostream>
 
 namespace votca {
@@ -43,8 +43,8 @@ void NBList::Generate(BeadList &list1, BeadList &list2, bool do_exclusions) {
   if (list1.empty()) return;
   if (list2.empty()) return;
 
-  assert(list1.getCSGTopology() == list2.getCSGTopology());
-  CSG_Topology *top = list1.getCSGTopology();
+  assert(list1.getTopology() == list2.getCSGTopology());
+  Topology *top = list1.getTopology();
 
   for (iter1 = list1.begin(); iter1 != list1.end(); ++iter1) {
     if (&list1 == &list2) {

@@ -19,12 +19,12 @@
 #include <votca_config.h>
 #endif
 
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/io/groreader.h"
 #include "../../include/votca/csg/io/lammpsdumpreader.h"
 #include "../../include/votca/csg/io/pdbreader.h"
 #include "../../include/votca/csg/io/xmltopologyreader.h"
 #include "../../include/votca/csg/io/xyzreader.h"
+#include "../../include/votca/csg/topology.h"
 #include "../../include/votca/csg/topologyreader.h"
 #ifdef GMX_DOUBLE
 #include "../../include/votca/csg/io/gmxtopologyreader.h"
@@ -35,16 +35,16 @@ namespace votca {
 namespace csg {
 
 void TopologyReader::RegisterPlugins(void) {
-  TopReaderFactory().Register<PDBReader<CSG_Topology>>("pdb");
-  TopReaderFactory().Register<XMLTopologyReader<CSG_Topology>>("xml");
-  TopReaderFactory().Register<XYZReader<CSG_Topology>>("xyz");
-  TopReaderFactory().Register<LAMMPSDumpReader<CSG_Topology>>("dump");
-  TopReaderFactory().Register<GROReader<CSG_Topology>>("gro");
+  TopReaderFactory().Register<PDBReader<Topology>>("pdb");
+  TopReaderFactory().Register<XMLTopologyReader<Topology>>("xml");
+  TopReaderFactory().Register<XYZReader<Topology>>("xyz");
+  TopReaderFactory().Register<LAMMPSDumpReader<Topology>>("dump");
+  TopReaderFactory().Register<GROReader<Topology>>("gro");
 #ifdef GMX_DOUBLE
-  TopReaderFactory().Register<GMXTopologyReader<CSG_Topology>>("tpr");
+  TopReaderFactory().Register<GMXTopologyReader<Topology>>("tpr");
 #endif
-  TopReaderFactory().Register<LAMMPSDataReader<CSG_Topology>>("data");
-  TopReaderFactory().Register<DLPOLYTopologyReader<CSG_Topology>>("dlpf");
+  TopReaderFactory().Register<LAMMPSDataReader<Topology>>("data");
+  TopReaderFactory().Register<DLPOLYTopologyReader<Topology>>("dlpf");
 }
 
 }  // namespace csg

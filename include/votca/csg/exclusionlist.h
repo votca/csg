@@ -30,7 +30,7 @@ namespace csg {
 /// \todo fill _excl_by_bead
 /// \todo no ids but pointers, use PairList
 
-class CSG_Topology;
+class Topology;
 class Bead;
 
 class ExclusionList {

@@ -35,8 +35,8 @@ class CsgTestApp : public CsgApplication {
 
   bool DoTrajectory() { return true; }
 
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
+  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void EvalConfiguration(Topology *top, Topology *top_ref);
   void EndEvaluate();
 
  protected:
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
+void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref) {
   BeadList b;
   b.Generate(*top, "*");
   NBListGrid nb;
@@ -67,7 +67,7 @@ void CsgTestApp::Initialize() {
       "the cutoff");
 }
 
-void CsgTestApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
+void CsgTestApp::BeginEvaluate(Topology *top, Topology *top_ref) {
   _cut_off = OptionsMap()["c"].as<double>();
   _rdf.Initialize(0, _cut_off, 50);
 }

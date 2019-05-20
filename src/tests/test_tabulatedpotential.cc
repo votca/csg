@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE tabulatedpotential_test
 #include <boost/test/unit_test.hpp>
 
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include "../csg_boltzmann/tabulatedpotential.h"
 #include <cstdlib>
 #include <map>
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_register) {
 
 BOOST_AUTO_TEST_CASE(test_command) {
 
-  CSG_Topology top;
+  Topology top;
   BondedStatistics bonded_statistics;
   string interaction_group = "interaction";
   vector<string> interactions;

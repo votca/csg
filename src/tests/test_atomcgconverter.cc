@@ -19,8 +19,8 @@
 
 #define BOOST_TEST_MODULE atomcgconverter_test
 #include "../../include/votca/csg/atomcgconverter.h"
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/molecule.h"
+#include "../../include/votca/csg/topology.h"
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/test/unit_test.hpp>
 #include <fstream>
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_atomcgconverter_constructor) {
 
 BOOST_AUTO_TEST_CASE(test_load) {
 
-  CSG_Topology atom_top;
+  Topology atom_top;
   atom_top.setStep(0);
   // Create two propane molecules
 
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
                     string("propane"));
 
   // Create an empty topology
-  CSG_Topology cg_top;
+  Topology cg_top;
 
   cg_top = converter.Convert(atom_top);
 

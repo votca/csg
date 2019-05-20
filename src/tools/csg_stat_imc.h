@@ -44,7 +44,7 @@ class Imc {
   void LoadOptions(const std::string &file);
 
   /// begin coarse graining a trajectory
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
+  void BeginEvaluate(Topology *top, Topology *top_atom);
 
   /// end coarse graining a trajectory
   void EndEvaluate();
@@ -140,11 +140,11 @@ class Imc {
     double _cur_vol;
 
     /// evaluate current conformation
-    void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_atom);
+    void EvalConfiguration(Topology *top, Topology *top_atom);
     /// process non-bonded interactions for given frame
-    void DoNonbonded(CSG_Topology *top);
+    void DoNonbonded(Topology *top);
     /// process bonded interactions for given frame
-    void DoBonded(CSG_Topology *top);
+    void DoBonded(Topology *top);
   };
   /// update the correlations after interations were processed
   void DoCorrelations(Imc::Worker *worker);

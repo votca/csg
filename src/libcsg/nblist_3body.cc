@@ -16,7 +16,7 @@
  */
 
 #include "../../include/votca/csg/nblist_3body.h"
-#include "../../include/votca/csg/csgtopology.h"
+#include "../../include/votca/csg/topology.h"
 #include <iostream>
 
 namespace votca {
@@ -43,10 +43,10 @@ void NBList_3Body::Generate(BeadList &list1, BeadList &list2, BeadList &list3,
   if (list3.empty()) return;
 
   // check if all bead lists "have" the same topology
-  assert(list1.getCSGTopology() == list2.getCSGTopology());
-  assert(list1.getCSGTopology() == list3.getCSGTopology());
-  assert(list2.getCSGTopology() == list3.getCSGTopology());
-  CSG_Topology *top = list1.getCSGTopology();
+  assert(list1.getTopology() == list2.getCSGTopology());
+  assert(list1.getTopology() == list3.getCSGTopology());
+  assert(list2.getTopology() == list3.getCSGTopology());
+  Topology *top = list1.getTopology();
 
   // builds neighbor lists for all cases, where all list are of different bead
   // typess (list1 neq list2 neq list3), list2 and list3 are of the same type

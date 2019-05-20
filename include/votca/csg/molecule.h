@@ -70,7 +70,7 @@ class Molecule : public BaseMolecule<Bead> {
     type_.setName(molecule_type);
   }
 
-  friend class CSG_Topology;
+  friend class Topology;
 };
 
 inline std::vector<int> Molecule::getBeadIdsByLabel(

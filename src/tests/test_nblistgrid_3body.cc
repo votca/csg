@@ -22,8 +22,8 @@
 
 #include "../../include/votca/csg/bead.h"
 #include "../../include/votca/csg/beadlist.h"
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/nblistgrid_3body.h"
+#include "../../include/votca/csg/topology.h"
 #include <string>
 #include <vector>
 #include <votca/tools/constants.h>
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
 
   nb->setCutoff(2.0);
 
-  CSG_Topology top;
+  Topology top;
 
   Eigen::Matrix3d m = 5 * Eigen::Matrix3d::Identity();
 

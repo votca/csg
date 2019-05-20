@@ -58,7 +58,7 @@ bool CGForceMatching::EvaluateOptions() {
   return true;
 }
 
-void CGForceMatching::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void CGForceMatching::BeginEvaluate(Topology *top, Topology *top_atom) {
   // set counters to zero value:
   _nblocks = 0;
   _line_cntr = _col_cntr = 0;
@@ -375,11 +375,10 @@ void CGForceMatching::WriteOutFiles() {
   }
 }
 
-void CGForceMatching::EvalConfiguration(CSG_Topology *conf,
-                                        CSG_Topology *conf_atom) {
+void CGForceMatching::EvalConfiguration(Topology *conf, Topology *conf_atom) {
   if (conf->BeadCount() == 0)
     throw std::runtime_error(
-        "CG CSG_Topology has 0 beads, check your mapping file!");
+        "CG Topology has 0 beads, check your mapping file!");
   if (_has_existing_forces) {
     if (conf->BeadCount() != _top_force.BeadCount())
       throw std::runtime_error(
@@ -565,7 +564,7 @@ void CGForceMatching::LoadOptions(const string &file) {
   _nonbonded = _options.Select("cg.non-bonded");
 }
 
-void CGForceMatching::EvalBonded(CSG_Topology *conf, SplineInfo *sinfo) {
+void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) {
   std::list<Interaction *> interList;
   std::list<Interaction *>::iterator interListIter;
 
@@ -612,7 +611,7 @@ void CGForceMatching::EvalBonded(CSG_Topology *conf, SplineInfo *sinfo) {
   }
 }
 
-void CGForceMatching::EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo) {
+void CGForceMatching::EvalNonbonded(Topology *conf, SplineInfo *sinfo) {
 
   // generate the neighbour list
   NBList *nb;
@@ -691,7 +690,7 @@ void CGForceMatching::EvalNonbonded(CSG_Topology *conf, SplineInfo *sinfo) {
   delete nb;
 }
 
-void CGForceMatching::EvalNonbonded_Threebody(CSG_Topology *conf,
+void CGForceMatching::EvalNonbonded_Threebody(Topology *conf,
                                               SplineInfo *sinfo) {
   // so far option gridsearch ignored. Only simple search
 

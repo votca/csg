@@ -45,7 +45,7 @@ class NBListGrid_3Body : public NBList_3Body {
   int _box_Na, _box_Nb, _box_Nc;
 
   std::vector<cell_t> _grid;
-  CSG_Topology *_top;
+  Topology *_top;
 
   void InitializeGrid(const Eigen::Matrix3d &box);
 

@@ -21,9 +21,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../../include/votca/csg/bead.h"
-#include "../../include/votca/csg/csgtopology.h"
 #include "../../include/votca/csg/interaction.h"
 #include "../../include/votca/csg/molecule.h"
+#include "../../include/votca/csg/topology.h"
 #include <string>
 #include <votca/tools/constants.h>
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(interaction_test)
 
 BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
 
-  CSG_Topology top;
+  Topology top;
 
   string bead_type = "type1";
   byte_t symmetry = 1;
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_interaction_setters_getters) {
 
 BOOST_AUTO_TEST_CASE(bond_test) {
 
-  CSG_Topology top;
+  Topology top;
 
   byte_t symmetry = 1;
   string bead_type = "H";
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(bond_test) {
 
 BOOST_AUTO_TEST_CASE(angle_test) {
 
-  CSG_Topology top;
+  Topology top;
   byte_t symmetry = 1;
   string bead_type = "H";
   string element = "H";
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(angle_test) {
 
 BOOST_AUTO_TEST_CASE(dihedral_test) {
 
-  CSG_Topology top;
+  Topology top;
   byte_t symmetry = 1;
   string bead_type = "H";
   string element = "H";
