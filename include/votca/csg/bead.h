@@ -354,6 +354,23 @@ class Bead : public BaseBead {
     bead_force_set_ = false;
   }
 
+  Bead(tools::StructureParameters params) {
+    setId(params.get<int>(tools::StructureParameter::BeadId));
+
+    setType(params.get<std::string>(tools::StructureParameter::BeadType));
+    residue_id_ = params.get<int>(tools::StructureParameter::ResidueId);
+    molecule_id_.setId(params.get<int>(tools::StructureParameter::MoleculeId));
+    element_symbol_.setName(
+        params.get<std::string>(tools::StructureParameter::Element));
+    setMass(params.get<double>(tools::StructureParameter::CSG_Mass));
+    charge_ = params.get<double>(tools::StructureParameter::CSG_Charge);
+    symmetry_ = params.get<tools::byte_t>(tools::StructureParameter::Symmetry);
+    if (params.ParameterExist(tools::StructureParameter::CSG_Position)) {
+      params.set(tools::StructureParameter::CSG_Position, bead_position_);
+      bead_position_set_ = true;
+    }
+  }
+
   friend class Topology;
   friend class Molecule;
 };

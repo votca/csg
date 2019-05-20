@@ -114,7 +114,7 @@ void AtomCGConverter::Update(const Topology &atomic_top, Topology &cg_top) {
 
     int molecule_id = cg_mol_with_info.first;
     string cg_mol_type = cg_top.getMolecule(molecule_id).getType();
-    string atomic_mol_type = atomic_top.getMoleculeConst(molecule_id).getType();
+    string atomic_mol_type = atomic_top.getMolecule(molecule_id).getType();
     // Call the appropriate molecule mapper
     mol_names_and_maps_.at(atomic_mol_type)
         .at(cg_mol_type)

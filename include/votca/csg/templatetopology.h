@@ -187,7 +187,7 @@ class TemplateTopology {
    *
    * @return raw pointer to the molecule
    */
-  Molecule_T &getMolecule(const int id) {
+  Molecule_T &getMolecule(const int &id) {
     assert(molecules_map_.count(id) &&
            "Cannot access molecule with provided id because it is not stored "
            "in the topology object.");
@@ -201,7 +201,7 @@ class TemplateTopology {
    *
    * @return const pointer to the molecule
    */
-  const Molecule_T &getMoleculeConst(const int id) const {
+  const Molecule_T &getMolecule(const int &id) const {
     assert(molecules_map_.count(id) &&
            "Cannot access const molecule with provided id because it is not "
            "stored in the topology object.");
