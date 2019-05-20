@@ -96,11 +96,11 @@ bool CsgDumpApp::EvaluateTopology(Topology *top, Topology *top_ref) {
       vector<int> bead_ids = mol->getBeadIds();
       sort(bead_ids.begin(), bead_ids.end());
       for (const int &bead_id : bead_ids) {
-        Bead *bead = top->getBead(bead_id);
-        cout << bead_id << " Type " << bead->getType() << " Mass "
-             << bead->getMass() << " Resnr " << bead->getResidueId()
-             << " Resname " << bead->getResidueType() << " Charge "
-             << bead->getQ() << endl;
+        Bead bead = top->getBead(bead_id);
+        cout << bead_id << " Type " << bead.getType() << " Mass "
+             << bead.getMass() << " Resnr " << bead.getResidueId()
+             << " Resname " << bead.getResidueType() << " Charge "
+             << bead.getQ() << endl;
       }
     }
 

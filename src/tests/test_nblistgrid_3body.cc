@@ -62,46 +62,45 @@ BOOST_AUTO_TEST_CASE(test_nblist_3body_generate_list) {
   string residue_type = "Residue";
   double mass = 1.0;
   double charge = -1.0;
-  Bead *b;
-  b = &top.CreateBead(symmetry, bead_type, bead_id0, molecule_id, residue_id,
-                      residue_type, topology_constants::unassigned_element,
-                      mass, charge);
+  Bead &b = top.CreateBead(
+      symmetry, bead_type, bead_id0, molecule_id, residue_id, residue_type,
+      topology_constants::unassigned_element, mass, charge);
   pos[0] = 0.0;
   pos[1] = 0.0;
   pos[2] = 0.0;
-  b->setPos(pos);
+  b.setPos(pos);
   mol->AddBead(b);
-  b->setMoleculeId(mol->getId());
+  b.setMoleculeId(mol->getId());
 
   int bead_id1 = 1;
   symmetry = 1;
   residue_id = 0;
   mass = 2.0;
   charge = -2.0;
-  b = &top.CreateBead(symmetry, bead_type, bead_id1, molecule_id, residue_id,
-                      residue_type, topology_constants::unassigned_element,
-                      mass, charge);
-  mol->AddBead(b);
-  b->setMoleculeId(mol->getId());
+  Bead &b2 = top.CreateBead(
+      symmetry, bead_type, bead_id1, molecule_id, residue_id, residue_type,
+      topology_constants::unassigned_element, mass, charge);
+  mol->AddBead(b2);
+  b2.setMoleculeId(mol->getId());
   pos[0] = 1.0;
   pos[1] = 0.0;
   pos[2] = 0.0;
-  b->setPos(pos);
+  b2.setPos(pos);
 
   int bead_id2 = 2;
   symmetry = 1;
   residue_id = 0;
   mass = 3.0;
   charge = -3.0;
-  b = &top.CreateBead(symmetry, bead_type, bead_id2, molecule_id, residue_id,
-                      residue_type, topology_constants::unassigned_element,
-                      mass, charge);
-  mol->AddBead(b);
-  b->setMoleculeId(mol->getId());
+  Bead &b3 = top.CreateBead(
+      symmetry, bead_type, bead_id2, molecule_id, residue_id, residue_type,
+      topology_constants::unassigned_element, mass, charge);
+  mol->AddBead(b3);
+  b3.setMoleculeId(mol->getId());
   pos[0] = 1.0;
   pos[1] = 1.0;
   pos[2] = 0.0;
-  b->setPos(pos);
+  b3.setPos(pos);
 
   BeadList beads;
   beads.Generate(top, "CG");

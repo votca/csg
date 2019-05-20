@@ -85,21 +85,21 @@ void LAMMPSDumpWriter<Topology_T>::Write(boost::any conf_any) {
   // Sort the beads before outputing them
   std::sort(bead_ids.begin(), bead_ids.end());
   for (const int bead_id : bead_ids) {
-    typename Topology_T::bead_t *bead = top.getBead(bead_id);
+    typename Topology_T::bead_t &bead = top.getBead(bead_id);
     int bead_type_id = top.getBeadTypeId(bead_id);
 
-    fprintf(_out, "%i %i", formatId_(bead->getId()), bead_type_id);
-    fprintf(_out, " %f %f %f", formatDistance_(bead->getPos().x()),
-            formatDistance_(bead->getPos().y()),
-            formatDistance_(bead->getPos().z()));
+    fprintf(_out, "%i %i", formatId_(bead.getId()), bead_type_id);
+    fprintf(_out, " %f %f %f", formatDistance_(bead.getPos().x()),
+            formatDistance_(bead.getPos().y()),
+            formatDistance_(bead.getPos().z()));
     if (v) {
-      fprintf(_out, " %f %f %f", formatVelocity_(bead->getVel().x()),
-              formatVelocity_(bead->getVel().y()),
-              formatVelocity_(bead->getVel().z()));
+      fprintf(_out, " %f %f %f", formatVelocity_(bead.getVel().x()),
+              formatVelocity_(bead.getVel().y()),
+              formatVelocity_(bead.getVel().z()));
     }
     if (f) {
-      fprintf(_out, " %f %f %f", formatForce_(bead->getF().x()),
-              formatForce_(bead->getF().y()), formatForce_(bead->getF().z()));
+      fprintf(_out, " %f %f %f", formatForce_(bead.getF().x()),
+              formatForce_(bead.getF().y()), formatForce_(bead.getF().z()));
     }
     fprintf(_out, "\n");
   }

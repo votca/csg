@@ -456,18 +456,18 @@ bool H5MDTrajectoryReader<Topology_T>::NextFrame(
 
     // Topology has to be defined in the xml file or in other
     // topology files. The h5md only stores the trajectory data.
-    typename Topology_T::bead_t *b = top.getBead(atom_id);
-    if (b == nullptr)
+    if (top.BeadExist(atom_id) == false)
       throw std::runtime_error("Bead not found: " +
                                boost::lexical_cast<std::string>(atom_id));
+    typename Topology_T::bead_t &b = top.getBead(atom_id);
 
-    b->setPos(Eigen::Vector3d(x, y, z));
+    b.setPos(Eigen::Vector3d(x, y, z));
     if (has_velocity_ == H5MDTrajectoryReader::TIMEDEPENDENT) {
       double vx, vy, vz;
       vx = velocities[array_index];
       vy = velocities[array_index + 1];
       vz = velocities[array_index + 2];
-      b->setVel(Eigen::Vector3d(vx, vy, vz));
+      b.setVel(Eigen::Vector3d(vx, vy, vz));
     }
 
     if (has_force_ == H5MDTrajectoryReader::TIMEDEPENDENT) {
@@ -475,7 +475,7 @@ bool H5MDTrajectoryReader<Topology_T>::NextFrame(
       fx = forces[array_index];
       fy = forces[array_index + 1];
       fz = forces[array_index + 2];
-      b->setF(Eigen::Vector3d(fx, fy, fz));
+      b.setF(Eigen::Vector3d(fx, fy, fz));
     }
   }
 

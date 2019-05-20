@@ -282,7 +282,6 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       formatElement_(element_symbol, atom_type);
       formatId_(atom_number);
 
-      typename Topology_T::bead_t *b;
       // Only read the CONECT keyword if the topology is set too true
       if (_topology) {
         int residue_id;
@@ -330,10 +329,9 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
         params.set(tools::StructureParameter::ResidueId, residue_id);
         params.set(tools::StructureParameter::ResidueType, residue_type);
         std::cout << "Creating Bead " << atom_number << std::endl;
-        b = &(top.CreateBead(params));
-      } else {
-        b = top.getBead(atom_number);
+        top.CreateBead(params);
       }
+      typename Topology_T::bead_t &b = top.getBead(atom_number);
       // convert to nm from A
       double x_pos = stod(x);
       double y_pos = stod(y);
@@ -342,7 +340,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       formatDistance_(x_pos);
       formatDistance_(y_pos);
       formatDistance_(z_pos);
-      b->setPos(Eigen::Vector3d(x_pos, y_pos, z_pos));
+      b.setPos(Eigen::Vector3d(x_pos, y_pos, z_pos));
     }
 
     if ((line == "ENDMDL") || (line == "END") || (_fl.eof())) {
@@ -482,14 +480,14 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
 
       // Add all the atoms to the appropriate molecule object
       for (int atm_temp : mol_and_atom_ids.second) {
-        molecule_beads[molecule_id].push_back(top.getBead(atm_temp));
+        molecule_beads[molecule_id].push_back(&top.getBead(atm_temp));
       }
     }
 
     for (std::pair<int, std::vector<typename Topology_T::bead_t *>> mol_b :
          molecule_beads) {
       for (typename Topology_T::bead_t *bead_f : mol_b.second) {
-        mol_map[mol_b.first]->AddBead(bead_f);
+        mol_map[mol_b.first]->AddBead(*bead_f);
       }
     }
     // Cyle through the bonds and add them to the appropriate molecule

@@ -47,10 +47,10 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_add_and_getbead) {
   BeadStructure<TestBead> beadstructure;
   TestBead testbead;
   testbead.setId(2);
-  beadstructure.AddBead(&testbead);
+  beadstructure.AddBead(testbead);
   BOOST_CHECK_EQUAL(beadstructure.BeadCount(), 1);
   auto testbead2 = beadstructure.getBead(2);
-  BOOST_CHECK_EQUAL(testbead2->getId(), testbead.getId());
+  BOOST_CHECK_EQUAL(testbead2.getId(), testbead.getId());
 }
 
 BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {
@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_ConnectBeads) {
   TestBead testbead2;
   testbead2.setId(2);
   testbead2.setType("Carbon");
-  beadstructure.AddBead(&testbead1);
-  beadstructure.AddBead(&testbead2);
+  beadstructure.AddBead(testbead1);
+  beadstructure.AddBead(testbead2);
   beadstructure.ConnectBeads(1, 2);
 }
 
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleStructure) {
   testbead5.setType("Hydrogen");
   testbead5.setId(5);
 
-  beadstructure.AddBead(&testbead1);
-  beadstructure.AddBead(&testbead2);
+  beadstructure.AddBead(testbead1);
+  beadstructure.AddBead(testbead2);
   BOOST_CHECK(!beadstructure.isSingleStructure());
 
   // C - C
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleStructure) {
   BOOST_CHECK(beadstructure.isSingleStructure());
 
   // C - C  O
-  beadstructure.AddBead(&testbead3);
+  beadstructure.AddBead(testbead3);
   BOOST_CHECK(!beadstructure.isSingleStructure());
 
   // C - C - O
@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isSingleStructure) {
   BOOST_CHECK(beadstructure.isSingleStructure());
 
   // C - C - O  H - H
-  beadstructure.AddBead(&testbead4);
-  beadstructure.AddBead(&testbead5);
+  beadstructure.AddBead(testbead4);
+  beadstructure.AddBead(testbead5);
   beadstructure.ConnectBeads(4, 5);
   BOOST_CHECK(!beadstructure.isSingleStructure());
 }
@@ -159,28 +159,28 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_isStructureEquivalent) {
   testbead10.setId(10);
 
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
-  beadstructure1.AddBead(&testbead1);
+  beadstructure1.AddBead(testbead1);
   BOOST_CHECK(!beadstructure1.isStructureEquivalent(beadstructure2));
-  beadstructure2.AddBead(&testbead6);
+  beadstructure2.AddBead(testbead6);
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
 
-  beadstructure1.AddBead(&testbead2);
-  beadstructure2.AddBead(&testbead7);
+  beadstructure1.AddBead(testbead2);
+  beadstructure2.AddBead(testbead7);
 
   beadstructure1.ConnectBeads(1, 2);
   BOOST_CHECK(!beadstructure1.isStructureEquivalent(beadstructure2));
   beadstructure2.ConnectBeads(6, 7);
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
 
-  beadstructure1.AddBead(&testbead3);
-  beadstructure1.AddBead(&testbead4);
-  beadstructure1.AddBead(&testbead5);
+  beadstructure1.AddBead(testbead3);
+  beadstructure1.AddBead(testbead4);
+  beadstructure1.AddBead(testbead5);
   beadstructure1.ConnectBeads(2, 3);
   beadstructure1.ConnectBeads(4, 5);
 
-  beadstructure2.AddBead(&testbead10);
-  beadstructure2.AddBead(&testbead8);
-  beadstructure2.AddBead(&testbead9);
+  beadstructure2.AddBead(testbead10);
+  beadstructure2.AddBead(testbead8);
+  beadstructure2.AddBead(testbead9);
   beadstructure2.ConnectBeads(7, 8);
   beadstructure2.ConnectBeads(9, 10);
   BOOST_CHECK(beadstructure1.isStructureEquivalent(beadstructure2));
@@ -235,14 +235,14 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_getNeighBeads) {
   testbead8.setType("Hydrogen");
   testbead8.setId(8);
 
-  beadstructure1.AddBead(&testbead1);
-  beadstructure1.AddBead(&testbead2);
-  beadstructure1.AddBead(&testbead3);
-  beadstructure1.AddBead(&testbead4);
-  beadstructure1.AddBead(&testbead5);
-  beadstructure1.AddBead(&testbead6);
-  beadstructure1.AddBead(&testbead7);
-  beadstructure1.AddBead(&testbead8);
+  beadstructure1.AddBead(testbead1);
+  beadstructure1.AddBead(testbead2);
+  beadstructure1.AddBead(testbead3);
+  beadstructure1.AddBead(testbead4);
+  beadstructure1.AddBead(testbead5);
+  beadstructure1.AddBead(testbead6);
+  beadstructure1.AddBead(testbead7);
+  beadstructure1.AddBead(testbead8);
 
   // At this point non of the beads are connected so should return a vector of
   // size 0
@@ -317,13 +317,13 @@ BOOST_AUTO_TEST_CASE(test_beadstructure_catchError) {
     testbead6.setId(5);
 
     BeadStructure<TestBead> beadstructure;
-    beadstructure.AddBead(&testbead1);
-    beadstructure.AddBead(&testbead2);
-    beadstructure.AddBead(&testbead3);
-    beadstructure.AddBead(&testbead4);
-    beadstructure.AddBead(&testbead5);
+    beadstructure.AddBead(testbead1);
+    beadstructure.AddBead(testbead2);
+    beadstructure.AddBead(testbead3);
+    beadstructure.AddBead(testbead4);
+    beadstructure.AddBead(testbead5);
 
-    BOOST_CHECK_THROW(beadstructure.AddBead(&testbead6), invalid_argument);
+    BOOST_CHECK_THROW(beadstructure.AddBead(testbead6), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(0, 1), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(5, 6), invalid_argument);
     BOOST_CHECK_THROW(beadstructure.ConnectBeads(1, 1), invalid_argument);

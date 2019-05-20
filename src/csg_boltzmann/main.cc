@@ -114,7 +114,7 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Topology &top_atomistic,
     list<Bead *> excl_list;
     vector<int> bead_ids = mol_atomistic.getBeadIds();
     for (int &bead_id : bead_ids) {
-      excl_list.push_back(mol_atomistic.getBead(bead_id));
+      excl_list.push_back(&(mol_atomistic.getBead(bead_id)));
     }
     ex->ExcludeList(excl_list);
   }
@@ -122,11 +122,11 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Topology &top_atomistic,
   // remove exclusions from inside a mapped bead
   vector<int> cg_bead_ids = mol_cg.getBeadIds();
   for (int &bead_id : cg_bead_ids) {
-    const vector<int> &parent_beads = mol_cg.getBead(bead_id)->ParentBeads();
+    const vector<int> &parent_beads = mol_cg.getBead(bead_id).ParentBeads();
     list<Bead *> excl_list;
 
     for (const int &parent_bead_id : parent_beads) {
-      excl_list.push_back(top_atomistic.getBead(parent_bead_id));
+      excl_list.push_back(&(top_atomistic.getBead(parent_bead_id)));
     }
     ex->Remove(excl_list);
   }
@@ -138,17 +138,17 @@ ExclusionList *CsgBoltzmann::CreateExclusionList(Topology &top_atomistic,
          ++index_2) {
       int bead_id_1 = cg_bead_ids.at(index_1);
       int bead_id_2 = cg_bead_ids.at(index_2);
-      if (top_cg.getExclusions().IsExcluded(mol_cg.getBead(bead_id_1),
-                                            mol_cg.getBead(bead_id_2))) {
+      if (top_cg.getExclusions().IsExcluded(&mol_cg.getBead(bead_id_1),
+                                            &mol_cg.getBead(bead_id_2))) {
         const vector<int> &parent_beads_w =
-            mol_cg.getBead(bead_id_1)->ParentBeads();
+            mol_cg.getBead(bead_id_1).ParentBeads();
         const vector<int> &parent_beads_v =
-            mol_cg.getBead(bead_id_2)->ParentBeads();
+            mol_cg.getBead(bead_id_2).ParentBeads();
 
         for (const int parent_bead_id_w : parent_beads_w) {
           for (const int parent_bead_id_v : parent_beads_v) {
-            ex->RemoveExclusion(top_atomistic.getBead(parent_bead_id_w),
-                                top_atomistic.getBead(parent_bead_id_v));
+            ex->RemoveExclusion(&top_atomistic.getBead(parent_bead_id_w),
+                                &top_atomistic.getBead(parent_bead_id_v));
           }
         }
       }

@@ -78,12 +78,12 @@ class BeadStructure {
    *
    * The same bead cannot be added twice.
    **/
-  void AddBead(T *bead);
+  void AddBead(T &bead);
 
   /**
    * \brief Get the bead with the specified id
    **/
-  T *getBead(int id);
+  T &getBead(int id);
 
   std::vector<T *> getBeads() const;
   /**
@@ -93,7 +93,7 @@ class BeadStructure {
    *
    * @return const pointer to the bead
    */
-  const T *getBead(int id) const;
+  const T &getBead(int id) const;
   /**
    * \brief Create a connection between two beads in the structure
    *
@@ -204,16 +204,16 @@ tools::GraphNode BeadStructure<T>::BaseBeadToGraphNode_(T *basebead) {
  ***************************/
 
 template <class T>
-void BeadStructure<T>::AddBead(T *bead) {
-  if (beads_.count(bead->getId())) {
+void BeadStructure<T>::AddBead(T &bead) {
+  if (beads_.count(bead.getId())) {
     std::string err = "Cannot add bead with Id ";
-    err += std::to_string(bead->getId());
+    err += std::to_string(bead.getId());
     err += " because each bead must have a unique Id and a bead with that Id ";
     err += "already exists within the beadstructure";
     throw std::invalid_argument(err);
   }
   size_t numberOfBeads = beads_.size();
-  beads_[bead->getId()] = bead;
+  beads_[bead.getId()] = &bead;
 
   if (numberOfBeads != beads_.size()) {
     single_structureUpToDate_ = false;
@@ -304,9 +304,9 @@ std::vector<T *> BeadStructure<T>::getNeighBeads(int bead_id) {
 }
 
 template <class T>
-T *BeadStructure<T>::getBead(int bead_id) {
+T &BeadStructure<T>::getBead(int bead_id) {
   assert(beads_.count(bead_id));
-  return beads_[bead_id];
+  return *beads_[bead_id];
 }
 
 template <class T>
@@ -319,9 +319,9 @@ std::vector<T *> BeadStructure<T>::getBeads() const {
 }
 
 template <class T>
-const T *BeadStructure<T>::getBead(int bead_id) const {
+const T &BeadStructure<T>::getBead(int bead_id) const {
   assert(beads_.count(bead_id));
-  return beads_.at(bead_id);
+  return *beads_.at(bead_id);
 }
 
 template <class T>

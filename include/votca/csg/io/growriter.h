@@ -20,7 +20,7 @@
 #define VOTCA_CSG_GROWRITER_H
 
 #include "../trajectorywriter.h"
-#include "growriter.h"
+#include <Eigen/Dense>
 #include <boost/any.hpp>
 #include <stdexcept>
 #include <stdio.h>

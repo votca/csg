@@ -221,23 +221,23 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
     if (elements.isEleShort(atom_type)) {
       element_symbol = atom_type;
     }
-    Bead *b = &top.CreateBead(symmetry, atom_type, atom_id,
-                              topology_constants::unassigned_molecule_id,
-                              residue_id, residue_type, element_symbol,
-                              elements.getMass(atom_type), charge);
+    Bead b = top.CreateBead(symmetry, atom_type, atom_id,
+                            topology_constants::unassigned_molecule_id,
+                            residue_id, residue_type, element_symbol,
+                            elements.getMass(atom_type), charge);
 
     Eigen::Vector3d xyz(atom_xyz.at(ind).at(0), atom_xyz.at(ind).at(1),
                         atom_xyz.at(ind).at(2));
-    b->setPos(xyz);
+    b.setPos(xyz);
 
     Eigen::Vector3d xyz_vel(atom_vel.at(ind).at(0), atom_vel.at(ind).at(1),
                             atom_vel.at(ind).at(2));
-    b->setVel(xyz_vel);
+    b.setVel(xyz_vel);
 
     Eigen::Vector3d xyz_forces(atom_forces.at(ind).at(0),
                                atom_forces.at(ind).at(1),
                                atom_forces.at(ind).at(2));
-    b->setF(xyz_forces);
+    b.setF(xyz_forces);
   }
 
   TrajectoryReader::RegisterPlugins();
@@ -250,13 +250,13 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);
-    Bead *b = top.getBead(bead_id);
-    BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz_file.at(ind).at(0), 0.01);
-    BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz_file.at(ind).at(1), 0.01);
-    BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz_file.at(ind).at(2), 0.01);
-    BOOST_CHECK_CLOSE(b->F().x(), atom_forces_file.at(ind).at(0), 0.01);
-    BOOST_CHECK_CLOSE(b->F().y(), atom_forces_file.at(ind).at(1), 0.01);
-    BOOST_CHECK_CLOSE(b->F().z(), atom_forces_file.at(ind).at(2), 0.01);
+    Bead b = top.getBead(bead_id);
+    BOOST_CHECK_CLOSE(b.Pos().x(), atom_xyz_file.at(ind).at(0), 0.01);
+    BOOST_CHECK_CLOSE(b.Pos().y(), atom_xyz_file.at(ind).at(1), 0.01);
+    BOOST_CHECK_CLOSE(b.Pos().z(), atom_xyz_file.at(ind).at(2), 0.01);
+    BOOST_CHECK_CLOSE(b.F().x(), atom_forces_file.at(ind).at(0), 0.01);
+    BOOST_CHECK_CLOSE(b.F().y(), atom_forces_file.at(ind).at(1), 0.01);
+    BOOST_CHECK_CLOSE(b.F().z(), atom_forces_file.at(ind).at(2), 0.01);
   }
 }
 
@@ -384,13 +384,13 @@ BOOST_AUTO_TEST_CASE(test_trajectorywriter) {
 
   for (size_t ind = 0; ind < atom_types.size(); ++ind) {
     int bead_id = static_cast<int>(ind);
-    Bead *b = top.getBead(bead_id);
-    BOOST_CHECK_CLOSE(b->Pos().x(), atom_xyz.at(ind).at(0), 0.01);
-    BOOST_CHECK_CLOSE(b->Pos().y(), atom_xyz.at(ind).at(1), 0.01);
-    BOOST_CHECK_CLOSE(b->Pos().z(), atom_xyz.at(ind).at(2), 0.01);
-    BOOST_CHECK_CLOSE(b->F().x(), atom_forces.at(ind).at(0), 0.01);
-    BOOST_CHECK_CLOSE(b->F().y(), atom_forces.at(ind).at(1), 0.01);
-    BOOST_CHECK_CLOSE(b->F().z(), atom_forces.at(ind).at(2), 0.01);
+    Bead b = top.getBead(bead_id);
+    BOOST_CHECK_CLOSE(b.Pos().x(), atom_xyz.at(ind).at(0), 0.01);
+    BOOST_CHECK_CLOSE(b.Pos().y(), atom_xyz.at(ind).at(1), 0.01);
+    BOOST_CHECK_CLOSE(b.Pos().z(), atom_xyz.at(ind).at(2), 0.01);
+    BOOST_CHECK_CLOSE(b.F().x(), atom_forces.at(ind).at(0), 0.01);
+    BOOST_CHECK_CLOSE(b.F().y(), atom_forces.at(ind).at(1), 0.01);
+    BOOST_CHECK_CLOSE(b.F().z(), atom_forces.at(ind).at(2), 0.01);
   }
 }
 

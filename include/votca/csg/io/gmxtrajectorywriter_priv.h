@@ -92,7 +92,7 @@ void GMXTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
     for (int j = 0; j < 3; j++) frame.box[j][i] = formatDistance(box(i, j));
 
   for (int i = 0; i < N; ++i) {
-    Eigen::Vector3d pos = conf.getBead(i)->getPos();
+    Eigen::Vector3d pos = conf.getBead(i).getPos();
     x[i][0] = formatDistance(pos.x());
     x[i][1] = formatDistance(pos.y());
     x[i][2] = formatDistance(pos.z());
@@ -102,7 +102,7 @@ void GMXTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
     v = new rvec[N];
     for (int i = 0; i < N; ++i) {
       frame.v = v;
-      Eigen::Vector3d vel = conf.getBead(i)->getVel();
+      Eigen::Vector3d vel = conf.getBead(i).getVel();
       v[i][0] = formatVelocity(vel.x());
       v[i][1] = formatVelocity(vel.y());
       v[i][2] = formatVelocity(vel.z());
@@ -112,7 +112,7 @@ void GMXTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
     f = new rvec[N];
     for (int i = 0; i < N; ++i) {
       frame.f = f;
-      Eigen::Vector3d force = conf.getBead(i)->getF();
+      Eigen::Vector3d force = conf.getBead(i).getF();
       f[i][0] = formatForce(force.x());
       f[i][1] = formatForce(force.y());
       f[i][2] = formatForce(force.z());

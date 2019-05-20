@@ -125,7 +125,7 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
         params.set(tools::StructureParameter::ResidueType, residue_name);
         params.set(tools::StructureParameter::MoleculeId, mi.getId());
         typename Topology_T::bead_t &bead = top.CreateBead(params);
-        mi.AddBead(&bead);
+        mi.AddBead(bead);
       }
 
       // add exclusions
@@ -135,9 +135,9 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
         // insert exclusions
         std::list<typename Topology_T::bead_t *> excl_list;
         for (int k = excl->index[iatom]; k < excl->index[iatom + 1]; k++) {
-          excl_list.push_back(top.getBead(excl->a[k] + ifirstatom));
+          excl_list.push_back(&top.getBead(excl->a[k] + ifirstatom));
         }
-        top.InsertExclusion(top.getBead(iatom + ifirstatom), excl_list);
+        top.InsertExclusion(&top.getBead(iatom + ifirstatom), excl_list);
       }
       ifirstatom += natoms_mol;
     }

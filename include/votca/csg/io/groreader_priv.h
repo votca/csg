@@ -157,7 +157,6 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
       hasVel = false;
     }
 
-    typename Topology_T::bead_t *b;
     if (_topology) {
       int residue_number = boost::lexical_cast<int>(resNum);
       if (residue_number < 1)
@@ -185,21 +184,19 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
       params.set(tools::StructureParameter::ResidueType, resName);
       params.set(tools::StructureParameter::MoleculeId,
                  tools::topology_constants::unassigned_molecule_id);
-      b = &(top.CreateBead(params));
-    } else {
-      b = top.getBead(i);
+      top.CreateBead(params);
     }
+    typename Topology_T::bead_t &b = top.getBead(i);
 
-    b->setPos(Eigen::Vector3d(formatDistance_(stod(x)),
-                              formatDistance_(stod(y)),
-                              formatDistance_(stod(z))));
+    b.setPos(Eigen::Vector3d(formatDistance_(stod(x)), formatDistance_(stod(y)),
+                             formatDistance_(stod(z))));
     if (hasVel) {
       boost::algorithm::trim(vx);
       boost::algorithm::trim(vy);
       boost::algorithm::trim(vz);
-      b->setVel(Eigen::Vector3d(formatVelocity_(stod(vx)),
-                                formatVelocity_(stod(vy)),
-                                formatVelocity_(stod(vz))));
+      b.setVel(Eigen::Vector3d(formatVelocity_(stod(vx)),
+                               formatVelocity_(stod(vy)),
+                               formatVelocity_(stod(vz))));
     }
   }
 

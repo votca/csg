@@ -53,16 +53,15 @@ template <bool topology>
 inline void XYZReader<Topology_T>::AddAtom(Topology_T &container,
                                            tools::StructureParameters &params) {
 
-  typename Topology_T::bead_t *b;
   Eigen::Vector3d posnm =
       params.get<Eigen::Vector3d>(tools::StructureParameter::CSG_Position);
   if (topology) {
-    b = &(container.CreateBead(params));
-    container.CreateMolecule(params).AddBead(b);
-  } else {
-    b = container.getBead(params.get<int>(tools::StructureParameter::BeadId));
+    container.CreateMolecule(params).AddBead(container.CreateBead(params));
   }
-  b->setPos(posnm);
+  typename Topology_T::bead_t &b =
+      container.getBead(params.get<int>(tools::StructureParameter::BeadId));
+
+  b.setPos(posnm);
 }
 
 template <class Topology_T>

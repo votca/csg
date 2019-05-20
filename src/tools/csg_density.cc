@@ -141,16 +141,16 @@ void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref) {
     if (!wildcmp(_molname.c_str(), mol->getType().c_str())) continue;
     int N = mol->BeadCount();
     for (int i = 0; i < N; i++) {
-      Bead *b = mol->getBead(i);
-      if (!wildcmp(_filter.c_str(), b->getType().c_str())) continue;
+      Bead b = mol->getBead(i);
+      if (!wildcmp(_filter.c_str(), b.getType().c_str())) continue;
       double r;
       if (_axisname == "r") {
-        r = (top->BCShortestConnection(_ref, b->getPos()).norm());
+        r = (top->BCShortestConnection(_ref, b.getPos()).norm());
       } else {
-        r = b->getPos().dot(_axis);
+        r = b.getPos().dot(_axis);
       }
       if (_dens_type == "mass") {
-        _dist.Process(r, b->getMass());
+        _dist.Process(r, b.getMass());
       } else {
         _dist.Process(r, 1.0);
       }

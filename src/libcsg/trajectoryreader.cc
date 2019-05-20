@@ -20,7 +20,6 @@
 #endif
 
 #include "../../include/votca/csg/io/dlpolytrajectoryreader.h"
-#include "../../include/votca/csg/io/gmxtrajectoryreader.h"
 #include "../../include/votca/csg/io/groreader.h"
 #include "../../include/votca/csg/io/lammpsdatareader.h"
 #include "../../include/votca/csg/io/lammpsdumpreader.h"
@@ -40,8 +39,6 @@ namespace csg {
 
 void TrajectoryReader::RegisterPlugins(void) {
   TrjReaderFactory().Register<PDBReader<Topology>>("pdb");
-  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("trr");
-  TrjReaderFactory().Register<GMXTrajectoryReader<Topology>>("xtc");
   TrjReaderFactory().Register<DLPOLYTrajectoryReader<Topology>>("dlph");
   TrjReaderFactory().Register<DLPOLYTrajectoryReader<Topology>>("dlpc");
   TrjReaderFactory().Register<XYZReader<Topology>>("xyz");

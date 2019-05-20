@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_bead_sphere_apply) {
   cg_bead.setMass(0.0);
   cg_bead.setSymmetry(1);  // For sphere
 
-  test_sphere.UpdateCGBead(&boundaries, atomic_beads, &cg_bead);
+  test_sphere.UpdateCGBead(&boundaries, atomic_beads, cg_bead);
 
   cout << cg_bead.getF() << endl;
   cout << cg_bead.getVel() << endl;
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_bead_ellipsoid_apply) {
   cg_bead.setW(initialize);
   cg_bead.setMass(0.0);
 
-  test_ellip.UpdateCGBead(&boundaries, atomic_beads, &cg_bead);
+  test_ellip.UpdateCGBead(&boundaries, atomic_beads, cg_bead);
 
   cout << cg_bead.getF() << endl;
   cout << cg_bead.getVel() << endl;
@@ -420,149 +420,149 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
   byte_t atom_bead_sym = 1;
   Molecule* atom_mol = &atom_top.CreateMolecule(mol_id, atomic_mol_type);
   int bead_id = 1;
-  Bead* C1 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "C", 12, 0.0);
-  C1->setPos(pos_c1);
-  C1->setVel(initialize);
-  C1->setF(initialize);
+  Bead& C1 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "C", 12, 0.0);
+  C1.setPos(pos_c1);
+  C1.setVel(initialize);
+  C1.setF(initialize);
   atom_mol->AddBead(C1);
 
   bead_id = 2;
-  Bead* C2 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "C", 12, 0.0);
-  C2->setPos(pos_c2);
-  C2->setVel(initialize);
-  C2->setF(initialize);
+  Bead& C2 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "C", 12, 0.0);
+  C2.setPos(pos_c2);
+  C2.setVel(initialize);
+  C2.setF(initialize);
   atom_mol->AddBead(C2);
 
   bead_id = 3;
-  Bead* C3 = &atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "C", 12, 0.0);
-  C3->setPos(pos_c3);
-  C3->setVel(initialize);
-  C3->setF(initialize);
+  Bead& C3 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "C", 12, 0.0);
+  C3.setPos(pos_c3);
+  C3.setVel(initialize);
+  C3.setF(initialize);
   atom_mol->AddBead(C3);
 
   bead_id = 4;
-  Bead* H4 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H4->setPos(pos_h4);
-  H4->setVel(vel_h4);
-  H4->setF(force_h4);
+  Bead& H4 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H4.setPos(pos_h4);
+  H4.setVel(vel_h4);
+  H4.setF(force_h4);
   atom_mol->AddBead(H4);
 
   bead_id = 5;
-  Bead* H5 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H5->setPos(pos_h5);
-  H5->setVel(initialize);
-  H5->setF(initialize);
+  Bead& H5 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H5.setPos(pos_h5);
+  H5.setVel(initialize);
+  H5.setF(initialize);
   atom_mol->AddBead(H5);
 
   bead_id = 6;
-  Bead* H6 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H6->setPos(pos_h6);
-  H6->setVel(initialize);
-  H6->setF(initialize);
+  Bead& H6 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H6.setPos(pos_h6);
+  H6.setVel(initialize);
+  H6.setF(initialize);
   atom_mol->AddBead(H6);
 
   bead_id = 7;
-  Bead* H7 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H7->setPos(pos_h7);
-  H7->setVel(initialize);
-  H7->setF(initialize);
+  Bead& H7 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H7.setPos(pos_h7);
+  H7.setVel(initialize);
+  H7.setF(initialize);
   atom_mol->AddBead(H7);
 
   bead_id = 8;
-  Bead* H8 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H8->setPos(pos_h8);
-  H8->setVel(initialize);
-  H8->setF(initialize);
+  Bead& H8 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H8.setPos(pos_h8);
+  H8.setVel(initialize);
+  H8.setF(initialize);
   atom_mol->AddBead(H8);
 
   bead_id = 9;
-  Bead* H9 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                  topology_constants::unassigned_residue_id,
-                                  topology_constants::unassigned_residue_type,
-                                  "H", 12, 0.0);
-  H9->setPos(pos_h9);
-  H9->setVel(initialize);
-  H9->setF(initialize);
+  Bead& H9 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                 topology_constants::unassigned_residue_id,
+                                 topology_constants::unassigned_residue_type,
+                                 "H", 12, 0.0);
+  H9.setPos(pos_h9);
+  H9.setVel(initialize);
+  H9.setF(initialize);
   atom_mol->AddBead(H9);
 
   bead_id = 10;
-  Bead* H10 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                   topology_constants::unassigned_residue_id,
-                                   topology_constants::unassigned_residue_type,
-                                   "H", 12, 0.0);
-  H10->setPos(pos_h10);
-  H10->setVel(initialize);
-  H10->setF(initialize);
+  Bead& H10 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
+  H10.setPos(pos_h10);
+  H10.setVel(initialize);
+  H10.setF(initialize);
   atom_mol->AddBead(H10);
 
   bead_id = 11;
-  Bead* H11 = &atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
-                                   topology_constants::unassigned_residue_id,
-                                   topology_constants::unassigned_residue_type,
-                                   "H", 12, 0.0);
-  H11->setPos(pos_h11);
-  H11->setVel(vel_h11);
-  H11->setF(force_h11);
+  Bead& H11 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                  topology_constants::unassigned_residue_id,
+                                  topology_constants::unassigned_residue_type,
+                                  "H", 12, 0.0);
+  H11.setPos(pos_h11);
+  H11.setVel(vel_h11);
+  H11.setF(force_h11);
   atom_mol->AddBead(H11);
 
   Topology cg_top;
   string cg_mol_type = "propane";
   Molecule* cg_mol = &cg_top.CreateMolecule(mol_id, cg_mol_type);
   int cg_bead_id = 1;
-  Bead* A1 = &cg_top.CreateBead(
+  Bead& A1 = cg_top.CreateBead(
       bead_stencil1.cg_symmetry_, bead_stencil1.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,
       topology_constants::unassigned_element, 0.0, 0.0);
-  A1->setPos(initialize);
-  A1->setVel(initialize);
-  A1->setF(initialize);
+  A1.setPos(initialize);
+  A1.setVel(initialize);
+  A1.setF(initialize);
   cg_mol->AddBead(A1);
 
   cg_bead_id = 2;
-  Bead* B1 = &cg_top.CreateBead(
+  Bead& B1 = cg_top.CreateBead(
       bead_stencil2.cg_symmetry_, bead_stencil2.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,
       topology_constants::unassigned_element, 0.0, 0.0);
-  B1->setPos(initialize);
-  B1->setVel(initialize);
-  B1->setF(initialize);
+  B1.setPos(initialize);
+  B1.setVel(initialize);
+  B1.setF(initialize);
   cg_mol->AddBead(B1);
 
   cg_bead_id = 3;
-  Bead* A2 = &cg_top.CreateBead(
+  Bead& A2 = cg_top.CreateBead(
       bead_stencil3.cg_symmetry_, bead_stencil3.cg_bead_type_, cg_bead_id,
       mol_id, topology_constants::unassigned_residue_id,
       topology_constants::unassigned_residue_type,
       topology_constants::unassigned_element, 0.0, 0.0);
-  A2->setPos(initialize);
-  A2->setVel(initialize);
-  A2->setF(initialize);
+  A2.setPos(initialize);
+  A2.setVel(initialize);
+  A2.setF(initialize);
   cg_mol->AddBead(A2);
 
   AtomToCGMoleculeMapper mapper(atomic_mol_type, cg_mol_type);
@@ -575,74 +575,74 @@ BOOST_AUTO_TEST_CASE(test_atomtocgmapper_apply) {
 
   vector<pair<string, int>> atoms_in_A1;
   atoms_in_A1.push_back(
-      make_pair(bead_stencil1.atomic_subbeads_.at(0), C1->getId()));
+      make_pair(bead_stencil1.atomic_subbeads_.at(0), C1.getId()));
   atoms_in_A1.push_back(
-      make_pair(bead_stencil1.atomic_subbeads_.at(1), H4->getId()));
+      make_pair(bead_stencil1.atomic_subbeads_.at(1), H4.getId()));
   atoms_in_A1.push_back(
-      make_pair(bead_stencil1.atomic_subbeads_.at(2), H5->getId()));
+      make_pair(bead_stencil1.atomic_subbeads_.at(2), H5.getId()));
   atoms_in_A1.push_back(
-      make_pair(bead_stencil1.atomic_subbeads_.at(3), H6->getId()));
+      make_pair(bead_stencil1.atomic_subbeads_.at(3), H6.getId()));
 
   vector<pair<string, int>> atoms_in_B1;
   atoms_in_B1.push_back(
-      make_pair(bead_stencil2.atomic_subbeads_.at(0), C2->getId()));
+      make_pair(bead_stencil2.atomic_subbeads_.at(0), C2.getId()));
   atoms_in_B1.push_back(
-      make_pair(bead_stencil2.atomic_subbeads_.at(1), H7->getId()));
+      make_pair(bead_stencil2.atomic_subbeads_.at(1), H7.getId()));
   atoms_in_B1.push_back(
-      make_pair(bead_stencil2.atomic_subbeads_.at(2), H8->getId()));
+      make_pair(bead_stencil2.atomic_subbeads_.at(2), H8.getId()));
 
   vector<pair<string, int>> atoms_in_A2;
   atoms_in_A2.push_back(
-      make_pair(bead_stencil3.atomic_subbeads_.at(0), C3->getId()));
+      make_pair(bead_stencil3.atomic_subbeads_.at(0), C3.getId()));
   atoms_in_A2.push_back(
-      make_pair(bead_stencil3.atomic_subbeads_.at(1), H9->getId()));
+      make_pair(bead_stencil3.atomic_subbeads_.at(1), H9.getId()));
   atoms_in_A2.push_back(
-      make_pair(bead_stencil3.atomic_subbeads_.at(2), H10->getId()));
+      make_pair(bead_stencil3.atomic_subbeads_.at(2), H10.getId()));
   atoms_in_A2.push_back(
-      make_pair(bead_stencil3.atomic_subbeads_.at(3), H11->getId()));
+      make_pair(bead_stencil3.atomic_subbeads_.at(3), H11.getId()));
 
   cgmolid_cgbeadid_atomname_and_id.first = mol_id;
-  cgmolid_cgbeadid_atomname_and_id.second[A1->getId()] = atoms_in_A1;
-  cgmolid_cgbeadid_atomname_and_id.second[B1->getId()] = atoms_in_B1;
-  cgmolid_cgbeadid_atomname_and_id.second[A2->getId()] = atoms_in_A2;
+  cgmolid_cgbeadid_atomname_and_id.second[A1.getId()] = atoms_in_A1;
+  cgmolid_cgbeadid_atomname_and_id.second[B1.getId()] = atoms_in_B1;
+  cgmolid_cgbeadid_atomname_and_id.second[A2.getId()] = atoms_in_A2;
 
   // This should update the cg beads with the appropriate atomistic bead pos,
   // velocity etc
   mapper.UpdateCGMolecule(atom_top, cg_top, cgmolid_cgbeadid_atomname_and_id);
 
-  BOOST_CHECK_CLOSE(A1->getPos().x(), 0.933333, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getPos().y(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getPos().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().x(), 2.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().y(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getPos().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().x(), 3.0666666666666673, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().y(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getPos().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getPos().x(), 0.933333, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getPos().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getPos().x(), 2.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getPos().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getPos().x(), 3.0666666666666673, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getPos().y(), 1.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getPos().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(A1->getVel().x(), -0.033333333333333333, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getVel().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getVel().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().x(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getVel().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().x(), 0.04, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getVel().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getVel().x(), -0.033333333333333333, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getVel().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getVel().x(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getVel().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getVel().x(), 0.04, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getVel().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getVel().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(A1->getF().x(), -0.3, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getF().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A1->getF().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().x(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getF().z(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().x(), -0.7, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().y(), 0.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getF().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getF().x(), -0.3, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getF().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getF().x(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getF().z(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getF().x(), -0.7, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getF().y(), 0.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getF().z(), 0.0, 1E-4);
 
-  BOOST_CHECK_CLOSE(A1->getMass(), 48.0, 1E-4);
-  BOOST_CHECK_CLOSE(B1->getMass(), 36.0, 1E-4);
-  BOOST_CHECK_CLOSE(A2->getMass(), 48.0, 1E-4);
+  BOOST_CHECK_CLOSE(A1.getMass(), 48.0, 1E-4);
+  BOOST_CHECK_CLOSE(B1.getMass(), 36.0, 1E-4);
+  BOOST_CHECK_CLOSE(A2.getMass(), 48.0, 1E-4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -100,9 +100,9 @@ void Map_Sphere::AddAtomisticBead(const std::string &atomic_bead_name,
 
 void Map_Sphere::UpdateCGBead(const BoundaryCondition *boundaries,
                               map<string, const Bead *> atomic_beads,
-                              Bead *cg_bead) const {
+                              Bead &cg_bead) const {
 
-  assert(cg_bead->getSymmetry() == 1 &&
+  assert(cg_bead.getSymmetry() == 1 &&
          "Applying spherical bead map on a non spherical corase grained bead");
 
   assert(matrix_.size() == atomic_beads.size() &&
@@ -158,19 +158,19 @@ void Map_Sphere::UpdateCGBead(const BoundaryCondition *boundaries,
       bF = true;
     }
   }
-  cg_bead->setMass(sum_of_atomistic_mass);
-  cg_bead->setPos(weighted_sum_of_atomistic_pos);
-  if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_velocity);
-  if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
+  cg_bead.setMass(sum_of_atomistic_mass);
+  cg_bead.setPos(weighted_sum_of_atomistic_pos);
+  if (bVel) cg_bead.setVel(weighted_sum_of_atomistic_velocity);
+  if (bF) cg_bead.setF(weighted_sum_of_atomistic_forces);
 }
 
 /// Warning the atomistic beads must be a map they cannot be an unordered_map
 void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
                                  std::map<string, const Bead *> atomistic_beads,
-                                 Bead *cg_bead) const {
+                                 Bead &cg_bead) const {
 
   assert(
-      cg_bead->getSymmetry() == 3 &&
+      cg_bead.getSymmetry() == 3 &&
       "Applying ellipsoidal bead map on a non ellipsoidal corase grained bead");
   assert(matrix_.size() == atomistic_beads.size() &&
          "Cannot apply mapping mismatch in the number of atomistic beads in "
@@ -227,10 +227,10 @@ void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
     }
   }
 
-  cg_bead->setMass(sum_of_atomistic_mass);
-  cg_bead->setPos(weighted_sum_of_atomistic_pos);
-  if (bVel) cg_bead->setVel(weighted_sum_of_atomistic_vel);
-  if (bF) cg_bead->setF(weighted_sum_of_atomistic_forces);
+  cg_bead.setMass(sum_of_atomistic_mass);
+  cg_bead.setPos(weighted_sum_of_atomistic_pos);
+  if (bVel) cg_bead.setVel(weighted_sum_of_atomistic_vel);
+  if (bF) cg_bead.setF(weighted_sum_of_atomistic_forces);
 
   // calculate the tensor of gyration
   Eigen::Matrix3d tensor_of_gyration = Eigen::Matrix3d::Zero();
@@ -253,7 +253,7 @@ void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
   Eigen::Vector3d reference_position2 = name_and_bead_iter->second->getPos();
   Eigen::Vector3d v = reference_position2 - reference_position;
   v.normalize();
-  cg_bead->setV(v);
+  cg_bead.setV(v);
 
   ++name_and_bead_iter;
   Eigen::Vector3d reference_position3 = name_and_bead_iter->second->getPos();
@@ -263,12 +263,12 @@ void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
   if (v.cross(w).dot(u) < 0) {
     u = -u;
   }
-  cg_bead->setU(u);
+  cg_bead.setU(u);
 
   // write out w
   w = u.cross(v);
   w.normalize();
-  cg_bead->setW(w);
+  cg_bead.setW(w);
 }
 
 AtomToCGMoleculeMapper::~AtomToCGMoleculeMapper() {
@@ -380,9 +380,9 @@ void AtomToCGMoleculeMapper::UpdateCGMolecule(
   // Beads that have already been applied
   unordered_set<string> expired_beads;
   for (int &cg_bead_id : cg_bead_ids) {
-    Bead *cg_bead = cg_top.getBead(cg_bead_id);
+    Bead &cg_bead = cg_top.getBead(cg_bead_id);
     // get the cg bead type
-    string cg_bead_type = cg_bead->getType();
+    string cg_bead_type = cg_bead.getType();
     vector<string> bead_names = bead_type_and_names_[cg_bead_type];
     string bead_name;
     for (const string &name : bead_names) {
@@ -412,7 +412,7 @@ map<string, const Bead *> AtomToCGMoleculeMapper::getAtomicNamesAndBeads_(
   map<string, const Bead *> atomic_names_and_beads;
   for (const pair<string, int> &atom_name_id : atomic_names_and_ids) {
     atomic_names_and_beads[atom_name_id.first] =
-        atom_top.getBeadConst(atom_name_id.second);
+        &atom_top.getBeadConst(atom_name_id.second);
   }
   return atomic_names_and_beads;
 }

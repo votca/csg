@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE(test_beadtriple_constructor) {
   Eigen::Vector3d dist13(0.2, 0.4, 0.3);
   Eigen::Vector3d dist23(0.1, 0.2, 0.0);
 
-  BeadTriple testtriple(top.getBead(bead_id1), top.getBead(bead_id2),
-                        top.getBead(bead_id3), dist12, dist13, dist23);
+  BeadTriple testtriple(&top.getBead(bead_id1), &top.getBead(bead_id2),
+                        &top.getBead(bead_id3), dist12, dist13, dist23);
 
   double d12ref = 0.3741657;
   double d13ref = 0.5385165;

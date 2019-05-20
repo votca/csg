@@ -43,10 +43,10 @@ int BeadList::Generate(Topology &top, const string &select) {
 
   vector<int> bead_ids = top.getBeadIds();
   for (int &bead_id : bead_ids) {
-    Bead *bead_ptr = top.getBead(bead_id);
+    Bead &bead = top.getBead(bead_id);
     if (!selectByName) {
-      if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {
-        push_back(bead_ptr);
+      if (wildcmp(pSelect.c_str(), bead.getType().c_str())) {
+        push_back(&bead);
       }
     } else {
       throw runtime_error("Bead name is no longer supported");
@@ -71,12 +71,11 @@ int BeadList::GenerateInSphericalSubvolume(Topology &top, const string &select,
 
   vector<int> bead_ids = top.getBeadIds();
   for (int &bead_id : bead_ids) {
-    Bead *bead_ptr = top.getBead(bead_id);
-    if (top.BCShortestConnection(ref, bead_ptr->getPos()).norm() > radius)
-      continue;
+    Bead &bead = top.getBead(bead_id);
+    if (top.BCShortestConnection(ref, bead.getPos()).norm() > radius) continue;
     if (!selectByName) {
-      if (wildcmp(pSelect.c_str(), bead_ptr->getType().c_str())) {
-        push_back(bead_ptr);
+      if (wildcmp(pSelect.c_str(), bead.getType().c_str())) {
+        push_back(&bead);
       }
     } else {
       throw runtime_error("Bead name is no longer supported");

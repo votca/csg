@@ -281,7 +281,7 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
           params.set(tools::StructureParameter::MoleculeId, mi.getId());
           typename Topology_T::bead_t &bead = top.CreateBead(params);
 
-          mi.AddBead(&bead);
+          mi.AddBead(bead);
           id_map[i] = bead.getId();
           i++;
 #ifdef DEBUG
@@ -371,31 +371,30 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
             top.CreateMolecule(params_mol);
         std::vector<int> bead_ids = mi.getBeadIds();
         for (const int &bead_id : bead_ids) {
-          typename Topology_T::bead_t *bead = mi.getBead(bead_id);
+          typename Topology_T::bead_t &bead = mi.getBead(bead_id);
           tools::byte_t symmetry = 1;
 
           tools::StructureParameters params;
           params.set(tools::StructureParameter::Symmetry, symmetry);
-          params.set(tools::StructureParameter::CSG_Mass, bead->getMass());
-          params.set(tools::StructureParameter::CSG_Charge, bead->getQ());
-          params.set(tools::StructureParameter::Element, bead->getElement());
+          params.set(tools::StructureParameter::CSG_Mass, bead.getMass());
+          params.set(tools::StructureParameter::CSG_Charge, bead.getQ());
+          params.set(tools::StructureParameter::Element, bead.getElement());
           params.set(tools::StructureParameter::BeadId,
                      static_cast<int>(top.BeadCount()));
-          params.set(tools::StructureParameter::BeadType, bead->getType());
-          params.set(tools::StructureParameter::ResidueId,
-                     bead->getResidueId());
+          params.set(tools::StructureParameter::BeadType, bead.getType());
+          params.set(tools::StructureParameter::ResidueId, bead.getResidueId());
           params.set(tools::StructureParameter::ResidueType,
-                     bead->getResidueType());
+                     bead.getResidueType());
           params.set(tools::StructureParameter::MoleculeId, mi_replica.getId());
           typename Topology_T::bead_t &bead_replica = top.CreateBead(params);
-          mi_replica.AddBead(&bead_replica);
+          mi_replica.AddBead(bead_replica);
         }
         matoms += mi.BeadCount();
         std::vector<Interaction *> ics = mi.Interactions();
         for (std::vector<Interaction *>::iterator ic = ics.begin();
              ic != ics.end(); ++ic) {
           Interaction *ic_replica = NULL;
-          int offset = mi_replica.getBead(0)->getId() - mi.getBead(0)->getId();
+          int offset = mi_replica.getBead(0).getId() - mi.getBead(0).getId();
           if ((*ic)->BeadCount() == 2) {
             int bead_id1 = (*ic)->getBeadId(0) + offset;
             int bead_id2 = (*ic)->getBeadId(1) + offset;

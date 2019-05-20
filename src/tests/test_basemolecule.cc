@@ -48,10 +48,10 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_add_and_getbead) {
   BaseMolecule<TestBead> base_molecule;
   TestBead testbead;
   testbead.setId(2);
-  base_molecule.AddBead(&testbead);
+  base_molecule.AddBead(testbead);
   BOOST_CHECK_EQUAL(base_molecule.BeadCount(), 1);
   auto testbead2 = base_molecule.getBead(2);
-  BOOST_CHECK_EQUAL(testbead2->getId(), testbead.getId());
+  BOOST_CHECK_EQUAL(testbead2.getId(), testbead.getId());
 }
 
 BOOST_AUTO_TEST_CASE(test_base_molecule_ConnectBeads) {
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_ConnectBeads) {
   TestBead testbead2;
   testbead2.setId(2);
   testbead2.setName("Carbon");
-  base_molecule.AddBead(&testbead1);
-  base_molecule.AddBead(&testbead2);
+  base_molecule.AddBead(testbead1);
+  base_molecule.AddBead(testbead2);
   base_molecule.ConnectBeads(1, 2);
 }
 
@@ -90,8 +90,8 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_isSingleStructure) {
   testbead5.setName("Hydrogen");
   testbead5.setId(5);
 
-  base_molecule.AddBead(&testbead1);
-  base_molecule.AddBead(&testbead2);
+  base_molecule.AddBead(testbead1);
+  base_molecule.AddBead(testbead2);
   BOOST_CHECK(!base_molecule.isSingleStructure());
 
   // C - C
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_isSingleStructure) {
   BOOST_CHECK(base_molecule.isSingleStructure());
 
   // C - C  O
-  base_molecule.AddBead(&testbead3);
+  base_molecule.AddBead(testbead3);
   BOOST_CHECK(!base_molecule.isSingleStructure());
 
   // C - C - O
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_isSingleStructure) {
   BOOST_CHECK(base_molecule.isSingleStructure());
 
   // C - C - O  H - H
-  base_molecule.AddBead(&testbead4);
-  base_molecule.AddBead(&testbead5);
+  base_molecule.AddBead(testbead4);
+  base_molecule.AddBead(testbead5);
   base_molecule.ConnectBeads(4, 5);
   BOOST_CHECK(!base_molecule.isSingleStructure());
 }
@@ -160,28 +160,28 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_isStructureEquivalent) {
   testbead10.setId(10);
 
   BOOST_CHECK(base_molecule1.isStructureEquivalent(base_molecule2));
-  base_molecule1.AddBead(&testbead1);
+  base_molecule1.AddBead(testbead1);
   BOOST_CHECK(!base_molecule1.isStructureEquivalent(base_molecule2));
-  base_molecule2.AddBead(&testbead6);
+  base_molecule2.AddBead(testbead6);
   BOOST_CHECK(base_molecule1.isStructureEquivalent(base_molecule2));
 
-  base_molecule1.AddBead(&testbead2);
-  base_molecule2.AddBead(&testbead7);
+  base_molecule1.AddBead(testbead2);
+  base_molecule2.AddBead(testbead7);
 
   base_molecule1.ConnectBeads(1, 2);
   BOOST_CHECK(!base_molecule1.isStructureEquivalent(base_molecule2));
   base_molecule2.ConnectBeads(6, 7);
   BOOST_CHECK(base_molecule1.isStructureEquivalent(base_molecule2));
 
-  base_molecule1.AddBead(&testbead3);
-  base_molecule1.AddBead(&testbead4);
-  base_molecule1.AddBead(&testbead5);
+  base_molecule1.AddBead(testbead3);
+  base_molecule1.AddBead(testbead4);
+  base_molecule1.AddBead(testbead5);
   base_molecule1.ConnectBeads(2, 3);
   base_molecule1.ConnectBeads(4, 5);
 
-  base_molecule2.AddBead(&testbead10);
-  base_molecule2.AddBead(&testbead8);
-  base_molecule2.AddBead(&testbead9);
+  base_molecule2.AddBead(testbead10);
+  base_molecule2.AddBead(testbead8);
+  base_molecule2.AddBead(testbead9);
   base_molecule2.ConnectBeads(7, 8);
   base_molecule2.ConnectBeads(9, 10);
   BOOST_CHECK(base_molecule1.isStructureEquivalent(base_molecule2));
@@ -236,14 +236,14 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_getNeighBeads) {
   testbead8.setName("Hydrogen");
   testbead8.setId(8);
 
-  base_molecule1.AddBead(&testbead1);
-  base_molecule1.AddBead(&testbead2);
-  base_molecule1.AddBead(&testbead3);
-  base_molecule1.AddBead(&testbead4);
-  base_molecule1.AddBead(&testbead5);
-  base_molecule1.AddBead(&testbead6);
-  base_molecule1.AddBead(&testbead7);
-  base_molecule1.AddBead(&testbead8);
+  base_molecule1.AddBead(testbead1);
+  base_molecule1.AddBead(testbead2);
+  base_molecule1.AddBead(testbead3);
+  base_molecule1.AddBead(testbead4);
+  base_molecule1.AddBead(testbead5);
+  base_molecule1.AddBead(testbead6);
+  base_molecule1.AddBead(testbead7);
+  base_molecule1.AddBead(testbead8);
 
   // At this point non of the beads are connected so should return a vector of
   // size 0
@@ -318,13 +318,13 @@ BOOST_AUTO_TEST_CASE(test_base_molecule_catchError) {
     testbead6.setId(5);
 
     BaseMolecule<TestBead> base_molecule;
-    base_molecule.AddBead(&testbead1);
-    base_molecule.AddBead(&testbead2);
-    base_molecule.AddBead(&testbead3);
-    base_molecule.AddBead(&testbead4);
-    base_molecule.AddBead(&testbead5);
+    base_molecule.AddBead(testbead1);
+    base_molecule.AddBead(testbead2);
+    base_molecule.AddBead(testbead3);
+    base_molecule.AddBead(testbead4);
+    base_molecule.AddBead(testbead5);
 
-    BOOST_CHECK_THROW(base_molecule.AddBead(&testbead6), invalid_argument);
+    BOOST_CHECK_THROW(base_molecule.AddBead(testbead6), invalid_argument);
     BOOST_CHECK_THROW(base_molecule.ConnectBeads(0, 1), invalid_argument);
     BOOST_CHECK_THROW(base_molecule.ConnectBeads(5, 6), invalid_argument);
     BOOST_CHECK_THROW(base_molecule.ConnectBeads(1, 1), invalid_argument);

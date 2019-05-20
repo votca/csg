@@ -129,11 +129,11 @@ class TemplateTopology {
    *
    * @return Bead * is a pointer to the bead
    **/
-  Bead_T *getBead(const int id) {
+  Bead_T &getBead(const int id) {
     assert(beads_.count(id) &&
            "Cannot access bead with provided id because it is not stored in "
            "the topology obeject");
-    return &beads_.at(id);
+    return beads_.at(id);
   }
 
   std::unordered_map<int, const Eigen::Vector3d *> getBeadPositions(
@@ -156,6 +156,8 @@ class TemplateTopology {
     return molecules_map_.count(molecule_id);
   }
 
+  bool BeadExist(const int bead_id) const { return beads_.count(bead_id); }
+
   bool BeadTypeExist(const std::string bead_type) const {
     return type_container_.BeadTypeExist(bead_type);
   }
@@ -171,11 +173,11 @@ class TemplateTopology {
    *
    * @return const Bead * is a pointer to the bead
    **/
-  const Bead_T *getBeadConst(const int id) const {
+  const Bead_T &getBeadConst(const int id) const {
     assert(beads_.count(id) &&
            "Cannot access bead with provided id because it is not stored in "
            "the topology obeject");
-    return &beads_.at(id);
+    return beads_.at(id);
   }
 
   /**
@@ -439,23 +441,6 @@ class TemplateTopology {
   const std::unordered_map<std::string, int> getMoleculeTypes() const {
     return type_container_.getMoleculeTypes();
   }
-  /*
-    BaseBead *CreateBead(tools::byte_t symmetry, std::string bead_type,
-                         int bead_id, int molecule_id, int residue_id,
-                         std::string residue_type, std::string element_symbol,
-                         double mass, double charge) {
-
-      throw std::runtime_error(
-          "CreateBead must be overwritten by derived type it may not be called "
-          "from template");
-    }
-
-    template <class Bead_T2, template <class Bead_T3> class Molecule_T2>
-    Molecule_T2<Bead_T2> *CreateMolecule(int id, std::string molecule_type) {
-      throw std::runtime_error(
-          "CreateMolecule must be overwritten by derived type it may not be "
-          "called from template");
-    }*/
 
  protected:
   std::unique_ptr<BoundaryCondition> bc_;
@@ -668,8 +653,7 @@ Eigen::Vector3d TemplateTopology<Bead_T, Molecule_T>::BCShortestConnection(
 template <class Bead_T, class Molecule_T>
 Eigen::Vector3d TemplateTopology<Bead_T, Molecule_T>::getDist(
     const int bead1, const int bead2) const {
-  return BCShortestConnection(getBead(bead1)->getPos(),
-                              getBead(bead2)->getPos());
+  return BCShortestConnection(getBead(bead1).getPos(), getBead(bead2).getPos());
 }
 
 template <class Bead_T, class Molecule_T>

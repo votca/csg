@@ -134,50 +134,50 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
   }
 
   for (int i = 0; static_cast<size_t>(i) < conf.BeadCount(); i++) {
-    typename Topology_T::bead_t *bead = conf.getBead(i);
+    typename Topology_T::bead_t &bead = conf.getBead(i);
 
     // AB: DL_POLY needs bead TYPE, not name!
 
     if (_isConfig) {
-      out_ << std::setw(8) << std::left << bead->getType() << std::right
+      out_ << std::setw(8) << std::left << bead.getType() << std::right
            << std::setw(10) << i + 1 << std::endl;
     } else {
-      out_ << std::setw(8) << std::left << bead->getType() << std::right
+      out_ << std::setw(8) << std::left << bead.getType() << std::right
            << std::setw(10) << i + 1;
-      out_ << std::setprecision(6) << std::setw(12) << bead->getMass()
-           << std::setw(12) << bead->getQ() << std::setw(12) << "   0.0"
+      out_ << std::setprecision(6) << std::setw(12) << bead.getMass()
+           << std::setw(12) << bead.getQ() << std::setw(12) << "   0.0"
            << std::endl;
     }
 
     // nm -> Angs
     out_ << resetiosflags(std::ios::fixed) << std::setprecision(12)
-         << std::setw(20) << bead->getPos().x() * scale;
-    out_ << std::setw(20) << bead->getPos().y() * scale << std::setw(20)
-         << bead->getPos().z() * scale << std::endl;
+         << std::setw(20) << bead.getPos().x() * scale;
+    out_ << std::setw(20) << bead.getPos().y() * scale << std::setw(20)
+         << bead.getPos().z() * scale << std::endl;
 
     if (mavecs > 0) {
-      if (!bead->HasVel())
+      if (!bead.HasVel())
         throw std::ios_base::failure(
             "Error: dlpoly frame is supposed to contain velocities, but bead "
             "does not have v-data");
 
       // nm -> Angs
       out_ << std::setprecision(12) << std::setw(20)
-           << bead->getVel().x() * scale << std::setw(20);
-      out_ << bead->getVel().y() * scale << std::setw(20)
-           << bead->getVel().z() * scale << std::endl;
+           << bead.getVel().x() * scale << std::setw(20);
+      out_ << bead.getVel().y() * scale << std::setw(20)
+           << bead.getVel().z() * scale << std::endl;
 
       if (mavecs > 1) {
-        if (!bead->HasF())
+        if (!bead.HasF())
           throw std::ios_base::failure(
               "Error: dlpoly frame is supposed to contain forces, but bead "
               "does not have f-data");
 
         // nm -> Angs
         out_ << std::setprecision(12) << std::setw(20)
-             << bead->getF().x() * scale << std::setw(20);
-        out_ << bead->getF().y() * scale << std::setw(20)
-             << bead->getF().z() * scale << std::endl;
+             << bead.getF().x() * scale << std::setw(20);
+        out_ << bead.getF().y() * scale << std::setw(20)
+             << bead.getF().z() * scale << std::endl;
       }
     }
   }

@@ -32,9 +32,9 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
   if (list3.empty()) return;
 
   // check if all bead lists "have" the same topology
-  assert(list1.getTopology() == list2.getCSGTopology());
-  assert(list1.getTopology() == list3.getCSGTopology());
-  assert(list2.getTopology() == list3.getCSGTopology());
+  assert(list1.getTopology() == list2.getTopology());
+  assert(list1.getTopology() == list3.getTopology());
+  assert(list2.getTopology() == list3.getTopology());
   Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());
@@ -66,7 +66,7 @@ void NBListGrid_3Body::Generate(BeadList &list1, BeadList &list2,
   if (list2.empty()) return;
 
   // check if both bead lists "have" the same topology
-  assert(list1.getTopology() == list2.getCSGTopology());
+  assert(list1.getTopology() == list2.getTopology());
   Topology *top = _top = list1.getTopology();
 
   InitializeGrid(top->getBox());

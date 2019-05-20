@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType) {
   TestBead testbead;
   testbead.setId(2);
   testbead.setType("Helium");
-  beadmotif.AddBead(&testbead);
+  beadmotif.AddBead(testbead);
   BOOST_CHECK_EQUAL(beadmotif.BeadCount(), 1);
   type = beadmotif.getType();
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType) {
   TestBead testbead2;
   testbead2.setId(3);
   testbead2.setType("Helium");
-  beadmotif.AddBead(&testbead2);
+  beadmotif.AddBead(testbead2);
   type = beadmotif.getType();
   BOOST_CHECK_EQUAL(type, BeadMotif::MotifType::multiple_structures);
 }
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead1;
   testbead1.setId(1);
   testbead1.setType("Carbon");
-  beadmotif.AddBead(&testbead1);
+  beadmotif.AddBead(testbead1);
 
   // C1
   type = beadmotif.getType();
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead2;
   testbead2.setId(2);
   testbead2.setType("Carbon");
-  beadmotif.AddBead(&testbead2);
+  beadmotif.AddBead(testbead2);
   type = beadmotif.getType();
   BOOST_CHECK_EQUAL(type, BeadMotif::MotifType::multiple_structures);
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead3;
   testbead3.setId(3);
   testbead3.setType("Carbon");
-  beadmotif.AddBead(&testbead3);
+  beadmotif.AddBead(testbead3);
   beadmotif.ConnectBeads(2, 3);
 
   // C1 - C2 - C3
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead4;
   testbead4.setId(4);
   testbead4.setType("Carbon");
-  beadmotif.AddBead(&testbead4);
+  beadmotif.AddBead(testbead4);
 
   beadmotif.ConnectBeads(1, 4);
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead5;
   testbead5.setId(5);
   testbead5.setType("Carbon");
-  beadmotif.AddBead(&testbead5);
+  beadmotif.AddBead(testbead5);
 
   beadmotif.ConnectBeads(5, 4);
   beadmotif.ConnectBeads(5, 2);
@@ -143,12 +143,12 @@ BOOST_AUTO_TEST_CASE(test_beadmotif_getType2) {
   TestBead testbead6;
   testbead6.setId(6);
   testbead6.setType("Carbon");
-  beadmotif.AddBead(&testbead6);
+  beadmotif.AddBead(testbead6);
 
   TestBead testbead7;
   testbead7.setId(7);
   testbead7.setType("Carbon");
-  beadmotif.AddBead(&testbead7);
+  beadmotif.AddBead(testbead7);
 
   beadmotif.ConnectBeads(5, 6);
   beadmotif.ConnectBeads(6, 7);

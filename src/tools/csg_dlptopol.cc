@@ -137,7 +137,7 @@ bool DLPTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
     // collect unique bead pairs over all molecular types found
     vector<int> bead_ids = mol->getBeadIds();
     for (int &bead_id : bead_ids) {
-      const string bead_name1 = mol->getBead(bead_id)->getType();
+      const string bead_name1 = mol->getBead(bead_id).getType();
 
       for (unsigned int imt = 0; imt < MolecularTypes.size(); imt++) {
 
@@ -145,7 +145,7 @@ bool DLPTopolApp::EvaluateTopology(Topology *top, Topology *top_ref) {
         for (int &bead_id2 : bead_ids2) {
 
           const string bead_name2 =
-              MolecularTypes[imt]->getBead(bead_id2)->getType();
+              MolecularTypes[imt]->getBead(bead_id2).getType();
 
           stringstream ss_bp1, ss_bp2;
 
@@ -214,12 +214,12 @@ void DLPTopolApp::WriteMoleculeAtoms(ostream &out, const Molecule &cg) {
   vector<int> bead_ids = cg.getBeadIds();
   int index = 0;
   for (int &bead_id : bead_ids) {
-    const Bead *b = cg.getBead(bead_id);
+    const Bead b = cg.getBead(bead_id);
 
-    const string btype = b->getType();
+    const string btype = b.getType();
 
     out << format("%8s  %10f  %10f     1     0     1 %10d  %8s  %10d \n") %
-               btype % b->getMass() % b->getQ() % (index + 1) % btype %
+               btype % b.getMass() % b.getQ() % (index + 1) % btype %
                (index + 1);
     ++index;
   }

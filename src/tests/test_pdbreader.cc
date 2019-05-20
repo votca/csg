@@ -123,17 +123,17 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
                       0.1671, 0.2451, 0.1999, 0.1430, 0.0804};
   vector<double> z = {-0.000, -0.0141, 0.0255, -0.0904, 0.079,
                       -0.000, 0.0051,  0.0467, -0.1024, 0.0507};
-  Bead* bd;
+  Bead bd;
   Eigen::Vector3d v;
   for (int i = 0; i < 10; i++) {
     bd = top.getBead(i);
-    BOOST_CHECK_EQUAL(bd->getId(), i);
-    BOOST_CHECK_EQUAL(bd->getResidueId(), residue_id.at(i));
-    BOOST_CHECK_EQUAL(bd->getType(), bead_type.at(i));
-    BOOST_CHECK_EQUAL(bd->getElement(), bead_element.at(i));
-    BOOST_CHECK_EQUAL(bd->getResidueType(), residue_type.at(i));
-    v = bd->getPos();
-    BOOST_CHECK_CLOSE(bd->getQ(), 0, 1e-5);
+    BOOST_CHECK_EQUAL(bd.getId(), i);
+    BOOST_CHECK_EQUAL(bd.getResidueId(), residue_id.at(i));
+    BOOST_CHECK_EQUAL(bd.getType(), bead_type.at(i));
+    BOOST_CHECK_EQUAL(bd.getElement(), bead_element.at(i));
+    BOOST_CHECK_EQUAL(bd.getResidueType(), residue_type.at(i));
+    v = bd.getPos();
+    BOOST_CHECK_CLOSE(bd.getQ(), 0, 1e-5);
     BOOST_CHECK_CLOSE(v.x(), x.at(i), 1e-5);
     BOOST_CHECK_CLOSE(v.y(), y.at(i), 1e-5);
     BOOST_CHECK_CLOSE(v.z(), z.at(i), 1e-5);
@@ -233,17 +233,17 @@ BOOST_AUTO_TEST_CASE(test_topologywriter) {
                       0.1671, 0.2451, 0.1999, 0.1430, 0.0804};
   vector<double> z = {-0.000, -0.0141, 0.0255, -0.0904, 0.079,
                       -0.000, 0.0051,  0.0467, -0.1024, 0.0507};
-  Bead* bd;
+  Bead bd;
   Eigen::Vector3d v;
   for (int i = 0; i < 10; i++) {
     bd = top2.getBead(i);
-    BOOST_CHECK_EQUAL(bd->getId(), i);
-    BOOST_CHECK_EQUAL(bd->getResidueId(), residue_id.at(i));
-    BOOST_CHECK_EQUAL(bd->getType(), bead_type.at(i));
-    BOOST_CHECK_EQUAL(bd->getElement(), bead_element.at(i));
-    BOOST_CHECK_EQUAL(bd->getResidueType(), residue_type.at(i));
-    v = bd->getPos();
-    BOOST_CHECK_CLOSE(bd->getQ(), 0, 1e-5);
+    BOOST_CHECK_EQUAL(bd.getId(), i);
+    BOOST_CHECK_EQUAL(bd.getResidueId(), residue_id.at(i));
+    BOOST_CHECK_EQUAL(bd.getType(), bead_type.at(i));
+    BOOST_CHECK_EQUAL(bd.getElement(), bead_element.at(i));
+    BOOST_CHECK_EQUAL(bd.getResidueType(), residue_type.at(i));
+    v = bd.getPos();
+    BOOST_CHECK_CLOSE(bd.getQ(), 0, 1e-5);
     BOOST_CHECK_CLOSE(v.x(), x.at(i), 1e-5);
     BOOST_CHECK_CLOSE(v.y(), y.at(i), 1e-5);
     BOOST_CHECK_CLOSE(v.z(), z.at(i), 1e-5);

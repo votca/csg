@@ -397,7 +397,7 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
         topology_constants::unassigned_element, 0.0, 0.0);
 
     cg_bead_name_and_id[bead_info.cg_name_] = bead.getId();
-    cg_mol->AddBead(&bead);
+    cg_mol->AddBead(bead);
   }
 
   // cg_bead_id, vector< atom_name, atom_bead_id >

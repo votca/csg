@@ -81,17 +81,17 @@ void GROWriter<Topology_T>::Write(boost::any conf_any) {
     sprintf(format, "%%%d.%df%%%d.%df%%%d.%df\n", l, pr, l, pr, l, pr);
 
   for (i = 0; static_cast<size_t>(i) < top.BeadCount(); i++) {
-    resnr = top.getBead(i)->getResidueId();
-    std::string resname = top.getBead(i)->getResidueType();
-    std::string atomname = top.getBead(i)->getType();
+    resnr = top.getBead(i).getResidueId();
+    std::string resname = top.getBead(i).getResidueType();
+    std::string atomname = top.getBead(i).getType();
 
     fprintf(_out, "%5d%-5.5s%5.5s%5d", formatId_(resnr), resname.c_str(),
             atomname.c_str(), formatId_(i));
     // next fprintf uses built format std::string
-    Eigen::Vector3d r = top.getBead(i)->getPos();
+    Eigen::Vector3d r = top.getBead(i).getPos();
 
     if (v) {
-      Eigen::Vector3d vv = top.getBead(i)->getVel();
+      Eigen::Vector3d vv = top.getBead(i).getVel();
       fprintf(_out, format, formatDistance_(r.x()), formatDistance_(r.y()),
               formatDistance_(r.z()), formatVelocity_(vv.x()),
               formatVelocity_(vv.y()), formatVelocity_(vv.z()));

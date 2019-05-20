@@ -343,7 +343,7 @@ bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
               " but got " + boost::lexical_cast<std::string>(id));
       }
 
-      typename Topology_T::bead_t *b = conf.getBead(i);
+      typename Topology_T::bead_t &b = conf.getBead(i);
       Eigen::Matrix3d atom_vecs = Eigen::Matrix3d::Zero();
       for (int j = 0; j < std::min(navecs, 2) + 1; j++) {
 
@@ -369,19 +369,19 @@ bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
             scale * Eigen::Vector3d(fields[0], fields[1], fields[2]);
       }
 
-      b->setPos(atom_vecs.col(0));
+      b.setPos(atom_vecs.col(0));
 #ifdef DEBUG
       std::cout << "Crds from dlpoly file '" << _fname
                 << "' : " << atom_vecs.col(0) << std::endl;
 #endif
       if (navecs > 0) {
-        b->setVel(atom_vecs.col(1));
+        b.setVel(atom_vecs.col(1));
 #ifdef DEBUG
         std::cout << "Vels from dlpoly file '" << _fname
                   << "' : " << atom_vecs.col(1) << std::endl;
 #endif
         if (navecs > 1) {
-          b->setF(atom_vecs.col(2));
+          b.setF(atom_vecs.col(2));
 #ifdef DEBUG
           std::cout << "Frcs from dlpoly file '" << _fname
                     << "' : " << atom_vecs.col(2) << std::endl;

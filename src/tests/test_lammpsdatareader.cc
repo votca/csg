@@ -75,15 +75,15 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   BOOST_CHECK_EQUAL(top.BeadCount(), 100);
   // Units should be converted to nm
   Eigen::Vector3d first_bead_correct_pos(6.2806, 5.25127, 4.98873);
-  Bead *firstBead = top.getBead(0);
-  auto first_bead_pos = firstBead->getPos();
+  Bead firstBead = top.getBead(0);
+  auto first_bead_pos = firstBead.getPos();
   std::cout << "Bead pos " << first_bead_pos << std::endl;
   BOOST_CHECK(first_bead_correct_pos.isApprox(first_bead_pos, 1e-3));
 
   // Units should be converted to nm
   Eigen::Vector3d last_bead_correct_pos(10.278495, 7.80388, 5.99629);
-  Bead *lastBead = top.getBead(99);
-  auto last_bead_pos = lastBead->getPos();
+  Bead lastBead = top.getBead(99);
+  auto last_bead_pos = lastBead.getPos();
   BOOST_CHECK(last_bead_correct_pos.isApprox(last_bead_pos, 1e-3));
 
   auto mol = &top.getMolecule(0);
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
 
   // Units should be converted to nm
   Eigen::Vector3d first_bead_correct_pos(6.57991, 5.104235, 5.8480193);
-  Bead *firstBead = top.getBead(0);
-  auto first_bead_pos = firstBead->getPos();
+  Bead firstBead = top.getBead(0);
+  auto first_bead_pos = firstBead.getPos();
 
   cout << first_bead_correct_pos << endl;
   cout << first_bead_pos << endl;
@@ -155,8 +155,8 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   // Units should be converted to nm
   BOOST_CHECK(first_bead_correct_pos.isApprox(first_bead_pos, 1e-3));
   Eigen::Vector3d last_bead_correct_pos(10.8431, 8.394695, 6.85254);
-  Bead *lastBead = top.getBead(99);
-  auto last_bead_pos = lastBead->getPos();
+  Bead lastBead = top.getBead(99);
+  auto last_bead_pos = lastBead.getPos();
 
   cout << last_bead_correct_pos << endl;
   cout << last_bead_pos << endl;

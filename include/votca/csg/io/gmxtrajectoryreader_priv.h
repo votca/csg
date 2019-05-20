@@ -88,18 +88,18 @@ bool GMXTrajectoryReader<Topology_T>::FirstFrame(boost::any conf_any) {
     Eigen::Vector3d r = {formatDistance_(_gmx_frame.x[i][XX]),
                          formatDistance_(_gmx_frame.x[i][YY]),
                          formatDistance_(_gmx_frame.x[i][ZZ])};
-    conf.getBead(i)->setPos(r);
+    conf.getBead(i).setPos(r);
     if (_gmx_frame.bF) {
       Eigen::Vector3d f = {formatForce_(_gmx_frame.f[i][XX]),
                            formatForce_(_gmx_frame.f[i][YY]),
                            formatForce_(_gmx_frame.f[i][ZZ])};
-      conf.getBead(i)->setF(f);
+      conf.getBead(i).setF(f);
     }
     if (_gmx_frame.bV) {
       Eigen::Vector3d v = {formatVelocity_(_gmx_frame.v[i][XX]),
                            formatVelocity_(_gmx_frame.v[i][YY]),
                            formatVelocity_(_gmx_frame.v[i][ZZ])};
-      conf.getBead(i)->setVel(v);
+      conf.getBead(i).setVel(v);
     }
   }
   return true;
@@ -130,18 +130,18 @@ bool GMXTrajectoryReader<Topology_T>::NextFrame(boost::any conf_any) {
     Eigen::Vector3d r = {formatDistance_(_gmx_frame.x[i][XX]),
                          formatDistance_(_gmx_frame.x[i][YY]),
                          formatDistance_(_gmx_frame.x[i][ZZ])};
-    conf.getBead(i)->setPos(r);
+    conf.getBead(i).setPos(r);
     if (_gmx_frame.bF) {
       Eigen::Vector3d f = {formatForce_(_gmx_frame.f[i][XX]),
                            formatForce_(_gmx_frame.f[i][YY]),
                            formatForce_(_gmx_frame.f[i][ZZ])};
-      conf.getBead(i)->setF(f);
+      conf.getBead(i).setF(f);
     }
     if (_gmx_frame.bV) {
       Eigen::Vector3d v = {formatVelocity_(_gmx_frame.v[i][XX]),
                            formatVelocity_(_gmx_frame.v[i][YY]),
                            formatVelocity_(_gmx_frame.v[i][ZZ])};
-      conf.getBead(i)->setVel(v);
+      conf.getBead(i).setVel(v);
     }
   }
   return true;

@@ -347,35 +347,35 @@ void LAMMPSDumpReader<Topology_T>::ReadAtoms(Topology_T &top,
                  atom_attributes_string["mol"]);
       top.CreateBead(params);
     }
-    typename Topology_T::bead_t *b = top.getBead(atom_attributes_int["id"]);
-    b->HasPos(pos);
-    b->HasF(force);
-    b->HasVel(vel);
+    typename Topology_T::bead_t &b = top.getBead(atom_attributes_int["id"]);
+    b.HasPos(pos);
+    b.HasF(force);
+    b.HasVel(vel);
 
     if (pos) {
       if (atom_attributes_double.count("x")) {
-        b->Pos().x() = atom_attributes_double["x"];
-        b->Pos().y() = atom_attributes_double["y"];
-        b->Pos().z() = atom_attributes_double["z"];
+        b.Pos().x() = atom_attributes_double["x"];
+        b.Pos().y() = atom_attributes_double["y"];
+        b.Pos().z() = atom_attributes_double["z"];
       } else if (atom_attributes_double.count("xs")) {
-        b->Pos().x() = atom_attributes_double["xs"];
-        b->Pos().y() = atom_attributes_double["ys"];
-        b->Pos().z() = atom_attributes_double["zs"];
+        b.Pos().x() = atom_attributes_double["xs"];
+        b.Pos().y() = atom_attributes_double["ys"];
+        b.Pos().z() = atom_attributes_double["zs"];
       } else if (atom_attributes_double.count("xu")) {
-        b->Pos().x() = atom_attributes_double["xu"];
-        b->Pos().y() = atom_attributes_double["yu"];
-        b->Pos().z() = atom_attributes_double["zu"];
+        b.Pos().x() = atom_attributes_double["xu"];
+        b.Pos().y() = atom_attributes_double["yu"];
+        b.Pos().z() = atom_attributes_double["zu"];
       }
     }
     if (force) {
-      b->F().x() = atom_attributes_double["fx"];
-      b->F().y() = atom_attributes_double["fy"];
-      b->F().z() = atom_attributes_double["fz"];
+      b.F().x() = atom_attributes_double["fx"];
+      b.F().y() = atom_attributes_double["fy"];
+      b.F().z() = atom_attributes_double["fz"];
     }
     if (vel) {
-      b->Vel().x() = atom_attributes_double["vx"];
-      b->Vel().y() = atom_attributes_double["vy"];
-      b->Vel().z() = atom_attributes_double["vz"];
+      b.Vel().x() = atom_attributes_double["vx"];
+      b.Vel().y() = atom_attributes_double["vy"];
+      b.Vel().z() = atom_attributes_double["vz"];
     }
 
   }  // for (int i = 0; i < number_of_atoms_; ++i)

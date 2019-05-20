@@ -58,7 +58,7 @@ class BaseMolecule : public BeadStructure<T> {
    *
    * @param bead
    */
-  void AddBead(T *bead);
+  void AddBead(T &bead);
 
   /**
    * @brief Returns the ids of the beads with the name `name`
@@ -113,14 +113,14 @@ class BaseMolecule : public BeadStructure<T> {
 };
 
 template <class T>
-void BaseMolecule<T>::AddBead(T *bead) {
-  assert(!BeadStructure<T>::beads_.count(bead->getId()) &&
+void BaseMolecule<T>::AddBead(T &bead) {
+  assert(!BeadStructure<T>::beads_.count(bead.getId()) &&
          "Cannot add a bead to the basemolecule"
          " when it has been previously added.");
 
   BeadStructure<T>::AddBead(bead);
-  bead_type_and_ids_[bead->getType()].push_back(bead->getId());
-  bead->setMoleculeId(getId());
+  bead_type_and_ids_[bead.getType()].push_back(bead.getId());
+  bead.setMoleculeId(getId());
 }
 
 template <class T>

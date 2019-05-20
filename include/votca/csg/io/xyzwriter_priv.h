@@ -114,8 +114,8 @@ inline void XYZWriter<Topology_T>::WriteContainer_(T &container) {
             << container.getId() << std::endl;
   for (const int &id : ids) {
     std::cout << "getting bead id " << id << std::endl;
-    auto atom_ptr = container.getBead(id);
-    tools::StructureParameters params = atom_ptr->getParameters();
+    auto &atom_ptr = container.getBead(id);
+    tools::StructureParameters params = atom_ptr.getParameters();
     Eigen::Vector3d r =
         params.get<Eigen::Vector3d>(tools::StructureParameter::CSG_Position);
     std::string atomtype =

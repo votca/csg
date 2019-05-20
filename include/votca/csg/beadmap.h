@@ -76,7 +76,7 @@ class BeadMap {
    */
   virtual void UpdateCGBead(const BoundaryCondition *boundaries,
                             std::map<std::string, const Bead *> atomistic_beads,
-                            Bead *cg_bead) const = 0;
+                            Bead &cg_bead) const = 0;
 
   /**
    * @brief Method initializes the paramters important for describing how the
@@ -127,7 +127,7 @@ class Map_Sphere : public BeadMap {
  public:
   void UpdateCGBead(const BoundaryCondition *boundaries,
                     std::map<std::string, const Bead *> atomistic_beads,
-                    Bead *cg_bead) const override;
+                    Bead &cg_bead) const override;
 
   void InitializeBeadMap(const std::vector<std::string> &subbeads,
                          std::vector<double> weights,
@@ -160,7 +160,7 @@ class Map_Ellipsoid : public Map_Sphere {
  public:
   void UpdateCGBead(const BoundaryCondition *boundaries,
                     std::map<std::string, const Bead *> atomistic_beads,
-                    Bead *cg_bead) const override;
+                    Bead &cg_bead) const override;
 
   virtual std::unique_ptr<BeadMap> Clone() const override {
     return std::unique_ptr<BeadMap>(new Map_Ellipsoid(*this));

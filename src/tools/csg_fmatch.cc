@@ -384,9 +384,9 @@ void CGForceMatching::EvalConfiguration(Topology *conf, Topology *conf_atom) {
       throw std::runtime_error(
           "number of beads in topology and force topology does not match");
     for (int i = 0; static_cast<size_t>(i) < conf->BeadCount(); ++i) {
-      conf->getBead(i)->F() -= _top_force.getBead(i)->getF();
+      conf->getBead(i).F() -= _top_force.getBead(i).getF();
       Eigen::Vector3d d =
-          conf->getBead(i)->getPos() - _top_force.getBead(i)->getPos();
+          conf->getBead(i).getPos() - _top_force.getBead(i).getPos();
       if (d.norm() > _dist) {  // default is 1e-5, otherwise it can be a too
                                // strict criterion
         throw std::runtime_error(
@@ -411,10 +411,10 @@ void CGForceMatching::EvalConfiguration(Topology *conf, Topology *conf_atom) {
 
   // loop for the forces vector:
   // hack, chage the Has functions..
-  if (conf->getBead(0)->HasF()) {
+  if (conf->getBead(0).HasF()) {
     Eigen::Vector3d Force(0., 0., 0.);
     for (int iatom = 0; iatom < _nbeads; ++iatom) {
-      Force = conf->getBead(iatom)->getF();
+      Force = conf->getBead(iatom).getF();
       _b(_least_sq_offset + 3 * _nbeads * _frame_counter + iatom) = Force.x();
       _b(_least_sq_offset + 3 * _nbeads * _frame_counter + _nbeads + iatom) =
           Force.y();

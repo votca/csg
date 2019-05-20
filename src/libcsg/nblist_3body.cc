@@ -43,9 +43,9 @@ void NBList_3Body::Generate(BeadList &list1, BeadList &list2, BeadList &list3,
   if (list3.empty()) return;
 
   // check if all bead lists "have" the same topology
-  assert(list1.getTopology() == list2.getCSGTopology());
-  assert(list1.getTopology() == list3.getCSGTopology());
-  assert(list2.getTopology() == list3.getCSGTopology());
+  assert(list1.getTopology() == list2.getTopology());
+  assert(list1.getTopology() == list3.getTopology());
+  assert(list2.getTopology() == list3.getTopology());
   Topology *top = list1.getTopology();
 
   // builds neighbor lists for all cases, where all list are of different bead

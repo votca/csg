@@ -100,10 +100,10 @@ template <class Topology_T>
 class XMLTopologyReader : public TopologyReader {
  public:
   /// read a topology file
-  bool ReadTopology(const std::string &file, boost::any top);
+  bool ReadTopology(const std::string &file, ::boost::any top);
 
  private:
-  typedef boost::unordered_multimap<
+  typedef ::boost::unordered_multimap<
       std::string, XMLMolecule<typename Topology_T::container_t>>
       MoleculesMap;
 
@@ -133,14 +133,14 @@ class XMLTopologyReader : public TopologyReader {
 
 template <class Topology_T>
 inline bool XMLTopologyReader<Topology_T>::ReadTopology(
-    const std::string &filename, boost::any top_any) {
+    const std::string &filename, ::boost::any top_any) {
 
   if (typeid(Topology_T *) != top_any.type()) {
     throw std::runtime_error(
         "Error Cannot read topology using xml topology reader read topology, "
         "incorrect topology type provided.");
   }
-  _top = boost::any_cast<Topology_T *>(top_any);
+  _top = ::boost::any_cast<Topology_T *>(top_any);
 
   tools::Property options;
   load_property_from_xml(options, filename);
@@ -216,17 +216,17 @@ void XMLTopologyReader<Topology_T>::ParseMolecules(tools::Property &p) {
       if (it->name() == "define" && first < 1)
         throw std::runtime_error(
             "Attribute first is suppose to be > 0, but found " +
-            boost::lexical_cast<std::string>(
+            ::boost::lexical_cast<std::string>(
                 it->getAttribute<std::string>("first")));
       if (nbeads < 1)
         throw std::runtime_error(
             "Attribute nbeads is suppose to be > 0, but found " +
-            boost::lexical_cast<std::string>(
+            ::boost::lexical_cast<std::string>(
                 it->getAttribute<std::string>("nbeads")));
       if (nmols < 1)
         throw std::runtime_error(
             "Attribute nmols is suppose to be > 0, but found " +
-            boost::lexical_cast<std::string>(
+            ::boost::lexical_cast<std::string>(
                 it->getAttribute<std::string>("nmols")));
       if (it->name() == "define") {
       } else {
@@ -324,7 +324,7 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
 
       std::string element = tools::topology_constants::unassigned_element;
       std::string name_all_caps =
-          boost::algorithm::to_upper_copy<std::string>(b.name);
+          ::boost::algorithm::to_upper_copy<std::string>(b.name);
       if (elements.isEleShort(b.name)) {
         element = b.name;
       } else if (elements.isEleFull(name_all_caps)) {
@@ -344,9 +344,9 @@ void XMLTopologyReader<Topology_T>::ParseMolecule(tools::Property &p,
                  static_cast<int>(_top->BeadCount()));
       params.set(tools::StructureParameter::BeadType, b.type);
 
-      typename Topology_T::bead_t *bead = &(_top->CreateBead(params));
+      typename Topology_T::bead_t &bead = (_top->CreateBead(params));
 
-      bead->setMoleculeId(_mol_index);
+      bead.setMoleculeId(_mol_index);
       mi->AddBead(bead);
 
       // Data for bonded terms.

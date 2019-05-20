@@ -18,6 +18,9 @@
 #pragma once
 #ifndef VOTCA_CSG_LAMMPSDATAREADER_PRIV_H
 #define VOTCA_CSG_LAMMPSDATAREADER_PRIV_H
+
+#include <stdexcept>
+
 namespace votca {
 namespace csg {
 
@@ -568,7 +571,6 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
 
     // We want to start with an index of 0 not 1
     // atomId;
-    typename Topology_T::bead_t *b;
     if (topology_) {
 
       atomIdToIndex_[atomId] = atomIndex - startingIndex;
@@ -612,20 +614,16 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       params.set(tools::StructureParameter::ResidueType,
                  tools::topology_constants::unassigned_residue_type);
       params.set(tools::StructureParameter::MoleculeId, mol->getId());
-      b = &(top.CreateBead(params));
-      mol->AddBead(b);
-      b->setMoleculeId(mol->getId());
-
-    } else {
-      b = top.getBead(atomIndex - startingIndex);
+      mol->AddBead(top.CreateBead(params));
     }
+    typename Topology_T::bead_t &b = top.getBead(atomId);
 
     formatDistance(x);
     formatDistance(y);
     formatDistance(z);
     Eigen::Vector3d xyz_pos(x, y, z);
 
-    b->setPos(xyz_pos);
+    b.setPos(xyz_pos);
   }
 
   if (top.BeadCount() != static_cast<size_t>(numberOf_["atoms"])) {
@@ -669,9 +667,9 @@ void LAMMPSDataReader<Topology_T>::ReadBonds_(Topology_T &top) {
       int atom1Index = atomIdToIndex_[atom1Id];
       int atom2Index = atomIdToIndex_[atom2Id];
 
-      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::bead_t &b = top.getBead(atom1Index);
       typename Topology_T::container_t *mi =
-          &top.getMolecule(b->getMoleculeId());
+          &top.getMolecule(b.getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
           InteractionType::bond, "BONDS", bondId, mi->getId(),
@@ -729,9 +727,9 @@ void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
       int atom2Index = atomIdToIndex_[atom2Id];
       int atom3Index = atomIdToIndex_[atom3Id];
 
-      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::bead_t &b = top.getBead(atom1Index);
       typename Topology_T::container_t *mi =
-          &top.getMolecule(b->getMoleculeId());
+          &top.getMolecule(b.getMoleculeId());
 
       Interaction *ic = top.CreateInteraction(
           InteractionType::angle, "ANGLES", angleId, mi->getId(),
@@ -792,9 +790,9 @@ void LAMMPSDataReader<Topology_T>::ReadDihedrals_(Topology_T &top) {
       int atom3Index = atomIdToIndex_[atom3Id];
       int atom4Index = atomIdToIndex_[atom4Id];
 
-      typename Topology_T::bead_t *b = top.getBead(atom1Index);
+      typename Topology_T::bead_t &b = top.getBead(atom1Index);
       typename Topology_T::container_t *mi =
-          &top.getMolecule(b->getMoleculeId());
+          &top.getMolecule(b.getMoleculeId());
       Interaction *ic = top.CreateInteraction(
           InteractionType::dihedral, "DIHEDRALS", dihedralId, mi->getId(),
           std::vector<int>{atom1Index, atom2Index, atom3Index, atom4Index});
