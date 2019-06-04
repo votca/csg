@@ -145,9 +145,9 @@ class AtomCGConverter {
    * @param[in] atomistic_molecule
    * @param[in,out] cg_top_out
    */
-  void ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-      const Molecule &atomistic_molecule, Topology &cg_top_out,
-      Topology &atom_top);
+  //  void ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
+  void CoarseGrainMolecule_(const Molecule &atomistic_molecule,
+                            Topology &cg_top_out, const Topology &atom_top);
 
   /**
    * @brief

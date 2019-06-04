@@ -122,9 +122,12 @@ void AtomCGConverter::Update(const Topology &atomic_top, Topology &cg_top) {
   }
 }
 
-void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-    const Molecule &atomistic_mol, Topology &cg_top_out, Topology &atom_top) {
+// void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
+//    const Molecule &atomistic_mol, Topology &cg_top_out, Topology &atom_top) {
 
+void AtomCGConverter::CoarseGrainMolecule_(const Molecule &atomistic_mol,
+                                           Topology &cg_top_out,
+                                           Topology &atom_top) {
   string atom_mol_type = atomistic_mol.getType();
   int molecule_id = atomistic_mol.getId();
 
