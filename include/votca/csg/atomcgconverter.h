@@ -170,7 +170,7 @@ class AtomCGConverter {
 
   std::vector<CGInteractionStencil> ParseBonded_(tools::Property &options);
 
-  void ParseMaps_(
+  void ParseBeadMaps_(
       tools::Property &options_in,
       std::unordered_map<std::string, CGBeadStencil> &bead_maps_info);
 

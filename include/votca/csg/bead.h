@@ -65,7 +65,7 @@ class Bead : public BaseBead {
    *
    * @return string indicating the type if unassigned will return `unassigned`
    */
-  std::string getResidueType() const { return residue_type_.getName(); }
+  std::string getResidueType() const { return residue_type_; }
 
   /**
    * get the mass of the bead
@@ -309,18 +309,17 @@ class Bead : public BaseBead {
    **/
   std::string getLabel() const {
     std::stringstream label;
-    label << molecule_id_.getId() << ":" << getResidueType() << ":"
-          << getType();
+    label << molecule_id_ << ":" << getResidueType() << ":" << getType();
     return label.str();
   };
 
   [[deprecated]] std::string getName() const { return getLabel(); } protected
       : std::vector<int> parent_beads_;
 
-  tools::Name residue_type_;
+  std::string residue_type_;
 
   // Bead label is composed of ResidueNumber:ResidueType:bead_type
-  tools::Name bead_label_;
+  std::string bead_label_;
 
   tools::byte_t symmetry_;
   double charge_;
@@ -341,10 +340,11 @@ class Bead : public BaseBead {
        double m, double q)
       : symmetry_(symmetry), charge_(q), residue_id_(residue_id) {
     setId(id);
-    molecule_id_.setId(molecule_id);
+    molecule_id_ = molecule_id;
     setType(type);
-    residue_type_.setName(residue_type);
-    element_symbol_.setName(element_symbol);
+    residue_type_ = residue_type;
+    ;
+    element_symbol_ = element_symbol;
     setMass(m);
     bead_position_set_ = false;
     bead_velocity_set_ = false;
@@ -359,9 +359,9 @@ class Bead : public BaseBead {
 
     setType(params.get<std::string>(tools::StructureParameter::BeadType));
     residue_id_ = params.get<int>(tools::StructureParameter::ResidueId);
-    molecule_id_.setId(params.get<int>(tools::StructureParameter::MoleculeId));
-    element_symbol_.setName(
-        params.get<std::string>(tools::StructureParameter::Element));
+    molecule_id_ = params.get<int>(tools::StructureParameter::MoleculeId);
+    element_symbol_ =
+        params.get<std::string>(tools::StructureParameter::Element);
     setMass(params.get<double>(tools::StructureParameter::CSG_Mass));
     charge_ = params.get<double>(tools::StructureParameter::CSG_Charge);
     symmetry_ = params.get<tools::byte_t>(tools::StructureParameter::Symmetry);
@@ -380,8 +380,8 @@ inline tools::StructureParameters Bead::getParameters() const {
   params.set(tools::StructureParameter::BeadId, getId());
   params.set(tools::StructureParameter::BeadType, getType());
   params.set(tools::StructureParameter::ResidueId, residue_id_);
-  params.set(tools::StructureParameter::MoleculeId, molecule_id_.getId());
-  params.set(tools::StructureParameter::Element, element_symbol_.getName());
+  params.set(tools::StructureParameter::MoleculeId, molecule_id_);
+  params.set(tools::StructureParameter::Element, element_symbol_);
   params.set(tools::StructureParameter::CSG_Mass, getMass());
   params.set(tools::StructureParameter::CSG_Charge, charge_);
   params.set(tools::StructureParameter::Symmetry, symmetry_);

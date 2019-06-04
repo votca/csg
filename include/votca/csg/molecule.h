@@ -66,8 +66,8 @@ class Molecule : public BaseMolecule<Bead> {
 
   /// constructor
   Molecule(int id, std::string molecule_type) {
-    id_.setId(id);
-    type_.setName(molecule_type);
+    id_ = id;
+    type_ = molecule_type;
   }
 
   friend class Topology;

@@ -41,13 +41,21 @@ template <class T>
 class BaseMolecule : public BeadStructure<T> {
  public:
   /// get the molecule ID
-  int getId() const { return id_.getId(); }
+  int getId() const {
+    assert(id_ != tools::topology_constants::unassigned_molecule_id &&
+           "Cannot get molecule id it has not been assigned.");
+    return id_;
+  }
 
   /// get the name/type of the molecule
-  const std::string &getType() const { return type_.getName(); }
+  const std::string &getType() const {
+    assert(type_ != tools::topology_constants::unassigned_molecule_type &&
+           "Cannot get molecule type it has not been assigned");
+    return type_;
+  }
 
   /// set the name/type of the molecule
-  void setType(const std::string &type) { type_.setName(type); }
+  void setType(const std::string &type) noexcept { type_ = type; }
 
   /**
    * @brief Adds a bead to the base molecule
@@ -106,8 +114,8 @@ class BaseMolecule : public BeadStructure<T> {
   const std::string getBeadName(int id) const;
 
  protected:
-  tools::Identity<int> id_;
-  tools::Name type_;
+  int id_ = tools::topology_constants::unassigned_molecule_id;
+  std::string type_ = tools::topology_constants::unassigned_molecule_type;
 
   std::unordered_map<std::string, std::vector<int>> bead_type_and_ids_;
 };

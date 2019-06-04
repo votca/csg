@@ -181,13 +181,13 @@ void AtomCGConverter::LoadMoleculeStencil(const string &filename) {
   // Update the stencil with the bead info
   cg_mol_and_stencil_.at(cg_mol_type).AddBeadStencils(beads_info);
 
-  // Convert vector to map to be used with ParseMaps
+  // Convert vector to map to be used with ParseBeadMaps
   unordered_map<string, CGBeadStencil> name_and_beads_info;
   for (CGBeadStencil &bead_info : beads_info) {
     name_and_beads_info[bead_info.cg_name_] = bead_info;
   }
 
-  ParseMaps_(options, name_and_beads_info);
+  ParseBeadMaps_(options, name_and_beads_info);
 
   // Update the stencil the relevant interactions
   cg_mol_and_stencil_.at(cg_mol_type)
@@ -268,7 +268,7 @@ vector<CGBeadStencil> AtomCGConverter::ParseBeads_(Property &options_in) {
   return beads_info;
 }
 
-void AtomCGConverter::ParseMaps_(
+void AtomCGConverter::ParseBeadMaps_(
     Property &options_in,
     unordered_map<string, CGBeadStencil> &bead_maps_info) {
 
