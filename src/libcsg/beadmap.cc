@@ -357,7 +357,7 @@ AtomToCGMoleculeMapper &AtomToCGMoleculeMapper::operator=(
 
 void AtomToCGMoleculeMapper::UpdateCGMolecule(
     const Topology &atom_top, Topology &cg_top,
-    CGMolToAtom cgmolid_cgbeadid_atomicbeadids) {
+    CGMolToAtom cgmolid_cgbeadid_atomicbeadids) const {
 
   // First int cg_molecule id
   // map
@@ -383,7 +383,7 @@ void AtomToCGMoleculeMapper::UpdateCGMolecule(
     Bead &cg_bead = cg_top.getBead(cg_bead_id);
     // get the cg bead type
     string cg_bead_type = cg_bead.getType();
-    vector<string> bead_names = bead_type_and_names_[cg_bead_type];
+    vector<string> bead_names = bead_type_and_names_.at(cg_bead_type);
     string bead_name;
     for (const string &name : bead_names) {
       if (expired_beads.count(name) == false) {

@@ -38,48 +38,48 @@ namespace csg {
 /*****************************************************************************
  * Public Facing Methods
  *****************************************************************************/
-AtomCGConverter::AtomCGConverter(vector<string> ignore_molecule_types) {
-  for (string &atomistic_mol_type : ignore_molecule_types) {
-    atomic_mol_types_to_ignore_.insert(atomistic_mol_type);
+AtomCGConverter::AtomCGConverter(vector<string> ignore_mol_types) {
+  for (string &atom_mol_type : ignore_mol_types) {
+    atom_mol_types_to_ignore_.insert(atom_mol_type);
   }
 }
 
 const std::string &AtomCGConverter::getCGMoleculeType(
-    string atom_mol_type) const {
-  assert(atomic_and_cg_molecule_types_.left.count(atom_mol_type) &&
+    const string &atom_mol_type) const {
+  assert(atom_and_cg_mol_types_.left.count(atom_mol_type) &&
          "atomistic molecule is not known");
-  return atomic_and_cg_molecule_types_.left.at(atom_mol_type);
+  return atom_and_cg_mol_types_.left.at(atom_mol_type);
 }
 
 bool AtomCGConverter::AtomisticMoleculeTypeExist(
-    std::string atomistic_mol_type) {
-  return atomic_and_cg_molecule_types_.left.count(atomistic_mol_type);
+    const std::string &atom_mol_type) const {
+  return atom_and_cg_mol_types_.left.count(atom_mol_type);
 }
 
 const std::string &AtomCGConverter::getAtomisticMoleculeType(
-    string cg_mol_type) const {
-  assert(atomic_and_cg_molecule_types_.right.count(cg_mol_type) &&
+    const string &cg_mol_type) const {
+  assert(atom_and_cg_mol_types_.right.count(cg_mol_type) &&
          "cg molecule is not known");
-  return atomic_and_cg_molecule_types_.right.at(cg_mol_type);
+  return atom_and_cg_mol_types_.right.at(cg_mol_type);
 }
 
-Topology AtomCGConverter::Convert(Topology &atomic_top_in) {
+Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
 
   Topology cg_top_out;
-  cg_top_out.CopyBoundaryConditions(atomic_top_in);
-  cg_top_out.setStep(atomic_top_in.getStep());
-  cg_top_out.setTime(atomic_top_in.getTime());
+  cg_top_out.CopyBoundaryConditions(atom_top_in);
+  cg_top_out.setStep(atom_top_in.getStep());
+  cg_top_out.setTime(atom_top_in.getTime());
 
-  for (const Molecule &atomistic_mol : atomic_top_in) {
-    string atomistic_mol_type = atomistic_mol.getType();
-    if (atomic_mol_types_to_ignore_.count(atomistic_mol_type)) {
+  for (const Molecule &atom_mol : atom_top_in) {
+    string atom_mol_type = atom_mol.getType();
+    if (atom_mol_types_to_ignore_.count(atom_mol_type)) {
       continue;
     }
 
-    if (AtomisticMoleculeTypeExist(atomistic_mol_type) == false) {
+    if (AtomisticMoleculeTypeExist(atom_mol_type) == false) {
       cout << "--------------------------------------\n"
-           << "WARNING: unknown molecule \"" << atomistic_mol.getType()
-           << "\" with id " << atomistic_mol.getId() << " in topology" << endl
+           << "WARNING: unknown molecule \"" << atom_mol.getType()
+           << "\" with id " << atom_mol.getId() << " in topology" << endl
            << "molecule will not be mapped to CG representation\n"
            << "Check weather a mapping file for all molecule exists, was "
            << "specified in --cg separated by ; and the ident tag in xml-file "
@@ -88,63 +88,69 @@ Topology AtomCGConverter::Convert(Topology &atomic_top_in) {
       continue;
     }
 
-    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atomistic_mol, cg_top_out,
-                                                    atomic_top_in);
+    //    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atom_mol, cg_top_out,
+    //                                                    atom_top_in);
+    CoarseGrainMolecule_(atom_top_in, cg_top_out, atom_mol);
   }
   cg_top_out.RebuildExclusions();
 
-  Update(atomic_top_in, cg_top_out);
+  Update(atom_top_in, cg_top_out);
 
   return cg_top_out;
 }
 
-void AtomCGConverter::Update(const Topology &atomic_top, Topology &cg_top) {
+void AtomCGConverter::Update(const Topology &atom_top_in,
+                             Topology &cg_top) const {
 
-  assert(atomic_top.getBoxType() == cg_top.getBoxType() &&
+  assert(atom_top_in.getBoxType() == cg_top.getBoxType() &&
          "box types of topology in and out differ");
 
-  cg_top.setStep(atomic_top.getStep());
-  cg_top.setTime(atomic_top.getTime());
-  cg_top.setBox(atomic_top.getBox(), atomic_top.getBoxType());
+  cg_top.setStep(atom_top_in.getStep());
+  cg_top.setTime(atom_top_in.getTime());
+  cg_top.setBox(atom_top_in.getBox(), atom_top_in.getBoxType());
 
   // Cycle the cg molecules
 
   for (const pair<int, map<int, vector<pair<string, int>>>> &cg_mol_with_info :
-       cgmolid_cgbeadid_atomicbeadnames_and_ids_) {
+       cgmolid_cgbeadid_atombeadnames_and_ids_) {
 
-    int molecule_id = cg_mol_with_info.first;
-    string cg_mol_type = cg_top.getMolecule(molecule_id).getType();
-    string atomic_mol_type = atomic_top.getMolecule(molecule_id).getType();
+    int mol_id = cg_mol_with_info.first;
+    string cg_mol_type = cg_top.getMolecule(mol_id).getType();
+    string atom_mol_type = atom_top_in.getMolecule(mol_id).getType();
     // Call the appropriate molecule mapper
-    mol_names_and_maps_.at(atomic_mol_type)
+    mol_names_and_maps_.at(atom_mol_type)
         .at(cg_mol_type)
-        .UpdateCGMolecule(atomic_top, cg_top, cg_mol_with_info);
+        .UpdateCGMolecule(atom_top_in, cg_top, cg_mol_with_info);
   }
 }
 
 // void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-//    const Molecule &atomistic_mol, Topology &cg_top_out, Topology &atom_top) {
+//    const Molecule &atom_mol, Topology &cg_top_out, Topology &atom_top) {
 
-void AtomCGConverter::CoarseGrainMolecule_(const Molecule &atomistic_mol,
-                                           Topology &cg_top_out,
-                                           Topology &atom_top) {
-  string atom_mol_type = atomistic_mol.getType();
-  int molecule_id = atomistic_mol.getId();
+Molecule &AtomCGConverter::CoarseGrainMolecule_(const Topology &atom_top,
+                                                Topology &cg_top_out,
+                                                const Molecule &atom_mol) {
+  string atom_mol_type = atom_mol.getType();
+  const int mol_id = atom_mol.getId();
 
-  assert(cg_top_out.MoleculeExist(molecule_id) == false &&
+  assert(cg_top_out.MoleculeExist(mol_id) == false &&
          "Cannot convert atomistic molecule to cg molecule because the cg "
          "molecule with the specified id already exists");
-  string cg_mol_type = atomic_and_cg_molecule_types_.left.at(atom_mol_type);
+  string cg_mol_type = atom_and_cg_mol_types_.left.at(atom_mol_type);
 
   // returns ids of the cg molecule vector< atomic_bead_name, atomic_bead_id >
-  map<int, vector<pair<string, int>>> cg_beads_to_atomic_beads =
-      CreateMolecule_(cg_mol_type, molecule_id, cg_top_out, atom_top);
+  //  map<int, vector<pair<string, int>>> cg_beads_to_atom_beads =
+  //      CreateMolecule_(cg_mol_type, mol_id, cg_top_out, atom_top);
 
-  cgmolid_cgbeadid_atomicbeadnames_and_ids_[molecule_id] =
-      cg_beads_to_atomic_beads;
+  Molecule &cg_mol = cg_top_out.CreateMolecule(mol_id, cg_mol_type);
+
+  map<int, vector<pair<string, int>>> cg_beads_to_atom_beads =
+      MapAtomicMoleculeToCGMolecule_(atom_top, cg_top_out, mol_id);
+  cgmolid_cgbeadid_atombeadnames_and_ids_.at(mol_id) = cg_beads_to_atom_beads;
+  return cg_mol;
 }
 
-void AtomCGConverter::LoadMoleculeStencil(string filename) {
+void AtomCGConverter::LoadMoleculeStencil(const string &filename) {
 
   Property options;
   load_property_from_xml(options, filename);
@@ -153,17 +159,17 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   // Grab the type of the atomistic molecule
   string atom_mol_type = options.get("cg_molecule.ident").as<string>();
   // Store the types in the bimap
-  atomic_and_cg_molecule_types_.insert(
+  atom_and_cg_mol_types_.insert(
       boost::bimap<string, string>::value_type(atom_mol_type, cg_mol_type));
 
   // Create the stencil
-  cg_molecule_and_stencil_.insert(
+  cg_mol_and_stencil_.insert(
       make_pair(cg_mol_type, CGMoleculeStencil(cg_mol_type, atom_mol_type)));
 
   vector<CGBeadStencil> beads_info =
       ParseBeads_(options.get("cg_molecule.topology"));
   // Update the stencil with the bead info
-  cg_molecule_and_stencil_.at(cg_mol_type).AddBeadStencils(beads_info);
+  cg_mol_and_stencil_.at(cg_mol_type).AddBeadStencils(beads_info);
 
   // Convert vector to map to be used with ParseMaps
   unordered_map<string, CGBeadStencil> name_and_beads_info;
@@ -174,7 +180,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
   ParseMaps_(options, name_and_beads_info);
 
   // Update the stencil the relevant interactions
-  cg_molecule_and_stencil_.at(cg_mol_type)
+  cg_mol_and_stencil_.at(cg_mol_type)
       .AddInteractionStencil(ParseBonded_(options.get("cg_molecule.topology")));
 
   // Create a mapper to map from the atom to the cg molecule
@@ -182,7 +188,7 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
       cg_mol_type, move(AtomToCGMoleculeMapper(atom_mol_type, cg_mol_type))));
 
   vector<string> order_of_beads =
-      cg_molecule_and_stencil_.at(cg_mol_type).getCGBeadNames();
+      cg_mol_and_stencil_.at(cg_mol_type).getCGBeadNames();
   // Initialize the mapper
   mol_names_and_maps_.at(atom_mol_type)
       .at(cg_mol_type)
@@ -191,31 +197,28 @@ void AtomCGConverter::LoadMoleculeStencil(string filename) {
 
 std::unordered_map<int, string>
     AtomCGConverter::MapAtomicBeadIdsToAtomicBeadNames_(
-        string cg_or_atomic_molecule_type, vector<int> bead_ids) {
+        const string &cg_or_atom_mol_type, const vector<int> &bead_ids) const {
 
-  assert(
-      (atomic_and_cg_molecule_types_.left.count(cg_or_atomic_molecule_type) ||
-       atomic_and_cg_molecule_types_.right.count(cg_or_atomic_molecule_type)) &&
-      "Cannot map atomic bead ids to atomic bead names because the molecule "
-      "type is not recognized.");
+  assert((atom_and_cg_mol_types_.left.count(cg_or_atom_mol_type) ||
+          atom_and_cg_mol_types_.right.count(cg_or_atom_mol_type)) &&
+         "Cannot map atomic bead ids to atomic bead names because the molecule "
+         "type is not recognized.");
 
-  string cg_mol_type = cg_or_atomic_molecule_type;
-  if (atomic_and_cg_molecule_types_.left.count(cg_or_atomic_molecule_type)) {
-    cg_mol_type =
-        atomic_and_cg_molecule_types_.left.at(cg_or_atomic_molecule_type);
+  string cg_mol_type = cg_or_atom_mol_type;
+  if (atom_and_cg_mol_types_.left.count(cg_or_atom_mol_type)) {
+    cg_mol_type = atom_and_cg_mol_types_.left.at(cg_or_atom_mol_type);
   }
 
-  return cg_molecule_and_stencil_.at(cg_mol_type)
+  return cg_mol_and_stencil_.at(cg_mol_type)
       .MapAtomicBeadIdsToAtomicBeadNames(bead_ids);
 }
 
 // Must use the cg bead name not the type to do this
 vector<string> AtomCGConverter::getAtomicBeadNamesOfCGBead(
-    string cg_mol_type, string cg_bead_name) {
-  assert(cg_molecule_and_stencil_.count(cg_mol_type) &&
+    const string &cg_mol_type, const string &cg_bead_name) const {
+  assert(cg_mol_and_stencil_.count(cg_mol_type) &&
          "cg molecule type is not known to the atom-to-cg converter");
-  return cg_molecule_and_stencil_.at(cg_mol_type)
-      .getAtomicBeadNames(cg_bead_name);
+  return cg_mol_and_stencil_.at(cg_mol_type).getAtomicBeadNames(cg_bead_name);
 }
 /*****************************************************************************
  * Private Internal Methods
@@ -385,9 +388,9 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(
 // when sorted should line up with the cg beads when they are read sequentially
 // from an .xml file
 //
-map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
-    Molecule *cg_mol, CGMoleculeStencil stencil, Topology &cg_top_out,
-    Topology &atom_top) {
+map<int, vector<pair<string, int>>> AtomCGConverter::MapAtomicBeadsToCGBeads_(
+    const Topology &atom_top, Topology &cg_top_out, Molecule &cg_mol,
+    const CGMoleculeStencil &stencil) const {
 
   map<string, int> cg_bead_name_and_id;
   for (const CGBeadStencil &bead_info : stencil.getBeadStencil()) {
@@ -395,20 +398,20 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
     string bead_type = bead_info.cg_bead_type_;
     Bead &bead = cg_top_out.CreateBead(
         bead_info.cg_symmetry_, bead_type, cg_top_out.BeadCount(),
-        cg_mol->getId(), topology_constants::unassigned_residue_id,
+        cg_mol.getId(), topology_constants::unassigned_residue_id,
         topology_constants::unassigned_residue_type,
         topology_constants::unassigned_element, 0.0, 0.0);
 
     cg_bead_name_and_id[bead_info.cg_name_] = bead.getId();
-    cg_mol->AddBead(bead);
+    cg_mol.AddBead(bead);
   }
 
   // cg_bead_id, vector< atom_name, atom_bead_id >
-  Molecule *atom_mol = &atom_top.getMolecule(cg_mol->getId());
-  vector<int> atom_bead_ids = atom_mol->getBeadIds();
+  const Molecule &atom_mol = atom_top.getMolecule(cg_mol.getId());
+  vector<int> atom_bead_ids = atom_mol.getBeadIds();
   sort(atom_bead_ids.begin(), atom_bead_ids.end());
   unordered_map<int, string> atom_ids_and_names =
-      MapAtomicBeadIdsToAtomicBeadNames_(atom_mol->getType(), atom_bead_ids);
+      MapAtomicBeadIdsToAtomicBeadNames_(atom_mol.getType(), atom_bead_ids);
   vector<int> atom_ids;
   for (auto id_and_name : atom_ids_and_names) {
     atom_ids.push_back(id_and_name.first);
@@ -447,11 +450,11 @@ map<int, vector<pair<string, int>>> AtomCGConverter::CreateBeads_(
 }
 
 void AtomCGConverter::CreateInteractions_(
-    Molecule *cg_mol, CGMoleculeStencil stencil, Topology &cg_top_out,
-    map<int, vector<pair<std::string, int>>> cg_id_and_bead_name_to_id) {
+    Topology &cg_top_out, Molecule &cg_mol,
+    const CGMoleculeStencil &stencil) const {
 
   // Convert to a map of the atomic bead names and their ids
-  vector<int> cg_bead_ids = cg_mol->getBeadIds();
+  vector<int> cg_bead_ids = cg_mol.getBeadIds();
   unordered_map<int, string> bead_ids_and_names =
       stencil.MapCGBeadIdsToCGBeadNames(cg_bead_ids);
   unordered_map<string, int> bead_name_to_id;
@@ -473,37 +476,44 @@ void AtomCGConverter::CreateInteractions_(
       if (interaction_info.type_ == "bond") {
         ic = cg_top_out.CreateInteraction(
             InteractionType::bond, interaction_info.group_, interaction_id,
-            cg_mol->getId(), atoms);
+            cg_mol.getId(), atoms);
       } else if (interaction_info.type_ == "angle") {
         ic = cg_top_out.CreateInteraction(
             InteractionType::angle, interaction_info.group_, interaction_id,
-            cg_mol->getId(), atoms);
+            cg_mol.getId(), atoms);
       } else if (interaction_info.type_ == "dihedral") {
         ic = cg_top_out.CreateInteraction(
             InteractionType::dihedral, interaction_info.group_, interaction_id,
-            cg_mol->getId(), atoms);
+            cg_mol.getId(), atoms);
       } else {
         throw runtime_error("unknown bonded type in map: " +
                             interaction_info.type_);
       }
-      cg_mol->AddInteraction(ic);
+      cg_mol.AddInteraction(ic);
     }
   }
 }
 
 // Should return the id of the cg bead
 // followed by the vector< atom name, atom id>
-map<int, vector<pair<string, int>>> AtomCGConverter::CreateMolecule_(
-    string cg_mol_type, int molecule_id, Topology &cg_top_out,
-    Topology &atom_top) {
 
-  Molecule &cg_mol = cg_top_out.CreateMolecule(molecule_id, cg_mol_type);
-  CGMoleculeStencil &cg_mol_stencil = cg_molecule_and_stencil_.at(cg_mol_type);
+map<int, vector<pair<string, int>>>
+    AtomCGConverter::MapAtomicMoleculeToCGMolecule_(const Topology &atom_top,
+                                                    Topology &cg_top_out,
+                                                    const int &mol_id) {
+  // map<int, vector<pair<string, int>>> AtomCGConverter::CreateMolecule_(
+  //    string cg_mol_type, int mol_id, Topology &cg_top_out,
+  //    Topology &atom_top) {
+
+  Molecule &cg_mol = cg_top_out.getMolecule(mol_id);
+  string cg_mol_type = cg_mol.getType();
+
+  CGMoleculeStencil &cg_mol_stencil = cg_mol_and_stencil_.at(cg_mol_type);
 
   map<int, vector<pair<std::string, int>>> bead_name_to_id =
-      CreateBeads_(&cg_mol, cg_mol_stencil, cg_top_out, atom_top);
+      MapAtomicBeadsToCGBeads_(atom_top, cg_top_out, cg_mol, cg_mol_stencil);
 
-  CreateInteractions_(&cg_mol, cg_mol_stencil, cg_top_out, bead_name_to_id);
+  CreateInteractions_(cg_top_out, cg_mol, cg_mol_stencil);
 
   return bead_name_to_id;
 }
