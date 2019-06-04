@@ -23,6 +23,31 @@ namespace votca {
 namespace csg {
 
 template <class Topology_T>
+double DLPOLYTrajectoryWriter<Topology_T>::formatDistance_(
+    const double &distance) const {
+  return converter_.convert(Topology_T::units::distance_unit, distance_unit) *
+         distance;
+}
+template <class Topology_T>
+double DLPOLYTrajectoryWriter<Topology_T>::formatVelocity_(
+    const double &velocity) const {
+  return converter_.convert(Topology_T::units::velocity_unit, velocity_unit) *
+         velocity;
+}
+
+template <class Topology_T>
+double DLPOLYTrajectoryWriter<Topology_T>::formatForce_(
+    const double &force) const {
+  return converter_.convert(Topology_T::units::force_unit, force_unit) * force;
+}
+
+template <class Topology_T>
+double DLPOLYTrajectoryWriter<Topology_T>::formatTime_(
+    const double &time) const {
+  return converter_.convert(Topology_T::units::time_unit, time_unit) * time;
+}
+
+template <class Topology_T>
 void DLPOLYTrajectoryWriter<Topology_T>::Open(std::string file, bool bAppend)
 // open/create a dlpoly configuration or trajectory file
 // NOTE: allowed file naming - <name>.dlpc or <name>.dlph (convention:
@@ -86,7 +111,6 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
   Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   static int nstep = 1;
   static double dstep = 0.0;
-  const double scale = 10.0;  // nm -> A factor
   int mavecs = 0;
   int mpbct = 0;
   double energy = 0.0;
@@ -108,8 +132,9 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
     Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
       out_ << std::fixed << std::setprecision(10) << std::setw(20)
-           << m(i, 0) * scale << std::setw(20) << m(i, 1) * scale
-           << std::setw(20) << m(i, 2) * scale << std::endl;
+           << formatDistance_(m(i, 0)) << std::setw(20)
+           << formatDistance_(m(i, 1)) << std::setw(20)
+           << formatDistance_(m(i, 2)) << std::endl;
 
   } else {
 
@@ -124,13 +149,13 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
          << conf.getStep() << std::setw(10) << conf.BeadCount() << std::setw(10)
          << mavecs << std::setw(10) << mpbct;
     out_ << std::setprecision(9) << std::setw(12) << dstep << std::setw(12)
-         << conf.getTime() << std::endl;
+         << formatTime_(conf.getTime()) << std::endl;
 
     Eigen::Matrix3d m = conf.getBox();
     for (int i = 0; i < 3; i++)
-      out_ << std::setprecision(12) << std::setw(20) << m(i, 0) * scale
-           << std::setw(20) << m(i, 1) * scale << std::setw(20)
-           << m(i, 2) * scale << std::endl;
+      out_ << std::setprecision(12) << std::setw(20) << formatDistance_(m(i, 0))
+           << std::setw(20) << formatDistance_(m(i, 1)) << std::setw(20)
+           << formatDistance_(m(i, 2)) << std::endl;
   }
 
   for (int i = 0; static_cast<size_t>(i) < conf.BeadCount(); i++) {
@@ -151,9 +176,9 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
 
     // nm -> Angs
     out_ << resetiosflags(std::ios::fixed) << std::setprecision(12)
-         << std::setw(20) << bead.getPos().x() * scale;
-    out_ << std::setw(20) << bead.getPos().y() * scale << std::setw(20)
-         << bead.getPos().z() * scale << std::endl;
+         << std::setw(20) << formatDistance_(bead.getPos().x());
+    out_ << std::setw(20) << formatDistance_(bead.getPos().y()) << std::setw(20)
+         << formatDistance_(bead.getPos().z()) << std::endl;
 
     if (mavecs > 0) {
       if (!bead.HasVel())
@@ -163,9 +188,9 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
 
       // nm -> Angs
       out_ << std::setprecision(12) << std::setw(20)
-           << bead.getVel().x() * scale << std::setw(20);
-      out_ << bead.getVel().y() * scale << std::setw(20)
-           << bead.getVel().z() * scale << std::endl;
+           << formatVelocity_(bead.getVel().x()) << std::setw(20);
+      out_ << formatVelocity_(bead.getVel().y()) << std::setw(20)
+           << formatVelocity_(bead.getVel().z()) << std::endl;
 
       if (mavecs > 1) {
         if (!bead.HasF())
@@ -175,9 +200,9 @@ void DLPOLYTrajectoryWriter<Topology_T>::Write(boost::any conf_any) {
 
         // nm -> Angs
         out_ << std::setprecision(12) << std::setw(20)
-             << bead.getF().x() * scale << std::setw(20);
-        out_ << bead.getF().y() * scale << std::setw(20)
-             << bead.getF().z() * scale << std::endl;
+             << formatForce_(bead.getF().x()) << std::setw(20);
+        out_ << formatForce_(bead.getF().y()) << std::setw(20)
+             << formatForce_(bead.getF().z()) << std::endl;
       }
     }
   }

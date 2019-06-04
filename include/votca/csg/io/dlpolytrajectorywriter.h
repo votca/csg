@@ -25,6 +25,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <iomanip>
 #include <string>
+#include <votca/tools/unitconverter.h>
 
 namespace votca {
 namespace csg {
@@ -63,9 +64,25 @@ class DLPOLYTrajectoryWriter : public TrajectoryWriter {
   }
   bool getIsConfig() { return _isConfig; }
 
+  const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
+  const tools::MassUnit mass_unit = tools::MassUnit::atomic_mass_units;
+  const tools::TimeUnit time_unit = tools::TimeUnit::picoseconds;
+  const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
+  const tools::EnergyUnit energy_unit = tools::EnergyUnit::joules_per_mole;
+  const tools::VelocityUnit velocity_unit =
+      tools::VelocityUnit::angstroms_per_picosecond;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilojoules_per_mole_angstrom;
+
  private:
   std::string _fname;
   bool _isConfig;
+
+  tools::UnitConverter converter_;
+  double formatDistance_(const double& distance) const;
+  double formatVelocity_(const double& velocity) const;
+  double formatForce_(const double& force) const;
+  double formatTime_(const double& time) const;
 };
 
 }  // namespace csg

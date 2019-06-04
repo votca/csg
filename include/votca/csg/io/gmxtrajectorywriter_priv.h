@@ -24,23 +24,23 @@ namespace csg {
 
 template <class Topology_T>
 double GMXTrajectoryWriter<Topology_T>::formatTime(const double &time) {
-  return converter_.convert(Topology_T::time_unit, time_unit) * time;
+  return converter_.convert(Topology_T::units::time_unit, time_unit) * time;
 }
 
 template <class Topology_T>
 double GMXTrajectoryWriter<Topology_T>::formatDistance(const double &distance) {
-  return converter_.convert(Topology_T::distance_unit, distance_unit) *
+  return converter_.convert(Topology_T::units::distance_unit, distance_unit) *
          distance;
 }
 
 template <class Topology_T>
 double GMXTrajectoryWriter<Topology_T>::formatForce(const double &force) {
-  return converter_.convert(Topology_T::force_unit, force_unit) * force;
+  return converter_.convert(Topology_T::units::force_unit, force_unit) * force;
 }
 
 template <class Topology_T>
 double GMXTrajectoryWriter<Topology_T>::formatVelocity(const double &velocity) {
-  return converter_.convert(Topology_T::velocity_unit, velocity_unit) *
+  return converter_.convert(Topology_T::units::velocity_unit, velocity_unit) *
          velocity;
 }
 

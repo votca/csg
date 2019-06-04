@@ -152,10 +152,11 @@ class TemplateTopology {
    *
    * @return true if it does exist, else false
    */
-  bool MoleculeExist(const int molecule_id) const {
+  bool MoleculeExist(const int molecule_id) const noexcept {
     return molecules_map_.count(molecule_id);
   }
 
+  bool BoundaryExist() const noexcept { return bc_ != nullptr; }
   bool BeadExist(const int bead_id) const { return beads_.count(bead_id); }
 
   bool BeadTypeExist(const std::string bead_type) const {
@@ -443,7 +444,7 @@ class TemplateTopology {
   }
 
  protected:
-  std::unique_ptr<BoundaryCondition> bc_;
+  std::unique_ptr<BoundaryCondition> bc_ = nullptr;
 
   BoundaryCondition::eBoxtype autoDetectBoxType_(
       const Eigen::Matrix3d &box) const;
@@ -507,6 +508,8 @@ TemplateTopology<Bead_T, Molecule_T>::~TemplateTopology() {
 template <class Bead_T, class Molecule_T>
 void TemplateTopology<Bead_T, Molecule_T>::CopyBoundaryConditions(
     const TemplateTopology<Bead_T, Molecule_T> &top) {
+  assert(bc_ != nullptr &&
+         "Cannot copy boundary condition it has not been assigned");
   bc_ = top.bc_->Clone();
 }
 

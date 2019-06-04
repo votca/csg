@@ -41,7 +41,8 @@ void PDBReader<Topology_T>::formatElement_(std::string &element_symbol,
 
 template <class Topology_T>
 void PDBReader<Topology_T>::formatDistance_(double &distance) {
-  distance *= converter_.convert(distance_unit, Topology_T::distance_unit);
+  distance *=
+      converter_.convert(distance_unit, Topology_T::units::distance_unit);
 }
 
 template <class Topology_T>

@@ -58,7 +58,8 @@ inline void PDBWriter<Topology_T>::formatResId_(int &resId) noexcept {
 
 template <class Topology_T>
 inline void PDBWriter<Topology_T>::formatPos_(Eigen::Vector3d &pos) {
-  pos *= converter_.convert(Topology_T::distance_unit, this->distance_unit);
+  pos *=
+      converter_.convert(Topology_T::units::distance_unit, this->distance_unit);
 }
 
 template <class Topology_T>

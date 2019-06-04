@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <votca/tools/constants.h>
 #include <votca/tools/property.h>
@@ -66,7 +67,9 @@ const std::string &AtomCGConverter::getAtomisticMoleculeType(
 Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
 
   Topology cg_top_out;
-  cg_top_out.CopyBoundaryConditions(atom_top_in);
+  if (cg_top_out.BoundaryExist()) {
+    cg_top_out.CopyBoundaryConditions(atom_top_in);
+  }
   cg_top_out.setStep(atom_top_in.getStep());
   cg_top_out.setTime(atom_top_in.getTime());
 
@@ -88,10 +91,11 @@ Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
       continue;
     }
 
-    //    ConvertAtomisticMoleculeToCGAndAddToCGTopology_(atom_mol, cg_top_out,
-    //                                                    atom_top_in);
+    cout << "Coarse graining molecule" << endl;
     CoarseGrainMolecule_(atom_top_in, cg_top_out, atom_mol);
+    cout << "Done coarse graining" << endl;
   }
+  cout << "RebuildExclusions" << endl;
   cg_top_out.RebuildExclusions();
 
   Update(atom_top_in, cg_top_out);

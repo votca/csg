@@ -18,17 +18,20 @@
 #pragma once
 #ifndef VOTCA_CSG_DLPTOPOLOGYREADER_PRIV_H
 #define VOTCA_CSG_DLPTOPOLOGYREADER_PRIV_H
+
+#include "../units.h"
 namespace votca {
 namespace csg {
 
 template <class Topology_T>
 double DLPOLYTopologyReader<Topology_T>::formatMass_(const double &mass) {
-  return converter_.convert(mass_unit, Topology_T::mass_unit) * mass;
+  return converter_.convert(mass_unit, Topology_T::units::mass_unit) * mass;
 }
 
 template <class Topology_T>
 double DLPOLYTopologyReader<Topology_T>::formatCharge_(const double &charge) {
-  return converter_.convert(charge_unit, Topology_T::charge_unit) * charge;
+  return converter_.convert(charge_unit, Topology_T::units::charge_unit) *
+         charge;
 }
 
 template <class Topology_T>

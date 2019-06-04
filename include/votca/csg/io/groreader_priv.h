@@ -24,13 +24,13 @@ namespace csg {
 
 template <class Topology_T>
 double GROReader<Topology_T>::formatDistance_(const double &distance) {
-  return converter_.convert(distance_unit, Topology_T::distance_unit) *
+  return converter_.convert(distance_unit, Topology_T::units::distance_unit) *
          distance;
 }
 
 template <class Topology_T>
 double GROReader<Topology_T>::formatVelocity_(const double &velocity) {
-  return converter_.convert(velocity_unit, Topology_T::velocity_unit) *
+  return converter_.convert(velocity_unit, Topology_T::units::velocity_unit) *
          velocity;
 }
 

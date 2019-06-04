@@ -87,7 +87,7 @@ inline void XYZWriter<Topology_T>::formatType(std::string &atomtype) {
 template <class Topology_T>
 inline void XYZWriter<Topology_T>::formatPosition(Eigen::Vector3d &position) {
   position *=
-      converter_.convert(Topology_T::distance_unit, this->distance_unit);
+      converter_.convert(Topology_T::units::distance_unit, this->distance_unit);
 }
 
 template <class Topology_T>

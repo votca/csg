@@ -20,6 +20,7 @@
 #define VOTCA_CSG_DLPOLYTRAJECTORYREADER_H
 
 #include "dlpolytrajectoryreader.h"
+#include <Eigen/Dense>
 #include <boost/any.hpp>
 #include <boost/filesystem/convenience.hpp>
 
@@ -83,10 +84,16 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   const tools::EnergyUnit energy_unit = tools::EnergyUnit::joules_per_mole;
   const tools::VelocityUnit velocity_unit =
       tools::VelocityUnit::angstroms_per_picosecond;
+  const tools::ForceUnit force_unit =
+      tools::ForceUnit::kilojoules_per_mole_angstrom;
 
  private:
   tools::UnitConverter converter_;
-  double formatDistance_(const double &distance);
+  double formatDistance_(const double &distance) const;
+  Eigen::Vector3d formatDistance_(const Eigen::Vector3d &distances) const;
+  Eigen::Vector3d formatVelocity_(const Eigen::Vector3d &velocity) const;
+  Eigen::Vector3d formatForce_(const Eigen::Vector3d &force) const;
+  double formatTime_(const double &time) const;
   std::ifstream _fl;
   std::string _fname;
   bool _first_frame;

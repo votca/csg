@@ -24,7 +24,7 @@ namespace csg {
 
 template <class Topology_T>
 double GROWriter<Topology_T>::formatVelocity_(const double &velocity) {
-  return converter_.convert(Topology_T::velocity_unit, velocity_unit) *
+  return converter_.convert(Topology_T::units::velocity_unit, velocity_unit) *
          velocity;
 }
 
@@ -35,7 +35,7 @@ int GROWriter<Topology_T>::formatId_(const int &id) {
 
 template <class Topology_T>
 double GROWriter<Topology_T>::formatDistance_(const double &distance) {
-  return converter_.convert(Topology_T::distance_unit, distance_unit) *
+  return converter_.convert(Topology_T::units::distance_unit, distance_unit) *
          distance;
 }
 

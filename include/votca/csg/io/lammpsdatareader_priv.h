@@ -27,7 +27,7 @@ namespace csg {
 template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::formatDistance(double &distance) {
   distance *=
-      converter_.convert(this->distance_unit, Topology_T::distance_unit);
+      converter_.convert(this->distance_unit, Topology_T::units::distance_unit);
 }
 
 template <class Topology_T>
@@ -37,12 +37,13 @@ void LAMMPSDataReader<Topology_T>::formatId(int &id) {
 
 template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::formatMass(double &mass) {
-  mass *= converter_.convert(this->mass_unit, Topology_T::mass_unit);
+  mass *= converter_.convert(this->mass_unit, Topology_T::units::mass_unit);
 }
 
 template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::formatCharge(double &charge) {
-  charge *= converter_.convert(this->charge_unit, Topology_T::charge_unit);
+  charge *=
+      converter_.convert(this->charge_unit, Topology_T::units::charge_unit);
 }
 
 template <class Topology_T>

@@ -15,20 +15,20 @@
  *
  */
 
-#include "../../include/votca/csg/topology.h"
+#include "../../include/votca/csg/units.h"
 namespace votca {
 namespace csg {
 
-const tools::DistanceUnit Topology::distance_unit =
+const tools::DistanceUnit Units::distance_unit =
     tools::DistanceUnit::nanometers;
-const tools::MassUnit Topology::mass_unit = tools::MassUnit::atomic_mass_units;
-const tools::TimeUnit Topology::time_unit = tools::TimeUnit::picoseconds;
-const tools::ChargeUnit Topology::charge_unit = tools::ChargeUnit::e;
-const tools::EnergyUnit Topology::energy_unit =
+const tools::MassUnit Units::mass_unit = tools::MassUnit::atomic_mass_units;
+const tools::TimeUnit Units::time_unit = tools::TimeUnit::picoseconds;
+const tools::ChargeUnit Units::charge_unit = tools::ChargeUnit::e;
+const tools::EnergyUnit Units::energy_unit =
     tools::EnergyUnit::kilojoules_per_mole;
-const tools::VelocityUnit Topology::velocity_unit =
+const tools::VelocityUnit Units::velocity_unit =
     tools::VelocityUnit::nanometers_per_picosecond;
-const tools::ForceUnit Topology::force_unit =
+const tools::ForceUnit Units::force_unit =
     tools::ForceUnit::kilojoules_per_mole_nanometer;
 
 }  // namespace csg

@@ -18,14 +18,41 @@
 #pragma once
 #ifndef VOTCA_CSG_DLPOLYTRAJECTORYREADER_PRIV_H
 #define VOTCA_CSG_DLPOLYTRAJECTORYREADER_PRIV_H
+
 namespace votca {
 namespace csg {
 
 template <class Topology_T>
 double DLPOLYTrajectoryReader<Topology_T>::formatDistance_(
-    const double &distance) {
-  return converter_.convert(distance_unit, Topology_T::distance_unit) *
+    const double &distance) const {
+  return converter_.convert(distance_unit, Topology_T::units::distance_unit) *
          distance;
+}
+
+template <class Topology_T>
+Eigen::Vector3d DLPOLYTrajectoryReader<Topology_T>::formatDistance_(
+    const Eigen::Vector3d &distance) const {
+  return converter_.convert(distance_unit, Topology_T::units::distance_unit) *
+         distance;
+}
+
+template <class Topology_T>
+Eigen::Vector3d DLPOLYTrajectoryReader<Topology_T>::formatVelocity_(
+    const Eigen::Vector3d &velocity) const {
+  return converter_.convert(velocity_unit, Topology_T::units::velocity_unit) *
+         velocity;
+}
+
+template <class Topology_T>
+Eigen::Vector3d DLPOLYTrajectoryReader<Topology_T>::formatForce_(
+    const Eigen::Vector3d &force) const {
+  return converter_.convert(force_unit, Topology_T::units::force_unit) * force;
+}
+
+template <class Topology_T>
+double DLPOLYTrajectoryReader<Topology_T>::formatTime_(
+    const double &time) const {
+  return converter_.convert(time_unit, Topology_T::units::time_unit) * time;
 }
 
 template <class Topology_T>
@@ -103,7 +130,7 @@ bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
       0;  // number of 3d vectors per atom = keytrj in DL_POLY manuals
   static int mpbct = 0;   // cell PBC type = imcon in DL_POLY manuals
   static int matoms = 0;  // number of atoms/beads in a frame
-  const double scale = tools::conv::ang2nm;
+  // const double scale = tools::conv::ang2nm;
 
   static int nerrt = 0;
 
@@ -264,7 +291,7 @@ bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
 
       // total time - calculated as product due to differences between DL_POLY
       // versions in HISTORY formats
-      conf.setTime(nstep * dtime);
+      conf.setTime(nstep * formatTime_(dtime));
       conf.setStep(nstep);
 
       if (std::abs(stime - conf.getTime()) > 1.e-8) {
@@ -365,23 +392,22 @@ bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
         tools::Tokenizer tok(line, " \t");
         tok.ConvertToVector<double>(fields);
         // Angs -> nm
-        atom_vecs.col(j) =
-            scale * Eigen::Vector3d(fields[0], fields[1], fields[2]);
+        atom_vecs.col(j) = Eigen::Vector3d(fields[0], fields[1], fields[2]);
       }
 
-      b.setPos(atom_vecs.col(0));
+      b.setPos(formatDistance_(atom_vecs.col(0)));
 #ifdef DEBUG
       std::cout << "Crds from dlpoly file '" << _fname
                 << "' : " << atom_vecs.col(0) << std::endl;
 #endif
       if (navecs > 0) {
-        b.setVel(atom_vecs.col(1));
+        b.setVel(formatVelocity_(atom_vecs.col(1)));
 #ifdef DEBUG
         std::cout << "Vels from dlpoly file '" << _fname
                   << "' : " << atom_vecs.col(1) << std::endl;
 #endif
         if (navecs > 1) {
-          b.setF(atom_vecs.col(2));
+          b.setF(formatForce_(atom_vecs.col(2)));
 #ifdef DEBUG
           std::cout << "Frcs from dlpoly file '" << _fname
                     << "' : " << atom_vecs.col(2) << std::endl;

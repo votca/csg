@@ -24,18 +24,18 @@ namespace csg {
 
 template <class Topology_T>
 double LAMMPSDumpWriter<Topology_T>::formatDistance_(const double &distance) {
-  return converter_.convert(Topology_T::distance_unit, distance_unit) *
+  return converter_.convert(Topology_T::units::distance_unit, distance_unit) *
          distance;
 }
 
 template <class Topology_T>
 double LAMMPSDumpWriter<Topology_T>::formatForce_(const double &force) {
-  return converter_.convert(Topology_T::force_unit, force_unit) * force;
+  return converter_.convert(Topology_T::units::force_unit, force_unit) * force;
 }
 
 template <class Topology_T>
 double LAMMPSDumpWriter<Topology_T>::formatVelocity_(const double &velocity) {
-  return converter_.convert(Topology_T::velocity_unit, velocity_unit) *
+  return converter_.convert(Topology_T::units::velocity_unit, velocity_unit) *
          velocity;
 }
 

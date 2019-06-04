@@ -130,7 +130,8 @@ inline void XYZReader<Topology_T>::formatElement(std::string &element) {
 
 template <class Topology_T>
 inline void XYZReader<Topology_T>::formatDistance(double &dist) {
-  dist *= converter_.convert(this->distance_unit, Topology_T::distance_unit);
+  dist *=
+      converter_.convert(this->distance_unit, Topology_T::units::distance_unit);
 }
 
 template <class Topology_T>
