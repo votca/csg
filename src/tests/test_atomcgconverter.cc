@@ -292,8 +292,10 @@ BOOST_AUTO_TEST_CASE(test_load) {
   // Create an empty topology
   Topology cg_top;
 
+  cout << "Converting top" << endl;
   cg_top = converter.Convert(atom_top);
 
+  cout << "Conversion success" << endl;
   cg_top.setStep(0);
 
   vector<int> molecule_ids = cg_top.getMoleculeIds();

@@ -68,12 +68,18 @@ Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
 
   Topology cg_top_out;
   if (cg_top_out.BoundaryExist()) {
+    cout << "Boundary exists, copying" << endl;
     cg_top_out.CopyBoundaryConditions(atom_top_in);
   }
+  cout << "Setting step" << endl;
   cg_top_out.setStep(atom_top_in.getStep());
+  cout << "Settign time" << endl;
   cg_top_out.setTime(atom_top_in.getTime());
 
+  cout << "Cycling atomic molecules" << endl;
   for (const Molecule &atom_mol : atom_top_in) {
+
+    cout << "Getting atomic molecule type" << endl;
     string atom_mol_type = atom_mol.getType();
     if (atom_mol_types_to_ignore_.count(atom_mol_type)) {
       continue;
@@ -150,7 +156,7 @@ Molecule &AtomCGConverter::CoarseGrainMolecule_(const Topology &atom_top,
 
   map<int, vector<pair<string, int>>> cg_beads_to_atom_beads =
       MapAtomicMoleculeToCGMolecule_(atom_top, cg_top_out, mol_id);
-  cgmolid_cgbeadid_atombeadnames_and_ids_.at(mol_id) = cg_beads_to_atom_beads;
+  cgmolid_cgbeadid_atombeadnames_and_ids_[mol_id] = cg_beads_to_atom_beads;
   return cg_mol;
 }
 
