@@ -43,11 +43,7 @@ class BaseBead {
   virtual ~BaseBead() {}
 
   /// Gets the id of the bead
-  int getId() const {
-    assert(id_ != tools::topology_constants::unassigned_bead_id &&
-           "Cannot get bead id it has not been assigned");
-    return id_;
-  }
+  int getId() const noexcept { return id_; }
 
   /// Sets the id of the bead
   void setId(int id) noexcept { id_ = id; }
