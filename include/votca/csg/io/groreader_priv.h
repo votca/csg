@@ -226,12 +226,6 @@ bool GROReader<Topology_T>::NextFrame(boost::any top_any) {
   }
   top.setBox(box);
 
-  if (_topology) {
-    std::cout
-        << "WARNING: topology created from .gro file, masses and charges are "
-           "wrong!\n";
-  }
-
   return !_fl.eof();
 }
 
