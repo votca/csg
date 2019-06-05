@@ -23,30 +23,6 @@ namespace votca {
 namespace csg {
 
 namespace TopConst = tools::topology_constants;
-/*template <class Topology_T>
-template <class T>
-inline size_t XYZReader<Topology_T>::getContainerSize(T &container) {
-  return container.size();
-}
-
-template <class Topology_T>
-inline size_t XYZReader<Topology_T>::getContainerSize(Topology_T &top) { return
-top.BeadCount(); }*/
-
-/*template <class Topology_T>
-template <bool topology, class T>
-inline void XYZReader<Topology_T>::AddAtom(T &container,
-tools::StructureParameters &params) {
-  // the typedef returns the type of the objects the container holds
-  typedef
-    typename std::iterator_traits<decltype(container.begin())>::value_type
-    atom;
-  Eigen::Vector3d pos2 =
-    params.get<Eigen::Vector3d>(tools::StructureParameter::Position);
-  params.set(tools::StructureParameter::Position, pos2);
-  // container.push_back(atom(id, name, pos2));
-  container.push_back(atom(params));
-}*/
 
 template <class Topology_T>
 template <bool topology>
@@ -101,7 +77,6 @@ bool XYZReader<Topology_T>::ReadTopology(const std::string &file,
         "topology type provided.");
   }
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
-  std::cout << "Cleaning current contents of topology file" << std::endl;
   top.Cleanup();
   top.setStep(0);
 
@@ -138,7 +113,6 @@ template <class Topology_T>
 template <bool topology, class T>
 inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
 
-  std::cout << "In read frame " << std::endl;
   std::string line;
   getline(_fl, line);
   ++_line;
@@ -162,7 +136,6 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
     ++_line;
     // read atoms
 
-    std::cout << "number of atoms " << std::endl;
     for (int bead_id = 0; bead_id < natoms; ++bead_id) {
       getline(_fl, line);
       ++_line;
@@ -214,7 +187,6 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
       params.set(tools::StructureParameter::BeadType, atom_type);
       params.set(tools::StructureParameter::CSG_Position, pos);
 
-      std::cout << "Adding atom " << bead_id << std::endl;
       AddAtom<topology>(container, params);
     }
   }
