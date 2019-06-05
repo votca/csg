@@ -52,11 +52,7 @@ class BaseBead {
   void setMoleculeId(int molecule_id) noexcept { molecule_id_ = molecule_id; }
 
   /// Gets the molecule pointer the bead is attached too
-  int getMoleculeId() const {
-    assert(molecule_id_ != tools::topology_constants::unassigned_molecule_id &&
-           "cannot get molecule id it has not been assigned");
-    return molecule_id_;
-  }
+  int getMoleculeId() const noexcept { return molecule_id_; }
 
   /**
    * get the bead type
