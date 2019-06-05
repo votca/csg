@@ -35,7 +35,7 @@ class TestBead : public Bead {
  public:
   TestBead(){};
   void setSymmetry(byte_t sym) { symmetry_ = sym; }
-  void setElement(string element) { element_symbol_ = element; }
+  void setElement(const string& element) { element_symbol_ = element; }
 };
 
 class TestBeadSphere : public Map_Sphere {

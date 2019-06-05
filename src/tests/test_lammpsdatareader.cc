@@ -123,7 +123,6 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   TopologyReader::RegisterPlugins();
   unique_ptr<TopologyReader> lammpsDataReader =
       TopReaderFactory().Create("test.data");
-  Topology *top_ptr = &top;
   boost::any any_ptr(&top);
   lammpsDataReader->ReadTopology(lammpsdatafilename, any_ptr);
 
