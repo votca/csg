@@ -300,7 +300,7 @@ void AtomCGConverter::ParseBeadMaps_(
 }
 
 void AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
-    string interaction_type, size_t bead_count) const {
+    const string &interaction_type, size_t bead_count) const {
 
   if (interaction_type == "bond") {
     if (bead_count != 2) {

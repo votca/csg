@@ -164,7 +164,7 @@ class AtomCGConverter {
       const std::vector<int> &atom_bead_ids) const;
 
   void CheckThatBeadCountAndInteractionTypeAreConsistent_(
-      std::string interaction_type, size_t bead_count) const;
+      const std::string &interaction_type, size_t bead_count) const;
 
   std::vector<CGBeadStencil> ParseBeads_(tools::Property &options);
 

@@ -32,14 +32,6 @@ namespace csg {
 
 class Topology : public TemplateTopology<Bead, Molecule> {
  public:
-  /*  static const tools::DistanceUnit distance_unit;
-    static const tools::MassUnit mass_unit;
-    static const tools::TimeUnit time_unit;
-    static const tools::ChargeUnit charge_unit;
-    static const tools::EnergyUnit energy_unit;
-    static const tools::VelocityUnit velocity_unit;
-    static const tools::ForceUnit force_unit;*/
-
   typedef const Units units;
   Topology(){};
   ~Topology(){};
