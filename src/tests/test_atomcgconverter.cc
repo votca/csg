@@ -85,10 +85,9 @@ BOOST_AUTO_TEST_CASE(test_load) {
   byte_t atom_bead_sym = 1;
   string mol_type = "propane";
   int bead_id = 1;
-  Molecule* propane_mol;
   for (int mol_id = 1; mol_id < 3; ++mol_id) {
 
-    propane_mol = &atom_top.CreateMolecule(mol_id, mol_type);
+    Molecule& propane_mol = atom_top.CreateMolecule(mol_id, mol_type);
 
     // cout << "Address original of molecule " << endl;
     // cout << "id " << mol_id << " address " << propane_mol << endl;
@@ -99,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     C1.setPos(pos_c1);
     C1.setVel(initialize);
     C1.setF(initialize);
-    propane_mol->AddBead(C1);
+    propane_mol.AddBead(C1);
 
     ++bead_id;
     Bead& C2 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
@@ -109,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     C2.setPos(pos_c2);
     C2.setVel(initialize);
     C2.setF(initialize);
-    propane_mol->AddBead(C2);
+    propane_mol.AddBead(C2);
 
     ++bead_id;
     Bead& C3 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
@@ -119,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     C3.setPos(pos_c3);
     C3.setVel(initialize);
     C3.setF(initialize);
-    propane_mol->AddBead(C3);
+    propane_mol.AddBead(C3);
 
     ++bead_id;
     Bead& H4 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -129,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H4.setPos(pos_h4);
     H4.setVel(vel_h4);
     H4.setF(force_h4);
-    propane_mol->AddBead(H4);
+    propane_mol.AddBead(H4);
 
     ++bead_id;
     Bead& H5 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -139,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H5.setPos(pos_h5);
     H5.setVel(initialize);
     H5.setF(initialize);
-    propane_mol->AddBead(H5);
+    propane_mol.AddBead(H5);
 
     ++bead_id;
     Bead& H6 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -149,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H6.setPos(pos_h6);
     H6.setVel(initialize);
     H6.setF(initialize);
-    propane_mol->AddBead(H6);
+    propane_mol.AddBead(H6);
 
     ++bead_id;
     Bead& H7 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -159,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H7.setPos(pos_h7);
     H7.setVel(initialize);
     H7.setF(initialize);
-    propane_mol->AddBead(H7);
+    propane_mol.AddBead(H7);
 
     ++bead_id;
     Bead& H8 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -169,7 +168,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H8.setPos(pos_h8);
     H8.setVel(initialize);
     H8.setF(initialize);
-    propane_mol->AddBead(H8);
+    propane_mol.AddBead(H8);
 
     ++bead_id;
     Bead& H9 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -179,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H9.setPos(pos_h9);
     H9.setVel(initialize);
     H9.setF(initialize);
-    propane_mol->AddBead(H9);
+    propane_mol.AddBead(H9);
 
     ++bead_id;
     Bead& H10 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
@@ -189,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_load) {
     H10.setPos(pos_h10);
     H10.setVel(initialize);
     H10.setF(initialize);
-    propane_mol->AddBead(H10);
+    propane_mol.AddBead(H10);
 
     ++bead_id;
     Bead& H11 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
