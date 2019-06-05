@@ -142,12 +142,7 @@ bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
     }
     getline(_fl, line);
   }
-  if (read_topology_data_) {
-    std::cout << "WARNING: topology created from .dump file, masses, charges, "
-                 "types, residue names are wrong!\n";
-  }
   return !_fl.eof();
-  ;
 }
 
 template <class Topology_T>
