@@ -30,8 +30,6 @@ inline void PDBWriter<Topology_T>::formatType_(std::string &type) {
 }
 
 template <class Topology_T>
-
-template <class Topology_T>
 inline void PDBWriter<Topology_T>::formatElement_(std::string &element) {
   if (element.compare(tools::topology_constants::unassigned_element) == 0) {
     element = "";
@@ -90,10 +88,9 @@ inline T *PDBWriter<Topology_T>::ptr(T &obj) {
 
 template <class Topology_T>
 template <typename T>
-inline void PDBWriter::WriteBox(const T &cont) {
+inline void PDBWriter<Topology_T>::WriteBox(const T &cont) {
   Eigen::Matrix3d box = cont.getBox();
-  box *= converter_.convert(Topology_T::units::distance_unit,
-                            cont::units::distance_unit);
+  box *= converter_.convert(T::units::distance_unit, distance_unit);
   boost::format boxfrmt("CRYST1%1$9.3f%2$9.3f%3$9.3f%4$7.2f%5$7.2f%6$7.2f\n");
   double a = box.col(0).norm();
   double b = box.col(1).norm();
@@ -104,7 +101,7 @@ inline void PDBWriter::WriteBox(const T &cont) {
       180 / tools::conv::Pi * std::acos(box.col(0).dot(box.col(2)) / (a * c));
   double gamma =
       180 / tools::conv::Pi * std::acos(box.col(0).dot(box.col(1)) / (a * b));
-  _out << boxfrmt % a % b % c % alpha % beta % gamma;
+  out_ << boxfrmt % a % b % c % alpha % beta % gamma;
 }
 
 template <class Topology_T>
@@ -174,7 +171,8 @@ void PDBWriter<Topology_T>::Write(boost::any conf_any) {
   Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   if (out_.is_open()) {
 
-    WriteHeader("Frame: " + std::to_string(conf.getStep()) + " Time: " + std::to_string(conf.getTime() );
+    WriteHeader("Frame: " + std::to_string(conf.getStep()) +
+                " Time: " + std::to_string(conf.getTime()));
 
     WriteBox(conf);
     out_ << boost::format("MODEL     %1$4d\n") % (conf.getStep() + 1)
