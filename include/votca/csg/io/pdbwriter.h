@@ -56,7 +56,8 @@ class PDBWriter : public TrajectoryWriter {
 
   void WriteHeader(std::string header);
 
-  void WriteBox(const Eigen::Matrix3d &box);
+  template <class T>
+  void WriteBox(const T &cont);
 
   const tools::DistanceUnit distance_unit = tools::DistanceUnit::angstroms;
 
