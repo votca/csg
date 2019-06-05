@@ -299,38 +299,27 @@ void AtomCGConverter::ParseBeadMaps_(
   }
 }
 
-void AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
-    const string &interaction_type, size_t bead_count) const {
+bool AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
+    const string &interaction_type, const size_t &bead_count) const {
 
   if (interaction_type == "bond") {
     if (bead_count != 2) {
-      throw runtime_error(
-          "Error interaction type is specified as bond but"
-          " there are not exactly two atoms associated with the bond");
+      return false;
     }
-    return;
   } else if (interaction_type == "angle") {
     if (bead_count != 3) {
-      throw runtime_error(
-          "Error interaction type is specified as angle "
-          "but there are not exactly three atoms associated with the bond");
+      return false;
     }
-    return;
   } else if (interaction_type == "dihedral") {
     if (bead_count != 4) {
-      throw runtime_error(
-          "Error interaction type is specified as dihedral"
-          " but there are not exactly four atoms associated with the bond");
+      return false;
     }
-    return;
   } else if (interaction_type == "improper") {
-    throw runtime_error(
-        "Error currently the improper interaction type is not "
-        "supported.");
+    return false;
   } else {
-    throw runtime_error(string("Error the specified interaction type ") +
-                        interaction_type + string(" is not known."));
+    return false;
   }
+  return true;
 }
 
 vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(
@@ -376,8 +365,9 @@ vector<CGInteractionStencil> AtomCGConverter::ParseBonded_(
           interaction_info.type_ = "dihedral";
         }
 
-        CheckThatBeadCountAndInteractionTypeAreConsistent_(
-            (*bond)->name(), interaction_info.bead_names_.size());
+        assert(CheckThatBeadCountAndInteractionTypeAreConsistent_(
+                   (*bond)->name(), interaction_info.bead_names_.size()) &&
+               "Consistency check failed,");
 
         all_interactions_info.push_back(interaction_info);
       }
