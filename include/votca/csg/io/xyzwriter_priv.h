@@ -71,7 +71,6 @@ inline void XYZWriter<Topology_T>::Write(boost::any conf_any) {
 
   WriteHeader(header, getAtomCount(top));
   for (auto &container : top) {
-    std::cout << "Writing container" << std::endl;
     WriteContainer_(container);
   }
 }
@@ -110,10 +109,7 @@ inline void XYZWriter<Topology_T>::WriteContainer_(T &container) {
 
   boost::format fmter("%1$s%2$10.5f%3$10.5f%4$10.5f\n");
   std::vector<int> ids = container.getBeadIds();
-  std::cout << "Number of bead ids " << ids.size() << " in molecule "
-            << container.getId() << std::endl;
   for (const int &id : ids) {
-    std::cout << "getting bead id " << id << std::endl;
     auto &atom_ptr = container.getBead(id);
     tools::StructureParameters params = atom_ptr.getParameters();
     Eigen::Vector3d r =
