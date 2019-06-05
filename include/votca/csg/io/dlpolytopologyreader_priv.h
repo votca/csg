@@ -143,11 +143,6 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
   }
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
 
-  const char *WhiteSpace = " \t";
-
-  int matoms = 0;
-  int natoms = 0;
-
   std::ifstream fl;
   boost::filesystem::path filepath(file.c_str());
 
@@ -170,6 +165,7 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
     throw std::runtime_error("Error on opening dlpoly file '" + _fname + "'");
   } else {
 
+    const char *WhiteSpace = " \t";
     line = _NextKeyline(fl, WhiteSpace);  // read title line and skip it
     line = _NextKeyline(fl, WhiteSpace);  // read next directive line
     boost::to_upper(line);
@@ -198,6 +194,8 @@ bool DLPOLYTopologyReader<Topology_T>::ReadTopology(const std::string &file,
 
     std::string mol_name;
 
+    int natoms = 0;
+    int matoms = 0;
     for (int nmol_type = 0; nmol_type < nmol_types; nmol_type++) {
 
       mol_name = _NextKeyline(fl, WhiteSpace);
