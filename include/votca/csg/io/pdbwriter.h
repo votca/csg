@@ -30,7 +30,6 @@
 #include <votca/tools/constants.h>
 #include <votca/tools/structureparameters.h>
 #include <votca/tools/unitconverter.h>
-
 namespace votca {
 namespace csg {
 

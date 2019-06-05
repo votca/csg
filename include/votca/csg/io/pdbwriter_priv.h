@@ -19,6 +19,8 @@
 #ifndef VOTCA_CSG_PDBWRITER_PRIV_H
 #define VOTCA_CSG_PDBWRITER_PRIV_H
 
+#include "../boundarycondition.h"
+
 namespace votca {
 namespace csg {
 
@@ -89,19 +91,24 @@ inline T *PDBWriter<Topology_T>::ptr(T &obj) {
 template <class Topology_T>
 template <typename T>
 inline void PDBWriter<Topology_T>::WriteBox(const T &cont) {
-  Eigen::Matrix3d box = cont.getBox();
-  box *= converter_.convert(T::units::distance_unit, distance_unit);
-  boost::format boxfrmt("CRYST1%1$9.3f%2$9.3f%3$9.3f%4$7.2f%5$7.2f%6$7.2f\n");
-  double a = box.col(0).norm();
-  double b = box.col(1).norm();
-  double c = box.col(2).norm();
-  double alpha =
-      180 / tools::conv::Pi * std::acos(box.col(1).dot(box.col(2)) / (b * c));
-  double beta =
-      180 / tools::conv::Pi * std::acos(box.col(0).dot(box.col(2)) / (a * c));
-  double gamma =
-      180 / tools::conv::Pi * std::acos(box.col(0).dot(box.col(1)) / (a * b));
-  out_ << boxfrmt % a % b % c % alpha % beta % gamma;
+  if (cont.BoundaryExist()) {
+    if (cont.getBoxType() != BoundaryCondition::eBoxtype::typeOpen) {
+      Eigen::Matrix3d box = cont.getBox();
+      box *= converter_.convert(T::units::distance_unit, distance_unit);
+      boost::format boxfrmt(
+          "CRYST1%1$9.3f%2$9.3f%3$9.3f%4$7.2f%5$7.2f%6$7.2f\n");
+      double a = box.col(0).norm();
+      double b = box.col(1).norm();
+      double c = box.col(2).norm();
+      double alpha = 180 / tools::conv::Pi *
+                     std::acos(box.col(1).dot(box.col(2)) / (b * c));
+      double beta = 180 / tools::conv::Pi *
+                    std::acos(box.col(0).dot(box.col(2)) / (a * c));
+      double gamma = 180 / tools::conv::Pi *
+                     std::acos(box.col(0).dot(box.col(1)) / (a * b));
+      out_ << boxfrmt % a % b % c % alpha % beta % gamma;
+    }
+  }
 }
 
 template <class Topology_T>
