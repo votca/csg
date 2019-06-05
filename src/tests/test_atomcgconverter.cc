@@ -89,8 +89,6 @@ BOOST_AUTO_TEST_CASE(test_load) {
 
     Molecule& propane_mol = atom_top.CreateMolecule(mol_id, mol_type);
 
-    // cout << "Address original of molecule " << endl;
-    // cout << "id " << mol_id << " address " << propane_mol << endl;
     Bead& C1 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
                                    topology_constants::unassigned_residue_id,
                                    topology_constants::unassigned_residue_type,
@@ -291,10 +289,8 @@ BOOST_AUTO_TEST_CASE(test_load) {
   // Create an empty topology
   Topology cg_top;
 
-  cout << "Converting top" << endl;
   cg_top = converter.Convert(atom_top);
 
-  cout << "Conversion success" << endl;
   cg_top.setStep(0);
 
   vector<int> molecule_ids = cg_top.getMoleculeIds();

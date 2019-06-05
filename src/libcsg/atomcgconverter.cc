@@ -68,18 +68,13 @@ Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
 
   Topology cg_top_out;
   if (cg_top_out.BoundaryExist()) {
-    cout << "Boundary exists, copying" << endl;
     cg_top_out.CopyBoundaryConditions(atom_top_in);
   }
-  cout << "Setting step" << endl;
   cg_top_out.setStep(atom_top_in.getStep());
-  cout << "Settign time" << endl;
   cg_top_out.setTime(atom_top_in.getTime());
 
-  cout << "Cycling atomic molecules" << endl;
   for (const Molecule &atom_mol : atom_top_in) {
 
-    cout << "Getting atomic molecule type" << endl;
     string atom_mol_type = atom_mol.getType();
     if (atom_mol_types_to_ignore_.count(atom_mol_type)) {
       continue;
@@ -97,11 +92,8 @@ Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
       continue;
     }
 
-    cout << "Coarse graining molecule" << endl;
     CoarseGrainMolecule_(atom_top_in, cg_top_out, atom_mol);
-    cout << "Done coarse graining" << endl;
   }
-  cout << "RebuildExclusions" << endl;
   cg_top_out.RebuildExclusions();
 
   Update(atom_top_in, cg_top_out);
@@ -300,7 +292,7 @@ void AtomCGConverter::ParseBeadMaps_(
 }
 
 bool AtomCGConverter::CheckThatBeadCountAndInteractionTypeAreConsistent_(
-    const string &interaction_type, const size_t &bead_count) const {
+    const string &interaction_type, const size_t &bead_count) const noexcept {
 
   if (interaction_type == "bond") {
     if (bead_count != 2) {

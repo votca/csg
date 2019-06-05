@@ -36,11 +36,9 @@ class TrajectoryWriter {
   virtual ~TrajectoryWriter() {}
 
   virtual void Open(std::string file, bool bAppend = false) {
-    std::cout << "Calling open" << std::endl;
     if (bAppend) {
       out_.open(file, std::ios_base::app);
     } else {
-      std::cout << "And opening " << std::endl;
       out_.open(file);
     }
   }

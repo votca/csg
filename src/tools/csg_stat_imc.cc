@@ -59,14 +59,12 @@ void Imc::Initialize() {
     i->_is_bonded = false;
   }
 
-  cout << "Adding bonded interaction " << endl;
   // initialize bonded structures
   for (Property *prop : _bonded) {
     interaction_t *i = AddInteraction(prop);
     i->_is_bonded = true;
   }
 
-  cout << "Initialize groups" << endl;
   // initialize the group structures
   if (_do_imc) InitializeGroups();
 };
@@ -169,14 +167,12 @@ Imc::interaction_t *Imc::AddInteraction(Property *p) {
     group = "none";
   }
   size_t index = _interactions.size();
-  cout << "index " << index << endl;
   unique_ptr<interaction_t> unique_interaction =
       unique_ptr<interaction_t>(new interaction_t);
   getGroup(group)->_interactions.push_back(move(unique_interaction));
   // getGroup(group)->_interactions.push_back(
   //   unique_ptr<interaction_t>(new interaction_t));
 
-  cout << "Adding to map " << endl;
   _interactions[name] = (getGroup(group)->_interactions.back()).get();
   interaction_t *i = _interactions[name];
 
@@ -203,8 +199,6 @@ Imc::interaction_t *Imc::AddInteraction(Property *p) {
   if (i->_force) {
     i->_average_force.Initialize(i->_min, i->_max, n);
   }
-  cout << "Interaction " << endl;
-  cout << i->_index << " " << i->_step << " " << i->_min << endl;
   return i;
 }
 
@@ -457,14 +451,10 @@ void Imc::Worker::DoBonded(Topology *top) {
 
 // returns a group, creates it if doesn't exist
 Imc::group_t *Imc::getGroup(const string &name) {
-  cout << "calling getgroup" << endl;
   if (_groups.count(name) == 0) {
-    cout << "Creating new group" << endl;
     _groups[name] = unique_ptr<group_t>(new group_t);
   }
-  cout << "Got the group" << endl;
   return _groups[name].get();
-  // return (*iter).second.get();
 }
 
 // initialize the groups after interactions are added

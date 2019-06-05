@@ -49,7 +49,6 @@ void BondedStatistics::EvalConfiguration(Topology *conf, Topology *conv_atom) {
         conf->getBeadPositions(bead_ids);
     double value =
         (*ia)->EvaluateVar(*(conf->getBoundaryCondition()), bead_positions);
-    cout << value << endl;
     (*is)->push_back(value);
   }
 }
