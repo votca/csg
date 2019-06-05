@@ -41,18 +41,10 @@ template <class T>
 class BaseMolecule : public BeadStructure<T> {
  public:
   /// get the molecule ID
-  int getId() const {
-    assert(id_ != tools::topology_constants::unassigned_molecule_id &&
-           "Cannot get molecule id it has not been assigned.");
-    return id_;
-  }
+  int getId() const noexcept { return id_; }
 
   /// get the name/type of the molecule
-  const std::string &getType() const {
-    assert(type_ != tools::topology_constants::unassigned_molecule_type &&
-           "Cannot get molecule type it has not been assigned");
-    return type_;
-  }
+  const std::string &getType() const noexcept { return type_; }
 
   /// set the name/type of the molecule
   void setType(const std::string &type) noexcept { type_ = type; }
