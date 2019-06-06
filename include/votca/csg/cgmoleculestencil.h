@@ -190,7 +190,8 @@ class CGMoleculeStencil {
    *
    * @return vector of strings containing the atomic bead names
    */
-  std::vector<std::string> getAtomicBeadNames(std::string cg_bead_name) const;
+  std::vector<std::string> getAtomicBeadNames(
+      const std::string &cg_bead_name) const;
 
   /**
    * @brief Returns the cg bead names in the molecule
@@ -205,7 +206,7 @@ class CGMoleculeStencil {
    *
    * @return coarse grained bead name
    */
-  std::string getCGBeadName(std::string atom_bead_name) const;
+  std::string getCGBeadName(const std::string &atom_bead_name) const;
 
   void AddInteractionStencil(
       const std::vector<CGInteractionStencil> &interaction_info);

@@ -92,7 +92,7 @@ vector<string> CGMoleculeStencil::getCGBeadNames() const {
 }
 
 vector<string> CGMoleculeStencil::getAtomicBeadNames(
-    string cg_bead_name) const {
+    const string &cg_bead_name) const {
   vector<string> atom_names;
   std::pair<multi_bimap::left_const_iterator, multi_bimap::left_const_iterator>
       begin_and_end = cg_and_atom_names_.left.equal_range(cg_bead_name);
@@ -103,7 +103,7 @@ vector<string> CGMoleculeStencil::getAtomicBeadNames(
   return atom_names;
 }
 
-string CGMoleculeStencil::getCGBeadName(string atom_bead_name) const {
+string CGMoleculeStencil::getCGBeadName(const string &atom_bead_name) const {
   return cg_and_atom_names_.right.at(atom_bead_name);
 }
 
