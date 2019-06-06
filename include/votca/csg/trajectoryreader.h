@@ -40,7 +40,7 @@ class TrajectoryReader {
  public:
   virtual ~TrajectoryReader() {}
   /// open a trajectory file
-  virtual bool Open(const std::string &file){};
+  virtual bool Open(const std::string &file) { return false; };
 
   virtual void Close(){};
 

@@ -189,7 +189,6 @@ void Map_Ellipsoid::UpdateCGBead(const BoundaryCondition *boundaries,
   bool bVel, bF;
   bVel = bF = false;
   double sum_of_atomistic_mass = 0;
-  Eigen::Vector3d sum_of_atomistic_pos = Eigen::Vector3d::Zero();
   Eigen::Vector3d weighted_sum_of_atomistic_pos = Eigen::Vector3d::Zero();
   Eigen::Vector3d weighted_sum_of_atomistic_forces = Eigen::Vector3d::Zero();
   Eigen::Vector3d weighted_sum_of_atomistic_vel = Eigen::Vector3d::Zero();

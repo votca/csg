@@ -28,6 +28,20 @@ void PDBReader<Topology_T>::formatId_(int &id) {
 }
 
 template <class Topology_T>
+bool PDBReader<Topology_T>::Open(const std::string &file) {
+  _fl.open(file.c_str());
+  if (!_fl.is_open())
+    throw std::ios_base::failure("Error on open pdb trajectory file: " + file);
+  _fname = file;
+  return true;
+}
+
+template <class Topology_T>
+void PDBReader<Topology_T>::Close(const std::string &file) {
+  _fl.close();
+}
+
+template <class Topology_T>
 void PDBReader<Topology_T>::formatElement_(std::string &element_symbol,
                                            const std::string &atom_type) {
   if (!elements_.isEleShort(element_symbol)) {
@@ -188,7 +202,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
       int at1 = boost::lexical_cast<int>(atm1);
       formatId_(at1);
 
-      int index = 0;
+      size_t index = 0;
       while (index < bonded_atms.size()) {
 
         // Atom ids are stored internally starting at 0 but are stored in pdb
@@ -496,7 +510,7 @@ bool PDBReader<Topology_T>::NextFrame(boost::any top_any) {
 
       int atm_id1 = bond_pair.at(0);
       int bond_index = 1;
-      while (bond_index < bond_pair.size()) {
+      while (bond_index < static_cast<int>(bond_pair.size())) {
         int atm_id2 = bond_pair.at(bond_index);
 
         // Should be able to just look at one of the atoms the bond is attached

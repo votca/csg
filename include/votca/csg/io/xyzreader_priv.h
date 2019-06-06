@@ -136,7 +136,7 @@ inline bool XYZReader<Topology_T>::ReadFrame(T &container) {
     ++_line;
     // read atoms
 
-    for (int bead_id = 0; bead_id < natoms; ++bead_id) {
+    for (int bead_id = 0; bead_id < static_cast<int>(natoms); ++bead_id) {
       getline(_fl, line);
       ++_line;
 

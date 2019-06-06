@@ -49,6 +49,9 @@ class PDBReader : public csg::TopologyReader, public csg::TrajectoryReader {
   PDBReader() {}
   /// Destructor
   ~PDBReader() {}
+
+  bool Open(const std::string &file);
+  void Close();
   /// read in the first frame
   bool FirstFrame(boost::any top);
   /// read in the next frame
