@@ -32,12 +32,11 @@ bool PDBReader<Topology_T>::Open(const std::string &file) {
   _fl.open(file.c_str());
   if (!_fl.is_open())
     throw std::ios_base::failure("Error on open pdb trajectory file: " + file);
-  _fname = file;
   return true;
 }
 
 template <class Topology_T>
-void PDBReader<Topology_T>::Close(const std::string &file) {
+void PDBReader<Topology_T>::Close() {
   _fl.close();
 }
 
