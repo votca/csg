@@ -71,7 +71,7 @@ class BeadStructure {
   /**
    * \brief returns the number of beads in the bead structure
    **/
-  size_t BeadCount() const { return beads_.size(); }
+  size_t BeadCount() const noexcept { return beads_.size(); }
 
   /**
    * \brief add a bead to the bead structure
@@ -100,7 +100,7 @@ class BeadStructure {
    * A bead cannot be connected to itself. It also may not be connected to a
    * bead that has not yet been added to the structure.
    **/
-  void ConnectBeads(int bead1_id, int bead2_id);
+  void ConnectBeads(const int &bead1_id, const int &bead2_id);
 
   /**
    * \brief Return a vector of all the beads neighboring the bead_id
@@ -223,7 +223,7 @@ void BeadStructure<T>::AddBead(T &bead) {
 }
 
 template <class T>
-void BeadStructure<T>::ConnectBeads(int bead1_id, int bead2_id) {
+void BeadStructure<T>::ConnectBeads(const int &bead1_id, const int &bead2_id) {
   if (!(beads_.count(bead1_id)) || !(beads_.count(bead2_id))) {
     std::string err =
         "Cannot connect beads in bead structure that do not exist";
