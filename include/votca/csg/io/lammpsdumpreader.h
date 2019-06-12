@@ -69,7 +69,7 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
       tools::EnergyUnit::kilocalories_per_mole;
   const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
   const tools::ForceUnit force_unit =
-      tools::ForceUnit::kilocalories_per_mole_ansgtrom;
+      tools::ForceUnit::kilocalories_per_mole_angstrom;
   const tools::VelocityUnit velocity_unit =
       tools::VelocityUnit::angstroms_per_femtosecond;
 

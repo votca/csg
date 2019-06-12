@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   for (size_t i = 0; i < atom_forces_file.size(); ++i) {
     for (size_t j = 0; j < atom_forces_file.at(0).size(); ++j) {
       atom_forces_file.at(i).at(j) *=
-          converter.convert(ForceUnit::kilocalories_per_mole_ansgtrom,
+          converter.convert(ForceUnit::kilocalories_per_mole_angstrom,
                             ForceUnit::kilojoules_per_mole_nanometer);
     }
   }

@@ -70,7 +70,7 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
       tools::EnergyUnit::kilocalories_per_mole;
   const tools::ChargeUnit charge_unit = tools::ChargeUnit::e;
   const tools::ForceUnit force_unit =
-      tools::ForceUnit::kilocalories_per_mole_ansgtrom;
+      tools::ForceUnit::kilocalories_per_mole_angstrom;
 
  private:
   std::ifstream fl_;
