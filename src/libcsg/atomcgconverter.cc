@@ -74,7 +74,6 @@ Topology AtomCGConverter::Convert(const Topology &atom_top_in) {
   cg_top_out.setTime(atom_top_in.getTime());
 
   for (const Molecule &atom_mol : atom_top_in) {
-
     string atom_mol_type = atom_mol.getType();
     if (atom_mol_types_to_ignore_.count(atom_mol_type)) {
       continue;
@@ -119,15 +118,13 @@ void AtomCGConverter::Update(const Topology &atom_top_in,
     int mol_id = cg_mol_with_info.first;
     string cg_mol_type = cg_top.getMolecule(mol_id).getType();
     string atom_mol_type = atom_top_in.getMolecule(mol_id).getType();
+
     // Call the appropriate molecule mapper
     mol_names_and_maps_.at(atom_mol_type)
         .at(cg_mol_type)
         .UpdateCGMolecule(atom_top_in, cg_top, cg_mol_with_info);
   }
 }
-
-// void AtomCGConverter::ConvertAtomisticMoleculeToCGAndAddToCGTopology_(
-//    const Molecule &atom_mol, Topology &cg_top_out, Topology &atom_top) {
 
 Molecule &AtomCGConverter::CoarseGrainMolecule_(const Topology &atom_top,
                                                 Topology &cg_top_out,

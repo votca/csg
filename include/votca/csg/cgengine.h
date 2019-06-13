@@ -60,7 +60,7 @@ class CGEngine {
    * positions vectors and forces of the coarse grained representation
    */
   std::unique_ptr<AtomCGConverter> PopulateCGTopology(
-      Topology& atomistic_top_in, Topology& cg_top);
+      const Topology& atomistic_top_in, Topology& cg_top);
 
   /**
    * \brief Adds molecules that are to be ignored during the mapping process

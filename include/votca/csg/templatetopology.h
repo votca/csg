@@ -523,9 +523,11 @@ void TemplateTopology<Bead_T, Molecule_T>::Copy(
   beads_ = top.beads_;
 
   molecules_.resize(top.molecules_.size());
+  size_t index = 0;
   for (auto &molecule : top.molecules_) {
-    molecules_.push_back(molecule);
-    molecules_map_[molecule.getId()] = &(molecules_.back());
+    molecules_.at(index) = molecule;
+    molecules_map_[molecule.getId()] = &(molecules_.at(index));
+    ++index;
   }
 
   bc_ = top.bc_->Clone();

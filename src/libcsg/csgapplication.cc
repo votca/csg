@@ -329,7 +329,6 @@ void CsgApplication::Run(void) {
             cg.PopulateCGTopology(myWorker->_top, myWorker->_top_cg);
       }
     }
-
     //////////////////////////////////////////////////
     // Proceed to first frame of interest
     //////////////////////////////////////////////////

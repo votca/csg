@@ -367,14 +367,14 @@ void AtomToCGMoleculeMapper::UpdateCGMolecule(
 
   // Grab the correct cg molecule
   int cg_mol_id = cgmolid_cgbeadid_atomicbeadids.first;
-  Molecule *cg_mol = &cg_top.getMolecule(cg_mol_id);
+  Molecule &cg_mol = cg_top.getMolecule(cg_mol_id);
 
   // Ensure that the type molecule type is correct
-  assert(cg_mol->getType() == cg_molecule_type_ &&
+  assert(cg_mol.getType() == cg_molecule_type_ &&
          "Cannot convert to the molecule  is not of the correct type");
 
   // Cycle throught the cg beads in a cg molecule
-  vector<int> cg_bead_ids = cg_mol->getBeadIds();
+  vector<int> cg_bead_ids = cg_mol.getBeadIds();
   sort(cg_bead_ids.begin(), cg_bead_ids.end());
   // Beads that have already been applied
   unordered_set<string> expired_beads;

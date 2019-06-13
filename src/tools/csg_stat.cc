@@ -23,7 +23,6 @@
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/version.h>
 
-// using namespace votca::tools;
 using namespace std;
 using namespace votca::csg;
 using namespace votca::tools;

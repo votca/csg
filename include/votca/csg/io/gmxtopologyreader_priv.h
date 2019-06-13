@@ -83,6 +83,8 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
   size_t nmolblock = mtop.nmolblock;
 #endif
 
+  int internal_atom_id = 0;
+  int residue_offset = 0;
   for (size_t iblock = 0; iblock < nmolblock; ++iblock) {
     gmx_moltype_t *mol = &(mtop.moltype[mtop.molblock[iblock].type]);
 
@@ -107,10 +109,16 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
       size_t natoms_mol = mtop.molblock[iblock].natoms_mol;
 #endif
       // read the atoms
+      bool assign_atom_ids_internally = false;
+      if (natoms_mol > 0) {
+        if (atoms->atom[0].atomnumber ==
+            tools::topology_constants::unassigned_bead_id) {
+          assign_atom_ids_internally = true;
+        }
+      }
+      std::vector<int> number_unique_residues;
       for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
         t_atom *a = &(atoms->atom[iatom]);
-        std::string residue_name = *(atoms->resinfo[iatom].name);
-
         std::string bead_type = *(atoms->atomtype[iatom]);
 
         std::string element = formatElement_(bead_type);
@@ -120,15 +128,35 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
         params.set(tools::StructureParameter::CSG_Mass, formatMass_(a->m));
         params.set(tools::StructureParameter::CSG_Charge, formatCharge_(a->q));
         params.set(tools::StructureParameter::Element, element);
-        params.set(tools::StructureParameter::BeadId, a->atomnumber);
+        if (assign_atom_ids_internally) {
+          params.set(tools::StructureParameter::BeadId,
+                     static_cast<int>(internal_atom_id));
+          ++internal_atom_id;
+        } else {
+          params.set(tools::StructureParameter::BeadId,
+                     static_cast<int>(a->atomnumber));
+        }
+        if (a->resind == tools::topology_constants::unassigned_residue_id) {
+          params.set(tools::StructureParameter::ResidueType,
+                     tools::topology_constants::unassigned_residue_type);
+        } else {
+          number_unique_residues.push_back(a->resind);
+          std::string residue_name = *(atoms->resinfo[a->resind].name);
+          params.set(tools::StructureParameter::ResidueType, residue_name);
+        }
         params.set(tools::StructureParameter::BeadType, bead_type);
-        params.set(tools::StructureParameter::ResidueId, a->resind);
-        params.set(tools::StructureParameter::ResidueType, residue_name);
-        params.set(tools::StructureParameter::MoleculeId, mi.getId());
+
+        params.set(tools::StructureParameter::ResidueId,
+                   static_cast<int>(residue_offset + a->resind));
+        params.set(tools::StructureParameter::MoleculeId,
+                   static_cast<int>(mi.getId()));
         typename Topology_T::bead_t &bead = top.CreateBead(params);
         mi.AddBead(bead);
       }
-
+      number_unique_residues.erase(
+          unique(number_unique_residues.begin(), number_unique_residues.end()),
+          number_unique_residues.end());
+      residue_offset += static_cast<int>(number_unique_residues.size());
       // add exclusions
       for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
         // read exclusions

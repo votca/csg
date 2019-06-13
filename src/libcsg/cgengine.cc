@@ -46,7 +46,7 @@ void CGEngine::LoadFiles(string filename) {
 }
 
 unique_ptr<AtomCGConverter> CGEngine::PopulateCGTopology(
-    Topology &atomistic_top_in, Topology &cg_top_out) {
+    const Topology &atomistic_top_in, Topology &cg_top_out) {
 
   unique_ptr<AtomCGConverter> converter =
       unique_ptr<AtomCGConverter>(new AtomCGConverter(ignores_));
