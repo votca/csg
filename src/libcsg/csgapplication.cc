@@ -120,7 +120,6 @@ bool CsgApplication::EvaluateOptions(void) {
      * which criteria should be used? smaller than system's cores?
      */
   }
-
   return true;
 }
 
@@ -150,7 +149,6 @@ bool CsgApplication::ProcessData(Worker *worker) {
 
   int id;
   id = worker->getId();
-
   if (SynchronizeThreads()) {
     // wait til its your turn
     _threadsMutexesIn[id]->Lock();
@@ -186,11 +184,13 @@ bool CsgApplication::ProcessData(Worker *worker) {
     _threadsMutexesIn[(id + 1) % _nthreads]->Unlock();
   }
   // evaluate
+
   if (_do_mapping) {
     worker->converter_->Update(worker->_top, worker->_top_cg);
     worker->EvalConfiguration(&worker->_top_cg, &worker->_top);
-  } else
+  } else {
     worker->EvalConfiguration(&worker->_top);
+  }
 
   return true;
 }
@@ -284,7 +284,6 @@ void CsgApplication::Run(void) {
     // which may otherwise not be stored in the _top object
     boost::any any_ptr(&master->_top);
     _traj_reader->FirstFrame(any_ptr);
-    //    master->_top_cg.CopyBoundaryConditions(master->_top);
   }
 
   if (master->_top.getBoxType() == BoundaryCondition::typeOpen) {

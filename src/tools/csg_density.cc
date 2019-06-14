@@ -117,7 +117,7 @@ void CsgDensityApp::BeginEvaluate(Topology *top, Topology *top_atom) {
 
   if (_axisname == "r") {
     if (!OptionsMap().count("ref")) _ref = a / 2 + b / 2 + c / 2;
-    cout << "Using referece point: " << _ref << endl;
+    cout << "Using reference point: " << _ref << endl;
   } else if (OptionsMap().count("ref"))
     throw std::runtime_error(
         "reference center can only be used in case of spherical density");
@@ -140,8 +140,8 @@ void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref) {
     Molecule *mol = &(top->getMolecule(molecule_id));
     if (!wildcmp(_molname.c_str(), mol->getType().c_str())) continue;
     int N = mol->BeadCount();
-    for (int i = 0; i < N; i++) {
-      Bead b = mol->getBead(i);
+    for (pair<int, Bead *> id_bead : *mol) {
+      Bead b = mol->getBead(id_bead.first);
       if (!wildcmp(_filter.c_str(), b.getType().c_str())) continue;
       double r;
       if (_axisname == "r") {

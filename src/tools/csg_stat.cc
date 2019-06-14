@@ -39,7 +39,6 @@ class CsgStatApp : public CsgApplication {
   bool SynchronizeThreads() { return true; }
   void Initialize();
   bool EvaluateOptions();
-
   void BeginEvaluate(Topology *top, Topology *top_ref);
   void EndEvaluate();
 

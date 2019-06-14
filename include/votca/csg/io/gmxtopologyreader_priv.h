@@ -109,13 +109,6 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
       size_t natoms_mol = mtop.molblock[iblock].natoms_mol;
 #endif
       // read the atoms
-      bool assign_atom_ids_internally = false;
-      if (natoms_mol > 0) {
-        if (atoms->atom[0].atomnumber ==
-            tools::topology_constants::unassigned_bead_id) {
-          assign_atom_ids_internally = true;
-        }
-      }
       std::vector<int> number_unique_residues;
       for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
         t_atom *a = &(atoms->atom[iatom]);
@@ -128,14 +121,10 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
         params.set(tools::StructureParameter::CSG_Mass, formatMass_(a->m));
         params.set(tools::StructureParameter::CSG_Charge, formatCharge_(a->q));
         params.set(tools::StructureParameter::Element, element);
-        if (assign_atom_ids_internally) {
-          params.set(tools::StructureParameter::BeadId,
-                     static_cast<int>(internal_atom_id));
-          ++internal_atom_id;
-        } else {
-          params.set(tools::StructureParameter::BeadId,
-                     static_cast<int>(a->atomnumber));
-        }
+        params.set(tools::StructureParameter::BeadId,
+                   static_cast<int>(internal_atom_id));
+        ++internal_atom_id;
+
         if (a->resind == tools::topology_constants::unassigned_residue_id) {
           params.set(tools::StructureParameter::ResidueType,
                      tools::topology_constants::unassigned_residue_type);
@@ -158,15 +147,17 @@ bool GMXTopologyReader<Topology_T>::ReadTopology(const std::string &file,
           number_unique_residues.end());
       residue_offset += static_cast<int>(number_unique_residues.size());
       // add exclusions
-      for (size_t iatom = 0; iatom < natoms_mol; iatom++) {
+      std::vector<int> bead_ids = mi.getBeadIds();
+      for (size_t iatom = 0; iatom < bead_ids.size(); ++iatom) {
         // read exclusions
         t_blocka *excl = &(mol->excls);
         // insert exclusions
         std::list<typename Topology_T::bead_t *> excl_list;
+
         for (int k = excl->index[iatom]; k < excl->index[iatom + 1]; k++) {
           excl_list.push_back(&top.getBead(excl->a[k] + ifirstatom));
         }
-        top.InsertExclusion(&top.getBead(iatom + ifirstatom), excl_list);
+        top.InsertExclusion(&(mi.getBead(bead_ids.at(iatom))), excl_list);
       }
       ifirstatom += natoms_mol;
     }

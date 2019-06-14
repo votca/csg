@@ -57,6 +57,17 @@ class BeadStructure {
   ~BeadStructure() {}
 
   typedef T *bead_t;
+  typedef typename std::unordered_map<int, T *>::iterator iterator;
+  typename std::unordered_map<int, T *>::iterator begin() {
+    return beads_.begin();
+  }
+  typename std::unordered_map<int, T *>::iterator end() { return beads_.end(); }
+  typename std::unordered_map<int, T *>::iterator begin() const {
+    return beads_.begin();
+  }
+  typename std::unordered_map<int, T *>::iterator end() const {
+    return beads_.end();
+  }
   /**
    * \brief Determine if the bead structure consists of a single connected
    * structure

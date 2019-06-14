@@ -74,7 +74,6 @@ void Imc::BeginEvaluate(Topology *top, Topology *top_atom) {
   _nframes = 0;
   _nblock = 0;
   _processed_some_frames = false;
-
   // initialize non-bonded structures
   for (Property *prop : _nonbonded) {
     string name = prop->get("name").value();
@@ -170,8 +169,6 @@ Imc::interaction_t *Imc::AddInteraction(Property *p) {
   unique_ptr<interaction_t> unique_interaction =
       unique_ptr<interaction_t>(new interaction_t);
   getGroup(group)->_interactions.push_back(move(unique_interaction));
-  // getGroup(group)->_interactions.push_back(
-  //   unique_ptr<interaction_t>(new interaction_t));
 
   _interactions[name] = (getGroup(group)->_interactions.back()).get();
   interaction_t *i = _interactions[name];
