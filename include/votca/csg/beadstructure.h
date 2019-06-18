@@ -62,10 +62,10 @@ class BeadStructure {
     return beads_.begin();
   }
   typename std::unordered_map<int, T *>::iterator end() { return beads_.end(); }
-  typename std::unordered_map<int, T *>::iterator begin() const {
+  typename std::unordered_map<int, T *>::const_iterator begin() const {
     return beads_.begin();
   }
-  typename std::unordered_map<int, T *>::iterator end() const {
+  typename std::unordered_map<int, T *>::const_iterator end() const {
     return beads_.end();
   }
   /**

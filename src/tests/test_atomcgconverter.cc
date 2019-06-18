@@ -282,6 +282,29 @@ BOOST_AUTO_TEST_CASE(test_load) {
   AtomCGConverter converter;
   converter.LoadMoleculeStencil(file_cg);
 
+  BOOST_CHECK(converter.AtomisticMoleculeTypeExist("propane"));
+
+  vector<string> atoms_in_cg_bead =
+      converter.getAtomicBeadNamesOfCGBead("ppn", "b1");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.size(), 4);
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(0), "1:ppn:C1");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(1), "1:ppn:H4");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(2), "1:ppn:H5");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(3), "1:ppn:H6");
+
+  atoms_in_cg_bead = converter.getAtomicBeadNamesOfCGBead("ppn", "b2");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.size(), 3);
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(0), "1:ppn:C2");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(1), "1:ppn:H7");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(2), "1:ppn:H8");
+
+  atoms_in_cg_bead = converter.getAtomicBeadNamesOfCGBead("ppn", "b3");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.size(), 4);
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(0), "1:ppn:C3");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(1), "1:ppn:H9");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(2), "1:ppn:H10");
+  BOOST_CHECK_EQUAL(atoms_in_cg_bead.at(3), "1:ppn:H11");
+
   BOOST_CHECK_EQUAL(converter.getCGMoleculeType("propane"), string("ppn"));
   BOOST_CHECK_EQUAL(converter.getAtomisticMoleculeType("ppn"),
                     string("propane"));
@@ -318,47 +341,444 @@ BOOST_AUTO_TEST_CASE(test_load) {
   BOOST_CHECK_EQUAL(bead_types.at(0), "CH2");
   BOOST_CHECK_EQUAL(bead_types.at(1), "CH3");
 
-  Bead& bead = cg_top.getBead(bead_ids_mol_1.at(0));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH3");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 1.1333333333333333, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 1.0, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+  {
+    Bead& bead = cg_top.getBead(bead_ids_mol_1.at(0));
+    BOOST_CHECK_EQUAL(bead.getType(), "CH3");
+    cout << bead.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead.getPos().x(), 1.1333333333333333, 1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().y(), 1.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
 
-  bead = cg_top.getBead(bead_ids_mol_1.at(1));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH2");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 1.0714285714285714, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 1.857142857142857, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+    Bead& bead2 = cg_top.getBead(bead_ids_mol_1.at(1));
+    BOOST_CHECK_EQUAL(bead2.getType(), "CH2");
+    cout << bead2.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead2.getPos().x(), 1.0714285714285714, 1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().y(), 1.857142857142857, 1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().z(), 0.0, 1E-4);
 
-  bead = cg_top.getBead(bead_ids_mol_1.at(2));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH3");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 2.2666666666666671, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 0.2, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+    Bead& bead3 = cg_top.getBead(bead_ids_mol_1.at(2));
+    BOOST_CHECK_EQUAL(bead3.getType(), "CH3");
+    cout << bead3.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead3.getPos().x(), 2.2666666666666671, 1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().y(), 0.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().z(), 0.0, 1E-4);
 
-  bead = cg_top.getBead(bead_ids_mol_2.at(0));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH3");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 1.1333333333333333, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 6.0, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+    Bead& bead4 = cg_top.getBead(bead_ids_mol_2.at(0));
+    BOOST_CHECK_EQUAL(bead4.getType(), "CH3");
+    cout << bead4.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead4.getPos().x(), 1.1333333333333333, 1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().y(), 6.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().z(), 0.0, 1E-4);
 
-  bead = cg_top.getBead(bead_ids_mol_2.at(1));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH2");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 1.0714285714285714, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 6.85714, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+    Bead& bead5 = cg_top.getBead(bead_ids_mol_2.at(1));
+    BOOST_CHECK_EQUAL(bead5.getType(), "CH2");
+    cout << bead5.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead5.getPos().x(), 1.0714285714285714, 1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().y(), 6.85714, 1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().z(), 0.0, 1E-4);
 
-  bead = cg_top.getBead(bead_ids_mol_2.at(2));
-  BOOST_CHECK_EQUAL(bead.getType(), "CH3");
-  cout << bead.getPos() << endl;
-  BOOST_CHECK_CLOSE(bead.getPos().x(), 2.2666666666666671, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().y(), 5.2, 1E-4);
-  BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+    Bead& bead6 = cg_top.getBead(bead_ids_mol_2.at(2));
+    BOOST_CHECK_EQUAL(bead6.getType(), "CH3");
+    cout << bead6.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead6.getPos().x(), 2.2666666666666671, 1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().y(), 5.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().z(), 0.0, 1E-4);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_update) {
+
+  Topology atom_top;
+  atom_top.setStep(0);
+  // Create two propane molecules
+
+  // Propane atoms will be positioned as
+  //
+  //      H5   H7   H9
+  //      |    |    |
+  // H4 - C1 - C2 - C3 - H11
+  //      |    |    |
+  //      H6   H8   H10
+  //
+  Eigen::Vector3d pos_c1(1.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h5(1.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h6(1.0, 0.0, 0.0);
+  Eigen::Vector3d pos_h4(0.0, 1.0, 0.0);
+  Eigen::Vector3d pos_c2(2.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h7(2.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h8(2.0, 0.0, 0.0);
+  Eigen::Vector3d pos_c3(3.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h11(4.0, 1.0, 0.0);
+  Eigen::Vector3d pos_h9(3.0, 2.0, 0.0);
+  Eigen::Vector3d pos_h10(3.0, 0.0, 0.0);
+
+  Eigen::Vector3d translate(0.0, 5.0, 0.0);
+  // Only the H4 and H11 atoms will be given velocities and forces
+  //
+  // Velocities
+  //
+  // <- H4     H11 ->
+  //
+  Eigen::Vector3d vel_h4(-0.5, 0.0, 0.0);
+  Eigen::Vector3d vel_h11(0.6, 0.0, 0.0);
+
+  // Forces
+  //
+  // <- H4     <- H11
+  //
+  Eigen::Vector3d force_h4(-0.3, 0.0, 0.0);
+  Eigen::Vector3d force_h11(-0.7, 0.0, 0.0);
+
+  // Used to initialize all other forces and velocities
+  Eigen::Vector3d initialize(0.0, 0.0, 0.0);
+
+  byte_t atom_bead_sym = 1;
+  string mol_type = "propane";
+  int bead_id = 1;
+  for (int mol_id = 1; mol_id < 3; ++mol_id) {
+
+    Molecule& propane_mol = atom_top.CreateMolecule(mol_id, mol_type);
+
+    Bead& C1 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "C", 12, 0.0);
+    C1.setPos(pos_c1);
+    C1.setVel(initialize);
+    C1.setF(initialize);
+    propane_mol.AddBead(C1);
+
+    ++bead_id;
+    Bead& C2 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "C", 12, 0.0);
+    C2.setPos(pos_c2);
+    C2.setVel(initialize);
+    C2.setF(initialize);
+    propane_mol.AddBead(C2);
+
+    ++bead_id;
+    Bead& C3 = atom_top.CreateBead(atom_bead_sym, "C", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "C", 12, 0.0);
+    C3.setPos(pos_c3);
+    C3.setVel(initialize);
+    C3.setF(initialize);
+    propane_mol.AddBead(C3);
+
+    ++bead_id;
+    Bead& H4 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H4.setPos(pos_h4);
+    H4.setVel(vel_h4);
+    H4.setF(force_h4);
+    propane_mol.AddBead(H4);
+
+    ++bead_id;
+    Bead& H5 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H5.setPos(pos_h5);
+    H5.setVel(initialize);
+    H5.setF(initialize);
+    propane_mol.AddBead(H5);
+
+    ++bead_id;
+    Bead& H6 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H6.setPos(pos_h6);
+    H6.setVel(initialize);
+    H6.setF(initialize);
+    propane_mol.AddBead(H6);
+
+    ++bead_id;
+    Bead& H7 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H7.setPos(pos_h7);
+    H7.setVel(initialize);
+    H7.setF(initialize);
+    propane_mol.AddBead(H7);
+
+    ++bead_id;
+    Bead& H8 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H8.setPos(pos_h8);
+    H8.setVel(initialize);
+    H8.setF(initialize);
+    propane_mol.AddBead(H8);
+
+    ++bead_id;
+    Bead& H9 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                   topology_constants::unassigned_residue_id,
+                                   topology_constants::unassigned_residue_type,
+                                   "H", 12, 0.0);
+    H9.setPos(pos_h9);
+    H9.setVel(initialize);
+    H9.setF(initialize);
+    propane_mol.AddBead(H9);
+
+    ++bead_id;
+    Bead& H10 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                    topology_constants::unassigned_residue_id,
+                                    topology_constants::unassigned_residue_type,
+                                    "H", 12, 0.0);
+    H10.setPos(pos_h10);
+    H10.setVel(initialize);
+    H10.setF(initialize);
+    propane_mol.AddBead(H10);
+
+    ++bead_id;
+    Bead& H11 = atom_top.CreateBead(atom_bead_sym, "H", bead_id, mol_id,
+                                    topology_constants::unassigned_residue_id,
+                                    topology_constants::unassigned_residue_type,
+                                    "H", 12, 0.0);
+    H11.setPos(pos_h11);
+    H11.setVel(vel_h11);
+    H11.setF(force_h11);
+    // propane_mol->AddBead(H11);
+    atom_top.getMolecule(mol_id).AddBead(H11);
+    ++bead_id;
+
+    pos_c1 += translate;
+    pos_h5 += translate;
+    pos_h6 += translate;
+    pos_h4 += translate;
+    pos_c2 += translate;
+    pos_h7 += translate;
+    pos_h8 += translate;
+    pos_c3 += translate;
+    pos_h11 += translate;
+    pos_h9 += translate;
+    pos_h10 += translate;
+  }
+
+  BOOST_CHECK_EQUAL(atom_top.BeadCount(), 22);
+  BOOST_CHECK_EQUAL(atom_top.MoleculeCount(), 2);
+
+  BOOST_CHECK_EQUAL(atom_top.getMolecule(1).BeadCount(), 11);
+  BOOST_CHECK_EQUAL(atom_top.getMolecule(2).BeadCount(), 11);
+
+  string file_cg = "cg_molecule.xml";
+  ofstream out_cg(file_cg);
+
+  out_cg << "<cg_molecule>\n";
+  out_cg << "  <name>ppn</name> <!-- molecule name in cg representation -->\n";
+  out_cg << "  <ident>propane</ident> \n";
+  out_cg << "  <topology> <!-- topology of one molecule -->\n";
+  out_cg << "   <cg_beads>\n";
+  out_cg << "      <cg_bead>\n";
+  out_cg << "        <name>b1</name>\n";
+  out_cg << "        <type>CH3</type>\n";
+  out_cg << "        <symmetry>1</symmetry>\n";
+  out_cg << "        <mapping>A</mapping>\n";
+  out_cg << "        <beads> 1:ppn:C1 1:ppn:H4 1:ppn:H5 1:ppn:H6 </beads>\n";
+  out_cg << "      </cg_bead>\n";
+  out_cg << "      <cg_bead>\n";
+  out_cg << "        <name>b2</name>\n";
+  out_cg << "        <type>CH2</type>\n";
+  out_cg << "        <symmetry>1</symmetry>\n";
+  out_cg << "        <mapping>B</mapping>\n";
+  out_cg << "        <beads> 1:ppn:C2 1:ppn:H7 1:ppn:H8  </beads>\n";
+  out_cg << "      </cg_bead>\n";
+  out_cg << "      <cg_bead>\n";
+  out_cg << "        <name>b3</name>\n";
+  out_cg << "        <type>CH3</type>\n";
+  out_cg << "        <symmetry>1</symmetry>\n";
+  out_cg << "        <mapping>A</mapping>\n";
+  out_cg << "        <beads> 1:ppn:C3 1:ppn:H9 1:ppn:H10 1:ppn:H11 </beads>\n";
+  out_cg << "      </cg_bead>\n";
+  out_cg << "    </cg_beads>\n";
+  out_cg << "    <cg_bonded> <!-- bonded interactions -->\n";
+  out_cg << "      <bond>\n";
+  out_cg << "        <name>bond</name>\n";
+  out_cg << "        <beads>\n";
+  out_cg << "          b1 b2\n";
+  out_cg << "          b2 b3\n";
+  out_cg << "        </beads>\n";
+  out_cg << "      </bond>\n";
+  out_cg << "      <angle>\n";
+  out_cg << "        <name>angle</name>\n";
+  out_cg << "        <beads>\n";
+  out_cg << "          b1 b2 b3\n";
+  out_cg << "        </beads>\n";
+  out_cg << "      </angle>\n";
+  out_cg << "    </cg_bonded>\n";
+  out_cg << "  </topology>\n";
+  out_cg << "  <maps>\n";
+  out_cg << "    <map> <!-- mapping A -->\n";
+  out_cg << "      <name>A</name>\n";
+  out_cg << "      <weights> 12 1 1 1 </weights>\n";
+  out_cg << "    </map>\n";
+  out_cg << "    <map>\n";
+  out_cg << "      <name>B</name>\n";
+  out_cg << "      <weights> 12 1 1 </weights>\n";
+  out_cg << "     </map>  \n";
+  out_cg << "  </maps>\n";
+  out_cg << "</cg_molecule> <!-- end of the molecule -->\n";
+  out_cg.close();
+
+  // Create converter
+  AtomCGConverter converter;
+  converter.LoadMoleculeStencil(file_cg);
+
+  BOOST_CHECK_EQUAL(converter.getCGMoleculeType("propane"), string("ppn"));
+  BOOST_CHECK_EQUAL(converter.getAtomisticMoleculeType("ppn"),
+                    string("propane"));
+
+  // Create an empty topology
+  Topology cg_top;
+
+  cg_top = converter.Convert(atom_top);
+
+  cg_top.setStep(0);
+
+  vector<int> molecule_ids = cg_top.getMoleculeIds();
+  sort(molecule_ids.begin(), molecule_ids.end());
+  BOOST_CHECK_EQUAL(molecule_ids.at(0), 1);
+  BOOST_CHECK_EQUAL(molecule_ids.at(1), 2);
+
+  vector<int> cg_bead_ids = cg_top.getBeadIds();
+  sort(cg_bead_ids.begin(), cg_bead_ids.end());
+  BOOST_CHECK_EQUAL(cg_bead_ids.size(), 6);
+
+  vector<int> bead_ids_mol_1 =
+      cg_top.getMolecule(molecule_ids.at(0)).getBeadIds();
+  BOOST_CHECK_EQUAL(bead_ids_mol_1.size(), 3);
+  vector<int> bead_ids_mol_2 =
+      cg_top.getMolecule(molecule_ids.at(1)).getBeadIds();
+  BOOST_CHECK_EQUAL(bead_ids_mol_2.size(), 3);
+  sort(bead_ids_mol_1.begin(), bead_ids_mol_1.end());
+  sort(bead_ids_mol_2.begin(), bead_ids_mol_2.end());
+
+  vector<string> bead_types = cg_top.getBeadTypes();
+  // Should be CH3 and CH2
+  BOOST_CHECK_EQUAL(bead_types.size(), 2);
+  sort(bead_types.begin(), bead_types.end());
+  BOOST_CHECK_EQUAL(bead_types.at(0), "CH2");
+  BOOST_CHECK_EQUAL(bead_types.at(1), "CH3");
+
+  {
+    Bead& bead = cg_top.getBead(bead_ids_mol_1.at(0));
+    BOOST_CHECK_EQUAL(bead.getType(), "CH3");
+    cout << bead.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead.getPos().x(), 1.1333333333333333, 1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().y(), 1.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().z(), 0.0, 1E-4);
+
+    Bead& bead2 = cg_top.getBead(bead_ids_mol_1.at(1));
+    BOOST_CHECK_EQUAL(bead2.getType(), "CH2");
+    cout << bead2.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead2.getPos().x(), 1.0714285714285714, 1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().y(), 1.857142857142857, 1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().z(), 0.0, 1E-4);
+
+    Bead& bead3 = cg_top.getBead(bead_ids_mol_1.at(2));
+    BOOST_CHECK_EQUAL(bead3.getType(), "CH3");
+    cout << bead3.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead3.getPos().x(), 2.2666666666666671, 1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().y(), 0.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().z(), 0.0, 1E-4);
+
+    Bead& bead4 = cg_top.getBead(bead_ids_mol_2.at(0));
+    BOOST_CHECK_EQUAL(bead4.getType(), "CH3");
+    cout << bead4.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead4.getPos().x(), 1.1333333333333333, 1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().y(), 6.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().z(), 0.0, 1E-4);
+
+    Bead& bead5 = cg_top.getBead(bead_ids_mol_2.at(1));
+    BOOST_CHECK_EQUAL(bead5.getType(), "CH2");
+    cout << bead5.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead5.getPos().x(), 1.0714285714285714, 1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().y(), 6.85714, 1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().z(), 0.0, 1E-4);
+
+    Bead& bead6 = cg_top.getBead(bead_ids_mol_2.at(2));
+    BOOST_CHECK_EQUAL(bead6.getType(), "CH3");
+    cout << bead6.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead6.getPos().x(), 2.2666666666666671, 1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().y(), 5.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().z(), 0.0, 1E-4);
+  }
+
+  translate.x() = 1.5;
+  translate.y() = 2.0;
+  translate.z() = 3.0;
+  // Change the atomistic positions and then call update, to update the
+  // positions of the cg topology object
+  for (Molecule& mol : atom_top) {
+    for (pair<const int, Bead*>& id_and_bead : mol) {
+      id_and_bead.second->setPos(id_and_bead.second->getPos() + translate);
+    }
+  }
+  atom_top.setStep(1);
+  atom_top.setTime(1E-9);
+
+  converter.Update(atom_top, cg_top);
+
+  BOOST_CHECK_EQUAL(cg_top.getStep(), 1);
+  BOOST_CHECK_EQUAL(cg_top.getTime(), 1E-9);
+  {
+    Bead& bead = cg_top.getBead(bead_ids_mol_1.at(0));
+    BOOST_CHECK_EQUAL(bead.getType(), "CH3");
+    cout << bead.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead.getPos().x(), translate.x() + 1.1333333333333333,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().y(), translate.y() + 1.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead.getPos().z(), translate.z() + 0.0, 1E-4);
+
+    Bead& bead2 = cg_top.getBead(bead_ids_mol_1.at(1));
+    BOOST_CHECK_EQUAL(bead2.getType(), "CH2");
+    cout << bead2.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead2.getPos().x(), translate.x() + 1.0714285714285714,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().y(), translate.y() + 1.857142857142857,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead2.getPos().z(), translate.z() + 0.0, 1E-4);
+
+    Bead& bead3 = cg_top.getBead(bead_ids_mol_1.at(2));
+    BOOST_CHECK_EQUAL(bead3.getType(), "CH3");
+    cout << bead3.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead3.getPos().x(), translate.x() + 2.2666666666666671,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().y(), translate.y() + 0.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead3.getPos().z(), translate.z() + 0.0, 1E-4);
+
+    Bead& bead4 = cg_top.getBead(bead_ids_mol_2.at(0));
+    BOOST_CHECK_EQUAL(bead4.getType(), "CH3");
+    cout << bead4.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead4.getPos().x(), translate.x() + 1.1333333333333333,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().y(), translate.y() + 6.0, 1E-4);
+    BOOST_CHECK_CLOSE(bead4.getPos().z(), translate.z() + 0.0, 1E-4);
+
+    Bead& bead5 = cg_top.getBead(bead_ids_mol_2.at(1));
+    BOOST_CHECK_EQUAL(bead5.getType(), "CH2");
+    cout << bead5.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead5.getPos().x(), translate.x() + 1.0714285714285714,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().y(), translate.y() + 6.85714, 1E-4);
+    BOOST_CHECK_CLOSE(bead5.getPos().z(), translate.z() + 0.0, 1E-4);
+
+    Bead& bead6 = cg_top.getBead(bead_ids_mol_2.at(2));
+    BOOST_CHECK_EQUAL(bead6.getType(), "CH3");
+    cout << bead6.getPos() << endl;
+    BOOST_CHECK_CLOSE(bead6.getPos().x(), translate.x() + 2.2666666666666671,
+                      1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().y(), translate.y() + 5.2, 1E-4);
+    BOOST_CHECK_CLOSE(bead6.getPos().z(), translate.z() + 0.0, 1E-4);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
