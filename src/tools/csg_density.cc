@@ -139,7 +139,6 @@ void CsgDensityApp::EvalConfiguration(Topology *top, Topology *top_ref) {
   for (const int &molecule_id : molecule_ids) {
     Molecule *mol = &(top->getMolecule(molecule_id));
     if (!wildcmp(_molname.c_str(), mol->getType().c_str())) continue;
-    int N = mol->BeadCount();
     for (pair<int, Bead *> id_bead : *mol) {
       Bead b = mol->getBead(id_bead.first);
       if (!wildcmp(_filter.c_str(), b.getType().c_str())) continue;
