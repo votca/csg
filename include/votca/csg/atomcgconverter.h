@@ -97,15 +97,39 @@ class AtomCGConverter {
    * The properties updated include the time step, bead positions, forces and
    * velocities etc...
    *
+   * New molecules and beads are not created with this method, if the atomistic
+   * topology and the cg topology are inconsistent an error should occur. As an
+   * example if the atomistic topology contains a molecule that does not have
+   * a corresponding sister/brother molecule in the coarse grained description
+   * an error should be thrown.
+   *
    * @param atomic_top_in
    * @param cg_top_out
    */
   void Update(const Topology &atom_top_in, Topology &cg_top_out) const;
 
+  /**
+   * @brief Returns the atomisitc beads that make up a given coarse grained
+   * bead in a particular molecule
+   *
+   * @param cg_mol_type
+   * @param cg_bead_type
+   *
+   * @return vector of the atomistic bead names in the coarse grained bead
+   * specified
+   */
   std::vector<std::string> getAtomicBeadNamesOfCGBead(
       const std::string &cg_mol_type, const std::string &cg_bead_type) const;
 
-  bool AtomisticMoleculeTypeExist(const std::string &atom_mol_type) const;
+  /**
+   * @brief Determines if an atomisitic molecule of the provided type exists
+   *
+   * @param atom_mol_type
+   *
+   * @return true or false
+   */
+  bool AtomisticMoleculeTypeExist(const std::string &atom_mol_type) const
+      noexcept;
 
  private:
   std::map<int, std::map<int, std::vector<std::pair<std::string, int>>>>

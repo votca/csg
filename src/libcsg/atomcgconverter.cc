@@ -53,7 +53,7 @@ const std::string &AtomCGConverter::getCGMoleculeType(
 }
 
 bool AtomCGConverter::AtomisticMoleculeTypeExist(
-    const std::string &atom_mol_type) const {
+    const std::string &atom_mol_type) const noexcept {
   return atom_and_cg_mol_types_.left.count(atom_mol_type);
 }
 
