@@ -137,10 +137,6 @@ Molecule &AtomCGConverter::CoarseGrainMolecule_(const Topology &atom_top,
          "molecule with the specified id already exists");
   string cg_mol_type = atom_and_cg_mol_types_.left.at(atom_mol_type);
 
-  // returns ids of the cg molecule vector< atomic_bead_name, atomic_bead_id >
-  //  map<int, vector<pair<string, int>>> cg_beads_to_atom_beads =
-  //      CreateMolecule_(cg_mol_type, mol_id, cg_top_out, atom_top);
-
   Molecule &cg_mol = cg_top_out.CreateMolecule(mol_id, cg_mol_type);
 
   map<int, vector<pair<string, int>>> cg_beads_to_atom_beads =
@@ -490,9 +486,6 @@ map<int, vector<pair<string, int>>>
     AtomCGConverter::MapAtomicMoleculeToCGMolecule_(const Topology &atom_top,
                                                     Topology &cg_top_out,
                                                     const int &mol_id) {
-  // map<int, vector<pair<string, int>>> AtomCGConverter::CreateMolecule_(
-  //    string cg_mol_type, int mol_id, Topology &cg_top_out,
-  //    Topology &atom_top) {
 
   Molecule &cg_mol = cg_top_out.getMolecule(mol_id);
   string cg_mol_type = cg_mol.getType();
