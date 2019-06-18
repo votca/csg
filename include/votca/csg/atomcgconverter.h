@@ -19,7 +19,6 @@
 #ifndef VOTCA_CSG_ATOMTOCGCONVERTER_H
 #define VOTCA_CSG_ATOMTOCGCONVERTER_H
 
-#include <list>
 #include <map>
 #include <string>
 #include <vector>
