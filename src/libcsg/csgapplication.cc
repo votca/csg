@@ -252,7 +252,7 @@ void CsgApplication::Run(void) {
   // Here trajectory parsing starts
   //////////////////////////////////////////////////
   double begin = 0;
-  int first_frame;
+  int first_frame = -1;
   bool has_begin = false;
   if (DoTrajectory() && _op_vm.count("trj")) {
 

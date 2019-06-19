@@ -55,9 +55,9 @@ class DLPOLYTrajectoryReader : public TrajectoryReader {
   /// open original trajectory file
   bool Open(const std::string &file);
   /// read in the first frame
-  bool FirstFrame(boost::any &conf);
+  bool FirstFrame(boost::any conf);
   /// read in the next frame
-  bool NextFrame(boost::any &conf);
+  bool NextFrame(boost::any conf);
   /// close original trajectory file
   void Close();
 

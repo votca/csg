@@ -107,7 +107,7 @@ void DLPOLYTrajectoryReader<Topology_T>::Close() {
 }
 
 template <class Topology_T>
-bool DLPOLYTrajectoryReader<Topology_T>::FirstFrame(boost::any &conf) {
+bool DLPOLYTrajectoryReader<Topology_T>::FirstFrame(boost::any conf) {
   _first_frame = true;
   bool res = NextFrame(conf);
   _first_frame = false;
@@ -115,15 +115,15 @@ bool DLPOLYTrajectoryReader<Topology_T>::FirstFrame(boost::any &conf) {
 }
 
 template <class Topology_T>
-bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any &conf_any) {
+bool DLPOLYTrajectoryReader<Topology_T>::NextFrame(boost::any conf_any) {
 
-  if (typeid(Topology_T) != conf_any.type()) {
+  if (typeid(Topology_T *) != conf_any.type()) {
     throw std::runtime_error(
         "Error Cannot read topology using dlpoly trajectory reader, incorrect "
         "topology type provided.");
   }
 
-  Topology_T &conf = boost::any_cast<Topology_T>(conf_any);
+  Topology_T &conf = *boost::any_cast<Topology_T *>(conf_any);
   static bool hasVs = false;
   static bool hasFs = false;
   static int mavecs =
