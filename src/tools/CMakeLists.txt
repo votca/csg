@@ -66,12 +66,6 @@ endif(VALGRIND_EXECUTABLE)
                       --cg ${REFPATH}/mapping.xml 
     WORKING_DIRECTORY ${RUNPATH})
   set_tests_properties(integration_Run_csg_fmatch_3body PROPERTIES LABELS "csg;tools;votca")
-  if(VALGRIND_EXECUTABLE)                                                                
-    add_test(NAME memory_Run_csg_fmatch_3body COMMAND "${VALGRIND_EXECUTABLE}" --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --error-exitcode=1 $<TARGET_FILE:csg_fmatch> --top ${REFPATH}/topol.xml --trj ${REFPATH}/frame.dump --options ${REFPATH}/settings_fmatch_3body.xml
-                      --cg ${REFPATH}/mapping.xml 
-    WORKING_DIRECTORY ${RUNPATH})
-      set_tests_properties(memory_Run_csg_fmatch_3body PROPERTIES LABELS "csg;votca")
-endif(VALGRIND_EXECUTABLE)   
   add_test(NAME integration_Compare_csg_fmatch_3body_output1 COMMAND $<TARGET_FILE:VOTCA::votca_compare> --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG.force -f2 ${REFPATH}/CG-CG.force.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
   add_test(NAME integration_Compare_csg_fmatch_3body_output2 COMMAND $<TARGET_FILE:VOTCA::votca_compare> --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG-CG.force -f2 ${REFPATH}/CG-CG-CG.force.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
   add_test(NAME integration_Compare_csg_fmatch_3body_output3 COMMAND $<TARGET_FILE:VOTCA::votca_compare> --etol ${REGRESSIONTEST_TOLERANCE} -f1 CG-CG-CG.pot -f2 ${REFPATH}/CG-CG-CG.pot.fmatch_3body WORKING_DIRECTORY ${RUNPATH})
