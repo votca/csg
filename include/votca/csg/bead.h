@@ -46,11 +46,9 @@ class Bead : public BaseBead {
   /**
    * destructor
    */
-  virtual ~Bead(){}
+  virtual ~Bead() {}
 
-      [[deprecated]] int getResnr() const {
-    return residue_id_;
-  }
+  [[deprecated]] int getResnr() const { return residue_id_; }
 
   tools::StructureParameters getParameters() const;
   /**
@@ -73,13 +71,11 @@ class Bead : public BaseBead {
    */
   [[deprecated]] const double &getM() const { return getMass(); }
 
-      /**
-       * set the mass of the bead
-       * \param m bead mass
-       */
-      [[deprecated]] void setM(const double &m) {
-    setMass(m);
-  }
+  /**
+   * set the mass of the bead
+   * \param m bead mass
+   */
+  [[deprecated]] void setM(const double &m) { setMass(m); }
 
   /**
    * get the charge of the bead
@@ -313,8 +309,10 @@ class Bead : public BaseBead {
     return label.str();
   };
 
-  [[deprecated]] std::string getName() const { return getLabel(); } protected
-      : std::vector<int> parent_beads_;
+  [[deprecated]] std::string getName() const { return getLabel(); }
+
+ protected:
+  std::vector<int> parent_beads_;
 
   std::string residue_type_;
 
