@@ -21,6 +21,7 @@ foreach(PROG
   test_nblistgrid_3body
   test_pdbreader
   test_tabulatedpotential
+  test_topologytypecontainer
   test_triplelist
   test_xyzreaderwriter)
 
