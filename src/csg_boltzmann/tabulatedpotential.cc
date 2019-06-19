@@ -46,7 +46,7 @@ void TabulatedPotential::Register(map<string, AnalysisTool *> &lib) {
   lib["hist"] = this;
 }
 
-void TabulatedPotential::Command(BondedStatistics &bs, string cmd,
+void TabulatedPotential::Command(BondedStatistics &bs, const string &cmd,
                                  vector<string> &args) {
   if (args[0] == "set") {
     if (cmd == "hist") {
