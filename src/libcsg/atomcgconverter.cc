@@ -180,7 +180,7 @@ void AtomCGConverter::LoadMoleculeStencil(const string &filename) {
 
   // Create a mapper to map from the atom to the cg molecule
   mol_names_and_maps_[atom_mol_type].insert(std::make_pair(
-      cg_mol_type, move(AtomToCGMoleculeMapper(atom_mol_type, cg_mol_type))));
+      cg_mol_type, AtomToCGMoleculeMapper(atom_mol_type, cg_mol_type)));
 
   vector<string> order_of_beads =
       cg_mol_and_stencil_.at(cg_mol_type).getCGBeadNames();

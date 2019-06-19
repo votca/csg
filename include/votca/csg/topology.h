@@ -148,12 +148,13 @@ inline Interaction* Topology::CreateInteraction(InteractionType type,
   assert(beads_.size() > 0 &&
          "Cannot create interactions before beads have been initialized");
 
+#ifndef NDEBUG
   for (const int& bead_id : bead_ids) {
     assert(beads_.count(bead_id) &&
            "Cannot add interaction as there are no beads, create the beads "
            "before the interactions.");
   }
-
+#endif
   if (type == InteractionType::bond) {
     interactions_.push_back(std::unique_ptr<IBond>(new IBond(bead_ids)));
   } else if (type == InteractionType::angle) {
