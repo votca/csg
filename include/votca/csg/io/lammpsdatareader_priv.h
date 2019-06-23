@@ -364,7 +364,7 @@ std::map<std::string, double>
     if (elements.isMassAssociatedWithElement(mass_atom_bead, 0.01)) {
       beadElementName = elements.getEleShortClosestInMass(mass_atom_bead, 0.01);
     } else {
-      beadElementName = "Bead" + std::to_string(bead_index_type);
+      beadElementName = std::to_string(bead_index_type);
       ++bead_index_type;
     }
     baseNamesAndMasses[beadElementName] = mass_atom_bead;

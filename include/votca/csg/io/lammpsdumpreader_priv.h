@@ -103,7 +103,7 @@ bool LAMMPSDumpReader<Topology_T>::FirstFrame(boost::any top) {
 template <class Topology_T>
 bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
 
-  std::cout << "WARNING: Currently the votca lammps dump reader only suppots ";
+  std::cout << "WARNING: Currently the votca lammps dump reader only supports ";
   std::cout << "lammps units specified by the 'units real' ";
   std::cout << "command." << std::endl;
   std::cout << "mass: grams/mole" << std::endl;
