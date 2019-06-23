@@ -439,7 +439,7 @@ class TemplateTopology {
    *
    * @return
    */
-  const std::unordered_map<std::string, int> getMoleculeTypes() const {
+  const std::vector<std::string> getMoleculeTypes() const {
     return type_container_.getMoleculeTypes();
   }
 
