@@ -111,7 +111,7 @@ class TabulatedPotential : public AnalysisTool {
   void Command(BondedStatistics &bs, const std::string &cmd,
                std::vector<std::string> &args);
 
-  void Help(std::string cmd, std::vector<std::string> &args);
+  void Help(const std::string & cmd, std::vector<std::string> &args);
 
   void WriteHistogram(BondedStatistics &bs, std::vector<std::string> &args);
   void WritePotential(BondedStatistics &bs, std::vector<std::string> &args);

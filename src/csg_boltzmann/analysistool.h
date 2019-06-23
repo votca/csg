@@ -40,7 +40,7 @@ class AnalysisTool {
   virtual void Register(std::map<std::string, AnalysisTool *> &lib) {}
   virtual void Command(BondedStatistics &bs, const std::string &cmd,
                        std::vector<std::string> &args){};
-  virtual void Help(std::string cmd, std::vector<std::string> &args){};
+  virtual void Help(const std::string & cmd, std::vector<std::string> &args){};
 };
 
 }  // namespace csg
