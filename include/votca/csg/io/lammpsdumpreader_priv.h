@@ -114,7 +114,7 @@ bool LAMMPSDumpReader<Topology_T>::NextFrame(boost::any top_any) {
     std::cout << "energy: Kcal/mole" << std::endl;
     std::cout << "charge: e" << std::endl;
     std::cout << std::endl;
-    error_msg_printed_ = true;
+    warning_msg_printed_ = true;
   }
 
   if (typeid(Topology_T *) != top_any.type()) {
