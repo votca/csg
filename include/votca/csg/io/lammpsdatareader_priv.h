@@ -91,34 +91,38 @@ bool LAMMPSDataReader<Topology_T>::ReadTopology(const std::string &file,
   }
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
 
-  std::cout << std::endl;
-  std::cout << "WARNING: The votca lammps data reader is only able to read ";
-  std::cout << "lammps files formatted in the following styles:" << std::endl;
-  std::cout << "angle" << std::endl;
-  std::cout << "atom" << std::endl;
-  std::cout << "bond" << std::endl;
-  std::cout << "full" << std::endl;
-  std::cout << "molecule" << std::endl;
-  std::cout << std::endl;
-  std::cout << "These styles use the following formats in the atom block:"
-            << std::endl;
-  std::cout << "atom-ID molecule-ID atom-type charge x y z" << std::endl;
-  std::cout << "atom-ID molecule-ID atom-type charge x y z nx ny nz"
-            << std::endl;
-  std::cout << "atom-ID molecule-ID atom-type x y z" << std::endl;
-  std::cout << "atom-ID molecule-ID atom-type x y z nx ny nz" << std::endl;
-  std::cout << "atom-ID atom-type x y z" << std::endl;
-  std::cout << "atom-ID atom-type x y z nx ny nz" << std::endl;
-  std::cout << std::endl;
-  std::cout << "WARNING: Currently the votca lammps data reader only suppots ";
-  std::cout << "lammps units specified by the 'units real' ";
-  std::cout << "command." << std::endl;
-  std::cout << "mass: grams/mole" << std::endl;
-  std::cout << "distance: angstroms" << std::endl;
-  std::cout << "time: femtoseconds" << std::endl;
-  std::cout << "energy: Kcal/mole" << std::endl;
-  std::cout << "charge: e" << std::endl;
-  std::cout << std::endl;
+  if (warning_msg_printed_ == false) {
+    std::cout << std::endl;
+    std::cout << "WARNING: The votca lammps data reader is only able to read ";
+    std::cout << "lammps files formatted in the following styles:" << std::endl;
+    std::cout << "angle" << std::endl;
+    std::cout << "atom" << std::endl;
+    std::cout << "bond" << std::endl;
+    std::cout << "full" << std::endl;
+    std::cout << "molecule" << std::endl;
+    std::cout << std::endl;
+    std::cout << "These styles use the following formats in the atom block:"
+              << std::endl;
+    std::cout << "atom-ID molecule-ID atom-type charge x y z" << std::endl;
+    std::cout << "atom-ID molecule-ID atom-type charge x y z nx ny nz"
+              << std::endl;
+    std::cout << "atom-ID molecule-ID atom-type x y z" << std::endl;
+    std::cout << "atom-ID molecule-ID atom-type x y z nx ny nz" << std::endl;
+    std::cout << "atom-ID atom-type x y z" << std::endl;
+    std::cout << "atom-ID atom-type x y z nx ny nz" << std::endl;
+    std::cout << std::endl;
+    std::cout
+        << "WARNING: Currently the votca lammps data reader only suppots ";
+    std::cout << "lammps units specified by the 'units real' ";
+    std::cout << "command." << std::endl;
+    std::cout << "mass: grams/mole" << std::endl;
+    std::cout << "distance: angstroms" << std::endl;
+    std::cout << "time: femtoseconds" << std::endl;
+    std::cout << "energy: Kcal/mole" << std::endl;
+    std::cout << "charge: e" << std::endl;
+    std::cout << std::endl;
+    warning_msg_printed_ = true;
+  }
 
   topology_ = true;
   top.Cleanup();

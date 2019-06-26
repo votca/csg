@@ -76,7 +76,7 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   std::ifstream fl_;
   std::string fname_;
   bool topology_;
-
+  bool warning_msg_printed_ = false;
   tools::UnitConverter converter_;
   std::map<std::string, std::vector<std::vector<std::string>>> data_;
 

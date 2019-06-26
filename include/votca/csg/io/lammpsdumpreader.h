@@ -76,6 +76,7 @@ class LAMMPSDumpReader : public TrajectoryReader, public TopologyReader {
  private:
   tools::UnitConverter converter_;
 
+  bool warning_msg_printed_ = false;
   int formatId_(const int &id);
   double formatDistance_(const double &distance);
   double formatForce_(const double &force);
