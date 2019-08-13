@@ -104,8 +104,6 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   // First int is the atom id second the atom index
   std::map<int, int> atomIdToIndex_;
 
-  void RenameMolecule_(Molecule &mol) const;
-
   void formatDistance(double &distance);
   void formatId(int &id);
   void formatMass(double &mass);

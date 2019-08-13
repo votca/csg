@@ -131,32 +131,7 @@ bool LAMMPSDataReader<Topology_T>::ReadTopology(const std::string &file,
 
   fl_.close();
 
-  for (Molecule &mol : top) {
-    RenameMolecule_(mol);
-  }
-
   return true;
-}
-
-template <class Topology_T>
-void LAMMPSDataReader<Topology_T>::RenameMolecule_(Molecule &mol) const {
-  if (mol.getName() == "UNKNOWN") {
-    std::map<std::string, int> molname_map;
-    for (const Bead *atom : mol.Beads()) {
-      std::string atomname = atom->getName();
-      std::string element = atomname.substr(0, 1);
-      if (std::islower(atomname[1])) {
-        element += atomname[1];
-      }
-      molname_map[element]++;
-    }
-
-    std::string molname = "";
-    for (auto const &pair : molname_map) {
-      molname += (pair.first + std::to_string(pair.second));
-    }
-    mol.setName(molname);
-  }
 }
 
 template <class Topology_T>
