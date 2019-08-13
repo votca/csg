@@ -34,7 +34,7 @@ namespace csg {
 
 class CsgApplication : public tools::Application {
  public:
-  CsgApplication(){};
+  CsgApplication();
   virtual ~CsgApplication(){};
 
   void Initialize();
@@ -103,9 +103,6 @@ class CsgApplication : public tools::Application {
    */
   class Worker : public tools::Thread {
    public:
-    Worker(){};
-    ~Worker();
-
     /// \brief overload with the actual computation
     virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0) = 0;
 
@@ -116,7 +113,7 @@ class CsgApplication : public tools::Application {
     CsgApplication *_app = nullptr;
     Topology _top, _top_cg;
     std::unique_ptr<AtomCGConverter> converter_;
-    int _id;
+    int _id = -1;
 
     void Run(void);
 

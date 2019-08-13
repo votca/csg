@@ -36,8 +36,6 @@ CsgApplication::CsgApplication(void)
       _nthreads(1),
       _traj_reader(nullptr) {}
 
-CsgApplication::~CsgApplication(void) {}
-
 void CsgApplication::Initialize(void) {
   // register all io plugins
   TrajectoryWriter::RegisterPlugins();

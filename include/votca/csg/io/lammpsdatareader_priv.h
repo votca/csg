@@ -218,9 +218,10 @@ bool LAMMPSDataReader<Topology_T>::MatchOneFieldLabel_(
   } else if (fields.at(0) == "Dihedrals") {
     ReadDihedrals_(top);
   } else if (fields.at(0) == "Impropers") {
-    cout << endl;
-    cout << "WARNING Impropers are not currently supported, skipping." << endl;
-    cout << endl;
+    std::cout << std::endl;
+    std::cout << "WARNING Impropers are not currently supported, skipping."
+              << std::endl;
+    std::cout << std::endl;
     // Impropers are not yet supported
     SkipImpropers_();
   } else {
@@ -354,9 +355,9 @@ std::map<std::string, double>
       beadElementName = elements.getEleShortClosestInMass(mass_atom_bead, 0.01);
     } else {
       beadElementName = "Bead" + std::to_string(bead_index_type);
-      cout << "Unable to associate mass " << mass.at(1)
-           << " with element assuming pseudo atom, assigning name "
-           << beadElementName << "." << endl;
+      std::cout << "Unable to associate mass " << mass.at(1)
+                << " with element assuming pseudo atom, assigning name "
+                << beadElementName << "." << std::endl;
       ++bead_index_type;
     }
     baseNamesAndMasses[beadElementName] = mass_atom_bead;
@@ -468,7 +469,7 @@ typename LAMMPSDataReader<Topology_T>::lammps_format
     LAMMPSDataReader<Topology_T>::determineDataFileFormat_(std::string line) {
 
   tools::Tokenizer tok(line, " ");
-  std::vector<std::string> fields = tok.ConvertToVector();
+  std::vector<std::string> fields = tok.ToVector();
   lammps_format format;
   if (fields.size() == 5 || fields.size() == 8) {
     format = style_atomic;
@@ -488,10 +489,10 @@ template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
 
   if (data_.count("Masses") == 0) {
-    string err =
+    std::string err =
         "You are attempting to read in the atom block before the masses, or "
         "you have failed to include the masses in the data file.";
-    throw runtime_error(err);
+    throw std::runtime_error(err);
   }
 
   std::string line;
@@ -578,11 +579,12 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       tools::byte_t symmetry = 1;  // spherical
 
       if (data_.at("Masses").size() <= atomTypeId) {
-        string err =
-            "The atom block contains an atom of type " + to_string(atomTypeId) +
+        std::string err =
+            "The atom block contains an atom of type " +
+            std::to_string(atomTypeId) +
             " however, the masses are only specified for atoms up to type " +
-            to_string(data_.at("Masses").size());
-        throw runtime_error(err);
+            std::to_string(data_.at("Masses").size());
+        throw std::runtime_error(err);
       }
 
       double mass =
@@ -755,7 +757,7 @@ void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
 
 template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::SkipImpropers_() {
-  string line;
+  std::string line;
   getline(fl_, line);
   getline(fl_, line);
   while (!line.empty()) {
