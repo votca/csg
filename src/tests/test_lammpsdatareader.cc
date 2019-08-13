@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
 
   BOOST_CHECK_EQUAL(mol->BeadCount(), 100);
 
-  BOOST_CHECK_EQUAL(top.getStep(), 961);
+  BOOST_CHECK_EQUAL(top.getStep(), -1);
 
   const vector<unique_ptr<Interaction>> &interaction_cont =
       top.BondedInteractions();
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   Molecule mol = top.getMolecule(0);
   BOOST_CHECK_EQUAL(mol.BeadCount(), 100);
 
-  BOOST_CHECK_EQUAL(top.getStep(), 1010);
+  BOOST_CHECK_EQUAL(top.getStep(), -1);
 
   const vector<unique_ptr<Interaction>> &interaction_cont =
       top.BondedInteractions();

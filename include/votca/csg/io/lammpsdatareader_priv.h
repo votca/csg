@@ -75,6 +75,8 @@ std::string LAMMPSDataReader<Topology_T>::getStringGivenDoubleAndMap_(
  * Public Facing Methods                                                     *
  *****************************************************************************/
 
+// Data file should follow this format:
+// https://lammps.sandia.gov/doc/2001/data_format.html
 template <class Topology_T>
 bool LAMMPSDataReader<Topology_T>::ReadTopology(const std::string &file,
                                                 boost::any top_any) {
@@ -163,35 +165,30 @@ bool LAMMPSDataReader<Topology_T>::NextFrame(boost::any top_any) {
         "incorrect topology type provided.");
   }
   Topology_T &top = *boost::any_cast<Topology_T *>(top_any);
+  std::string header;
+  getline(fl_, header);
   std::string line;
   getline(fl_, line);
   while (!fl_.eof()) {
 
     // Remove all comments
     stripLine(line);
-    bool labelMatched = false;
     tools::Tokenizer tok(line, " ");
     std::vector<std::string> fields;
     tok.ToVector(fields);
     // If not check the size of the vector and parse according
     // to the number of fields
     if (fields.size() == 1) {
-      labelMatched = MatchOneFieldLabel_(fields, top);
+      MatchOneFieldLabel_(fields, top);
     } else if (fields.size() == 2) {
-      labelMatched = MatchTwoFieldLabels_(fields, top);
+      MatchTwoFieldLabels_(fields, top);
     } else if (fields.size() == 3) {
-      labelMatched = MatchThreeFieldLabels_(fields, top);
+      MatchThreeFieldLabels_(fields, top);
     } else if (fields.size() == 4) {
-      labelMatched = MatchFourFieldLabels_(fields, top);
+      MatchFourFieldLabels_(fields, top);
     } else if (fields.size() != 0) {
-
-      // See if the line is the lammps .data header/info line
-      labelMatched = MatchFieldsTimeStepLabel_(fields, top);
-
-      if (!labelMatched) {
-        std::string err = "Unrecognized line in lammps .data file:\n" + line;
-        throw std::runtime_error(err);
-      }
+      std::string err = "Unrecognized line in lammps .data file:\n" + line;
+      throw std::runtime_error(err);
     }
     getline(fl_, line);
   }
@@ -290,20 +287,6 @@ bool LAMMPSDataReader<Topology_T>::MatchFourFieldLabels_(
     return false;
   }
   return true;
-}
-
-template <class Topology_T>
-bool LAMMPSDataReader<Topology_T>::MatchFieldsTimeStepLabel_(
-    std::vector<std::string> fields, Topology_T &top) {
-  size_t index = 0;
-  for (auto field : fields) {
-    if (field == "timestep" && (index + 2) < fields.size()) {
-      top.setStep(stoi(fields.at(index + 2)));
-      return true;
-    }
-    ++index;
-  }
-  return false;
 }
 
 template <class Topology_T>
@@ -524,6 +507,7 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
   int atomId = 0;
   int moleculeId = tools::topology_constants::unassigned_molecule_id;
   while (!line.empty()) {
+    std::cout << "Atom Id " << atomId << std::endl;
     std::istringstream iss(line);
     iss >> atomId;
     if (moleculeRead) {

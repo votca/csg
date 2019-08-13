@@ -113,8 +113,6 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   bool MatchTwoFieldLabels_(std::vector<std::string> fields, Topology_T &top);
   bool MatchThreeFieldLabels_(std::vector<std::string> fields, Topology_T &top);
   bool MatchFourFieldLabels_(std::vector<std::string> fields, Topology_T &top);
-  bool MatchFieldsTimeStepLabel_(std::vector<std::string> fields,
-                                 Topology_T &top);
 
   void ReadBox_(std::vector<std::string> fields, Topology_T &top);
   void SortIntoDataGroup_(std::string tag);
