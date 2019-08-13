@@ -34,8 +34,8 @@ namespace csg {
 
 class CsgApplication : public tools::Application {
  public:
-  CsgApplication();
-  ~CsgApplication();
+  CsgApplication(){};
+  virtual ~CsgApplication(){};
 
   void Initialize();
   bool EvaluateOptions();
@@ -103,8 +103,8 @@ class CsgApplication : public tools::Application {
    */
   class Worker : public tools::Thread {
    public:
-    Worker();
-    ~Worker(){};
+    Worker(){};
+    ~Worker();
 
     /// \brief overload with the actual computation
     virtual void EvalConfiguration(Topology *top, Topology *top_ref = 0) = 0;
@@ -115,7 +115,6 @@ class CsgApplication : public tools::Application {
    protected:
     CsgApplication *_app = nullptr;
     Topology _top, _top_cg;
-    // TopologyMap *_map;
     std::unique_ptr<AtomCGConverter> converter_;
     int _id;
 
@@ -170,8 +169,6 @@ class CsgApplication : public tools::Application {
 inline void CsgApplication::AddObserver(CGObserver *observer) {
   _observers.push_back(observer);
 }
-
-inline CsgApplication::Worker::Worker() : _app(NULL), _id(-1) {}
 
 }  // namespace csg
 }  // namespace votca

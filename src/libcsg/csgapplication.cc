@@ -87,7 +87,7 @@ void CsgApplication::Initialize(void) {
         "  number of threads");
 }
 
-bool CsgApplication::EvaluateOptions(void) {
+bool CsgApplication::EvaluateOptions() {
   _do_mapping = false;
   if (NeedsTopology()) {
     CheckRequired("top", "no topology file specified");
