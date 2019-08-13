@@ -20,6 +20,7 @@
 #define VOTCA_CSG_LAMMPSDATAREADER_PRIV_H
 
 #include <stdexcept>
+#include <votca/tools/floatingpointcomparison.h>
 
 namespace votca {
 namespace csg {
@@ -54,18 +55,12 @@ void LAMMPSDataReader<Topology_T>::stripLine(std::string &line) {
 }
 
 template <class Topology_T>
-bool LAMMPSDataReader<Topology_T>::withinTolerance_(double value1,
-                                                    double value2,
-                                                    double tolerance) {
-  return abs(value1 - value2) / std::min(value1, value2) < tolerance;
-}
-
-template <class Topology_T>
 std::string LAMMPSDataReader<Topology_T>::getStringGivenDoubleAndMap_(
     double value, std::map<std::string, double> nameValue, double tolerance) {
 
   for (auto string_value_pair : nameValue) {
-    if (withinTolerance_(value, string_value_pair.second, tolerance)) {
+    if (tools::isApproximatelyEqual<double>(value, string_value_pair.second,
+                                            tolerance)) {
       return string_value_pair.first;
     }
   }
@@ -136,7 +131,32 @@ bool LAMMPSDataReader<Topology_T>::ReadTopology(const std::string &file,
 
   fl_.close();
 
+  for (Molecule &mol : top) {
+    RenameMolecule_(mol);
+  }
+
   return true;
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::RenameMolecule_(Molecule &mol) const {
+  if (mol.getName() == "UNKNOWN") {
+    std::map<std::string, int> molname_map;
+    for (const Bead *atom : mol.Beads()) {
+      std::string atomname = atom->getName();
+      std::string element = atomname.substr(0, 1);
+      if (std::islower(atomname[1])) {
+        element += atomname[1];
+      }
+      molname_map[element]++;
+    }
+
+    std::string molname = "";
+    for (auto const &pair : molname_map) {
+      molname += (pair.first + std::to_string(pair.second));
+    }
+    mol.setName(molname);
+  }
 }
 
 template <class Topology_T>
@@ -178,7 +198,6 @@ bool LAMMPSDataReader<Topology_T>::NextFrame(boost::any top_any) {
     tools::Tokenizer tok(line, " ");
     std::vector<std::string> fields;
     tok.ToVector(fields);
-    // fields = TrimCommentsFrom_(fields);
     // If not check the size of the vector and parse according
     // to the number of fields
     if (fields.size() == 1) {
@@ -224,6 +243,11 @@ bool LAMMPSDataReader<Topology_T>::MatchOneFieldLabel_(
   } else if (fields.at(0) == "Dihedrals") {
     ReadDihedrals_(top);
   } else if (fields.at(0) == "Impropers") {
+    cout << endl;
+    cout << "WARNING Impropers are not currently supported, skipping." << endl;
+    cout << endl;
+    // Impropers are not yet supported
+    SkipImpropers_();
   } else {
     return false;
   }
@@ -318,28 +342,15 @@ void LAMMPSDataReader<Topology_T>::InitializeAtomAndBeadTypes_() {
   auto baseNamesCount = determineAtomAndBeadCountBasedOnMass_(baseNamesMasses);
 
   tools::Elements elements;
-  // If there is more than one atom type of the same element append a number
-  // to the atom type name
-  std::map<std::string, int> baseNameIndices;
+
   int index = 0;
 
   for (auto mass : data_["Masses"]) {
     // Determine the mass associated with the atom
     double mass_atom_bead = stod(mass.at(1));
 
-    auto baseName =
+    std::string baseName =
         getStringGivenDoubleAndMap_(mass_atom_bead, baseNamesMasses, 0.01);
-
-    std::string label = baseName;
-    if (baseNamesCount[baseName] > 1) {
-      if (baseNameIndices.count(baseName) == 0) {
-        label += label + " Type 1";
-        baseNameIndices[baseName] = 1;
-      } else {
-        baseNameIndices[baseName]++;
-        label += label + " Type " + std::to_string(baseNameIndices[baseName]);
-      }
-    }
 
     std::string name_all_caps = boost::to_upper_copy<std::string>(baseName);
     std::string element = tools::topology_constants::unassigned_element;
@@ -349,7 +360,6 @@ void LAMMPSDataReader<Topology_T>::InitializeAtomAndBeadTypes_() {
       element = elements.getEleShort(name_all_caps);
     }
     atomtypes_[index].push_back(baseName);
-    atomtypes_[index].push_back(label);
     atomtypes_[index].push_back(element);
     ++index;
   }
@@ -368,7 +378,10 @@ std::map<std::string, double>
     if (elements.isMassAssociatedWithElement(mass_atom_bead, 0.01)) {
       beadElementName = elements.getEleShortClosestInMass(mass_atom_bead, 0.01);
     } else {
-      beadElementName = std::to_string(bead_index_type);
+      beadElementName = "Bead" + std::to_string(bead_index_type);
+      cout << "Unable to associate mass " << mass.at(1)
+           << " with element assuming pseudo atom, assigning name "
+           << beadElementName << "." << endl;
       ++bead_index_type;
     }
     baseNamesAndMasses[beadElementName] = mass_atom_bead;
@@ -424,21 +437,14 @@ void LAMMPSDataReader<Topology_T>::SortIntoDataGroup_(std::string tag) {
   std::string line;
   getline(fl_, line);
   getline(fl_, line);
-  stripLine(line);
 
   std::vector<std::vector<std::string>> group;
-  std::string data_elem;
   while (!line.empty()) {
-    std::vector<std::string> mini_group;
-    tools::Tokenizer tok(line, " ");
-    std::vector<std::string> fields;
-    tok.ToVector(fields);
-    for (auto field : fields) {
-      mini_group.push_back(field);
-    }
-    group.push_back(mini_group);
-    getline(fl_, line);
     stripLine(line);
+    tools::Tokenizer tok(line, " ");
+    std::vector<std::string> fields = tok.ToVector();
+    group.push_back(fields);
+    getline(fl_, line);
   }
 
   data_[tag] = group;
@@ -487,8 +493,7 @@ typename LAMMPSDataReader<Topology_T>::lammps_format
     LAMMPSDataReader<Topology_T>::determineDataFileFormat_(std::string line) {
 
   tools::Tokenizer tok(line, " ");
-  std::vector<std::string> fields;
-  tok.ConvertToVector(fields);
+  std::vector<std::string> fields = tok.ConvertToVector();
   lammps_format format;
   if (fields.size() == 5 || fields.size() == 8) {
     format = style_atomic;
@@ -506,6 +511,13 @@ typename LAMMPSDataReader<Topology_T>::lammps_format
 
 template <class Topology_T>
 void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
+
+  if (data_.count("Masses") == 0) {
+    string err =
+        "You are attempting to read in the atom block before the masses, or "
+        "you have failed to include the masses in the data file.";
+    throw runtime_error(err);
+  }
 
   std::string line;
   getline(fl_, line);
@@ -589,6 +601,15 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       }
       typename Topology_T::container_t &mol = *molecules_[moleculeId];
       tools::byte_t symmetry = 1;  // spherical
+
+      if (data_.at("Masses").size() <= atomTypeId) {
+        string err =
+            "The atom block contains an atom of type " + to_string(atomTypeId) +
+            " however, the masses are only specified for atoms up to type " +
+            to_string(data_.at("Masses").size());
+        throw runtime_error(err);
+      }
+
       double mass =
           boost::lexical_cast<double>(data_["Masses"].at(atomTypeId).at(1));
 
@@ -603,7 +624,7 @@ void LAMMPSDataReader<Topology_T>::ReadAtoms_(Topology_T &top) {
       formatCharge(charge);
 
       std::string atom_type = atomtypes_.at(atomTypeId).at(0);
-      std::string element = atomtypes_[atomTypeId].at(2);
+      std::string element = atomtypes_[atomTypeId].at(1);
       tools::StructureParameters params;
       params.set(tools::StructureParameter::Symmetry, symmetry);
       params.set(tools::StructureParameter::CSG_Mass, mass);
@@ -754,6 +775,16 @@ void LAMMPSDataReader<Topology_T>::ReadAngles_(Topology_T &top) {
         "\nNumber of angles that were read in " + std::to_string(angle_count) +
         "\n";
     throw std::runtime_error(err);
+  }
+}
+
+template <class Topology_T>
+void LAMMPSDataReader<Topology_T>::SkipImpropers_() {
+  string line;
+  getline(fl_, line);
+  getline(fl_, line);
+  while (!line.empty()) {
+    getline(fl_, line);
   }
 }
 

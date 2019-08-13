@@ -213,8 +213,7 @@ bool H5MDTrajectoryReader<Topology_T>::Open(const std::string &file) {
   int version[2];
   H5Aread(at_version, H5Aget_type(at_version), &version);
   if (version[0] != 1 || (version[0] == 1 && version[1] > 0)) {
-    std::cout << "Major version " << version[0] << std::endl;
-    std::cout << "Minor version " << version[1] << std::endl;
+    cout << "Found H5MD version: " << version[0] << "." << version[1] << endl;
     throw std::ios_base::failure("Wrong version of H5MD file.");
   }
 

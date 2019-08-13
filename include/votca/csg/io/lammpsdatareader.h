@@ -104,6 +104,8 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   // First int is the atom id second the atom index
   std::map<int, int> atomIdToIndex_;
 
+  void RenameMolecule_(Molecule &mol) const;
+
   void formatDistance(double &distance);
   void formatId(int &id);
   void formatMass(double &mass);
@@ -126,11 +128,12 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
   void ReadNumOfDihedrals_(std::vector<std::string> fields);
   void ReadNumOfImpropers_(std::vector<std::string> fields);
 
+  void SkipImpropers_();
+
   void ReadAtoms_(Topology_T &top);
   void ReadBonds_(Topology_T &top);
   void ReadAngles_(Topology_T &top);
   void ReadDihedrals_(Topology_T &top);
-  void ReadImpropers_(Topology_T &top);
 
   enum lammps_format {
     style_angle_bond_molecule = 0,
@@ -145,11 +148,11 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
    * The purpose of this function is to take lammps output where there are more
    * than a single atom type of the same element. For instance there may be 4
    * atom types with mass of 12.01. Well this means that they are all carbon but
-   * are treated differently in lammps. It makes since to keep track of this. If
+   * are treated differently in lammps. It makes sense to keep track of this. If
    * a mass cannot be associated with an element we will assume it is pseudo
-   * atom or course grained watom which we will represent with as a bead. So
-   * when creating the atom names we will take into account so say we have the
-   * following masses in the lammps .data file:
+   * atom or course grained watom which we will represent as a bead. So
+   * when creating the atom names we will take this into account. So say we
+   * have the following masses in the lammps .data file:
    *
    * Masses
    *
@@ -182,10 +185,7 @@ class LAMMPSDataReader : public TrajectoryReader, public TopologyReader {
 
   /// Remove comments and padded spaces
   void stripLine(std::string &line);
-  //  std::vector<std::string> TrimCommentsFrom_(std::vector<std::string>
-  //  fields); void ltrim_(std::string &s); void rtrim_(std::string &s); void
-  //  trim_(std::string &s);
-  bool withinTolerance_(double value1, double value2, double tolerance);
+
   std::string getStringGivenDoubleAndMap_(
       double value, std::map<std::string, double> nameValue, double tolerance);
 };
