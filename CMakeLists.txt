@@ -88,8 +88,6 @@ set_package_properties(GROMACS PROPERTIES TYPE RECOMMENDED PURPOSE "Used to read
 if(NOT GROMACS_FOUND)
   find_package(GROMACS 2018 MODULE)
 endif()
-message("GROMACS VERSION Is")
-message(${GROMACS_VERSION})
 if(GROMACS_FOUND AND DEFINED GROMACS_VERSION AND GROMACS_VERSION VERSION_GREATER_EQUAL "2020")
   message(WARNING "Gromacs-2020 and above have no support for tabulated interactions, that are needed for coarse-graining (see and comment on https://gitlab.com/gromacs/gromacs/-/issues/1347)")
 endif()
