@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvotca%2Fcsg.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvotca%2Fcsg?ref=badge_shield)
+
 |Codacy Badge| |codecov| |CI| |DOI|
 
 VOTCA-CSG is a collection of tools, which help you to develop coarse
@@ -41,3 +43,7 @@ You can contact the VOTCA Development Team at devs@votca.org.
    :target: https://github.com/votca/votca/actions?query=workflow%3ACI+branch%3Amaster
 .. |DOI| image:: https://zenodo.org/badge/41003167.svg
    :target: https://zenodo.org/badge/latestdoi/41003167
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvotca%2Fcsg.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvotca%2Fcsg?ref=badge_large)
