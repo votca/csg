@@ -65,7 +65,7 @@ else (BUILD_MANPAGES)
 endif (BUILD_MANPAGES)
 
 find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options filesystem system regex)
-find_package(Eigen3 3.3.0 NO_MODULE REQUIRED)
+find_package(Eigen3 3.3.0 REQUIRED)
 find_package(Threads REQUIRED)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set_package_properties(Threads PROPERTIES TYPE REQUIRED PURPOSE "Used for thread parallelization")
