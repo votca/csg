@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <votca/tools/constants.h>
 
 // Third party includes
 #include <boost/test/unit_test.hpp>
@@ -80,7 +81,6 @@ BOOST_AUTO_TEST_CASE(test_command) {
   Topology top;
   BondedStatistics bonded_statistics;
   string interaction_group = "interaction";
-  string interaction_group_name = ":interaction";
   vector<string> interactions;
   interactions.push_back("file_interactions.txt");
   // Setup BondedStatistics Object
@@ -120,15 +120,20 @@ BOOST_AUTO_TEST_CASE(test_command) {
 
     cout << "Number of H2 " << number_of_H2 << endl;
     // Every molecule interacts with every other molecule
+    votca::Index inter_ind = 0;
     for (votca::Index index = 0; index < number_of_H2; ++index) {
       for (votca::Index index2 = index + 1; index2 < number_of_H2; ++index2) {
-        auto bond = new IBond(index, index2);
-        bond->setGroup(interaction_group + to_string(index) + "_" +
-                       to_string(index2));
-        top.AddBondedInteraction(bond);
-        interactions.push_back(interaction_group_name + to_string(index) + "_" +
-                               to_string(index2));
+        top.CreateInteraction(
+            std::list<votca::Index>{index, index2},
+            interaction_group + to_string(index) + "_" + to_string(index2),
+            inter_ind, topology_constants::unassigned_molecule_id);
+
+        ++inter_ind;
       }
+    }
+
+    for (const auto &inter : top.BondedInteractions()) {
+      interactions.push_back(inter->getName());
     }
 
     bonded_statistics.BeginCG(&top, nullptr);

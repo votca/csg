@@ -168,8 +168,7 @@ void Imc::BeginEvaluate(Topology *top, Topology *) {
 
   for (tools::Property *prop : _bonded) {
     string name = prop->get("name").value();
-    std::vector<Interaction *> vec = top->InteractionsInGroup(name);
-    if (vec.empty()) {
+    if (top->InteractionsInGroup(name).empty()) {
       throw std::runtime_error(
           "Bonded interaction '" + name +
           "' defined in options xml-file, but not in topology - check name "
@@ -450,7 +449,7 @@ void Imc::Worker::DoBonded(Topology *top) {
     _current_hists[i._index].Clear();
 
     // now fill with new data
-    for (Interaction *ic : top->InteractionsInGroup(name)) {
+    for (const Interaction *ic : top->InteractionsInGroup(name)) {
       double v = ic->EvaluateVar(*top);
       _current_hists[i._index].Process(v);
     }

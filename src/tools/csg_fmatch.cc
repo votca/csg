@@ -30,6 +30,7 @@
 
 // Local VOTCA includes
 #include "votca/csg/beadlist.h"
+#include "votca/csg/interaction.h"
 #include "votca/csg/nblistgrid.h"
 #include "votca/csg/nblistgrid_3body.h"
 
@@ -569,10 +570,10 @@ void CGForceMatching::LoadOptions(const string &file) {
 
 void CGForceMatching::EvalBonded(Topology *conf, SplineInfo *sinfo) {
 
-  std::vector<Interaction *> interList =
+  const std::vector<const Interaction *> interVec =
       conf->InteractionsInGroup(sinfo->splineName);
 
-  for (Interaction *inter : interList) {
+  for (const Interaction *inter : interVec) {
 
     votca::Index beads_in_int = inter->BeadCount();  // 2 for bonds, 3 for
                                                      // angles, 4 for dihedrals

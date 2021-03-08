@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <votca/tools/constants.h>
 
 // Third party includes
 #include <boost/test/unit_test.hpp>
@@ -44,17 +45,14 @@ BOOST_AUTO_TEST_CASE(test_bondedstatistics_begin) {
   Topology top;
   // Create two bonded interactions
   string interaction_group = "covalent_bond1";
-  string interaction_group_compare = ":covalent_bond1";
-  auto bond1 = new IBond(0, 1);
-  bond1->setGroup(interaction_group);
+  string interaction_group_compare = ":covalent_bond1 0:index 0";
+  top.CreateInteraction(std::list<votca::Index>{0, 1}, interaction_group, 0,
+                        topology_constants::unassigned_molecule_id);
 
   string interaction_group2 = "covalent_bond2";
-  string interaction_group_compare2 = ":covalent_bond2";
-  auto bond2 = new IBond(1, 2);
-  bond2->setGroup(interaction_group2);
-
-  top.AddBondedInteraction(bond1);
-  top.AddBondedInteraction(bond2);
+  string interaction_group_compare2 = ":covalent_bond2 1:index 1";
+  top.CreateInteraction(std::list<votca::Index>{1, 2}, interaction_group2, 1,
+                        topology_constants::unassigned_molecule_id);
 
   BondedStatistics bonded_statistics;
   bonded_statistics.BeginCG(&top, nullptr);
@@ -114,14 +112,11 @@ BOOST_AUTO_TEST_CASE(test_evalconfiguration_begin) {
 
     // Create two bonded interactions
     string interaction_group = "covalent_bond1";
-    auto bond1 = new IBond(0, 1);
-    bond1->setGroup(interaction_group);
+    top.CreateInteraction(std::list<votca::Index>{0, 1}, interaction_group, 0,
+                          topology_constants::unassigned_molecule_id);
     string interaction_group2 = "covalent_bond2";
-    auto bond2 = new IBond(1, 2);
-    bond2->setGroup(interaction_group2);
-
-    top.AddBondedInteraction(bond1);
-    top.AddBondedInteraction(bond2);
+    top.CreateInteraction(std::list<votca::Index>{1, 2}, interaction_group2, 1,
+                          topology_constants::unassigned_molecule_id);
   }
 
   BondedStatistics bonded_statistics;

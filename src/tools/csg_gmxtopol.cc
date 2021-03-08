@@ -87,7 +87,7 @@ void GmxTopolApp::WriteInteractions(ostream &out, const Topology &top,
                                     Molecule &cg) {
   votca::Index nb = -1;
 
-  for (const Interaction *ic : top.BondedInteractions()) {
+  for (const auto &ic : top.BondedInteractions()) {
     if (ic->getMolecule() != cg.getId()) {
       continue;
     }

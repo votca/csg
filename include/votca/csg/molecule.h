@@ -74,17 +74,16 @@ class Molecule {
   }
 
   /// Add an interaction to the molecule
-  void AddInteraction(Interaction *ic) { _interactions.push_back(ic); }
+  void AddInteraction(const Interaction *ic) { _interactions.push_back(ic); }
 
-  std::vector<Interaction *> Interactions() { return _interactions; }
-  const std::vector<Interaction *> &Interactions() const {
+  const std::vector<const Interaction *> Interactions() const {
     return _interactions;
   }
 
  private:
   // maps a name to a bead id
   std::map<std::string, Index> _beadmap;
-  std::vector<Interaction *> _interactions;
+  std::vector<const Interaction *> _interactions;
 
   // id of the molecules
   Index _id;

@@ -36,6 +36,7 @@
 #include "bead.h"
 #include "boundarycondition.h"
 #include "exclusionlist.h"
+#include "interaction.h"
 #include "molecule.h"
 #include "openbox.h"
 #include "orthorhombicbox.h"
@@ -69,7 +70,8 @@ using MoleculeContainer =
 using BeadContainer = boost::container::deque<Bead, void, block_bead_x4_t>;
 using ResidueContainer =
     boost::container::deque<Residue, void, block_residue_x4_t>;
-using InteractionContainer = std::vector<Interaction *>;
+using InteractionContainer = std::vector<std::unique_ptr<Interaction>>;
+using ConstInteractionContainer = std::vector<const Interaction *>;
 
 /**
  * \brief topology of the whole system
@@ -126,6 +128,36 @@ class Topology {
    */
   Residue &CreateResidue(std::string name);
   Residue &CreateResidue(std::string name, Index id);
+
+  // Should not be able to alter interactions from outside of topology
+  template <class T>
+  const Interaction *CreateInteraction(T bead_ptrs, const std::string &grp,
+                                       const Index ind, const Index mol_ind) {
+    if (bead_ptrs.size() == 2) {
+      _interactions.push_back(std::make_unique<IBond>(IBond(bead_ptrs)));
+    } else if (bead_ptrs.size() == 3) {
+      _interactions.push_back(std::make_unique<IAngle>(IAngle(bead_ptrs)));
+    } else if (bead_ptrs.size() == 4) {
+      _interactions.push_back(
+          std::make_unique<IDihedral>(IDihedral(bead_ptrs)));
+    }
+    Interaction *ic = _interactions.back().get();
+    ic->setGroup(grp);
+    ic->setIndex(ind);
+    ic->setMolecule(mol_ind);
+
+    std::map<std::string, Index>::iterator iter;
+    iter = _interaction_groups.find(grp);
+    if (iter != _interaction_groups.end()) {
+      ic->setGroupId((*iter).second);
+    } else {
+      Index i = _interaction_groups.size();
+      _interaction_groups[grp] = i;
+      ic->setGroupId(i);
+    }
+    _interactions_by_group[grp].push_back(ic);
+    return ic;
+  }
 
   /**
    * \brief Create molecules based on the residue.
@@ -207,8 +239,8 @@ class Topology {
     return _interactions;
   }
 
-  void AddBondedInteraction(Interaction *ic);
-  std::vector<Interaction *> InteractionsInGroup(const std::string &group);
+  std::vector<const Interaction *> InteractionsInGroup(
+      const std::string &group) const;
 
   /**
    * \brief Determine if a bead type exists.
@@ -448,7 +480,8 @@ class Topology {
 
   std::map<std::string, Index> _interaction_groups;
 
-  std::map<std::string, std::vector<Interaction *>> _interactions_by_group;
+  std::map<std::string, std::vector<const Interaction *>>
+      _interactions_by_group;
 
   double _time = 0.0;
   Index _step = 0;

@@ -308,9 +308,7 @@ void RDFCalculator::Worker::DoBonded(Topology *top) {
     _current_hists[i._index].Clear();
 
     // now fill with new data
-    std::vector<Interaction *> vec = top->InteractionsInGroup(name);
-
-    for (auto ic : vec) {
+    for (const auto &ic : top->InteractionsInGroup(name)) {
       double v = ic->EvaluateVar(*top);
       _current_hists[i._index].Process(v);
     }

@@ -57,13 +57,8 @@ void Topology::Cleanup() {
   _residues.clear();
 
   // cleanup interactions
-  {
-    for (InteractionContainer::iterator i = _interactions.begin();
-         i < _interactions.end(); ++i) {
-      delete (*i);
-    }
-    _interactions.clear();
-  }
+  _interactions.clear();
+
   // cleanup _bc object
   _bc = std::make_unique<OpenBox>();
 }
@@ -237,25 +232,12 @@ void Topology::CheckMoleculeNaming(void) {
   }
 }
 
-void Topology::AddBondedInteraction(Interaction *ic) {
-  map<string, Index>::iterator iter;
-  iter = _interaction_groups.find(ic->getGroup());
-  if (iter != _interaction_groups.end()) {
-    ic->setGroupId((*iter).second);
-  } else {
-    Index i = _interaction_groups.size();
-    _interaction_groups[ic->getGroup()] = i;
-    ic->setGroupId(i);
-  }
-  _interactions.push_back(ic);
-  _interactions_by_group[ic->getGroup()].push_back(ic);
-}
-
-std::vector<Interaction *> Topology::InteractionsInGroup(const string &group) {
-  map<string, vector<Interaction *>>::iterator iter =
+std::vector<const Interaction *> Topology::InteractionsInGroup(
+    const string &group) const {
+  map<string, vector<const Interaction *>>::const_iterator iter =
       _interactions_by_group.find(group);
   if (iter == _interactions_by_group.end()) {
-    return vector<Interaction *>();
+    return vector<const Interaction *>();
   }
   return iter->second;
 }

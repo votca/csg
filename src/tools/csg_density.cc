@@ -22,6 +22,7 @@
 
 // Local VOTCA includes
 #include "votca/csg/csgapplication.h"
+#include "votca/csg/topology.h"
 
 using namespace std;
 using namespace votca::csg;

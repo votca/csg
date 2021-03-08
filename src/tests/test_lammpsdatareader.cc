@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_topologyreader) {
   BOOST_CHECK_EQUAL(mol->getName(), "N100");
   BOOST_CHECK_EQUAL(mol->BeadCount(), 100);
 
-  auto interaction_cont = top.BondedInteractions();
+  const auto &interaction_cont = top.BondedInteractions();
   votca::Index numBondInter = 99;
   votca::Index numAngleInter = 98;
   votca::Index numDihedralInter = 97;
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_trajectoryreader) {
   auto mol = top.getMolecule(0);
   BOOST_CHECK_EQUAL(mol->BeadCount(), 100);
 
-  auto interaction_cont = top.BondedInteractions();
+  const auto &interaction_cont = top.BondedInteractions();
   votca::Index numBondInter = 99;
   votca::Index numAngleInter = 98;
   votca::Index numDihedralInter = 97;
