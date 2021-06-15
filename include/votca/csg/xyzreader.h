@@ -138,10 +138,9 @@ inline bool XYZReader::ReadFrame(T &container) {
       if (fl_.eof()) {
         throw std::runtime_error("unexpected end of file in xyz file");
       }
-      tools::Tokenizer tok(line, " ");
-      std::vector<std::string> fields = tok.ToVector();
+      std::vector<std::string> fields =  tools::Tokenizer(line, " \t").ToVector();
       if (fields.size() != 4) {
-        throw std::runtime_error("invalide line " +
+        throw std::runtime_error("invalid line " +
                                  boost::lexical_cast<std::string>(line_) +
                                  " in xyz file\n" + line);
       }
