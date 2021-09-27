@@ -1,8 +1,0 @@
-#include "oplsaa.ff/forcefield.itp"
-#include "oplsaa.ff/spce.itp"
-
-[ system ]
-Flex water
-
-[ molecules ]
-SOL     3

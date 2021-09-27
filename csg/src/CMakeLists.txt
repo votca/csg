@@ -1,7 +1,0 @@
-add_subdirectory(libcsg)
-add_subdirectory(tools)
-add_subdirectory(csg_boltzmann)
-add_subdirectory(csgapps)
-if(ENABLE_TESTING)
-  add_subdirectory(tests)
-endif()
